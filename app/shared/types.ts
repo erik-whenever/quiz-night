@@ -1,0 +1,107 @@
+// Delade typer mellan klient (src/) och server (worker/).
+
+export interface Question {
+  id: string;
+  text: string;
+  answer: string;
+  points?: number; // standard 1
+  category?: string;
+  imageUrl?: string;
+}
+
+export interface QuestionSet {
+  id: string;
+  title: string;
+  theme?: string;
+  source: "bank" | "repo"; // bank = skapad i appen, repo = incheckad av agenter i quizzes/
+  updatedAt: string;
+  questions: Question[];
+}
+
+export interface Settings {
+  answerSeconds: number; // tid att svara efter buzz
+  penalty: number; // poäng som dras vid fel/timeout
+}
+
+export type Phase = "lobby" | "question" | "buzzed" | "reveal" | "finished";
+
+export interface PlayerPublic {
+  id: string;
+  name: string;
+  color: string;
+  score: number;
+  connected: boolean;
+}
+
+export interface BuzzState {
+  playerId: string;
+  deadline: number; // epoch ms
+  typedAnswer?: string;
+}
+
+/** Det alla ser (TV + spelare). Svaret skickas bara när phase === "reveal". */
+export interface PublicState {
+  code: string;
+  title: string;
+  phase: Phase;
+  players: PlayerPublic[];
+  qIndex: number;
+  qCount: number;
+  question?: { text: string; points: number; category?: string; imageUrl?: string };
+  revealedAnswer?: string;
+  buzz: BuzzState | null;
+  lockedOut: string[];
+  lastEvent?: GameEvent;
+  settings: Settings;
+  serverNow: number;
+}
+
+/** Hosten ser dessutom rätt svar. */
+export interface HostState extends PublicState {
+  answer?: string;
+}
+
+export type GameEvent =
+  | { kind: "buzz"; playerId: string; at: number }
+  | { kind: "correct"; playerId: string; delta: number; at: number }
+  | { kind: "wrong"; playerId: string; delta: number; at: number }
+  | { kind: "timeout"; playerId: string; delta: number; at: number }
+  | { kind: "reveal"; at: number }
+  | { kind: "finished"; at: number };
+
+// Klient -> server
+export type ClientMsg =
+  | { t: "join"; name: string; playerId?: string }
+  | { t: "buzz" }
+  | { t: "type"; text: string }
+  | { t: "host:start" }
+  | { t: "host:next" }
+  | { t: "host:correct" }
+  | { t: "host:wrong" }
+  | { t: "host:reveal" }
+  | { t: "host:adjust"; playerId: string; delta: number }
+  | { t: "host:kick"; playerId: string }
+  | { t: "host:settings"; settings: Partial<Settings> }
+  | { t: "host:finish" }
+  | { t: "ping"; c: number };
+
+// Server -> klient
+export type ServerMsg =
+  | { t: "state"; state: PublicState | HostState }
+  | { t: "joined"; playerId: string }
+  | { t: "error"; message: string }
+  | { t: "pong"; c: number; s: number };
+
+export interface LeagueEntry {
+  id: string;
+  date: string;
+  title: string;
+  results: { name: string; score: number }[];
+}
+
+export interface HubPublic {
+  nextQuiz?: { date: string; theme?: string };
+  league: LeagueEntry[];
+}
+
+export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1 };

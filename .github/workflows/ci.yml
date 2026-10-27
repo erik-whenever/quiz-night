@@ -1,0 +1,75 @@
+name: Testa och publicera
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Typkontroll
+        run: npx tsc -b && npx tsc -p tsconfig.worker.json
+      - name: Bygg
+        run: npx vite build
+      - name: Installera Playwright
+        run: pip install playwright && python -m playwright install --with-deps chromium
+      - name: E2E mot lokal server
+        run: |
+          printf 'HOST_PIN=1234\n' > .dev.vars
+          npx wrangler dev --port 8787 --ip 127.0.0.1 > wrangler.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:8787/api/hub/public && break; sleep 1; done
+          python tests/e2e.py http://127.0.0.1:8787 e2e-shots
+      - name: Skärmdumpar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-shots
+          path: app/e2e-shots
+          retention-days: 14
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      HOST_PIN: ${{ secrets.HOST_PIN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Hoppa över om Cloudflare inte är uppsatt
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Inga Cloudflare-hemligheter än, se council/BEHOVER-ERIK.md"; fi
+      - if: steps.check.outputs.skip != 'true'
+        run: npm ci && npx vite build && npx wrangler deploy
+      - if: steps.check.outputs.skip != 'true' && env.HOST_PIN != ''
+        run: echo "$HOST_PIN" | npx wrangler secret put HOST_PIN
