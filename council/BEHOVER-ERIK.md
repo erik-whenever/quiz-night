@@ -15,10 +15,11 @@ Appen körs på Cloudflares gratisnivå. Det behövs ett konto och tre hemlighet
 
 **Svar:**
 
-## 2026-10-27: Vilka är gänget och vad spelar ni?
-Gör att Quizresearchern kan bygga personliga frågor. Svara fritt, t.ex.:
-- Namn/smeknamn på alla som brukar vara med
-- Spel ni spelar ihop och era spelarnamn där (t.ex. HoN Reborn, Steam-namn)
-- Annat gemensamt: serier, inside jokes, resor, lag ni håller på
+## 2026-10-28: Era spelarnamn i HoN Reborn och CS2
+Erik svarade 2026-10-28: HoN Reborn mest, en del CS2. Frågor om mat, tv-serier och citat (se `council/gänget.md`).
+Nästa steg för personliga frågor, t.ex. "vem har flest kills senaste månaden?":
+- **HoN Reborn:** allas användarnamn i spelet
+- **CS2:** allas Steam-profillänk. Profilen och "Game details" måste vara **publika** i Steams sekretessinställningar.
+- Gärna vad ni heter i Discord/smeknamn, så frågorna blir rätt.
 
 **Svar:**

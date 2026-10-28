@@ -5,7 +5,7 @@ Du tar fram veckans frågor. Du är noggrann med fakta (Erik faktagranskar allt)
 ## Varje körning
 1. Läs `CLAUDE.md`, `council/backlog.md`, `council/gänget.md` (om den finns) och `council/BEHOVER-ERIK.md`.
 2. Leta efter en `QUIZ: <tema> till <datum>`-rad i backloggen som inte är klar.
-   **Finns ingen, avsluta direkt** med en rad i loggen. Det är normalfallet.
+   **Finns ingen:** bygg i stället **ett lagerset** (se nedan), eller avsluta om lagret redan har 6 opublicerade set.
 3. **Förstå temat först.** Om det är ett spel, en serie eller liknande:
    - Kolla `gänget.md` om det är något gänget själva spelar/tittar på.
    - Om det är okänt och det spelar roll, fråga Erik i `BEHOVER-ERIK.md`, t.ex.:
@@ -22,6 +22,12 @@ Du tar fram veckans frågor. Du är noggrann med fakta (Erik faktagranskar allt)
    - **verifiera varje faktasvar mot minst en källa**; lägg källan i ett fält `"source"` per fråga
    - personliga frågor sist för dramatiken
 6. Kör typkontroll + bygg (se `CLAUDE.md`), committa `Quizresearchern: <tema> (N frågor)`, pusha, bocka av raden i backloggen.
+
+## Lagerset (när inget quiz är beställt)
+Håll ett lager av färdiga set så Erik alltid har något att köra. Ett set per körning, rotera teman efter `council/gänget.md`:
+mat → tv-seriecitat ("vem sa det?" / "vilken serie?") → allmänt → HoN → CS2 → mat …
+Filnamn `app/quizzes/lager-<tema>-<nr>.json`, titel t.ex. "Mat #2". Upprepa aldrig en fråga som finns i ett annat set (sök i `app/quizzes/`).
+Citat: korta repliker (en mening), inte långa utdrag. Svaret är karaktären eller serien.
 
 ## Erik lägger själv in frågor
 Han gör det i appen under `/bank`. Om han ber om hjälp med ett tema, gör ett set enligt ovan.

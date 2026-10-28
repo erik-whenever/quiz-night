@@ -2,6 +2,9 @@
 
 Rådets egna beslut, nyast överst. Eriks svar flyttas hit från BEHOVER-ERIK.md.
 
+- **2026-10-28 (Erik):** Gänget spelar främst HoN Reborn, en del CS2. Vill ha allmänna frågor, mycket mat, mycket tv-serier och citat (Breaking Bad, GoT, HIMYM m.fl.). Sparat i `council/gänget.md`. Quizresearchern bygger nu ett lager av temaset även när inget quiz är beställt, och "Vem sa det?" lades in som P1.
+- **2026-10-28 (Erik):** Har Cloudflare-konto. Lägger in hemligheterna i GitHub enligt BEHOVER-ERIK.md.
+
 - **2026-10-28: Rättvis buzz med 150 ms fönster och max 70 ms kompensation.** Servern mäter själv varje anslutnings ping (sping/spong, bara äkta svar godtas, lägsta av 5 senaste) och väljer lägst justerad tid inom 150 ms efter första buzz. Kompensationen är RTT/2 + 25 ms men högst 70 ms (`BUZZ_MAX_COMP_MS`). Kvarvarande risk som accepteras: den som fuskar via devtools kan vinna nära-lika buzzar med upp till ~70 ms (25 ms bara genom att fejka tidsstämpeln). Det är en rimlig kompromiss i ett kompisquiz; varje buzz syns ~150 ms senare.
 - **2026-10-28: PWA utan cache.** Service workern släpper igenom allt (ingen `respondWith`) så att en ny deploy aldrig fastnar och websockets/API inte påverkas. Ikoner ritas med `app/scripts/ikoner.py` (Pillow), inga nya npm-paket.
 - **2026-10-28: Vibration bara för spelarens egna händelser**, ljud för alla. Funktionsdetekteras så iOS Safari (saknar vibrate) inte kraschar.
