@@ -40,5 +40,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("RÖKTEST MISSLYCKADES:", e)
+        print(f"::error title=Röktest::{type(e).__name__}: {str(e)[:400]}".replace("\n", " "))
         sys.exit(1)
