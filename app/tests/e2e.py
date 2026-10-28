@@ -17,6 +17,38 @@ def shot(page, name):
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
 
 
+def http_get(path):
+    with urllib.request.urlopen(BASE + path) as r:
+        return r.status, r.headers.get("content-type", ""), r.read()
+
+
+def check_pwa(page):
+    """Manifest, ikoner och service worker: appen ska gå att installera på hemskärmen."""
+    status, ctype, body = http_get("/manifest.webmanifest")
+    assert status == 200 and "html" not in ctype, f"Manifestet serveras fel: {status} {ctype}"
+    m = json.loads(body)
+    assert m["name"] == "Kronan" and m["display"] == "standalone", f"Fel manifest: {m}"
+    assert m["start_url"] and m["theme_color"].lower() == "#1b28a8" and m["background_color"], "Manifest saknar färger/start_url"
+    sizes = {(i["sizes"], i.get("purpose", "any")) for i in m["icons"]}
+    assert ("192x192", "any") in sizes and ("512x512", "any") in sizes and ("512x512", "maskable") in sizes, f"Ikoner saknas: {sizes}"
+    for src in [i["src"] for i in m["icons"]] + ["/apple-touch-icon.png"]:
+        status, ctype, body = http_get(src)
+        assert status == 200 and ctype.startswith("image/png") and body[:8] == b"\x89PNG\r\n\x1a\n", f"Ikon {src}: {status} {ctype}"
+    status, ctype, body = http_get("/sw.js")
+    assert status == 200 and "javascript" in ctype and b"<html" not in body, f"sw.js serveras fel: {status} {ctype}"
+    assert page.locator('link[rel="manifest"]').get_attribute("href") == "/manifest.webmanifest", "Manifestlänk saknas i HTML"
+    assert page.locator('link[rel="apple-touch-icon"]').count() == 1, "apple-touch-icon saknas i HTML"
+    scope = page.evaluate("""async () => {
+        const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 8000))]);
+        return reg.scope;
+    }""")
+    assert scope == BASE + "/", f"Service workern registrerades inte rätt: {scope}"
+    # API och sidan fungerar fortfarande med SW aktiv (ingen cachning)
+    page.reload()
+    expect(page.get_by_role("heading", name="Vem tar kronan i veckan?")).to_be_visible()
+    assert page.evaluate("fetch('/api/hub/public', {cache: 'no-store'}).then(r => r.status)") == 200
+
+
 def main():
     with sync_playwright() as pw:
         b = pw.chromium.launch()
@@ -26,9 +58,15 @@ def main():
         p2 = b.new_page(viewport={"width": 390, "height": 844})
 
         # Startsida
+        page_errors = []
+        p1.on("pageerror", lambda e: page_errors.append(str(e)))
         p1.goto(BASE + "/")
         expect(p1.get_by_role("heading", name="Vem tar kronan i veckan?")).to_be_visible()
         shot(p1, "01-start-mobil")
+
+        # Installbar som app (PWA)
+        check_pwa(p1)
+        assert not page_errors, f"Sidfel på startsidan: {page_errors}"
 
         # Host loggar in och sätter kort svarstid
         host.goto(BASE + "/host")
