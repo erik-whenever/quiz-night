@@ -13,6 +13,9 @@ Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 - [ ] P2 | S | "Dubbla poäng"-joker: varje spelare kan använda en gång per kväll innan de buzzar.
 - [ ] P3 | M | Vinnarens krona syns vid namnet på startsidan och i rummet nästa vecka (regerande kung).
 
+## Research (Quizresearchern)
+- [ ] P1 | M | Undersök statistikkällor för gänget: (1) HoN Reborn, finns ett publikt API eller en sajt med matchhistorik per användarnamn? (2) CS2, Steam Web API `GetUserStatsForGame` (appid 730, kräver gratis Steam-nyckel → be Erik skaffa via steamcommunity.com/dev/apikey) samt t.ex. Leetify/csstats. Dokumentera i `council/statistik.md`: vad går att hämta, hur, vad det kostar. Gör sedan ett set "Gänget i siffror" med 5–8 personliga frågor.
+
 ## Teknik
 - [ ] P2 | S | Rate-limit för buzz per anslutning (max ~5/s) så ingen kan spamma servern.
 
