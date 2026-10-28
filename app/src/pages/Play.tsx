@@ -41,8 +41,11 @@ export default function Play({ code }: { code: string }) {
   const lastAt = useRef(0);
   useEffect(() => {
     const ev = state?.lastEvent;
-    if (!ev || ev.at === lastAt.current) return;
-    lastAt.current = ev.at;
+    if (!state || ev?.at === lastAt.current) return;
+    // Första tillståndet efter (om)laddning är gammalt: spara bara, ingen feedback.
+    const first = lastAt.current === 0;
+    lastAt.current = ev?.at ?? -1;
+    if (!ev || first) return;
     const mine = "playerId" in ev && ev.playerId === playerId;
     if (ev.kind === "buzz") { sfx.buzz(); if (mine) haptic.buzz(); }
     if (ev.kind === "correct") { sfx.correct(); if (mine) haptic.correct(); }
