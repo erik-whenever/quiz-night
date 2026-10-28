@@ -1,20 +1,28 @@
 import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings,
 } from "../shared/types";
-import { BUZZ_JITTER_MS, BUZZ_WINDOW_MS, DEFAULT_SETTINGS } from "../shared/types";
+import { BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, DEFAULT_SETTINGS, BUZZ_WINDOW_MS } from "../shared/types";
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
 
 interface Player extends PlayerPublic {}
-interface Conn { ws: WebSocket; role: "host" | "tv" | "player"; playerId?: string; rtt?: number }
+interface Conn {
+  ws: WebSocket; role: "host" | "tv" | "player"; playerId?: string;
+  /** Senaste RTT-mätningarna (ms); lägsta används, så fördröjda spong inte blåser upp kompensationen. */
+  rtts: number[];
+  /** Utestående sping: bara spong med exakt detta s godtas, och bara en gång. */
+  pingS?: number;
+}
+const RTT_SAMPLES = 5;
+const minRtt = (c: Conn) => (c.rtts.length ? Math.min(...c.rtts) : undefined);
 
 /**
  * Hur mycket tidigare än ankomsten en buzz får räknas. Klientens påstådda fördröjning (ankomst - at)
- * godtas bara upp till serverns egen mätning av RTT/2 plus lite brus, och aldrig mer än buzz-fönstret.
+ * godtas bara upp till serverns egen mätning av (lägsta) RTT/2 plus lite brus, och aldrig mer än BUZZ_MAX_COMP_MS.
  */
 export function buzzCompensation(arrival: number, at: number | undefined, rtt: number | undefined): number {
   if (typeof at !== "number" || !Number.isFinite(at)) return 0;
-  const max = Math.min(BUZZ_WINDOW_MS, (rtt ?? 0) / 2 + BUZZ_JITTER_MS);
+  const max = Math.min(BUZZ_MAX_COMP_MS, (rtt ?? 0) / 2 + BUZZ_JITTER_MS);
   return Math.max(0, Math.min(max, arrival - at));
 }
 
@@ -76,7 +84,7 @@ export class Room implements DurableObject {
     const pair = new WebSocketPair();
     const [client, server] = [pair[0], pair[1]];
     server.accept();
-    const conn: Conn = { ws: server, role };
+    const conn: Conn = { ws: server, role, rtts: [] };
     this.conns.add(conn);
 
     server.addEventListener("message", (ev) => {
@@ -120,7 +128,12 @@ export class Room implements DurableObject {
   }
 
   /** Servern mäter själv RTT, så klienten inte kan ljuga om sin ping. */
-  private sping(c: Conn) { this.send(c, { t: "sping", s: Date.now() }); }
+  private sping(c: Conn) {
+    const now = Date.now();
+    if (c.pingS !== undefined && now - c.pingS < 3000) return; // en mätning i taget
+    c.pingS = now;
+    this.send(c, { t: "sping", s: now });
+  }
 
   private clearPending() { if (this.pending) { clearTimeout(this.pending.timer); this.pending = null; } }
 
@@ -176,8 +189,10 @@ export class Room implements DurableObject {
     const s = this.s!;
     if (m.t === "ping") { this.send(c, { t: "pong", c: m.c, s: Date.now() }); return this.sping(c); }
     if (m.t === "spong") {
-      const sample = Date.now() - m.s;
-      if (sample >= 0 && sample < 10_000) c.rtt = c.rtt === undefined ? sample : c.rtt * 0.7 + sample * 0.3;
+      if (c.pingS === undefined || m.s !== c.pingS) return; // förfalskat eller redan använt s
+      c.rtts.push(Date.now() - c.pingS);
+      if (c.rtts.length > RTT_SAMPLES) c.rtts.shift();
+      c.pingS = undefined;
       return;
     }
 
@@ -205,7 +220,7 @@ export class Room implements DurableObject {
       if (!c.playerId || s.phase !== "question" || s.buzz) return;
       if (s.lockedOut.includes(c.playerId)) return;
       const now = Date.now();
-      const adjusted = now - buzzCompensation(now, m.at, c.rtt);
+      const adjusted = now - buzzCompensation(now, m.at, minRtt(c));
       if (!this.pending) {
         this.pending = { cands: new Map(), timer: setTimeout(() => { this.resolveBuzz(); }, BUZZ_WINDOW_MS) };
       }

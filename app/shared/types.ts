@@ -111,6 +111,8 @@ export interface HubPublic {
 
 /** Rättvis buzz: hur länge servern samlar buzzar efter den första innan vinnaren väljs. */
 export const BUZZ_WINDOW_MS = 150;
+/** Tak för hur mycket tidigare än ankomsten en buzz någonsin får räknas. */
+export const BUZZ_MAX_COMP_MS = 70;
 /** Tillåten mätbrus utöver uppmätt RTT/2 när en buzz-tidsstämpel klampas. */
 export const BUZZ_JITTER_MS = 25;
 
