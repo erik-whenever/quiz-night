@@ -1,0 +1,27 @@
+name: Synka nästa quiz och tabell till rådet
+
+# Rådets agenter når inte workers.dev, så GitHub hämtar appens publika läge
+# varje morgon (före Produktägaren) och checkar in det i council/hub.json.
+on:
+  schedule:
+    - cron: "13 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hämta /api/hub/public
+        run: |
+          curl -sf -A "Mozilla/5.0 (Kronan sync)" https://kronan.swing-check.workers.dev/api/hub/public \
+            | python3 -c "import json,sys; d=json.load(sys.stdin); json.dump(d, open('council/hub.json','w'), ensure_ascii=False, indent=2)"
+      - name: Checka in om ändrat
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add council/hub.json
+          git diff --cached --quiet || (git commit -m "Synk: nästa quiz och tabell från appen" && git push)

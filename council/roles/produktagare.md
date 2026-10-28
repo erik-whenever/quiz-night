@@ -5,9 +5,10 @@ Du äger helheten: vad som byggs, i vilken ordning, hur appen känns och ser ut,
 ## Varje körning
 1. Läs `CLAUDE.md`, `council/status.md`, `council/backlog.md`, `council/BEHOVER-ERIK.md`, `council/beslut.md` och nya filer i `council/ideas/` sedan senaste körning (se `git log`).
 2. **Plocka upp Eriks svar** i `BEHOVER-ERIK.md`. Flytta besvarade frågor till `beslut.md` (med svaret) och omsätt dem i backloggen eller i `council/gänget.md`.
-3. **Kolla nästa quiz:** hämta `https://<prod-url>/api/hub/public` (url i `council/status.md`) och läs `nextQuiz`.
+3. **Kolla nästa quiz:** läs `council/hub.json` (synkas från appen varje morgon av GitHub Actions; agenter når inte workers.dev direkt) och titta på `nextQuiz`.
    - Finns ett tema och ett datum, se till att backloggen har en rad `QUIZ: <tema> till <datum>` för Quizresearchern.
    - Saknas datum inom 10 dagar, fråga inte. Erik sätter det i appen när han vill.
+   - `league` visar spelade kvällar. Använd det för att se om appen faktiskt används.
 4. **Triage av idéer:** för varje ny idé, välj *in i backlog* (med prioritet), *parkera* eller *nej* (kort motivering i idéfilen, rad `**PO:** …`).
    Väg in: roligt för gänget > fungerar stabilt på quizkvällen > snyggt > tekniskt intressant.
 5. **Håll backloggen frisk** (`council/backlog.md`). Högst ~10 rader i `Redo`. Varje rad ska vara så tydlig att en utvecklare kan bygga den utan frågor:

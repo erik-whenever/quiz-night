@@ -24,6 +24,11 @@ python3 tests/e2e.py http://127.0.0.1:8787 e2e-shots   # helt quizflöde i 4 web
 E2E-testet måste vara grönt innan något mergas till `main`. Utöka det när du lägger till funktioner.
 Titta på skärmdumparna i `e2e-shots/` efter UI-ändringar. Det är så rådet "testar som en människa".
 
+## Produktion
+- https://kronan.swing-check.workers.dev, publiceras av `.github/workflows/ci.yml` vid push till `main` och röktestas (`app/tests/smoke.py`).
+- **Agenter når inte workers.dev** (sandlådans nätverk). Appens publika läge (nästa quiz, tabell) synkas till `council/hub.json` varje morgon av `.github/workflows/sync-hub.yml`.
+- Cloudflares botskydd blockerar Pythons standard-User-Agent. Sätt alltid en webbläsarlik `User-Agent` i skript mot prod.
+
 ## Vyer
 - `/` startsida (rumskod), `/play/KOD` spelare med buzzer, `/tv/KOD` skärmen som delas i Discord
 - `/host` starta rum (PIN), `/host/KOD` hostkontroll med svaren, `/bank` frågebank, `/tabell` säsong
