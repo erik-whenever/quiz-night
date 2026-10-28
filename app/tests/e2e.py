@@ -278,6 +278,8 @@ def main():
         host.get_by_label("Sekunder att svara efter buzz").fill("3")
         host.get_by_label("Straff vid fel eller timeout (poäng)").fill("1")
         shot(host, "02-host-dashboard")
+        # Välj alltid premiärsetet uttryckligen: nyare set hamnar överst och testet förväntar sig dess svar.
+        host.locator("label", has_text="Premiär: Blandat").get_by_role("radio").check()
         host.get_by_role("button", name="Öppna rum").click()
         host.wait_for_url("**/host/*")
         code = host.url.rstrip("/").split("/")[-1]
