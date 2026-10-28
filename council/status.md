@@ -2,7 +2,7 @@
 
 *Skrivs om av Produktägaren varje körning.*
 
-**Prod-url:** inte publicerad än (väntar på Cloudflare-konto, se BEHOVER-ERIK.md)
+**Prod-url:** https://kronan.swing-check.workers.dev (publiceras automatiskt vid push till main, röktestas efter varje publicering)
 
 **Senast (2026-10-28):** Idéspanaren kom med tre idéer och alla tre gick in i backloggen: rundtypen "Närmast på skalan" (P1), "Kvällens pris" där gänget röstar fram kvällens fail (P2) och "Fallande poäng" à la På spåret (P2).
 

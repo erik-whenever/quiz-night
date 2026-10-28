@@ -70,12 +70,24 @@ jobs:
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Inga Cloudflare-hemligheter än, se council/BEHOVER-ERIK.md"; fi
       - if: steps.check.outputs.skip != 'true'
+        id: deploy
         run: |
           set -o pipefail
           npm ci && npx vite build
           npx wrangler deploy 2>&1 | tee deploy.log
           URL=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "::notice title=Prod-url::$URL"
           echo "Publicerad på $URL" >> "$GITHUB_STEP_SUMMARY"
       - if: steps.check.outputs.skip != 'true' && env.HOST_PIN != ''
         run: echo "$HOST_PIN" | npx wrangler secret put HOST_PIN
+      - uses: actions/setup-python@v5
+        if: steps.check.outputs.skip != 'true'
+        with:
+          python-version: "3.12"
+      - name: Röktest mot produktion
+        if: steps.check.outputs.skip != 'true' && env.HOST_PIN != ''
+        run: |
+          pip install playwright && python -m playwright install --with-deps chromium
+          sleep 5
+          python tests/smoke.py "${{ steps.deploy.outputs.url }}"
