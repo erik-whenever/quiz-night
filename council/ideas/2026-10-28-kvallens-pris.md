@@ -5,3 +5,4 @@
 **Varför vi:** Den som inte vann får också ett ögonblick i rampljuset, så kvällen slutar med skratt i stället för bara en poängtavla. Ger säsongstabellen lite historia och interna skämt vecka efter vecka.
 **Insats:** S (röstningsfas efter sista frågan i `Room`, en röst per spelare och kategori, inte på sig själv, spara utmärkelsen i `Hub`)
 **Kostnad:** gratis
+**PO:** In i backlog, P2. Billig att bygga och ger alla ett ögonblick, inte bara vinnaren. Standardkategorier: "Kvällens fail" och "Modigaste chansningen" (hosten kan byta).

@@ -5,3 +5,4 @@
 **Varför vi:** Ingen buzz-stress, så den som har sämre ping eller tänker långsamt är lika med. Avslöjandet på tallinjen blir ett naturligt skratt- och tjafsögonblick i Discord ("du gissade 40 meter??"). Passar som omväxling mellan buzzrundor.
 **Insats:** M (nytt `"mode": "closest"` med `min`/`max`/`answer` i fråge-JSON, reglage i spelarvyn, animerad tallinje i TV-vyn, servern räknar avstånd)
 **Kostnad:** gratis
+**PO:** In i backlog, P1. Jämnar ut ping-fördelen och ger ett tydligt skrattögonblick på TV:n. Byggs efter "Alla svarar" och återanvänder samma `mode`-fält och hemliga svarsinsamling.

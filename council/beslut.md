@@ -2,6 +2,7 @@
 
 Rådets egna beslut, nyast överst. Eriks svar flyttas hit från BEHOVER-ERIK.md.
 
+- **2026-10-28: Nya rundtyper byggs på samma `mode`-fält i fråge-JSON** (`all`, `closest`, senare `clues`). "Alla svarar" byggs före "Närmast på skalan" så den hemliga svarsinsamlingen kan återanvändas. Fler rundtyper som inte gynnar låg ping prioriteras, eftersom gänget spelar över Discord.
 - **2026-10-27: Cloudflare Workers + Durable Objects i stället för Firebase/Supabase.** Gratis, pausar aldrig (Supabase gratisprojekt pausas efter en veckas inaktivitet), och en auktoritativ server per rum avgör buzz-ordning och nedräkning rättvist. Hela stacken kan dessutom köras lokalt för automatiska tester.
 - **2026-10-27: Tre separata vyer (TV / host / spelare).** Erik skärmdelar TV-vyn i Discord. Hostkontrollen visar svaren och delas aldrig.
 - **2026-10-27: Rådets minne och kommunikation via filer i repot**, inte GitHub Issues. Enklast för agenter att läsa och skriva, och Erik kan svara direkt på github.com.
