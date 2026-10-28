@@ -4,7 +4,7 @@ Du äger helheten: vad som byggs, i vilken ordning, hur appen känns och ser ut,
 
 ## Varje körning
 1. Läs `CLAUDE.md`, `council/status.md`, `council/backlog.md`, `council/BEHOVER-ERIK.md`, `council/beslut.md` och nya filer i `council/ideas/` sedan senaste körning (se `git log`).
-2. **Plocka upp Eriks svar** i `BEHOVER-ERIK.md`. Flytta besvarade frågor till `beslut.md` (med svaret) och omsätt dem i backloggen eller i `council/gänget.md`.
+2. **Plocka upp Eriks svar** i `BEHOVER-ERIK.md`. Flytta besvarade frågor till `beslut.md` (med svaret) och omsätt dem i backloggen eller i `council/gänget.md`. Läs också nya rader i `council/feedback.md` (gängets feedback efter speltillfällen) och omsätt dem: buggar som P1, önskemål triageras som idéer. Markera behandlade rader med `→ backlog` / `→ nej (motivering)`.
 3. **Kolla nästa quiz:** läs `council/hub.json` (synkas från appen varje morgon av GitHub Actions; agenter når inte workers.dev direkt) och titta på `nextQuiz`.
    - Finns ett tema och ett datum, se till att backloggen har en rad `QUIZ: <tema> till <datum>` för Quizresearchern.
    - Saknas datum inom 10 dagar, fråga inte. Erik sätter det i appen när han vill.

@@ -1,0 +1,28 @@
+{
+  "id": "demo-allmanbildning",
+  "title": "Demo: Allmänbildning",
+  "theme": "Lätt till medel, för att testa appen och samla feedback",
+  "updatedAt": "2026-10-28",
+  "questions": [
+    { "id": "d1", "text": "Vilken stad är huvudstad i Kanada?", "answer": "Ottawa", "category": "Geografi" },
+    { "id": "d2", "text": "Hur många ben har en spindel?", "answer": "8", "category": "Natur" },
+    { "id": "d3", "text": "Vem målade Mona Lisa?", "answer": "Leonardo da Vinci", "category": "Kultur" },
+    { "id": "d4", "text": "Vilket år landade Apollo 11 på månen?", "answer": "1969", "category": "Historia" },
+    { "id": "d5", "text": "Från vilket land kommer paella?", "answer": "Spanien", "category": "Mat" },
+    { "id": "d6", "text": "Vilken planet kallas den röda planeten?", "answer": "Mars", "category": "Vetenskap" },
+    { "id": "d7", "text": "Vilket land vann fotbolls-VM i Qatar 2022?", "answer": "Argentina", "category": "Sport" },
+    { "id": "d8", "text": "Vad heter Sveriges största sjö?", "answer": "Vänern", "category": "Geografi" },
+    { "id": "d9", "text": "Vad heter Harry Potters uggla?", "answer": "Hedwig", "category": "Kultur" },
+    { "id": "d10", "text": "Vilket grundämne har den kemiska beteckningen Fe?", "answer": "Järn", "category": "Vetenskap" },
+    { "id": "d11", "text": "Vilket språk är officiellt språk i Brasilien?", "answer": "Portugisiska", "category": "Geografi" },
+    { "id": "d12", "text": "Vilket år sjönk Titanic?", "answer": "1912", "category": "Historia" },
+    { "id": "d13", "text": "Hur många hjärtan har en bläckfisk?", "answer": "3", "category": "Natur", "points": 2 },
+    { "id": "d14", "text": "Vilken ost hör hemma på en pizza margherita?", "answer": "Mozzarella", "category": "Mat" },
+    { "id": "d15", "text": "I vilken stad står Frihetsgudinnan?", "answer": "New York", "category": "Geografi" },
+    { "id": "d16", "text": "Hur många kort finns i en vanlig kortlek utan jokrar?", "answer": "52", "category": "Allmänt" },
+    { "id": "d17", "text": "Vem var USA:s första president?", "answer": "George Washington", "category": "Historia" },
+    { "id": "d18", "text": "Vilken valuta används i Japan?", "answer": "Yen", "category": "Geografi" },
+    { "id": "d19", "text": "Vilket är världens största djur?", "answer": "Blåvalen", "category": "Natur" },
+    { "id": "d20", "text": "Vilket land har flest invånare i världen?", "answer": "Indien (gick om Kina 2023)", "category": "Geografi", "points": 2 }
+  ]
+}
