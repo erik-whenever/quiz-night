@@ -1,0 +1,28 @@
+{
+  "id": "2026-10-30-fredagsquiz",
+  "title": "Fredagsquiz 30 okt",
+  "theme": "Mat, tv-citat, HoN, CS2 och allmänt",
+  "updatedAt": "2026-10-30",
+  "questions": [
+    { "id": "f1", "text": "Från vilket land kommer kimchi?", "answer": "Korea", "category": "Mat" },
+    { "id": "f2", "text": "Vem säger: ”I am the one who knocks”?", "answer": "Walter White (Breaking Bad)", "category": "Tv-citat" },
+    { "id": "f3", "text": "Vad heter de två sidorna i Heroes of Newerth?", "answer": "Legion och Hellbourne", "category": "HoN", "source": "https://en.wikipedia.org/wiki/Heroes_of_Newerth" },
+    { "id": "f4", "text": "Vilket är världens minsta land till ytan?", "answer": "Vatikanstaten", "category": "Allmänt" },
+    { "id": "f5", "text": "Vilken grönsak är huvudingrediensen i baba ganoush?", "answer": "Aubergine", "category": "Mat" },
+    { "id": "f6", "text": "Vem säger: ”Suit up!”?", "answer": "Barney Stinson (How I Met Your Mother)", "category": "Tv-citat" },
+    { "id": "f7", "text": "Vilken Counter-Strike-karta har platserna Long A, Catwalk och Mid doors?", "answer": "Dust II", "category": "CS2" },
+    { "id": "f8", "text": "Vem säger: ”You know nothing, Jon Snow”?", "answer": "Ygritte (Game of Thrones)", "category": "Tv-citat" },
+    { "id": "f9", "text": "Vilken krydda är världens dyraste räknat per kilo?", "answer": "Saffran", "category": "Mat" },
+    { "id": "f10", "text": "Vad heter det stora bossmonstret i Heroes of Newerth?", "answer": "Kongor", "category": "HoN", "source": "https://en.wikipedia.org/wiki/Heroes_of_Newerth" },
+    { "id": "f11", "text": "Vad heter Gus Frings kycklingrestaurangkedja i Breaking Bad?", "answer": "Los Pollos Hermanos", "category": "Tv-serier" },
+    { "id": "f12", "text": "Hur många rundor behöver ett lag vinna för att vinna en vanlig Premier-match i CS2?", "answer": "13", "category": "CS2" },
+    { "id": "f13", "text": "Vad kallas tekniken där man tillagar vakuumförpackad mat i vattenbad med exakt temperatur?", "answer": "Sous vide", "category": "Mat", "points": 2 },
+    { "id": "f14", "text": "Vem säger: ”That's what I do. I drink and I know things”?", "answer": "Tyrion Lannister (Game of Thrones)", "category": "Tv-citat" },
+    { "id": "f15", "text": "Vilket år släpptes Counter-Strike 2?", "answer": "2023", "category": "CS2" },
+    { "id": "f16", "text": "Vad heter baren där gänget i How I Met Your Mother hänger?", "answer": "MacLaren's", "category": "Tv-serier", "points": 2 },
+    { "id": "f17", "text": "Vilket spelföretag utvecklade det ursprungliga Heroes of Newerth?", "answer": "S2 Games", "category": "HoN", "points": 2, "source": "https://en.wikipedia.org/wiki/Heroes_of_Newerth" },
+    { "id": "f18", "text": "Vad kostar en AWP i CS2?", "answer": "4 750 dollar", "category": "CS2", "points": 2, "source": "https://csdb.gg/weapon/awp" },
+    { "id": "f19", "text": "Vilket land räknas som hemlandet för ceviche?", "answer": "Peru", "category": "Mat", "points": 2 },
+    { "id": "f20", "text": "Vilken studio står bakom Heroes of Newerth: Reborn? Tips: den delar namn med spelets boss.", "answer": "Kongor Studios", "category": "HoN", "points": 2, "source": "https://www.gosugamers.net/entertainment/news/74223-kongor-studios-and-garena-announce-classic-moba-revival-heroes-of-newerth-reborn" }
+  ]
+}

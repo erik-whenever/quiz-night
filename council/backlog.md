@@ -3,6 +3,10 @@
 Format: `- [ ] P1 | S/M/L | Titel: vad + acceptanskriterie`. `[~]` = pågår (datum), `[x]` = klar (datum).
 Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 
+## Quiz
+- [x] 2026-10-28 | QUIZ: Fredagsquiz till 2026-10-30. Set `app/quizzes/2026-10-30-fredagsquiz.json` (20 frågor) klart. Quizresearchern: lägg gärna till 3–5 personliga "Gänget i siffror"-frågor sist om statistik hittas senast torsdag, annars rör inte setet.
+- KODFRYS: 2026-10-30 (quizdag). Utvecklingsansvarig mergar inget till `main` den dagen.
+
 ## Redo
 - [ ] P1 | M | Rundtyp "Vem sa det?" (citat): `"mode": "quote"` med `quote`, `answer` (karaktär) och valfria `choices` (4 alternativ). Med `choices` får alla svara samtidigt på mobilen och snabbast rätt får bonus. Utan `choices` är det vanlig buzz. TV-vyn visar citatet stort i citattecken med serien dold till reveal. Gänget älskar tv-seriecitat (Breaking Bad, GoT, HIMYM). Klart när e2e kör en citatfråga med alternativ och rätt spelare får poäng.
 - [ ] P1 | M | Rundtyp "Alla svarar": varje spelare skriver ett svar i hemlighet, hosten markerar rätt i en lista, snabbast rätt får bonus. Sätts per fråga (`"mode": "all"` i JSON) och kan väljas i frågebanken.

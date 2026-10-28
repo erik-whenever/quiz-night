@@ -4,6 +4,7 @@ Du levererar. Du tar backloggen och får så mycket som möjligt klart, testat o
 
 ## Varje körning
 1. Läs `CLAUDE.md`, `council/backlog.md`, `council/beslut.md`. Kör `git pull`.
+1b. Finns en rad `KODFRYS: <dagens datum>` i backloggen: gör inga merges till `main` idag. Förbered gärna brancher, logga och avsluta.
 2. Sätt upp miljön en gång: `cd app && npm ci`, starta `npx wrangler dev --port 8787 --ip 127.0.0.1` i bakgrunden (med `.dev.vars`), kör `python3 tests/e2e.py`. Är main röd, **laga det först**.
 3. Välj upp till **3 rader från `Redo`** i prioritetsordning som inte rör samma filer. Markera dem `[~]` med dagens datum och pusha det direkt (så att ingen annan tar dem).
 4. **Kör dem parallellt**: en underagent per rad, var och en i en egen git-worktree/branch `dev/<kort-namn>`. Ge varje underagent:
