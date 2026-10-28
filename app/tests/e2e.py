@@ -75,6 +75,92 @@ async ([pin]) => {
 }
 """
 
+# Kantfall kring buzz-fönstret. Varje fall får ett eget rum.
+EDGE_BUZZ_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const connect = (code, role, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [], states: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'state') { c.state = m.state; c.states.push(m.state); c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state')), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const name = (st) => st.players.find((p) => p.id === st.buzz?.playerId)?.name ?? null;
+  const setup = async (names) => {
+    const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+      body: JSON.stringify({ title: 'Kantfall', questions: [1, 2, 3].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
+    const { code, hostKey } = await res.json();
+    const host = await connect(code, 'host', hostKey);
+    const ps = {};
+    for (const n of names) { ps[n] = await connect(code, 'player'); send(ps[n], { t: 'join', name: n }); }
+    await sleep(400);
+    send(host, { t: 'host:start' });
+    await until(host, (st) => st?.phase === 'question');
+    for (const n of names) await until(ps[n], (st) => st?.phase === 'question');
+    return { code, host, ps, all: [host, ...Object.values(ps)] };
+  };
+  const winner = async (host) => { try { return name(await until(host, (st) => st?.phase === 'buzzed', 1500)); } catch { return null; } };
+  const done = (r) => r.all.forEach((c) => c.ws.close());
+  const out = {};
+
+  // Exakt samtidigt (samma tick, samma at): den som kom först vinner, alltid.
+  out.simultaneous = [];
+  for (let i = 0; i < 3; i++) {
+    const r = await setup(['A', 'B']);
+    const at = Date.now(); send(r.ps.A, { t: 'buzz', at }); send(r.ps.B, { t: 'buzz', at });
+    out.simultaneous.push(await winner(r.host)); done(r);
+  }
+
+  // Host går till nästa fråga / visar svaret / avslutar mitt i fönstret: ingen buzz ska dyka upp efteråt.
+  for (const [k, msg, phase] of [['next', 'host:next', 'question'], ['reveal', 'host:reveal', 'reveal'], ['finish', 'host:finish', 'finished']]) {
+    const r = await setup(['A', 'B']);
+    send(r.ps.A, { t: 'buzz' }); await sleep(20); send(r.host, { t: msg });
+    await sleep(400);
+    out[k] = { phase: r.host.state.phase === phase, buzz: name(r.host.state) };
+    if (k === 'next') { send(r.ps.B, { t: 'buzz' }); out[k].after = await winner(r.host); }
+    done(r);
+  }
+
+  // Utlåst spelare som buzzar (även med fusk-tidsstämpel) räknas inte.
+  { const r = await setup(['Ut', 'Kvar']);
+    send(r.ps.Ut, { t: 'buzz' }); await until(r.host, (st) => st?.phase === 'buzzed');
+    send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
+    send(r.ps.Kvar, { t: 'buzz', at: Date.now() }); send(r.ps.Ut, { t: 'buzz', at: Date.now() - 9999 });
+    out.lockedOut = await winner(r.host); done(r); }
+
+  // Samma spelare spammar buzz med allt bättre tidsstämplar: första buzzen gäller.
+  { const r = await setup(['Lugn', 'Spam']);
+    send(r.ps.Lugn, { t: 'buzz', at: Date.now() }); await sleep(40);
+    send(r.ps.Spam, { t: 'buzz', at: Date.now() });
+    for (let i = 0; i < 30; i++) send(r.ps.Spam, { t: 'buzz', at: 0 });
+    out.spam = await winner(r.host); await sleep(300);
+    out.spamBuzzed = r.host.states.filter((s) => s.phase === 'buzzed').length; done(r); }
+
+  // Spelare buzzar och laddar om mitt i fönstret: buzzen står kvar, ny buzz efter återanslutning ignoreras.
+  { const r = await setup(['Ladd', 'Annan']);
+    const id = r.ps.Ladd.id;
+    send(r.ps.Ladd, { t: 'buzz', at: Date.now() }); r.ps.Ladd.ws.close();
+    await sleep(30); send(r.ps.Annan, { t: 'buzz', at: Date.now() });
+    const re = await connect(r.code, 'player'); send(re, { t: 'join', name: 'Ladd', playerId: id });
+    await sleep(30); send(re, { t: 'buzz', at: Date.now() - 5000 });
+    out.reload = await winner(r.host); r.all.push(re); done(r); }
+  return out;
+}
+"""
+
 
 def shot(page, name):
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
@@ -188,6 +274,16 @@ def main():
         assert fair["fair"] == "Seg", f"Spelaren med lägst justerad tid ska vinna, vann: {fair['fair']}"
         assert fair["cheat"] == "Snabb", f"Fusk-tidsstämpeln klampades inte, vann: {fair['cheat']}"
         assert fair["single"] == "Fuskare", f"Ensam buzz utan tidsstämpel ska fungera, vann: {fair['single']}"
+
+        edge = raw.evaluate(EDGE_BUZZ_JS, [PIN])
+        print("Buzz-kantfall:", edge)
+        assert edge["simultaneous"] == ["A", "A", "A"], f"Exakt samtidiga buzzar ska vinnas av den som kom först: {edge['simultaneous']}"
+        for k in ("next", "reveal", "finish"):
+            assert edge[k]["phase"] and edge[k]["buzz"] is None, f"host:{k} under buzz-fönstret läckte en buzz: {edge[k]}"
+        assert edge["next"]["after"] == "B", f"Buzz på nästa fråga efter avbrutet fönster fungerar inte: {edge['next']}"
+        assert edge["lockedOut"] == "Kvar", f"Utlåst spelare fick buzza: {edge['lockedOut']}"
+        assert edge["spam"] == "Lugn" and edge["spamBuzzed"] == 1, f"Spam-buzz skrev över första buzzen: {edge}"
+        assert edge["reload"] == "Ladd", f"Buzz försvann vid omladdning mitt i fönstret: {edge['reload']}"
         raw.close()
 
         b.close()
