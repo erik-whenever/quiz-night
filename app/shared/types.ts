@@ -72,7 +72,8 @@ export type GameEvent =
 // Klient -> server
 export type ClientMsg =
   | { t: "join"; name: string; playerId?: string }
-  | { t: "buzz" }
+  /** at = klientens uppskattade servertid vid tryck (Date.now() + klockoffset). Servern klampar. */
+  | { t: "buzz"; at?: number }
   | { t: "type"; text: string }
   | { t: "host:start" }
   | { t: "host:next" }
@@ -83,14 +84,18 @@ export type ClientMsg =
   | { t: "host:kick"; playerId: string }
   | { t: "host:settings"; settings: Partial<Settings> }
   | { t: "host:finish" }
-  | { t: "ping"; c: number };
+  | { t: "ping"; c: number }
+  /** Svar på serverns sping, ekar s oförändrat så servern själv kan mäta RTT. */
+  | { t: "spong"; s: number };
 
 // Server -> klient
 export type ServerMsg =
   | { t: "state"; state: PublicState | HostState }
   | { t: "joined"; playerId: string }
   | { t: "error"; message: string }
-  | { t: "pong"; c: number; s: number };
+  | { t: "pong"; c: number; s: number }
+  /** Servern mäter klientens RTT: klienten svarar direkt med { t: "spong", s }. */
+  | { t: "sping"; s: number };
 
 export interface LeagueEntry {
   id: string;
@@ -103,5 +108,12 @@ export interface HubPublic {
   nextQuiz?: { date: string; theme?: string };
   league: LeagueEntry[];
 }
+
+/** Rättvis buzz: hur länge servern samlar buzzar efter den första innan vinnaren väljs. */
+export const BUZZ_WINDOW_MS = 150;
+/** Tak för hur mycket tidigare än ankomsten en buzz någonsin får räknas. */
+export const BUZZ_MAX_COMP_MS = 70;
+/** Tillåten mätbrus utöver uppmätt RTT/2 när en buzz-tidsstämpel klampas. */
+export const BUZZ_JITTER_MS = 25;
 
 export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1 };
