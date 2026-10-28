@@ -70,6 +70,11 @@ jobs:
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Inga Cloudflare-hemligheter än, se council/BEHOVER-ERIK.md"; fi
       - if: steps.check.outputs.skip != 'true'
-        run: npm ci && npx vite build && npx wrangler deploy
+        run: |
+          npm ci && npx vite build
+          npx wrangler deploy 2>&1 | tee deploy.log
+          URL=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "::notice title=Prod-url::$URL"
+          echo "Publicerad på $URL" >> "$GITHUB_STEP_SUMMARY"
       - if: steps.check.outputs.skip != 'true' && env.HOST_PIN != ''
         run: echo "$HOST_PIN" | npx wrangler secret put HOST_PIN
