@@ -184,6 +184,30 @@ def shot(page, name):
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
 
 
+# Samma mönster som HAPTIC i src/lib/sound.ts
+VIB_BUZZ, VIB_RIGHT, VIB_WRONG = [60], [40, 60, 40, 60, 120], [300, 80, 300]
+
+# Android-liknande: spela in navigator.vibrate-anrop
+STUB_VIBRATE = """
+window.__vib = [];
+Object.defineProperty(Navigator.prototype, 'vibrate', { configurable: true, writable: true,
+  value: function (p) { window.__vib.push(Array.isArray(p) ? p : [p]); return true; } });
+"""
+# iOS Safari-liknande: navigator.vibrate finns inte alls
+NO_VIBRATE = "delete Navigator.prototype.vibrate; delete navigator.vibrate;"
+
+
+def vib(page):
+    return page.evaluate("window.__vib")
+
+
+def wait_vib(page, expected):
+    page.wait_for_function("n => window.__vib.length >= n", arg=len(expected), timeout=5000)
+    page.wait_for_timeout(200)  # fånga eventuella extra anrop
+    got = vib(page)
+    assert got == expected, f"Fel vibrationer: {got}, väntade {expected}"
+
+
 def main():
     with sync_playwright() as pw:
         b = pw.chromium.launch()
@@ -191,6 +215,11 @@ def main():
         tv = b.new_page(viewport={"width": 1600, "height": 900})
         p1 = b.new_page(viewport={"width": 390, "height": 844})
         p2 = b.new_page(viewport={"width": 390, "height": 844})
+        p1.add_init_script(STUB_VIBRATE)
+        p2.add_init_script(NO_VIBRATE)
+        page_errors = []
+        for pg in (p1, p2):
+            pg.on("pageerror", lambda e: page_errors.append(str(e)))
 
         # Startsida
         p1.goto(BASE + "/")
@@ -233,6 +262,8 @@ def main():
         p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(p2.get_by_text("Erik svarar")).to_be_visible()
         expect(p2.get_by_role("button", name="Buzza")).to_be_disabled()
+        wait_vib(p1, [VIB_BUZZ])
+        assert p2.evaluate("'vibrate' in navigator") is False, "iOS-stubben fungerar inte"
         shot(tv, "07-tv-buzz")
         shot(host, "08-host-buzz")
         # Hosten ser svaret, TV:n gör det inte
@@ -241,6 +272,7 @@ def main():
         host.get_by_role("button", name="Rätt (R)").click()
         expect(tv.locator(".answer-reveal")).to_have_text("2010")
         expect(p1.locator(".chip").first).to_contain_text("1")
+        wait_vib(p1, [VIB_BUZZ, VIB_RIGHT])
 
         # Fråga 2: Tobbe buzzar och svarar fel, låses ute; Erik låter tiden gå ut
         host.get_by_role("button", name="Nästa fråga (N)").click()
@@ -248,11 +280,21 @@ def main():
         expect(host.get_by_role("button", name="Fel (F)")).to_be_visible()
         host.get_by_role("button", name="Fel (F)").click()
         expect(p2.get_by_text("Du är utlåst")).to_be_visible()
+        # Tobbe (utan vibrate) kunde buzza och få fel utan sidfel; Erik vibrerar inte för andras buzz
+        assert vib(p1) == [VIB_BUZZ, VIB_RIGHT], f"Vibrerade för annan spelare: {vib(p1)}"
+        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
         p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(p1.get_by_role("timer")).to_be_visible()
         shot(p1, "09-spelare-nedrakning")
         # Timeout efter 3 s => straff, alla utlåsta => svaret visas automatiskt
         expect(tv.locator(".answer-reveal")).to_be_visible(timeout=6000)
+        wait_vib(p1, [VIB_BUZZ, VIB_RIGHT, VIB_BUZZ, VIB_WRONG])
+        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+        # Erik laddar om: senaste händelsen (hans timeout) är gammal och ska inte vibrera igen
+        p1.reload()
+        expect(p1.locator(".chip").first).to_contain_text("Erik")
+        p1.wait_for_timeout(1000)
+        assert vib(p1) == [], f"Vibrerade för gammal händelse efter omladdning: {vib(p1)}"
 
         before = len(json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"])
 
