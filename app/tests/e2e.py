@@ -16,17 +16,17 @@ FAIR_BUZZ_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Rättvis buzz', questions: [1, 2, 3].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
+    body: JSON.stringify({ title: 'Rättvis buzz', questions: [1, 2, 3, 4, 5].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
   const { code, hostKey } = await res.json();
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  // Klient som svarar på serverns RTT-mätning (sping) efter spongDelay ms.
-  const connect = (role, spongDelay = 0, key) => new Promise((resolve) => {
+  // Klient som svarar på serverns RTT-mätning (sping) efter spongDelay ms; fakeS ekar ett förfalskat s.
+  const connect = (role, spongDelay = 0, key, fakeS = 0) => new Promise((resolve) => {
     const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
     const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
     const c = { ws, state: null, id: null, waiters: [] };
     ws.onmessage = (ev) => {
       const m = JSON.parse(ev.data);
-      if (m.t === 'sping') setTimeout(() => ws.send(JSON.stringify({ t: 'spong', s: m.s })), spongDelay);
+      if (m.t === 'sping') setTimeout(() => ws.send(JSON.stringify({ t: 'spong', s: m.s - fakeS })), spongDelay);
       if (m.t === 'joined') c.id = m.playerId;
       if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
     };
@@ -40,20 +40,22 @@ async ([pin]) => {
   const send = (c, m) => c.ws.send(JSON.stringify(m));
   const host = await connect('host', 0, hostKey);
   const snabb = await connect('player', 0);      // låg ping
-  const seg = await connect('player', 250);      // simulerad hög ping (~250 ms RTT)
+  const seg = await connect('player', 120);      // simulerad verklig hög ping: alla spong fördröjs 120 ms
   const fusk = await connect('player', 0);       // låg ping men ljuger om tidsstämpeln
-  for (const [c, n] of [[snabb, 'Snabb'], [seg, 'Seg'], [fusk, 'Fuskare']]) send(c, { t: 'join', name: n });
+  const falskS = await connect('player', 0, undefined, 9000); // låtsas ha 9 s RTT via falskt s
+  const drojer = await connect('player', 300);   // låg ping men fördröjer spong 300 ms för att blåsa upp RTT
+  for (const [c, n] of [[snabb, 'Snabb'], [seg, 'Seg'], [fusk, 'Fuskare'], [falskS, 'FalskS'], [drojer, 'Fördröjd']]) send(c, { t: 'join', name: n });
   await sleep(900); // låt servern hinna mäta RTT
   const name = (st) => st.players.find((p) => p.id === st.buzz?.playerId)?.name;
   const out = {};
 
-  // 1) Snabb anländer först, Seg 60 ms senare men tryckte 110 ms innan ankomst => justerat 50 ms före Snabb.
+  // 1) Snabb anländer först, Seg 30 ms senare men tryckte 60 ms innan ankomst (≈ RTT/2) => justerat ~30 ms före Snabb.
   send(host, { t: 'host:start' });
   await until(snabb, (st) => st?.phase === 'question' && st.qIndex === 0);
   await until(seg, (st) => st?.phase === 'question' && st.qIndex === 0);
   send(snabb, { t: 'buzz', at: Date.now() });
-  await sleep(60);
-  send(seg, { t: 'buzz', at: Date.now() - 110 });
+  await sleep(30);
+  send(seg, { t: 'buzz', at: Date.now() - 60 });
   out.fair = name(await until(host, (st) => st?.phase === 'buzzed'));
 
   // 2) Fuskaren (låg ping) skickar en tidsstämpel 10 s bakåt, 60 ms efter Snabb => klampas, Snabb vinner.
@@ -70,7 +72,23 @@ async ([pin]) => {
   await until(fusk, (st) => st?.phase === 'question' && st.qIndex === 2);
   send(fusk, { t: 'buzz' });
   out.single = name(await until(host, (st) => st?.phase === 'buzzed'));
-  for (const c of [host, snabb, seg, fusk]) c.ws.close();
+
+  // 4) Falskt s i spong ignoreras: ingen RTT godtas, så 120 ms efter Snabb med at långt bakåt förlorar.
+  send(host, { t: 'host:next' });
+  await until(falskS, (st) => st?.phase === 'question' && st.qIndex === 3);
+  send(snabb, { t: 'buzz', at: Date.now() });
+  await sleep(120);
+  send(falskS, { t: 'buzz', at: Date.now() - 100000 });
+  out.fakeS = name(await until(host, (st) => st?.phase === 'buzzed'));
+
+  // 5) Fördröjd spong ger högst taket (70 ms) i fördel: 120 ms efter Snabb förlorar ändå.
+  send(host, { t: 'host:next' });
+  await until(drojer, (st) => st?.phase === 'question' && st.qIndex === 4);
+  send(snabb, { t: 'buzz', at: Date.now() });
+  await sleep(120);
+  send(drojer, { t: 'buzz', at: Date.now() - 100000 });
+  out.delayedSpong = name(await until(host, (st) => st?.phase === 'buzzed'));
+  for (const c of [host, snabb, seg, fusk, falskS, drojer]) c.ws.close();
   return out;
 }
 """
@@ -274,6 +292,8 @@ def main():
         assert fair["fair"] == "Seg", f"Spelaren med lägst justerad tid ska vinna, vann: {fair['fair']}"
         assert fair["cheat"] == "Snabb", f"Fusk-tidsstämpeln klampades inte, vann: {fair['cheat']}"
         assert fair["single"] == "Fuskare", f"Ensam buzz utan tidsstämpel ska fungera, vann: {fair['single']}"
+        assert fair["fakeS"] == "Snabb", f"Falskt s i spong godtogs, vann: {fair['fakeS']}"
+        assert fair["delayedSpong"] == "Snabb", f"Fördröjd spong gav mer än taket i fördel, vann: {fair['delayedSpong']}"
 
         edge = raw.evaluate(EDGE_BUZZ_JS, [PIN])
         print("Buzz-kantfall:", edge)
