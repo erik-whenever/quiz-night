@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Crown, Link } from "../App";
 import { useCountdown, useRoom } from "../lib/useRoom";
-import { sfx } from "../lib/sound";
+import { haptic, sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
 
 const idKey = (code: string) => "kronan.player." + code;
@@ -29,18 +29,27 @@ export default function Play({ code }: { code: string }) {
   const left = useCountdown(state?.buzz?.deadline, serverNow);
   const [typed, setTyped] = useState("");
 
-  // Ljud på händelser
+  // Lås upp ljud på första trycket var som helst (iOS kräver en gest)
+  useEffect(() => {
+    const on = () => sfx.unlock();
+    window.addEventListener("pointerdown", on, { once: true });
+    window.addEventListener("keydown", on, { once: true });
+    return () => { window.removeEventListener("pointerdown", on); window.removeEventListener("keydown", on); };
+  }, []);
+
+  // Ljud på händelser, vibration när det gäller mig
   const lastAt = useRef(0);
   useEffect(() => {
     const ev = state?.lastEvent;
     if (!ev || ev.at === lastAt.current) return;
     lastAt.current = ev.at;
-    if (ev.kind === "buzz") sfx.buzz();
-    if (ev.kind === "correct") sfx.correct();
-    if (ev.kind === "wrong" || ev.kind === "timeout") sfx.wrong();
+    const mine = "playerId" in ev && ev.playerId === playerId;
+    if (ev.kind === "buzz") { sfx.buzz(); if (mine) haptic.buzz(); }
+    if (ev.kind === "correct") { sfx.correct(); if (mine) haptic.correct(); }
+    if (ev.kind === "wrong" || ev.kind === "timeout") { sfx.wrong(); if (mine) haptic.wrong(); }
     if (ev.kind === "finished") sfx.crown();
     if (ev.kind !== "buzz") setTyped("");
-  }, [state?.lastEvent]);
+  }, [state?.lastEvent, playerId]);
 
   // Mellanslag = buzz på dator
   useEffect(() => {
