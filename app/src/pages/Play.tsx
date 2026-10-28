@@ -52,7 +52,7 @@ export default function Play({ code }: { code: string }) {
     if (ev.kind === "wrong" || ev.kind === "timeout") { sfx.wrong(); if (mine) haptic.wrong(); }
     if (ev.kind === "finished") sfx.crown();
     if (ev.kind !== "buzz") setTyped("");
-  }, [state?.lastEvent, playerId]);
+  }, [!!state, state?.lastEvent, playerId]);
 
   // Mellanslag = buzz på dator
   useEffect(() => {
