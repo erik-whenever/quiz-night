@@ -27,6 +27,7 @@ Titta på skärmdumparna i `e2e-shots/` efter UI-ändringar. Det är så rådet 
 ## Produktion
 - https://kronan.swing-check.workers.dev, publiceras av `.github/workflows/ci.yml` vid push till `main` och röktestas (`app/tests/smoke.py`).
 - **Agenter når inte workers.dev** (sandlådans nätverk). Appens publika läge (nästa quiz, tabell) synkas till `council/hub.json` varje morgon av `.github/workflows/sync-hub.yml`.
+- Extern data (spelstatistik m.m.): curl från sandlådan blockeras oftast. Använd WebFetch/WebSearch. Går inte det, lägg hämtningen i en GitHub Action (som `sync-hub.yml`) med ev. nycklar som repo-secrets, och checka in resultatet under `council/data/`.
 - Cloudflares botskydd blockerar Pythons standard-User-Agent. Sätt alltid en webbläsarlik `User-Agent` i skript mot prod.
 
 ## Vyer
