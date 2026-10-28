@@ -13,7 +13,7 @@ PIN = os.environ["HOST_PIN"]
 def req(path, data=None, pin=True):
     r = urllib.request.Request(BASE + path, data=json.dumps(data).encode() if data is not None else None,
                                method="POST" if data is not None else "GET",
-                               headers={"content-type": "application/json", **({"x-host-pin": PIN} if pin else {})})
+                               headers={"content-type": "application/json", "user-agent": "Mozilla/5.0 (Kronan smoke test)", **({"x-host-pin": PIN} if pin else {})})
     return json.loads(urllib.request.urlopen(r, timeout=20).read())
 
 
