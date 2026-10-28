@@ -12,6 +12,69 @@ SHOTS = sys.argv[2] if len(sys.argv) > 2 else "e2e-shots"
 PIN = os.environ.get("HOST_PIN", "1234")
 os.makedirs(SHOTS, exist_ok=True)
 
+FAIR_BUZZ_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Rättvis buzz', questions: [1, 2, 3].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
+  const { code, hostKey } = await res.json();
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  // Klient som svarar på serverns RTT-mätning (sping) efter spongDelay ms.
+  const connect = (role, spongDelay = 0, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') setTimeout(() => ws.send(JSON.stringify({ t: 'spong', s: m.s })), spongDelay);
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state')), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const host = await connect('host', 0, hostKey);
+  const snabb = await connect('player', 0);      // låg ping
+  const seg = await connect('player', 250);      // simulerad hög ping (~250 ms RTT)
+  const fusk = await connect('player', 0);       // låg ping men ljuger om tidsstämpeln
+  for (const [c, n] of [[snabb, 'Snabb'], [seg, 'Seg'], [fusk, 'Fuskare']]) send(c, { t: 'join', name: n });
+  await sleep(900); // låt servern hinna mäta RTT
+  const name = (st) => st.players.find((p) => p.id === st.buzz?.playerId)?.name;
+  const out = {};
+
+  // 1) Snabb anländer först, Seg 60 ms senare men tryckte 110 ms innan ankomst => justerat 50 ms före Snabb.
+  send(host, { t: 'host:start' });
+  await until(snabb, (st) => st?.phase === 'question' && st.qIndex === 0);
+  await until(seg, (st) => st?.phase === 'question' && st.qIndex === 0);
+  send(snabb, { t: 'buzz', at: Date.now() });
+  await sleep(60);
+  send(seg, { t: 'buzz', at: Date.now() - 110 });
+  out.fair = name(await until(host, (st) => st?.phase === 'buzzed'));
+
+  // 2) Fuskaren (låg ping) skickar en tidsstämpel 10 s bakåt, 60 ms efter Snabb => klampas, Snabb vinner.
+  send(host, { t: 'host:next' });
+  await until(snabb, (st) => st?.phase === 'question' && st.qIndex === 1);
+  await until(fusk, (st) => st?.phase === 'question' && st.qIndex === 1);
+  send(snabb, { t: 'buzz', at: Date.now() });
+  await sleep(60);
+  send(fusk, { t: 'buzz', at: Date.now() - 10000 });
+  out.cheat = name(await until(host, (st) => st?.phase === 'buzzed'));
+
+  // 3) Ensam buzz utan tidsstämpel fungerar som förut.
+  send(host, { t: 'host:next' });
+  await until(fusk, (st) => st?.phase === 'question' && st.qIndex === 2);
+  send(fusk, { t: 'buzz' });
+  out.single = name(await until(host, (st) => st?.phase === 'buzzed'));
+  for (const c of [host, snabb, seg, fusk]) c.ws.close();
+  return out;
+}
+"""
+
 
 def shot(page, name):
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
@@ -116,6 +179,16 @@ def main():
         shot(host, "12-bank-editor")
         host.get_by_role("button", name="Spara set").click()
         expect(host.get_by_text("Test-set").first).to_be_visible()
+
+        # Rättvis buzz: direkta websocket-klienter med simulerad ping
+        raw = b.new_page()
+        raw.goto(BASE + "/")
+        fair = raw.evaluate(FAIR_BUZZ_JS, [PIN])
+        print("Rättvis buzz:", fair)
+        assert fair["fair"] == "Seg", f"Spelaren med lägst justerad tid ska vinna, vann: {fair['fair']}"
+        assert fair["cheat"] == "Snabb", f"Fusk-tidsstämpeln klampades inte, vann: {fair['cheat']}"
+        assert fair["single"] == "Fuskare", f"Ensam buzz utan tidsstämpel ska fungera, vann: {fair['single']}"
+        raw.close()
 
         b.close()
         print("E2E OK. Slutpoäng:", res)
