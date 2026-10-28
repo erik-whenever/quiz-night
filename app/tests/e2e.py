@@ -43,6 +43,12 @@ def check_pwa(page):
         return reg.scope;
     }""")
     assert scope == BASE + "/", f"Service workern registrerades inte rätt: {scope}"
+    # Chromes egen bedömning av installerbarhet (samma som "Installera app"-knappen)
+    cdp = page.context.new_cdp_session(page)
+    errs = cdp.send("Page.getInstallabilityErrors")["installabilityErrors"]
+    assert not errs, f"Chrome anser inte appen installerbar: {errs}"
+    assert not cdp.send("Page.getAppManifest").get("errors"), "Chrome hittar fel i manifestet"
+    cdp.detach()
     # API och sidan fungerar fortfarande med SW aktiv (ingen cachning)
     page.reload()
     expect(page.get_by_role("heading", name="Vem tar kronan i veckan?")).to_be_visible()
@@ -92,6 +98,11 @@ def main():
             page.get_by_label("Ditt namn").fill(name)
             page.get_by_role("button", name="Hoppa in").click()
             expect(page.get_by_text("Väntar på att hosten startar")).to_be_visible()
+        expect(tv.get_by_text("2 spelare inne")).to_be_visible()
+        # Spelarsidan styrs av service workern och klarar en omladdning (websocket återansluter)
+        assert p1.evaluate("!!navigator.serviceWorker.controller"), "/play styrs inte av service workern"
+        p1.reload()
+        expect(p1.get_by_text("Väntar på att hosten startar")).to_be_visible()
         expect(tv.get_by_text("2 spelare inne")).to_be_visible()
         shot(tv, "03-tv-lobby")
         shot(p1, "04-spelare-lobby")
