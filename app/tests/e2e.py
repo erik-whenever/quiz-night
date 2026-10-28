@@ -123,6 +123,11 @@ def main():
         expect(tv.locator(".answer-reveal")).to_be_visible(timeout=6000)
         wait_vib(p1, [VIB_BUZZ, VIB_RIGHT, VIB_BUZZ, VIB_WRONG])
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+        # Erik laddar om: senaste händelsen (hans timeout) är gammal och ska inte vibrera igen
+        p1.reload()
+        expect(p1.locator(".chip").first).to_contain_text("Erik")
+        p1.wait_for_timeout(1000)
+        assert vib(p1) == [], f"Vibrerade för gammal händelse efter omladdning: {vib(p1)}"
 
         before = len(json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"])
 
