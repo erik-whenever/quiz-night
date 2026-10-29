@@ -2,6 +2,9 @@ import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings,
 } from "../shared/types";
 import { BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, DEFAULT_SETTINGS, BUZZ_WINDOW_MS } from "../shared/types";
+import type { WheelState } from "../shared/types";
+import { activeTwist, answerSecondsFor } from "../shared/types";
+import { spinWheel, stealTarget } from "./wheel";
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
 
@@ -38,6 +41,7 @@ interface Persisted {
   settings: Settings;
   lastEvent?: GameEvent;
   hostKey: string;
+  wheel?: WheelState | null;
 }
 
 export class Room implements DurableObject {
@@ -118,6 +122,7 @@ export class Room implements DurableObject {
       question: q && s.phase !== "lobby" ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl } : undefined,
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? q?.answer : undefined,
       buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
+      wheel: s.wheel ?? null,
     };
     if (role === "host") return { ...base, answer: q?.answer };
     return base;
@@ -150,12 +155,13 @@ export class Room implements DurableObject {
       if (t < best) { best = t; winner = pid; }
     }
     if (!winner) return;
-    const deadline = Date.now() + s.settings.answerSeconds * 1000;
+    const secs = answerSecondsFor(s);
+    const deadline = Date.now() + secs * 1000;
     s.buzz = { playerId: winner, deadline };
     s.phase = "buzzed";
     s.lastEvent = { kind: "buzz", playerId: winner, at: Date.now() };
     this.clearTimer();
-    this.timer = setTimeout(() => { this.punish("timeout"); }, s.settings.answerSeconds * 1000 + 150);
+    this.timer = setTimeout(() => { this.punish("timeout"); }, secs * 1000 + 150);
     await this.save();
     this.broadcast();
   }
@@ -164,7 +170,9 @@ export class Room implements DurableObject {
 
   private delta(sign: 1 | -1) {
     const q = this.s!.questions[this.s!.qIndex];
-    return sign === 1 ? (q?.points ?? 1) : -this.s!.settings.penalty;
+    const twist = activeTwist(this.s!);
+    if (sign === 1) return (q?.points ?? 1) * (twist === "double" ? 2 : 1);
+    return twist === "safe" ? 0 : -this.s!.settings.penalty;
   }
 
   /** Fel eller timeout: dra poäng, lås ute spelaren, öppna för andra att buzza. */
@@ -241,15 +249,20 @@ export class Room implements DurableObject {
         this.clearTimer(); this.clearPending();
         if (s.qIndex + 1 >= s.questions.length) { s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() }; }
         else { s.qIndex += 1; s.phase = "question"; s.buzz = null; s.lockedOut = []; s.lastEvent = undefined; }
+        // Twisten gäller bara frågan den snurrades för.
+        if (s.wheel && (s.phase === "finished" || s.wheel.forQ < s.qIndex)) s.wheel = null;
         break;
       }
       case "host:correct": {
         if (s.phase !== "buzzed" || !s.buzz) return;
         this.clearTimer();
         const d = this.delta(1);
+        const steal = activeTwist(s) === "steal" ? stealTarget(s.players, s.buzz.playerId, d) : null;
         const p = s.players.find((x) => x.id === s.buzz!.playerId);
         if (p) p.score += d;
-        s.lastEvent = { kind: "correct", playerId: s.buzz.playerId, delta: d, at: Date.now() };
+        if (steal) steal.from.score -= steal.amount;
+        s.lastEvent = { kind: "correct", playerId: s.buzz.playerId, delta: d, at: Date.now(),
+          ...(steal ? { stolenFrom: steal.from.id, stolen: steal.amount } : {}) };
         s.phase = "reveal";
         break;
       }
@@ -272,8 +285,14 @@ export class Room implements DurableObject {
         if (n.penalty !== undefined) s.settings.penalty = Math.max(0, Math.min(10, Math.round(n.penalty)));
         break;
       }
+      case "host:spin": {
+        if (s.phase !== "lobby" && s.phase !== "reveal") return this.send(c, { t: "error", message: "Hjulet kan bara snurras mellan frågorna" });
+        if (s.qIndex + 1 >= s.questions.length) return this.send(c, { t: "error", message: "Det finns ingen nästa fråga att snurra för" });
+        s.wheel = spinWheel(s.wheel, s.qIndex + 1);
+        break;
+      }
       case "host:finish": {
-        this.clearTimer(); this.clearPending(); s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
+        this.clearTimer(); this.clearPending(); s.wheel = null; s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
         break;
       }
     }
