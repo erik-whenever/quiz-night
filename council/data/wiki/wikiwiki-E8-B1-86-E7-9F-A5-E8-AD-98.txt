@@ -1,0 +1,263 @@
+Källa: https://wikiwiki.jp/hon/%E8%B1%86%E7%9F%A5%E8%AD%98
+Hämtad: 2026-10-29
+
+[#e7a6f683] ヒーロー 
+[#mc60a563] アイテム 
+[#g62573b7] マップ・Creep関連 
+[#f66bf4a3] 操作関連 
+[#t5f70c89] その他 
+[#d0096323] コメント 
+ヒーロー [/hon/::cmd/edit?page=%E8%B1%86%E7%9F%A5%E8%AD%98&id=e7a6f683] 
+一つのスキルで、複数の能力があるヒーローのショートカットキーについて
+[/hon/Empath] Empathや[/hon/Soulstealer] Soulstealerなどがそれに当たります、QWERの各キーでどうやったら!？と思うかもしれませんが大丈夫だ、問題ない。
+そういったヒーローは必ずPassiveなスキルがその枠分あるので、Passiveスキルのキーのショートカットを押せば大丈夫です。
+たまに "D"キーを 使うHeroいるけど、[/hon/Staff%20of%20the%20Master] SotM持った[/hon/Nymphora] Nymphと、[/hon/Wildsoul] Wildsoulくらいのようです。
+アイテム [/hon/::cmd/edit?page=%E8%B1%86%E7%9F%A5%E8%AD%98&id=mc60a563] 
+[/hon/Insanitarius] Insanitariusについて
+Insanitariusは、ONにすることで大幅なStrの上昇(HP475)と攻撃力が上昇するアイテムだ。
+またOFFにすることで上昇したHP475分は減少してしまうので、HPが475以下でOFFにすると、HPが瞬時に１になってしまう。
+だが、ONにすることでHPが1だったとしても475増えるので、これを利用して多少追われているときなど延命を図ることができる。
+やり方としては、瀕死の状態でONにして逃げ始めたとしよう。
+毎秒ダメージはあるが475は増えたとしてCDの10秒間は耐えれたとする。
+その後瞬時にON⇒OFF⇒ONと切り替える。OFFにしたとき体力が1になってしまう可能性があるので気をつける。
+こうして再びONになることでHPは475以上となる。
+相手にスタンやスローなどがなければこれで逃げれる可能性はあるのでいざというときに覚えておきたい。
+[/hon/Void%20Talisman] Void Talismanについて
+使用時の短時間だけだが、通常攻撃・スキルに関わらずあらゆる物理属性の攻撃を無効にするアイテム。
+SwiftBladeのUltを完全にシャットアウトできたりと状況限定でかなりの効果を発揮する。
+下記にVoid TalismanをOnにすることで防げるスキルの一例を書いておくので、参考に。
+[/hon/Pandamonium] Pandamonium:1st(ダメージもノックバックも無い)、2nd(対象にならない)、3rd(ダメージ＆Stun共に無効)、Ult(打たれる前にOnにすると対象消失でキャンセル、スキルの対象にならない)
+[/hon/Arachna] Arachna:1st、Ult(効果時間中は子蜘蛛は攻撃できないが追ってくる。効果時間が終わると子蜘蛛は攻撃してくる)
+[/hon/Defiler] Defiler:Ult（Onの間は攻撃の対象にならない）
+[/hon/Pestilence] Pestilence:2nd（ただしStunがMajic属性なのでStunは食らう）
+[/hon/Voodoo%20Jester] Voodoo Jester:Ult（Wardの攻撃対象にならない）
+[/hon/Corrupted%20Disciple] Corrupted Disciple:Ult（電気の攻撃対象にならない）
+[/hon/Night%20Hound] Night Hound:2nd（スキルの対象にならないため、発動できない）
+[/hon/Torturer] Torturer:2nd（スキルの対象にならないのでダメージ無効）
+[/hon/Pollywog%20Priest] Pollywog Priest:Ult（Wardの攻撃対象にならない）
+[/hon/The%20Dark%20Lady] The Dark Lady:1st、3rd（スキルの対象にならない＆その後の攻撃速度増加時間の間無敵）
+[/hon/SwiftBlade] SwiftBlade:Ult（途中発動でも対象消失で効果消滅）
+特にVoodoo、Panda、Corrupted、Pollywog、DarkLady、SwiftBlade、Arachna、Defilerに強力な効果を発揮する。
+Pandaはスキル全部が物理属性なので全て無効されるので、所持しているときスキルコンボを食らいそうなら即使用するといい。
+また、[/hon/Magebane] Magebane、[/hon/The%20Dark%20Lady] The Dark Lady、[/hon/Wildsoul] Wildsoulのような、通常攻撃主体のCarry全般に対しても効果が高い。
+アイテムをその場で売却
+CTRL+SHIFTを押して売りたいアイテムを右クリックすると、どこにいてもアイテムを売ることができる
+ただし、死亡中は売却できない。死亡中に購入したものを売却することは可能。
+アイテムの売却価格
+アイテムの購入後、15秒間は買った値段と同じ価格で売却できる（猶予期間中はアイテムにマークが表示される）。
+買い物を間違えた場合はすぐに売買しなおそう。
+アイテムの使用、アイテムを合成・分解した場合、価格が即半減するので注意。
+合成は猶予期間を過ぎたアイテムが含まれていた場合のみで、一括購入なら売却可能。
+[/hon/Steamboots] Steambootsを切り替えだけでも売却価格は半減する。
+HPとManaの調整
+現在HPとManaは、そのときのステータスの最大値に対して動的に変動する。
+たとえば、MAXHP800、現在HP400のとき、現在HPは最大値の50%ということになる。
+このとき、MAXHPが200増える装備を買うと、現在HPは最大HPである1000に対して50%の割合を保つため、現在HPが500まで上昇する。
+これを利用して、たとえばスキルを使うときだけSteamBootsをINTに切り替え、マナポーションを使うときはINT以外にするような操作をすることで、擬似的にスキルの消費マナを抑えつつ、回復量を増やすことができる。
+*1
+アイテムの解体
+レシピ無しのアイテムは解体できる。
+例えば[/hon/Ghost%20Marchers] Ghost Marchersを作ったら倉庫に入れ左クリックをすれば、[/hon/Marchers] Marchers･[/hon/Punchdagger] Punchdagger×2になる。
+倉庫枠が解体後のアイテム数より少なければ解体は出来ない。またレシピを使うアイテムも解体は出来ない。
+これを使えば後半[/hon/Post%20Haste] Post Hasteなどに変える場合レシピ分のGOLDで買うことが可能
+Stash（倉庫）から1クリックで移す
+アイテムをCTRL+右クリックすると、Stash間の移動が出来る
+Outpostの有効活用
+creepingの切れ目等にOutpostで購入→15秒以内に売却することで無料でアイテムを利用できる。
+持っているだけで比較的効果の大きい[/hon/Lifetube] Lifetubeや[/hon/Trinket%20of%20Restoration] Trinket of Restoration、
+少しでもマナを回復したい時に[/hon/Scarab] Scarabなどを複数個 or 繰り返し利用すると少しお得。
+マップ・Creep関連 [/hon/::cmd/edit?page=%E8%B1%86%E7%9F%A5%E8%AD%98&id=g62573b7] 
+Creep引き寄せ
+敵Creepが付近にいるときに、敵ヒーローを右クリックすると、敵Creepがプレイヤーの近くに寄ってくる。
+これを利用することでレーンを下げたり、[/hon/Legionnaire] Legionnaireなどが優先的に攻撃を引き受けることが出来る。
+引き付けたいCreepは自分の近くにいなければならないが、敵Heroはマップ上のどこにいてもOK。
+ファーミングのときはマップのどこかにいるヒーローを右クリックして、周囲のクリープを食いまくるのをおすすめ。
+中立Creepのスタックについて
+中立creepの湧きは00秒なので、53~6秒あたりで中立creepに攻撃を仕掛け沸く位置から外に連れ出し
+沸く位置を自分の視界外にすることでその位置にもう1組creepが出現する。
+これを利用することで2組分のgoldとexpを稼げる。
+ただしレベル低かったりヒーローによっては倒しきれず意味がないので気をつける。
+特にミノタウロスと狼の組み合わせの場合は注意。
+中立Creepの出現時間
+00:30にはじめて湧き、その後01:00から1分ごとに湧きます。
+レーンCreepの出現時間
+00:00から30秒ごとに湧くので攻める時、守る時はうまく利用しよう。
+Melee creepは3体、Range creepは1体湧きます。
+これとは別にsiege creep（Heavy Ballista、Hell Cannon）が03:00から2分30秒ごとに1体湧きます。
+レーンCreepの出現時間
+昼と夜
+00:00から7分30秒ごとに昼と夜が入れ替わります。視界の範囲が大きく変わります。
+緑化運動
+木は試合時間の5分毎に再出現します。
+裏道
+タワーの横などには抜け道がある、危ないときはそこに逃げたり逃げられたりするので居なくなった場合探してみよう
+地形を無視した移動
+周囲に移動可能な場所が無い特殊な状況になった場合、地形を無視して移動する。
+当たり判定のあるユニットをはじめ、[/hon/Pharaoh] Pharaohのマミーや[/hon/Bramble] Brambleのult等の一時的に設置されるスキルによっても起こりうる。
+ 参考画像
+ [https://cdn.wikiwiki.jp/to/w/hon/image/::attach/mame01.jpg?rev=904f0ff0d7c7ef2ea3c7c58124a98597&t=20131210171130] | → | [https://cdn.wikiwiki.jp/to/w/hon/image/::attach/mame02.jpg?rev=380abeffaca727543c848bb0b5f73c3e&t=20131210171136] | 
+Legion側の1st Mid Tower左側の裏道は行き止まりになっている。
+例として、二人のHEROが詰まると奥のHEROが行き場を失う。こうなると奥のHEROは地形を無視して断崖上へ移動する。
+地形＋その他の要因で閉じ込められた時に起こる現象。
+操作関連 [/hon/::cmd/edit?page=%E8%B1%86%E7%9F%A5%E8%AD%98&id=f66bf4a3] 
+Auto-Cast可能なスキルについて
+スキルを右クリックすることでAutoCast状態にできます。
+効果中はCD毎にスキルを撃ち、スキルアイコンが光ります。
+Auto-Cast可能なスキルは、[/hon/Arachna] ArachnaのWebbed Shotや[/hon/Vindicator] VindicatorのMaster's Incantation等。
+また、キー設定の「Activate ability（1～4）Secondary」の部分をキーボードに設定することで、ワンクリックでAutoCast状態にできます。
+[/hon/Bubbles] Bubblesなど頻繁に切り替えるHEROをプレイしている時に便利。
+Denyの方法
+DenyするにはAボタン（デフォルトのアタックコマンド）を押して味方creepまたは味方タワーをクリックします。
+Denyすることで相手に入る経験値やお金を減らすことができます。
+creepはHPが半分以下。タワーは1割以下になると攻撃できるように。
+味方HEROはDoTを受けている時のみDeny可能に（一部例外スキルあり）。
+行動予約
+シフトを押しながらボタンを押すことで予約が可能です。
+ペットを巡回させたりスキルコンボにも使えます。
+特にチャネリングスキルの後に行動出来るようにすると効果大。
+自動追尾
+味方ユニットを右クリック
+キー操作でスキルレベルアップ
+Alt+各スキルのボタンでスキルのレベルアップ可能（デフォルト）
+戦闘中等、マウス操作が忙しい時に便利
+Mini MapにPingを打つ
+Alt+左クリックでMini MapにPingを打てます。
+また、Alt+左ドラッグ&ドロップすることで特殊なPingが打てます。
+ 参考画像
+地面にPingを打つ
+同様の操作で地面にも直接Pingが打てます。
+ 参考画像
+さらに端のほうへドラッグしていくと、より細かい指示・意思表示が可能です。
+mis call等、チャットする余裕がない時に便利。
+その他 [/hon/::cmd/edit?page=%E8%B1%86%E7%9F%A5%E8%AD%98&id=t5f70c89] 
+HoNにログインできない時は
+Windows: Start->Run->cmd (run as administrator). Then: "echo masterserver.hon.s2games.com 67.228.117.76 >> %systemroot%\system32\drivers\etc\hosts"
+これやると入れるかも・・・。
+一応自己責任でお願いします。
+連続キルすると出るアレ
+3 serial killer
+4 ultimate warrior
+5 legendary
+6 onslaught
+7 savage sick
+8 dominating
+9 CHAMPION OF NEWERTH
+10~ BLOODBATH
+15~ IMMORTAL
+キャラ選択時の元ネタっぽい物
+[/hon/Blacksmith] 
+[/hon/Blacksmith] Blacksmith | [http://knowyourmeme.com/memes/too-bad-its-me-blacksmith] http://knowyourmeme.com/memes/too-bad-its-me-blacksmith | HoN Meme – Too bad it's me - Blacksmith | 
+[/hon/Witch%20Slayer] 
+[/hon/Witch%20Slayer] Witch Slayer | [http://www.youtube.com/watch?v=4aniv65Mw8I&t=11s] http://www.youtube.com/watch?v=4aniv65Mw8I&t=11s | Ennio Morricone - The Good, The Bad and The Ugly | 
+[/hon/Zephyr] 
+[/hon/Zephyr] Zephyr | [http://www.youtube.com/watch?v=ZThquH5t0ow] http://www.youtube.com/watch?v=ZThquH5t0ow | The Trashmen- Surfin' Bird | 
+[/hon/Tundra] 
+[/hon/Tundra] Tundra | [http://www.youtube.com/watch?v=pDxn0Xfqkgw&t=207s] http://www.youtube.com/watch?v=pDxn0Xfqkgw&t=207s | Batman & Robin - Arnold Schwarzenegger as Mr. Freeze(Ice man Coming!) | 
+[/hon/Pandamonium] 
+[/hon/Pandamonium] Pandamonium | [http://www.soundboard.com/sb/Sounds_of_Baseball.aspx] http://www.soundboard.com/sb/Sounds_of_Baseball.aspx | Baseball - Charge! Theme | 
+[/hon/Deadwood] 
+[/hon/Deadwood] Deadwood | [http://www.youtube.com/watch?v=2C7mNr5WMjA] http://www.youtube.com/watch?v=2C7mNr5WMjA | Ren & Stimpy - International Log | 
+[http://wikiwiki.jp/hon/?The%20Gladiator] 
+[/hon/The%20Gladiator] The Gladiator | [http://www.youtube.com/watch?v=FsqJFIJ5lLs] http://www.youtube.com/watch?v=FsqJFIJ5lLs | Russel Crowe - Gladiator | 
+[/hon/Gauntlet] 
+[/hon/Gauntlet] Gauntlet | [http://www.youtube.com/watch?v=0KQkBXjk6w4] http://www.youtube.com/watch?v=0KQkBXjk6w4 | Gauntlet - Arcade Game | 
+[/hon/Bubbles] 
+[/hon/Bubbles] Bubbles | [http://www.youtube.com/watch?v=CMNry4PE93Y] http://www.youtube.com/watch?v=CMNry4PE93Y | Jonathan - I like turtles | 
+[/hon/The%20Chipper] 
+[/hon/The%20Chipper] The Chipper | [http://www.youtube.com/watch?v=rUbWjIKxrrs] http://www.youtube.com/watch?v=rUbWjIKxrrs | Slap Chop - You're gonna love my nuts! | 
+[/hon/Bombardier] 
+[/hon/Bombardier] Bombardier | [http://www.youtube.com/watch?v=wC_npMb0Mdo&t=16] http://www.youtube.com/watch?v=wC_npMb0Mdo&t=16 | Ben Stiller - Meet the Parents | 
+[/hon/Empath] 
+[/hon/Empath] Empath | [http://www.youtube.com/watch?v=LjZ2zwXbta4&hd] http://www.youtube.com/watch?v=LjZ2zwXbta4&hd | Cascada - Everytime We Touch | 
+[/hon/Martyr] 
+[/hon/Martyr] Martyr | [http://www.youtube.com/watch?v=lG6qx-CAIzA&t=7] http://www.youtube.com/watch?v=lG6qx-CAIzA&t=7 | Georg Friedrich Händel - Messiah | 
+[/hon/Revenant] 
+[/hon/Revenant] Revenant | [http://www.youtube.com/watch?v=JfwJwvkX9tw&t=30] http://www.youtube.com/watch?v=JfwJwvkX9tw&t=30 | Ghostbusters - Theme | 
+[/hon/Flux] 
+[/hon/Flux] Flux | [http://jee.rs/100222/dialogue] http://jee.rs/100222/dialogue | Back To The Future - Fluxing | 
+[/hon/Lord%20Salforis] 
+[/hon/Lord%20Salforis] Lord Salforis | [http://www.youtube.com/watch?v=DZ71CQiDBpY] http://www.youtube.com/watch?v=DZ71CQiDBpY | Carl Orff - Carmina Burana | 
+[/hon/Master%20of%20Arms] 
+[/hon/Master%20of%20Arms] Master of Arms | [http://www.youtube.com/watch?v=s8DHO7XFVkI] http://www.youtube.com/watch?v=s8DHO7XFVkI | Terminator - Hasta la vista, Baby! | 
+[/hon/Berzerker] 
+[/hon/Berzerker] Berzerker | [http://www.youtube.com/watch?v=VR8a8nxerjw&t=66s] http://www.youtube.com/watch?v=VR8a8nxerjw&t=66s | Clerks - Berserker | 
+[/hon/Artesia] 
+[/hon/Artesia] Artesia | [http://www.youtube.com/watch?v=8oWAb5NVALw] http://www.youtube.com/watch?v=8oWAb5NVALw | Web Soup - Magic Missile | 
+[/hon/Gravekeeper] 
+[/hon/Gravekeeper] Gravekeeper | [http://www.youtube.com/watch?v=ae5XwkSguNI&t=74s] http://www.youtube.com/watch?v=ae5XwkSguNI&t=74s | Tales from the Crypt - Intro | 
+[/hon/Kinesis] 
+[/hon/Kinesis] Kinesis | [http://www.youtube.com/watch?v=RI0i_tL-8aU&t=58s] http://www.youtube.com/watch?v=RI0i_tL-8aU&t=58s | Spaceballs - My Schwartz is bigger than yours | 
+[/hon/Blitz] 
+[/hon/Blitz] Blitz | [http://www.youtube.com/watch?v=wbSjhInADX8] http://www.youtube.com/watch?v=wbSjhInADX8 | Sonic the Hedgehog - Sonic Boom | 
+[/hon/Pearl] 
+[/hon/Pearl] Pearl | [http://www.youtube.com/watch?v=bw9CALKOvAI] http://www.youtube.com/watch?v=bw9CALKOvAI | HYUNA - Bubble Pop | 
+コメント [/hon/::cmd/edit?page=%E8%B1%86%E7%9F%A5%E8%AD%98&id=d0096323] 
+ 瀕死でDOT食らってる奴をクリープと同じ要領で殴ればおｋ -- 2011-05-09 (月) 00:23:35
+きちんと「Ａ」keyを押しながらね　-- 2011-05-09 (月) 00:35:35
+スキルを発動する前にキャンセルとかはどうやるの？ -- 2011-07-17 (日) 00:00:49
+デフォルトだとS押すとキャンセルできます -- 2011-07-17 (日) 13:39:15
+死亡中に買ったアイテムは売れるだろ -- 2012-05-10 (木) 14:26:49
+死亡中に買ったアイテムは売れるが手持ちのアイテムは売れないってことだろ。死んで手持ちのアイテムを売ってバイバックみたいな事を禁じてるんじゃないかなと -- 2012-05-10 (木) 19:36:42
+Bombardierの元ネタ動画が消えてるんですが、一体何の動画だったのでしょうか -- 2012-08-04 (土) 09:19:31
+ボンボンボーン -- 2012-09-12 (水) 10:19:10
+ボンボンボボーン -- 2012-12-25 (火) 23:26:58
+ボボッボボボボーンボボボボボ -- 2015-01-07 (水) 22:22:45
+ 初めての方へ
+[/hon/%E5%88%9D%E5%BF%83%E8%80%85%E5%90%91%E3%81%91%E3%82%AC%E3%82%A4%E3%83%89] 初心者向けガイド
+[/hon/1%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8BHoN] 1から始めるHoN
+[/hon/Goblinstore] ゲーム内ショップ解説
+[/hon/%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%9E%E3%83%8A%E3%83%BC] ルールとマナー
+[/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MidWarsについて
+[/hon/%E7%94%A8%E8%AA%9E%E9%9B%86] 用語集
+[/hon/%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A] 環境設定
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+HEROの紹介
+[/hon/%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E7%B4%B9%E4%BB%8B] ヒーロー紹介
+[/hon/Hero] HoNRヒーロー一覧
+[/hon/Hero#u87f90d9] Agility
+[/hon/Hero#r6ecd546] Intelligence
+[/hon/Hero#x880c310] Strength
+･[/hon/OldHero] 旧ヒーロー一覧
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方
+アイテム
+[/hon/%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] HoNRアイテム一覧
+･[/hon/%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧ベースアイテム一覧
+･[/hon/%E6%97%A7%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧アイテム一覧
+データ
+[/hon/Hero%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9] ステータスの効果
+[/hon/Modifier] Modifier
+[/hon/Rune] Rune
+[/hon/%E5%90%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E8%A9%B3%E7%B4%B0] Creep詳細
+[/hon/Kongor] Kongor
+[/hon/Illusion] Illusion
+[/hon/Range%E8%A1%A8] Range表
+Tips
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合
+[/hon/%E8%84%B1%E5%88%9D%E5%BF%83%E8%80%85%E3%82%AC%E3%82%A4%E3%83%89] 脱初心者ガイド
+[/hon/%E5%A5%B4%E9%9A%B7%E3%81%AE%E3%81%99%E3%82%9D%E3%82%81] 奴隷のすゝめ
+[/hon/%E7%8A%B6%E6%85%8B%E7%95%B0%E5%B8%B8%E8%A7%A3%E8%AA%AC] 状態異常解説
+[/hon/%E3%83%AF%E3%83%BC%E3%83%89%E3%83%BB%E3%83%9E%E3%83%83%E3%83%97%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ワード・マップについて
+[/hon/Monkey%20Courier] Monkey Courier
+[/hon/MagicImmunity] MagicImmunity
+[/hon/%E8%B1%86%E7%9F%A5%E8%AD%98] 豆知識
+[/hon/%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89] チャットコマンド
+[/hon/MOD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MODについて
+[/hon/SpilitReason%E3%81%A7%E3%81%AE%E8%B3%BC%E5%85%A5] 公式グッズを買う
+その他
+[/hon/%E3%83%AA%E3%83%B3%E3%82%AF] リンク
+[/hon/%E9%9B%91%E8%AB%87%E6%8E%B2%E7%A4%BA%E6%9D%BF] 雑談掲示板
+[/hon/?cmd=edit&page=MenuBar] MenuBar
+[/hon/hero%E5%90%8D%E5%89%8D%EF%BC%8B%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3] hero名前＋アイコン
+[/hon/image] 画像のアップロード
+[/hon/%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC] テンプレ
+[/hon/%E6%95%B4%E5%BD%A2%E3%83%AB%E3%83%BC%E3%83%AB] 整形ルール
+[/hon/%E7%B7%B4%E7%BF%92%E3%83%9A%E3%83%BC%E3%82%B8] 練習ページ
+T.?　Y.?
+NOW.?　TOTAL.?
+[http://wikiwiki.jp/hon/?cmd=edit&page=MenuBar] 編集
+ [#notetext_1] *1
+理屈の上では、最大マナ1200ならマナポットx10で全回復だが、最大マナが240ならx2で済む
+ レンタルWIKI by [https://wikiwiki.jp/] WIKIWIKI.jp* / 
+ [https://wikiwiki.jp/pp/aboutad] 広告について /
+ 無料レンタル掲示板 [https://z.wikiwiki.jp/] zawazawa
+ [/hon/::cmd/mixirss]

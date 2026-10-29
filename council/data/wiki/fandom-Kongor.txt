@@ -1,0 +1,296 @@
+Källa: https://hon.fandom.com/api.php?action=parse&prop=wikitext&format=json&page=Kongor
+Hämtad: 2026-10-29
+
+{{Unit infobox
+|name = Kongor/Hell Kongor
+|image = Kongor.jpg
+|image2 = Hell Kongor.jpg
+|combattype = Hero
+|health = 6500
+|healthregen = 20
+|mana = 2000
+|manaregen = 10
+|mindamage = 65
+|armor = 3
+|magicarmor = 25
+|movespeed = 270
+|sightrangeday = 1400
+|sightrangenight = 1400
+|attacktype = Melee
+|attackrange = 150
+|bat = 1.0
+|attackpoint = 0.8
+|backswing = 0.1
+|turnrate = 540
+|goldbounty = 350
+|expbounty = 1000
+|boss = y
+|notes = Unitwalking<br />Treewalking
+}}
+'''Kongor''' and '''Hell Kongor''' are the Boss [[Neutral]]s of [[Forests of Caldavar]]. They are the toughest NPC units in the map, and killing them gives the team a significant advantage, and their deaths are announced on the map.
+
+Kongor and Hell Kongor are located near the ancient camps on each side, with Kongor on the southeast side and Hell Kongor on the northwest side. Both are identical in terms of stats and abilities.
+
+==Abilities==
+In addition to these abilities, every 30 seconds while active, Kongor and Hell Kongor gain 1 Damage, 50 Max Health, 0.15 Armor, and 3 bonus damage to Slam. Bonuses stop accumulating at 120 charges, or 60 minutes.
+
+{{Ability infobox|Q
+|name = Boulder Toss
+|image = Pebbles Chuck.jpg
+|action = Target Position
+|target = Enemy Units
+|type = Magic
+|castactiontime = 0.2
+|castbackswing = 0
+|range = 1000
+|radius = 200
+|manacost = 100
+|cooldown = 5
+|description = 
+|effects = Throws rock at target location (200 radius) that lands after 2 seconds. Deals [200 + 15% of target's Max Health] in Magic Damage (30% instead for non-hero units) and stuns for 2 seconds.
+
+Kongor will randomly use this ability as long as he is fighting at least 1 enemy hero (20% chance every second).
+|status1 = 
+|status1-effects = 
+|notes = 
+}}
+
+{{Ability infobox|W
+|name = Slam
+|image = Kongor Slam.jpg
+|action = Self
+|target = 
+|castactiontime = 0.5
+|castbackswing = 0.25
+|cooldown = 6
+|description = 
+|effects = Deals Magic Damage equal to 100 + 3 x # Charges on Scaling State (plus 25% of the target's Max Health against non-hero units). Applies -50% Movement Speed and -50 Attack Speed of all nearby enemy units. Only used when 3 or more units are in melee range of the Kongor.
+|status1 = Slam
+|status1-effects = -50 Attack Speed<br />50% Movement Slow
+|notes = 
+}}
+
+{{Ability infobox|E
+|name = Fury
+|image = Berzerker Carnage.jpg
+|action = Passive
+|cooldown = 
+|description = 
+|effects = When below 25% of your Max Health, gain 20 Attack Damage, 120 Attack Speed, and 30% Slow Resistance.
+
+Autoattacks gain 65% Armor Penetration. Autoattacks deal a bonus 100 Attack Damage to non-hero units.
+|notes = * Armor penetration and bonus attack damage vs. non-hero units are always active.
+}}
+
+{{Ability infobox|R
+|name = Ancient Skin
+|image = Kongor Ancient Skin.jpg
+|action = Passive
+|cooldown = 
+|description = 
+|effects = Passively grants 70% Debuff and Stun Reduction and 30% Slow Resistance.
+|notes = 
+}}
+
+==Mechanics==
+''The following also applies to Hell Kongor.''
+===Spawning===
+Kongor is invulnerable and hidden until 6:00.
+
+When Kongor is killed, he will respawn exactly 8 minutes after his death. It is impossible to prevent Kongor from spawning.
+
+===Lair===
+Kongor cannot be attacked from outside his lair. Any attacks attempted from outside his lair will show a pop-up as a Miss, but [[True Strike]] will not allow you to damage Kongor from outside his lair. However, abilities will damage Kongor, regardless damage type or whether the user is inside or outside the lair.
+
+===AI===
+If there are 3 or more units with 230 radius of Kongor, Kongor will cast [[#Slam|Slam]].
+
+If Kongor is lured outside of his lair for more than 3 seconds, he will be forced to return to his lair. When this happens, any debuffs are dispelled from Kongor, and Kongor gains Invulnerability, Cliffwalking and Buildingwalking until he returns to his lair.
+
+Kongor will never attack Towers.
+
+===Bounty===
+When Kongor is killed, the killer will receive 350 gold. In addition, the killer's teammates will receive 200 gold. The killer does not receive this gold. If a non-player controlled unit lands the killing blow on Kongor, it gives 230 gold to the team instead.
+
+Killing Kongor grants each player on the killer's team a permanent stat bonus. They can choose from the following:
+* '''Vitality''': +100 Max Health, +50 Max Mana, +2% Healing Received, +2 Health Regeneration, +0.6 Mana Regeneration
+* '''Damage''': +4% Damage Dealt
+* '''Speed''': +10 Movement Speed
+These effects can stack.
+
+In addition, the team will receive the '''Kongor Slayer''' buff for 3 minutes and restore 40% of Max Health and 20% of Max Mana over 10 seconds (removed on taking damage from enemy players). Gaining the '''Kongor Slayer''' buff while you already have the buff will grant the '''Kongor Decimator''' buff for 3 minutes, granting bonus damage vs. structures (starts at +60%, which increases linearly starting from the 20 minute mark, up to +80% at the 45 minute mark; halved in Mid Wars) and restores 80% of Max Health and 40% of Max Mana over 10 seconds (removed on taking damage from enemy players).
+
+If a team kills Kongor or Hell Kongor with the '''Kongor Slayer''' buff active (in other words, kills both Kongors within 3 minutes), they will also drop a {{ii|Token of Life}}.
+
+==Changelog==
+{{changelog|
+'''[[Version 4.10.1]]'''
+* Kongor Boss Enchantment - Speed
+** Bonus Movement Speed per charge increased from 8 to 10.
+
+'''[[Version 4.10.0]]'''
+* Kongor Boss Enchantment - Stats
+** Renamed to "Kongor Boss Enchantment - Vitality"
+** Grants a bonus 100 Max Health per charge.
+** Grants a bonus 50 Max Mana per charge.
+** Grants a bonus 2% Healing Received per charge.
+** Grants 2 Health Regeneration (per second) per charge.
+** Grants 0.6 Mana Regeneration (per second) per charge.
+* Kongor Boss Enchantment - Speed
+** Bonus Movement Speed per charge reduced from 12 to 8.
+
+'''[[Version 4.9.3]]'''
+* Kongor: while invulnerable at the start of the game, Kongor is also visually hidden.
+** A visual timer for Kongor now spawns when the game time initially reaches 0:00.
+
+'''[[Version 4.9.1]]'''
+* Kongor Buff Reward
+** Movement Speed reward: bonus Movement Speed per charge reduced from 15 to 12.
+
+'''[[Version 4.9.0]]'''
+* Now has a base 30% Slow Resistance.
+* Enrage state: now also grants Kongor +30% Slow Resistance.
+** These changes only apply for the Legion & Hellbourne Kongors on the Forests of Caldavar ("New") map.
+* Bonus Siege Damage from the 2x Kongor Kill state now scales with time:
+** Grows linearly from 20 minutes to 45 minutes.
+** Minimum of 20% bonus Siege Damage, maximum of 60% bonus Siege Damage.
+
+'''[[Version 4.7.8]]'''
+* Now drops a {{ii|Token of Life}} if killed by a team who has killed another Kongor Boss within the last 180 seconds (i.e. if the "Kongor Slayer" state is active on them).
+* Token of Life cannot be dropped by Kongor if the team who killed it has heroes with the "Kongor Decimator" state (the state that contains the bonus Structure Damage for 180 seconds after killing the second Kongor boss within the "Kongor Slayer" state duration), nor if they have the "No Kongor Decimator" state (the state that prevents a team from obtaining the "Kongor Decimator" state 120 seconds after either the "Kongor Decimator" or "Kongor Slayer" states expire).
+* Bonus damage against Structures granted by the "Kongor Decimator" state reduced from +80% to +60% (+40% to +30% for Mid Wars).
+** NB: These changes do not apply to the "old" Forests of Caldavar map.
+
+'''[[Version 4.7.1]]'''
+* Armor gain per 30 seconds changed from 0.1 to 0.15.
+* {{si|Kongor|Boulder Toss}}
+** Cast Time/Cast Action Time reduced from 800/300 ms to 200/200 ms.
+** Magic Damage increased from 150 + 10% of the target's Max Health to 200 + 15% of the target's Max Health.
+*** Deals 30% of the target's Max Health against non-hero units.
+* {{si|Kongor|Slam}}
+** Magic Damage increased from 70 + (Growth State's # Charges) to 100 + 3*(Growth State's # Charges).
+*** Deals extra Magic Damage equal to 25% of the target's Max Health against non-hero units.
+* {{si|Kongor|Fury}}
+** New passive effect (regardless of whether the Fury state is active or not): autoattacks now have 65% Armor Penetration.
+** New passive effect (regardless of whether the Fury state is active or not): autoattacks also deals 100 bonus Attack Damage against non-hero units.
+
+'''[[Version 4.6.2]]'''
+* Starting Attack Damage increased from 60 to 70.
+
+'''[[Version 4.6.1]]'''
+* Starting Health increased from 5000 to 6500.
+* Starting Damage decreased from 80 to 60.
+* Magic Armor reduced from 30 to 25.
+* Killer gold bonus reduced from 350 to 300.
+* Team gold bonus reduced from 200 to 150.
+
+'''[[Version 4.6.0]]'''
+* Reworked:
+** [[Forests of Caldavar]] now contains two bosses: '''Kongor''' & '''Hell Kongor'''
+**Stats:
+**:Health: 5000
+**:Health Regeneration: 20
+**:Mana: 2000
+**:Mana Regen: 10
+**:Attack Damage: 80
+**:Armor: 3
+**:Magic Armor: 30
+**:Movement Speed: 270
+**:Sight Range: 1400/1400
+**:Attack Range 150 (Melee)
+**:Base Attack Time 1.0
+**:Gold: 350 to killer, 200 for rest of team
+**:Experience: 1000
+**:Respawn Time: 8 Minutes
+**:*Invulnerable until after the 6-minute mark.
+** Kongor & Hell Kongor gain 1 Damage, 50 Max Health, 0.1 Armor, and 1 bonus damage to his Slam every 30 seconds (stops gaining bonus stats after 60 minutes).
+** When killed:
+*** Grants players a choice between the following permanent bonuses upon defeating Kongor or Hell Kongor:
+**** +4 Strength, +2 Agility, +6 Intelligence.
+**** +4% to All Damage Dealt.
+**** +15 Movement Speed.
+** Applies "Kongor Slayer" to all heroes on the killer's team for 3 minutes.
+** Kongor Slayer: Restores 40% of Max Health and 20% of Max Mana over the first 10 seconds. If another Boss is slain, applies "Kongor Decimator" to self for 3 minutes.
+** Kongor Decimator: Restores 80% of Max Health and 40% of Max Mana over the first 10 seconds. Grants +80% bonus Damage vs Structures.
+** Healing effect ends early if you take damage from enemy players.
+** Ability 1: Boulder Toss
+*** Throws rock at target location (200 radius) that lands after 2 seconds. Deals [150 + 10% of target's Max Health] in Magic Damage and stuns for 2 seconds.
+*** Will randomly use this ability as long as he is fighting at least 1 enemy hero (20% chance every second).
+** Ability 2: Slam
+*** Slows the Movement Speed and Attack Speed of all nearby players. Only used when 3 or more units are in melee range of this unit.
+** Ability 3: Ancient Skin
+** Passively grants 70% Debuff and Stun Reduction.
+*** Ability 4: Fury 
+** When below 25% of your Max Health, gain 20 Attack Damage and 120 Attack Speed.
+
+'''[[Version 4.3.3]]'''
+* {{ui|Kongor}} has been relocated to a new home in a neutral position on the southeast side of the river.
+
+'''[[Version 4.0.0]]'''
+* Removed the passive stun ability from Kongor.
+* Null Stone effect on Kongor is now visible.
+* Added a new ability to Kongor in the first slot: {{si|Kongor|Boulder Toss}}
+*: Cooldown: 5 seconds
+*: Mana Cost: 100
+** Throws rock at target location (200 radius). Shows a red circle on the ground, lands after 2 seconds. Deals [150 + 10% of target's Max Health] in Magic Damage and stuns for 2 seconds.
+** Kongor will randomly use this ability as long as he is fighting at least 1 enemy hero (20% chance every second).
+
+'''[[Version 3.9.0]]'''
+* Now spawns an effect upon death that displays when Kongor will respawn. Effect is visible through fog on both teams.
+
+'''[[Version 3.1.0]]'''
+* [[Kongor]], [[Transmutanstein]], and [[Zorgath]] will no longer instantly kill illusions that attack them
+
+'''[[Version 2.5.8]]'''
+* Gold received for getting the last hit on Kongor normalized from 300-400 to 350
+
+'''[[Version 2.2.0]]'''
+* Kongor instantly kills Illusions he attacks
+* Kongor now stops getting stronger at the 1 hour mark, increased from 45 minutes
+** This means Kongor at the 60 minute mark has 120 charges of his growth buff, up from the old cap of 90 at 45 minutes
+* Kongor Armor from the growth buff doubled from .05 to .1 Armor per charge
+* Scaling damage for the stomp does twice as much damage to non-Heroes & the stomp damage increases by 1 damage per charge of his growth buff
+** Starting damage of the stomp is 70 Magic Damage against Heroes
+* Kongor can no longer have his Armor reduced by any ability or item
+** Abilities like {{hi|Pestilence}}'s {{si|Pestilence|Swarm}} still can be cast on him and give vision, but do not reduce his Armor
+
+'''[[Version 2.1.4]]'''
+* Fixed the faction, non-player-controlled units giving the team 0 gold when they land the killing blow from Kongor.
+* Now if a non-player controlled unit lands the killing blow on Kongor, then it gives 230 gold to the team (before it was giving 0)
+
+'''[[Version 1.0.15]]'''
+* Kongor now has a larger health bar
+* Kongor now has 75% Magic reduction
+* Kongor base armor lowered from 3.5 to 3
+* Kongor attack range increased from 100 to 128
+
+'''[[Version 0.3.0]]'''
+* If you attack him from outside of his lair you will have 100% miss now
+* After leaving his lair, 1.5 seconds later he retreats to go back in and is invuln on the run back
+* Is now 40% angrier
+
+'''[[Version 0.1.66]]'''
+* Kongor has [[Walking#Treewalking|Treewalking]] naturally now. Kongor is not stopped by trees.
+
+'''[[Version 0.1.65]]'''
+* Kongor now has [[Walking#Unitwalking|unitwalking]] by default
+
+'''[[Version 0.1.63]]'''
+* Kongor now gets the ability to run through buildings, trees, and cliffs to return home.
+** This fixes many many issues with him getting stuck in weird places.
+* Kongor can no longer attack towers
+
+'''[[Version 0.1.42]]'''
+* Kongor out-of-zone leash time set to 6.5 seconds (from 8)
+** Fixes an issue causing Kongor to sometimes get stuck when trying to return to his spawn zone when the neutral-leash code gives him a return command and he didn't stay outside for the 8 seconds needed to get the unit walking buff
+
+'''[[Version 0.1.26]]'''
+* The upgrade over time state on Kongor is no longer typed as a buff, so it cannot be dispelled
+
+'''[[Version 0.1.18]]'''
+* Setup kiting prevention on Kongor. If he is out of his lair for more than 8 seconds he will gain short term invulnerability and run back.
+}}
+
+{{Neutralsnav}}
+
+[[Category:Bosses]]

@@ -1,0 +1,727 @@
+Källa: https://wikiwiki.jp/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
+Hämtad: 2026-10-29
+
+Mid Warsのあれこれ [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=tafade0f] 
+Mid Warsって？
+Mid Warsは、元々Publicで非公式に行われていた、Midlaneのみを使って遊ぶというものです。
+ローカルルールから公式採用され、新しく出来ました。
+Statsが記録されないゲームモードですが、ゲーム数とLeave数だけは記録されるので注意。
+※筆者は編集初心者なので何かあれば訂正お願いします※
+通常のForest of Caldavarとの違い
+レーンが１本のみ
+KongではなくTransmutensteinとZorgathが居る
+本陣までのタワーの数は2本
+Runeの沸く場所が固定
+一部アイテムの効果が無効化される（GraveRocketのRespawntime減少等）
+デスペナルティ無し/Killした際のボーナスが通常より高い（ほぼ倍）
+経験値の取得可能範囲上昇/レベリングに必要な経験値減少
+カタパルトは3waveではなく5waveで来る
+Courierが互いに最初から飛んでいる
+建物のHPが減少/反面Baseの自然回復速度が超上昇
+タワーシールド使用不可
+PickはBanning Phase(Blind Ban)あり(1プレイヤーごとに1体ずつ、各陣営ごとに5体)
+双方のBANはお互いに終わるまで分からず、BANが被った場合はそのHeroはBANされるがBANされる枠がその分消滅する。
+例としてFlint Devour Behemoth Prisoner Artillery/Ellonia Artillery Behemoth Prisoner DevourとBANした場合には6体しかBANがされない事になる。
+なお、味方同士のBANは被らない(味方のBANは見える)。
+どのHeroをBanする？
+基本的には自分が相手にしたくないHeroを選べばいいと思います。
+まだよく分からないという人は、次項の要注意Heroの項目から選ぶといいでしょう。
+要注意Hero(優先的なBan候補) [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=t7f528cd] 
+[/hon/Artillery] | [/hon/Artillery] Artillery | 序盤からの1stが脅威的。基本的に1レーンの戦いなのでUltも強力。 | 
+[/hon/Sapphire] | [/hon/Sapphire] Sapphire | AGIに使い勝手の良いAoEを持たせてはいけない、という良い例。Ultが壊滅的にMid Warsにおいて反則的であり、こいつを5人で囲んで7秒間のfree-backdoorを眺める事になる。 | 
+[/hon/Behemoth] | [/hon/Behemoth] Behemoth | やはり1stの強さは絶大。通常Mapと違い、河が狭いため簡単に閉じ込められる。5人でcreepの側に居る事が多いMid Warsでは毎度Ultが恐ろしいダメージを叩き出す。 | 
+[/hon/Devourer] | [/hon/Devourer] Devourer | Flintと並び、Mid Warsで最も使われたHero。Pullが強く、パッシブによるSTRのお陰で後半も異常に硬い。対策は可能だけど、どちらかと言えば厄介な相手。カウンターで[/hon/Kinesis] Kinesisをpickしよう。 | 
+[/hon/Emerald%20Warden] | [/hon/Emerald%20Warden] Emerald Warden | 全てのskillがMid Warsで牙を剥く。2ndのspamと3rdの罠は絶大な強み。デフォルトで最大射程のRanged Heroで長期戦も強いです。 | 
+[/hon/Flint%20Beastwood] | [/hon/Flint%20Beastwood] Flint Beastwood | Pub時代のMid Warsでも象徴的だったHero。序盤のHarassも強い上に、low healthを確実にUltでkillに仕上げてくる。 | 
+[/hon/Prisoner%20945] | [/hon/Prisoner%20945] Prisoner 945 | 1stは範囲内の敵を全て引き寄せるため、序盤はDevourer以上の脅威になることもある。中盤以降もパッシブの効果で高い攻撃力を誇る。 | 
+[/hon/Vindicator] | [/hon/Vindicator] Vindicator | skillのタイミングが重要なMid Warsにおいてdisarm・silence・slowを範囲で手軽に遠距離から置いてくるIntCarry。河もlaneも狭い故に猛威を振るう。 | 
+[/hon/Predator] | [/hon/Predator] Predator | デスペナが無いのを良い事にsuicideなtowerdiveを繰り返し、終盤ではアイテムを揃えて[/hon/Void%20Talisman] Void Talismanを強要してくるHero。lategame最強の一角。 | 
+[/hon/Parallax] | [/hon/Parallax] Parallax | [/hon/Icon%20of%20the%20Goddess] Icon of the Goddessと[/hon/Staff%20of%20the%20Master] Staff of the Masterだけで勝利をもぎ取る嵐のようなHero。視界にうつったら最後、Tankすら3秒ともたずに溶けていく。 | 
+[/hon/Martyr] | [/hon/Martyr] Martyr | 1killでも多く絡んでアイテムを揃える事が重要なMid Warsで、数多の「killになった筈の動き」を無かった事にしてしまうHero。 | 
+[/hon/Nymphora] | [/hon/Nymphora] Nymphora | 5人全員同じlaneにいる事で恐ろしい総回復量となる1stに加えて、2ndによる味方のAoE Harass支援もこの上なく強い。Ultはbackdoor対策の為に跳べる場所が制限されている。 | 
+[/hon/Flux] | [/hon/Flux] Flux | ほぼ全てのAoEとシナジーを組めるHeroで、UltによるInitiateが色々なコンボを生み出す。PKを持ってばらけるかNullStoneを持って対策しよう。 | 
+[/hon/Shellshock] | [/hon/Shellshock] Shellshock | Strとは思えない程優秀な1stのAoEに加えて、無敵時間の長い2nd、DoTが激しいUltと二物も三物も揃ったHero。Fluxを2ndに乗せての特攻は凄まじい。 | 
+Mid WarsでのHeroレビュー [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=f6cc8fc0] 
+AGI
+ LEGION
+ [/hon/Andromeda] 
+[/hon/Andromeda] Andromeda
+1stのスタンは確かに強いし、2ndによるサポートも厄介だがそれ以上の域を出ない -- 2012-07-12 (木) 16:07:32
+ultの救出能力はかなり凶悪。banされない絶妙なラインの強さかと -- 2013-02-10 (日) 10:45:30
+サポートではなく、DPSへ。スワップは自分が死なないような相手以外ではこだわらない事。スタマス+PKは大した意味がない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:23:50
+[/hon/Artillery] 
+[/hon/Artillery] Artillery
+取りあえずBANしとけっていうレベルのImba。BeheやFlintをBanしたら枠は残らないが、無双されるよりはまし -- 2012-07-12 (木) 16:08:43
+中盤までは1stがメインのため、攻撃力の上がる装備。lateはキャリー装備だが、現仕様では弱い。ultは集団戦が始まってから。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:27:31
+レイプゲーでもないのにDoomを買うな。 -- 2014-04-16 (水) 00:20:24
+[/hon/Blitz] 
+[/hon/Blitz] Blitz
+ｽﾞｨﾝ!! -- 2013-01-10 (木) 15:06:34
+1stメイン。スタマスからのagiキャリー装備。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:30:23
+[/hon/Emerald%20Warden] 
+[/hon/Emerald%20Warden] Emerald Warden
+ひたすら面倒。RoSが出来ると高レベルの2nd連発だけで柔いチームは死に体になるが、とはいえ必須というほどでもないと思う -- 2012-07-12 (木) 16:09:59
+かなり強い。スキルは相手次第だが、１ずつは取る。サンダークロウにはいかない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:32:34
+敵に回した場合、とりあえずRuneが見える位置に青ワードは必須。見越して置いてないことも多いが、未確認状態よりよほどマシ。 -- 2014-04-16 (水) 00:29:52
+[/hon/Engineer] 
+[/hon/Engineer] Engineer
+地雷はNoob専用なので忘れていい。問題なのはkegとturretで、活用されるとかなり鬱陶しい。PKを持たれたらUltもそれなりに注意するべき -- 2012-07-12 (木) 16:12:43
+地雷は1st2ndを上げきるまでは取らない。fluxとのコンボは相手を完封出来る場合が多い。タブレット、pk両方あっても良い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:34:02
+Creepラインから少し外れた自陣岸に地雷置いとくと突っ込んできたMonkeyKingが勝手に死ぬ。 -- 2014-04-15 (火) 20:19:51
+[/hon/Draconis] 
+[/hon/Draconis] Draconis
+育ちきると死ねる部類のcarry筆頭だけど、序盤恐くないのはやっぱり定番 -- 2012-07-12 (木) 16:10:58
+3rdメイン1stサブ、2ndを1つ取る。チャージドハンマーも良いが、エルダーパラサイトから欲しい。スキル使用での3rdのカウントリセットは有効に使う。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:36:57
+[/hon/Night%20Hound] 
+[/hon/Night%20Hound] Night Hound
+ひたすらsmokeを撒け、そしてKSせよ。smokeメインでもいいんじゃなかろうか。 -- 2013-01-22 (火) 07:21:08
+序盤はこいつを戦力の勘定に入れたら駄目。４対５で勝てるnuke力のあるチームじゃないと中盤でGGされるのでキツい。 -- 2013-07-12 (金) 03:14:32
+序盤はひたすらKSを狙う。相手が対策をし、味方がデワードしない場合は相当厳しい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:38:41
+[/hon/SwiftBlade] 
+[/hon/SwiftBlade] SwiftBlade
+１番はタワーに逃げ込まれやすく、ultは散りやすいとなかなか真価を発揮できない。 -- 2013-07-12 (金) 03:15:32
+↑の方に同じ。スタマスは良しあし。序盤は攻撃できないため、3rdは取らない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:42:00
+[/hon/Magebane] 
+[/hon/Magebane] Magebane
+Midwarsにおけるいらない子筆頭 -- 2013-03-09 (土) 02:25:40
+マジで弱い。2-3-1-1-1-uと取る。3rdでアシストを狙う。2ndで真っ先に飛び込むような事はしないこと。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:45:48
+それでも勝負がもつれた時はやっぱり厄介。迂闊に稼がせないように。 -- 2014-04-13 (日) 06:10:44
+[/hon/Moon%20Queen] 
+[/hon/Moon%20Queen] Moon Queen
+スキルはお好み。1-2-1-2-1-uでも面白い。中盤までのultは範囲内の人数が多くならないように移動し、1stと合わせてキルと取るといい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:49:39
+[/hon/Master%20of%20Arms] 
+[/hon/Master%20of%20Arms] Master of Arms
+バランスの取れた万能型range carryといった感じか、killも取りやすく育ちやすい -- 2012-07-21 (土) 11:14:01
+無難に強い。ノーマルマップと同じようなビルドでいける。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:51:16
+[/hon/Monkey%20King] 
+[/hon/Monkey%20King] Monkey King
+最序盤からNukerとして動き回れるが突っ込んだタイミングを合わされてDisableされると死亡確定。 -- 2013-07-12 (金) 03:01:18
+コンボは強いが途中妨害される場合が多く、撃ちきるのは厳しい。ある程度の固さが必要。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:53:32
+[/hon/Nomad] 
+[/hon/Nomad] Nomad
+ASとSBを持たれると柔らかいHEROは一瞬で溶かされる -- 2012-11-20 (火) 04:16:55
+スキルがとにかく痛すぎる。序盤のうちに看破やdisableで稼がせないように。逆に味方のときはこいつが稼いでいれば何とかなる可能性もある。 -- 2013-07-12 (金) 03:18:45
+靴の次のアイテムがいかに早く出来るかで決まる。ultは決まりやすい。相手をする場合は青ワードが必須。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:55:40
+[/hon/Scout] 
+[/hon/Scout] Scout
+HoN界最強クラスのHero。BAN必須。 -- 2012-07-14 (土) 21:42:46
+看破徹底しないと普通に無双される・・・ -- 2012-07-22 (日) 12:17:09
+wardをうまく設置して敵のwardを破壊していくと良い -- 2012-07-25 (水) 14:15:49
+ただscoutをpickするのは大抵がNOOB -- 2012-08-17 (金) 03:52:43
+がんばってKSを狙う。PKを持ってKSを狙うビルドも存在する。サイレンスしようとして死ぬ場合が多いので、サイレンスにはあまり期待しない事。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:57:30
+[/hon/Silhouette] 
+[/hon/Silhouette] Silhouette
+レンジキャリーとしては強いが、2ndをなかなか活かせないのがつらい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 11:58:43
+[/hon/Valkyrie] 
+[/hon/Valkyrie] Valkyrie
+槍でイニシエーターできるが、見てない相手に限る。１番を叩き込む為に３番を使うと帰りに死ぬ。コンビネーションが取りやすいのでultが使いやすい。 -- 2013-07-12 (金) 03:03:13
+遠くからの2ndはnuke力がないチームだと当たっても倒し切れず、逆にやられる可能性があるのでこだわらない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:00:36
+[/hon/Wildsoul] 
+[/hon/Wildsoul] Wildsoul
+強すぎるので即pickすべき -- 2012-07-15 (日) 02:02:51
+強すぎるので即pickすべき -- 2012-07-15 (日) 02:03:47
+死人が多くでそうな場合は1stを取らない方がいい。サンダークロウ等を目指すといいが、味方次第。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:02:39
+[/hon/Zephyr] 
+[/hon/Zephyr] Zephyr
+ガストの引き寄せが強力だが2ndが生かしにくいのが難点。 -- 2013-02-10 (日) 10:47:53
+1stが当たらない場合まったく役に立てない。1-s-1-s-1-uでも良い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:03:50
+[/hon/Sir%20Benzington] 
+[/hon/Sir%20Benzington] Sir Benzington
+2ndはダメージがない上に、スキルレベルが低いうちは使いにくいため取らない。3rdでキルは取りやすい。スタマスは不要。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:05:58
+迂闊に突っ込むと死亡確定する。味方との連携に自信が持てない場合は一番には飛び込まないこと。 -- 2014-04-16 (水) 00:23:24
+HELLBOURNE
+ [/hon/Arachna] 
+[/hon/Arachna] Arachna
+スタンがないのがキツいが、とにかくスローを当て続けて逃げる相手を釘付けにしよう。ultを打つ為に前へ出て死ぬくらいなら出ない方がいい。 -- 2013-07-12 (金) 02:21:22
+3rdと1stwo -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:54:12
+3rdと1stを活かして後方から攻撃し続けるような位置取りで。ultを敵キャリーにつけるのは考えなくても良い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:55:31
+[/hon/Chronos] 
+[/hon/Chronos] Chronos
+melee carryの中では相当マシな部類。carryよりもSotM作ってDisablerとして働くと強い -- 2012-07-17 (火) 22:34:34
+サプライでブリンクを使い放題。どんどんKSしていける。 -- 2012-07-22 (日) 01:36:11
+割と活躍できる場合が多い。個人的にはキャリー装備。集団戦真っ最中ではなく、始まりそうと判断したら飛ぶ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:58:16
+序盤は複数人相手にULT決めてもダメージはたかが知れてるので仲間のAOEとしっかり連携するのが重要。一人で遠くまで突っ込んで死んだ後「noob team」と言われても困る。 -- 2014-04-22 (火) 06:27:18
+[/hon/Corrupted%20Disciple] 
+[/hon/Corrupted%20Disciple] Corrupted Disciple
+2ndがあるので、やや硬めのビルドで行く。視界が切れないようにワードが必要。スタマスはお好み。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 12:59:39
+[/hon/Dampeer] 
+[/hon/Dampeer] Dampeer
+相変わらずの紙飛行機。序盤のNukerとしての仕事ぶりはさすがだが乗り切れないと後半死に役に。 -- 2013-07-12 (金) 02:22:40
+スキルを活かすビルドだと後半がきつい。meleeキャリーを目指す。キルは取れるがfeedしないように気を付ける。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:01:05
+[/hon/Slither] 
+[/hon/Slither] Slither
+敵にいた場合はDenyを意識すると○。死んでも金は減らないしリスポンも早いため、Denyを躊躇する必要は無い。 -- 2012-07-27 (金) 17:25:18
+夢のSotM・グリモア・・・ -- 2013-11-23 (土) 19:56:12
+キャリーも、nukerとして行くのもあり。3rdを前に置いて相手のお金にするのは避ける。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:02:24
+[/hon/Fayde] 
+[/hon/Fayde] Fayde
+普通に強い。firstitemはpkがオススメ -- 2013-01-22 (火) 04:53:09
+agiキャリーで。ultはあまり活かせない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:03:21
+[/hon/Flint%20Beastwood] 
+[/hon/Flint%20Beastwood] Flint Beastwood
+遠距離から攻撃できる優秀なhero、blink等ないので最初に倒したい -- 2012-07-21 (土) 12:53:38
+狙われやすいので、1stメイン3rdサブ、2ndを1だけ。エネジャイザ―等ステータスを少し上げる装備をすると、ultのマナが残りやすい。サンダークロウにはいかない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:05:45
+[/hon/Forsaken%20Archer] 
+[/hon/Forsaken%20Archer] Forsaken Archer
+強い。味方のdisableにあわせるだけでkillが取れる。序盤から終盤まで安定して火力を出せる。ultが脅威。 -- 2012-07-22 (日) 01:46:39
+かなり優秀。3rdは敵のお金になるので、1-2-1-s-1-u-1-s-s-sがお勧め。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:07:10
+[/hon/Gemini] 
+[/hon/Gemini] Gemini
+すごく　うるさい -- 2013-02-11 (月) 22:19:05
+育つと手が付けられないが、当てにくいスタンがいまいち信用できない。 -- 2013-07-12 (金) 02:23:49
+常に集団戦なので、2ndで飛び込んでからの分裂が危険。分裂しないビルドで行く。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:09:07
+[/hon/Gunblade] 
+[/hon/Gunblade] Gunblade
+ある程度の固さと攻撃速度を上げるビルドで。序盤は1-2-1-2-1-u-1-2と上げる。レンジキャリーのアンチとして強い。最初はスローの後KSを狙う感じ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:10:50
+逃げ手段があるRanged Carryは貴重。 -- 2014-04-15 (火) 20:21:19
+[/hon/Blood%20Hunter] 
+[/hon/Blood%20Hunter] Blood Hunter
+テーンすると攻撃力が上がるので使う相手に注意。モックは絶対にいらない。キャリー装備で。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:13:59
+[/hon/Sand%20Wraith] 
+[/hon/Sand%20Wraith] Sand Wraith
+序盤は砂を飛ばしてksを狙う事しかできない。ある程度の固さをもったキャリービルドで。モックはいらない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:15:41
+Farmからの集団戦乱入、孤立した敵をULTで突然Gank、等の利点がMidwarsでは生かせない。装備がそろえればもちろん強いが、Carryしたいならもっと他に選ぶべきHeroがいる。 -- 2014-04-15 (火) 20:26:52
+[/hon/The%20Madman] 
+[/hon/The%20Madman] The Madman
+育つと恐ろしいほど手が付けられなくなる。序盤はスローだけでも貢献できるのでNHやScoutより軌道に乗りやすい。 -- 2013-07-12 (金) 02:25:58
+ultは1st2ndを上げきってから。割とキルは取りやすい方。ルーンドは作らない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:16:50
+ある程度稼いだ後SotMを持つと敵を泉の中まで追える。その間に味方にShrineを割らせる。 -- 2014-04-16 (水) 00:32:20
+[/hon/Shadowblade] 
+[/hon/Shadowblade] Shadowblade
+隠れimba -- 2013-03-09 (土) 02:29:27
+固い痛いと最強角。中盤までに稼がれないようDisableで強引に押さえつけるしかない。 -- 2013-07-12 (金) 02:27:14
+普通にHP4000オーバーしながら300を超える攻撃力を発揮してくる。Devがいると5000の大台すら見えてくる。 -- 2013-11-06 (水) 00:53:18
+キルも取り易く、後半も強い。中盤まではSTR、終盤AGIになるかは場合によって。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:18:24
+[/hon/Soulstealer] 
+[/hon/Soulstealer] Soulstealer
+レベルブーストして輝くHEROなので、mid warでは厳しいか・・・ -- 2012-07-22 (日) 01:52:36
+おててnukeが強い。範囲stun持ちが味方にいればピックしてもいい。 -- 2013-07-12 (金) 03:21:09
+1-3-1-3-1-3-1-3で。ultを決めるのはまず無理。2ndも死ぬ場合が多く、溜まり難い。後半は弱い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:20:34
+[/hon/Tremble] 
+[/hon/Tremble] Tremble
+弱い。大抵1stをまとって突っ込んだまま死ぬ。味方任せで固めのキャリー装備。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:23:32
+[/hon/The%20Dark%20Lady] 
+[/hon/The%20Dark%20Lady] The Dark Lady
+サイレンスをかけに突っ込んで死なない事。序盤は味方のサポートをするような意識で。ルーンドはいらない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:25:01
+[/hon/Bushwack] 
+[/hon/Bushwack] Bushwack
+序盤から終盤まで微妙。キャリー装備。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:26:03
+追撃にも逃げにも優秀なスキルがあって、スキルがほぼ全て火力に向かうのに、終始微妙とかないわ -- 2014-04-18 (金) 17:47:23
+[/hon/Grinex] 
+[/hon/Grinex] Grinex
+1stでhookもどきをする事は大した意味がないので避ける。キャリーだが、最後まで微妙。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:27:21
+[/hon/Klanx] 
+[/hon/Klanx] Klanx
+1-2-1-3-1-u-1-3-3-3。1stの序盤のnuke力はなかなか。エルダーパラサイトからチャージドハンマーを目指す。崖や森をうまく利用する。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 13:30:06
+INT
+ LEGION
+ [/hon/Aluna] 
+[/hon/Aluna] Aluna
+竹がImba -- 2012-07-15 (日) 02:06:11
+竹、範囲Stun完備。後半はcarryっぽく動ける。最悪ハーコンに加えて攻撃速度を稼げる。 -- 2013-07-12 (金) 02:28:24
+2ndでキルが取りやすい。スナイプも狙う。ultは1nd用として使用。ヘルフラワーからキャリービルドへ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:01:23
+[/hon/Bombardier] 
+[/hon/Bombardier] Bombardier
+2ndメインで1stサブ、1stの発動タイミングは状況次第。スタマスのultは強いが、cdが長いので、カルドラをお勧め。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:03:30
+[/hon/Bubbles] 
+[/hon/Bubbles] Bubbles
+ひたすらバウッ -- 2013-01-22 (火) 07:23:29
+1stから飛び込んでしなないように注意。ultは押されている場合はあまり役に立たない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:05:03
+[/hon/The%20Chipper] 
+[/hon/The%20Chipper] The Chipper
+ミサイルは当てやすい。靴からスタマスを目指す。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:06:21
+[/hon/Blacksmith] 
+[/hon/Blacksmith] Blacksmith
+コデックスはキルは取りやすいが、自身は育ってもあまり強くないので、バーブドやカルドラ。3rdのおかげで終盤も役に立てる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:07:40
+[/hon/Ellonia] 
+[/hon/Ellonia] Ellonia
+強いことは強いが後半の火力不足に注意sheep+hellflowerがないと後半悲惨な目に合う -- 2012-07-24 (火) 02:51:05
+1stメインか2ndメインかはお好み。3rdは1つ取る。ソーサリー、靴、ゴッデス。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:10:18
+[/hon/Empath] 
+[/hon/Empath] Empath
+2ndの壁が驚異的、不用意に前に出てきた敵の退路を断とう -- 2012-07-16 (月) 20:56:38
+Behemothが敵にいても味方に壁で閉じ込められる -- 2012-07-27 (金) 16:31:55
+靴はいらない。後でいいというレベルでなく、ガチで必要ない。金が稼ぎやすいのでさっさとSotMを作り、サポートアイテムをどっさり積んで常時味方MeleeCarryの中にいよう。 -- 2014-03-28 (金) 10:24:31
+スタマスからオーラアイテムが無難だが、lateゲームになると自身が戦力にならないため、厳しい戦いになる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:11:32
+[/hon/Nymphora] 
+[/hon/Nymphora] Nymphora
+Ult以外が強力。チームの継戦能力を大幅にアップさせ、レベルで差を付けるのに役立つ。スタンも2発目以降に撃つなら強い -- 2012-07-25 (水) 02:46:31
+hookerのために2を取るくらいなら、マナポーションを渡す。終盤のBDに注意する。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:13:22
+[/hon/Kinesis] 
+[/hon/Kinesis] Kinesis
+1stはダメージ軽減がある事に注意。木がないため、川での戦いはあまり強くない。ハーコン込のキャリー装備。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:14:59
+[/hon/Thunderbringer] 
+[/hon/Thunderbringer] Thunderbringer
+2番痛すぎ・・・ -- 2012-07-22 (日) 01:26:21
+ハラスとNukeで最強角。序盤で下手にスキルハラスを受けまくって、体力が低いまま不利な集団戦突入→流れを掴まれるのパターン多し。 -- 2013-07-12 (金) 02:30:52
+定期的に両岸のWardをチェックして破壊しよう。 -- 2014-03-28 (金) 10:27:04
+2ndにrevの効果があるため、ワード合戦では有利。スキル強化でキル数は取りやすいが、lateでは弱いという事に注意。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:17:35
+敵に回した場合はHealerがほしい。瀕死でうろついてるとULTで殺されるので、早めに泉に帰るか回復アイテムを多めに持つ。 -- 2014-04-13 (日) 06:27:53
+ミニスタンで楽にチャネリングを解除できるのは便利。Disable力は低いので他の味方にそのへんはカバーしてもらいたい。 -- 2014-04-15 (火) 20:14:58
+前半に稼ぎ先行できなかった場合はHEX目指してDisableで生きるのが無難。 -- 2014-04-22 (火) 06:28:55
+[/hon/Martyr] 
+[/hon/Martyr] Martyr
+1stで序盤のキルは取れるが、低HPの維持をするのは危険。2ndでいつのまにか瀕死と言う事が多いので注意。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:19:00
+[/hon/Monarch] 
+[/hon/Monarch] Monarch
+3rdメイン。スタマスを持つかはお好み。アシストは取り易く、お金は溜まるため、キャリー装備もあり。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:21:07
+[/hon/Ophelia] 
+[/hon/Ophelia] Ophelia
+即pick推奨。敵は死ぬ -- 2012-07-15 (日) 08:58:10
+味方を泉に帰すスキルは地味だけど便利 -- 2012-07-24 (火) 07:15:26
+3rdは正直役に立たない。取れるキルは必ず取って即Codexを作ろう。 -- 2012-08-04 (土) 21:47:52
+全てのスキルが微妙で、味方任せ。勧誘しに行ってgankされないようにする。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:23:28
+3ｒｄ以外はとても有効なんだけど -- 2014-04-18 (金) 20:47:39
+[/hon/Pollywog%20Priest] 
+[/hon/Pollywog%20Priest] Pollywog Priest
+場の制圧力が高く、集団戦にもpush・シージにも貢献しやすい、BDもできる -- 2012-07-21 (土) 11:17:48
+1stのnukeメインがお勧め。ソーサリー、靴、スタマス。次にリフレッシャーに行くと、cd時役に立たないため、カルドラを挟むのがお勧め。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:25:26
+[/hon/Prophet] 
+[/hon/Prophet] Prophet
+Lv6になるまでは死なないようにがんばろう。midwarだとcarryビルドもありかも -- 2013-02-12 (火) 12:46:32
+ultからの3rdはかなり強力。キャリー装備へ行く。火力はあるが死にやすいということには注意。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:27:16
+[/hon/Pyromancer] 
+[/hon/Pyromancer] Pyromancer
+強い -- 2012-07-22 (日) 01:02:57
+前半は1st2ndULTでKillが取れて後半は3rdで殴れる -- 2012-07-22 (日) 05:52:54
+pkを持って、キャリー装備へ。スキル強化でも強いが、lateゲームで厳しくなる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:33:04
+[/hon/Rhapsody] 
+[/hon/Rhapsody] Rhapsody
+Stun、immobilizeの多い構成で輝ける・・・ような。2ndの回復効果が序盤の殴り合いを支えてくれる。中盤からはHarkon's Bladeを持ってDPSにもなれる -- 2012-07-22 (日) 13:01:41
+Support専門と思われがちのCarry -- 2013-03-09 (土) 02:33:49
+パッシブが一部のHEROと非常に相性がいい。 -- 2013-11-23 (土) 19:57:32
+2ndを置くだけで、集団戦はかなり楽になる。ultのためにシュランケンも欲しい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:35:07
+[/hon/Tempest] 
+[/hon/Tempest] Tempest
+狭いのでultが決まりやすい、AOEコンボチームでの運用なら光る。そうでなければ微妙か -- 2012-07-22 (日) 01:32:28
+ultのcdが長いので数打てないのが痛い -- 2012-07-24 (火) 23:51:36
+頑張ってリフレッシャー作って一発屋に磨きをかけるのもあり。 -- 2013-07-12 (金) 02:32:03
+ultがcd中の集団戦は3rdでがんばるしかない。初期中立は割とワードを置かれる事が多いため、あまり期待しない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:37:07
+[/hon/Vindicator] 
+[/hon/Vindicator] Vindicator
+1stによるAOEハラス、3rd・ULTによる集団戦へのコントロールが共に有用。金も稼ぎやすいのでCarryを目指そう。 -- 2014-03-28 (金) 10:30:12
+1-3-1-3-1-u-1-3-3　2ndは取れるようになったら常時onで良い。ヘルフラワーからキャリー装備へ。3rdはとりあえず置いておくだけで十分有効。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:39:00
+[/hon/Witch%20Slayer] 
+[/hon/Witch%20Slayer] Witch Slayer
+無難に強い、あくまでdisablerなので終盤の火力は味方依存。 -- 2012-07-22 (日) 02:36:26
+１、２番で相手を拘束して集団戦をコントロール。厄介な相手を止めるのか、袋叩きを足止めするのかよく考えること。対策されてNullstone持ち出されたら３番で消そう。 -- 2013-07-12 (金) 02:34:01
+スキルが非常に強力。スタマスはお勧めはしない。PKやカルドラへ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:41:20
+[/hon/Oogie] 
+[/hon/Oogie] Oogie
+とにかくマナが欲しいが、ソーサリー、靴、ゴッデスの後に相手次第ではシュランケンを持つ。相手にする場合はサイレンスをかけて放っておいて他を倒す。下手をすると５人返り討ちにあう。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:44:28
+[/hon/Pearl] 
+[/hon/Pearl] Pearl
+最初に3rdを取ると、序盤の敵からのハラスを無力化できる。2ndは相手を押してしまうため、使いどころに注意。相手にする場合、ultが発動したら逃げるくらいでいい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:46:32
+HELLBOURNE
+ [/hon/Wretched%20Hag] 
+[/hon/Wretched%20Hag] Wretched Hag
+3rdメイン2サブ、1stを１つだけ。ultは非常に強力。キルも取りやすい。キャリー装備だが、ultを強化していくのも割と有。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:49:21
+[/hon/Defiler] 
+[/hon/Defiler] Defiler
+全スキルがmid warにおいて効果的。硬さを重視したビルドが安定。 -- 2012-07-22 (日) 01:12:41
+広範囲サイレンスが超鬼畜。 -- 2013-02-10 (日) 10:51:00
+広範囲サイレンスが超鬼畜。 -- 2013-02-10 (日) 10:53:21
+1stメインで、2nd3rdどちらをサブにするかは相手次第で。靴からゴッデス、バーブド。lv1のultにはあまり期待しない。BDされると割れるのが非常に速いため、警戒が必要。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:51:18
+[/hon/Plague%20Rider] 
+[/hon/Plague%20Rider] Plague Rider
+Ultが面白いように跳ねる -- 2012-11-20 (火) 04:22:00
+Runeが近くなり敵が孤立しにくくなってしまったのは痛い。 -- 2014-03-28 (金) 04:52:10
+一発屋になりがちだが、ult強化ビルドで行く。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:52:32
+[/hon/Doctor%20Repulsor] 
+[/hon/Doctor%20Repulsor] Doctor Repulsor
+ult移動が基本になるためアイテムを持つことが重要序盤はbottleを持ってもいい -- 2012-07-24 (火) 02:52:25
+泉が近い事や、ゴッデス等によりマナ確保が楽なため、かなりの強さ。カルドラ等を含めたキャリー装備。中盤に中途半端に押すとベースでの攻防でこいつにより逆転される。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:54:23
+[/hon/Glacius] 
+[/hon/Glacius] Glacius
+１番のハラス、２番の拘束力とmidwarでも強力。通常攻撃の射程が長いのでいい場所から殴れるのも利点。 -- 2013-07-12 (金) 02:35:18
+通常攻撃の射程が600なのはこいつに限らず普通に沢山居るのになんでわざわざ書くの -- 2014-04-07 (月) 12:37:56
+1stメイン2ndサブ、3rdは取らない。pkとシュランケンでultを活かす。nohelpを押してもらうといい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:55:47
+[/hon/Geomancer] 
+[/hon/Geomancer] Geomancer
+スキルはどれも有効。PKからのスタマス、フロストフィールド。最初に突っ込むとultが外れがち。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 14:57:35
+[/hon/Hellbringer] 
+[/hon/Hellbringer] Hellbringer
+マナをある程度確保して、リフレッシャー。マルファスを操作しきるのは無理なので、1stだけ適当に発動させる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:01:14
+[/hon/Soul%20Reaper] 
+[/hon/Soul%20Reaper] Soul Reaper
+金が稼ぎやすいmidwarでマナ供給手段とSotMを作りやすい為強力。序盤３番を１取っておくとアシストを荒稼ぎできるのもおいしい。 -- 2013-07-12 (金) 02:36:50
+即Goddesで止まらなくなる。 -- 2013-11-23 (土) 20:00:31
+ソーサリー、靴、ゴッデスからお好みで。1stを連打するだけなので楽。lateゲームではそんなに強くはない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:11:31
+[/hon/Myrmidon] 
+[/hon/Myrmidon] Myrmidon
+Disablerとして強力。ultで殴れるかは敵と味方の構成を見て判断。 -- 2013-07-12 (金) 02:37:56
+↑の方と同じ。ultで殴る場合はエルダーパラサイトが強力。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:13:52
+[/hon/Parasite] 
+[/hon/Parasite] Parasite
+gankerではなく、キャリー。コデックスは作らず、ヘルフラワーやブルタライザー。相手のルーン効果等を奪い、暴れる。jeraへのアンチピックとして強い。1-2-1-3-1-u-1-3-3-3。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:16:33
+[/hon/Puppet%20Master] 
+[/hon/Puppet%20Master] Puppet Master
+一時的に5vs4又は6vs4の状態に出来たり、敵を逃がさないor meleeを近寄らせない拘束が強い　3rdも割と強い -- 2013-01-30 (水) 18:27:56
+人形への攻撃ではNomadの反射が一切発動しない -- 2013-02-10 (日) 04:49:29
+キャリーとして相当強い。サンダークロウは不要。靴、ヘルフラワー、アサシンシュラウド、ハーコン。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:19:10
+敵のドクターがNullを持っても２つのDisableで無理矢理押さえ込める。 -- 2014-04-13 (日) 06:23:19
+[/hon/Artesia] 
+[/hon/Artesia] Artesia
+乱戦が非常に強い。ソーサリー、靴からグリモアまたはスペルシャード。1-3-1-2-1-u-1-3-3-3。ultは前に出すとすぐ壊されるため、気持ち後ろ、又は横。発動順もultから2ndではなく、2ndでチャージした後ultを置いて1st連打。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:22:36
+[/hon/Revenant] 
+[/hon/Revenant] Revenant
+消える効果は非常に微妙だが、1stは強い。ヘルフラワー、ハーコン等へ行く。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:24:01
+じおめた→3rd→近づいて1st2nd→殴る→必要ならSheep/HF　終わり -- 2014-04-17 (木) 12:59:38
+[/hon/Riftwalker] 
+[/hon/Riftwalker] Riftwalker
+強い。AOE stun持ちと相性がよく、長射程なのでハラスも強力。 -- 2012-07-22 (日) 01:25:36
+ULTが鬼畜すぎる -- 2013-02-12 (火) 12:50:30
+ultを味方とタイミングを合わせると強力。序盤のスキルハラスも強い。 -- 2013-07-12 (金) 02:39:09
+1stでのハラスは強力。昼は集団戦始まったところへ飛び込み、夜から自分からしかける。スタマスの効果は正直微妙なため、リフレッシャーへ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:26:08
+[/hon/Demented%20Shaman] 
+[/hon/Demented%20Shaman] Demented Shaman
+ヒールにより相手のフォーカスを混乱させる事ができる。集団戦が始まる前にultを撃ってきた場合は警戒する。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:28:50
+[/hon/Succubus] 
+[/hon/Succubus] Succubus
+スリープからのフック等が有効だが、集団戦中はかける相手を考えないと味方が眠る。カルドラ等をもってdisablerとして。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:30:53
+[/hon/Gravekeeper] 
+[/hon/Gravekeeper] Gravekeeper
+Mid War最弱候補かもしれない -- 2012-07-25 (水) 02:37:23
+ハラスはそこそこ強いが、集団戦が弱い。ultは味方の邪魔にならないように注意。相手にbeheがいたら非常に危険。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:32:24
+[/hon/Voodoo%20Jester] 
+[/hon/Voodoo%20Jester] Voodoo Jester
+全スキルがMid Warで有用。Ultは使うタイミングと位置取りが難しいがうまく使えば強い -- 2012-07-25 (水) 02:39:43
+呪いをかけに行くと自分が死にやすいので注意。1stだけでも有効。スタマスでultを強化するか、カルドラ等でdisableするか。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:34:21
+[/hon/Torturer] 
+[/hon/Torturer] Torturer
+スキルが全部AOEでスタンもある。当然強い -- 2012-07-25 (水) 02:36:38
+中盤のnukeが非常に強力。1-3-3-1-3-1-3-1-u。ソーサリー、靴、ゴッデスからバーブド等。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:36:45
+[/hon/Circe] 
+[/hon/Circe] Circe
+相手からするとイリュージョンが非常にうっとうしいが、戦力としては微妙。1stが当たった味方には近づかない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:38:14
+STR
+ LEGION
+ [/hon/Armadon] 
+[/hon/Armadon] Armadon
+carryがいないチームだと、育つとゲームが終わる・・・ -- 2012-07-21 (土) 11:35:49
+序盤の味方依存ぶりが苦しい。トゲ連発で相手のマナバッテリーにプレゼントしてるやつが多い。 -- 2013-03-13 (水) 04:07:25
+後半、敵が育つとトゲが弱すぎて後回しにされるだけになる。鼻水でなんとかして相手のcarrywo -- 2013-07-12 (金) 02:59:23
+序盤の1は効果も弱く、すぐタワーに逃げられるため、2メイン3サブで。2ndは集団戦が始まるまでは封印。プレート靴かゴースト靴かはお好み。その後兜。序盤に２キル程度できれば大抵大活躍ができる。後半はガチガチの固さよりは、ブルタライザーやフロストウルフ等で妨害込みで。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:42:13
+[/hon/Behemoth] 
+[/hon/Behemoth] Behemoth
+１番の閉じ込めがとにかく強い。序盤相手にいたらとにかく動きに注意して適度にハラスして削っておくと、最悪被害者が出てもこいつを倒してトレードできる。 -- 2013-07-12 (金) 02:40:38
+やる事はノーマルマップと同じ。ソーサリー、靴、pk、フロストフィールド、リフレッシャーあたり。敵にいたらmeleeはLHをあきらめる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:45:27
+[/hon/Berzerker] 
+[/hon/Berzerker] Berzerker
+強いが、いまいち自由に殴れない。味方の拘束力が強ければ強力だが、それならほかにも強いヒーローはいるという・・・ -- 2013-07-12 (金) 02:41:43
+靴、インサニ、エルダーパラサイトまで出来ればそこそこ、スタマスまでできれば活躍が出来る。敵が常に近くにいるため、2ndは有効。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:47:39
+インサニとエルパラがあったらそこそこどころか止まらないだろ -- 2014-04-18 (金) 17:27:57
+[/hon/Drunken%20Master] 
+[/hon/Drunken%20Master] Drunken Master
+bkbがないと死ねるがそもそもbkbのcdが長く使うのをお勧めできない -- 2012-07-24 (火) 02:54:59
+1stがダメージ、引き寄せと共にmidwasでは凶悪 -- 2013-02-10 (日) 10:53:13
+3rdからの1stでの引き寄せは自分が死ぬ事が多く、あまりお勧めはできない。不用意な敵を狙う。STRのキャリービルド。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:49:05
+[/hon/Flux] 
+[/hon/Flux] Flux
+AOEチームのイニシエーターとして。かなり硬くならないとイニシエートして溶けるだけの存在になりがち・・・ -- 2012-07-24 (火) 04:51:27
+味方との相性次第では超強い。GladiatorやEngineerとのコンビは特に強力 -- 2012-07-25 (水) 02:48:13
+こいつとengがいるときはengが先にultをやってくださいほんとまじでおねがいします -- 2013-05-21 (火) 22:38:09
+engi、rift、sols等のultと合わせると非常に強い。↑の方のように、fluxのultは後。靴、PKkara -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:50:45
+靴、pk、フロストウルフ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:51:42
+[/hon/The%20Gladiator] 
+[/hon/The%20Gladiator] The Gladiator
+集まっていることが多いので1st,ultが当てやすく、また鞭でのハラスも優秀 -- 2012-07-24 (火) 23:53:43
+長射程の１番とultで貢献し、終盤まで長引けばcarryへ。しかしcarryするほど活躍してれば既にGGという展開が多すぎてむしろDisablerとしての性格が強い。 -- 2013-07-12 (金) 02:43:52
+3rdを当てに行って殺されるパターンに注意。3rdを活かすためにリフトシャードを複数持つと一発屋になりがちなので、べヒモスハート等も持つ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:53:41
+[/hon/Hammerstorm] 
+[/hon/Hammerstorm] Hammerstorm
+バッテリーでハンマーが投げ放題、強い -- 2012-07-21 (土) 22:47:40
+序盤は範囲stunで後半はcarryと余すところなく活躍できる。meleeで迷ったらこいつでokってくらい万能選手。 -- 2013-07-12 (金) 02:45:38
+序盤は範囲stunで後半はcarryと余すところなく活躍できる。meleeで迷ったらこいつでokってくらい万能選手。 -- 2013-07-12 (金) 02:45:55
+序盤は範囲stunで後半はcarryと余すところなく活躍できる。meleeで迷ったらこいつでokってくらい万能選手。 -- 2013-07-12 (金) 02:45:57
+序盤から終盤まで凄い。書くことが無い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:56:40
+[/hon/Jeraziah] 
+[/hon/Jeraziah] Jeraziah
+アンチHook系として優秀、ultのCDが長すぎるのが△ -- 2012-07-21 (土) 11:20:46
+強力なサポートヒーロー。相手にいたらサイレンス持ちをアンチピックしたいくらい。 -- 2013-07-12 (金) 02:47:22
+相手が通常攻撃メインならリフレッシャーがお勧め。そうでなければタンクっぽく。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 15:58:10
+[/hon/Legionnaire] 
+[/hon/Legionnaire] Legionnaire
+相手がヤワなmelee carryを複数抱えてたら、序盤に期待できる。pk持つまでが勝負。 -- 2013-07-12 (金) 02:49:17
+pk、バーブド、スタマスあたりを持てれば強いが、ハーコン等を持ってこられるとつらい。スタマス込の、タンクビルド。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:00:51
+[/hon/Midas] 
+[/hon/Midas] Midas
+マジックダメージ強化ビルドでいいが、後半が微妙。スキルだけで戦えるため、こう着状態のスキルファーミングはやめた方が良い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:02:25
+[/hon/Pandamonium] 
+[/hon/Pandamonium] Pandamonium
+イニシエーターとして強い。ultはよく妨害されるので、最初にブッパするのではなくて相手の数が減ってから。 -- 2013-07-12 (金) 02:50:14
+2ndは1つだけで、1stを伸ばし、瞬間火力を上げた方が良い。pkを持ち、敵のdpsを出すヒーローを狙う。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:03:47
+[/hon/Bramble] 
+[/hon/Bramble] Bramble
+Ultが大変強い -- 2012-07-25 (水) 02:49:34
+タンクまたはSTRキャリービルドで行くが、自身の活躍はあまり見込めない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:05:07
+[/hon/Predator] 
+[/hon/Predator] Predator
+育つまでがちょっと長い。序盤死に役にならないように。稼いだ後は理不尽な暴力を振りまいてGG。 -- 2013-07-12 (金) 02:51:41
+靴、インサニ、エルダーパラサイト。味方次第。1stでksを狙う感じで良い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:06:50
+[/hon/Rampage] 
+[/hon/Rampage] Rampage
+midwarsにおいては微妙。STRキャリービルド。PKもあり。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:09:11
+[/hon/Pebbles] 
+[/hon/Pebbles] Pebbles
+Chuckを使い放題。狭いので味方を誤って投げつけないよう注意。味方にいるときはNo Helpを押しておくといい。 -- 2012-07-21 (土) 11:47:12
+noobを相手のtowerへshoot -- 2012-07-30 (月) 17:34:49
+レベルで先行が出来ないため、無双はできないが、キルは取っていける。中盤に強いマジックダメージ強化ビルドだと、終盤に微妙になる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:10:52
+[/hon/Keeper%20of%20the%20Forest] 
+[/hon/Keeper%20of%20the%20Forest] Keeper of the Forest
+マジで役に立たない。s-s-s-s-s-uでいいのではないだろうか。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:12:09
+[/hon/Tundra] 
+[/hon/Tundra] Tundra
+序盤のハラスが強力、ultも単体ではあるがスタン時間が長く使える。だがそれほど強ヒーローというわけでもない。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:14:27
+[/hon/Rally] 
+[/hon/Rally] Rally
+スタマスの効果が強力。1stで味方を殺さない様に注意。靴、スタマスからSTRキャリービルド。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:15:31
+扱いは難しいがhookからの救出やイニシエートのサポート等無限の可能性がある。 -- 2014-04-16 (水) 00:47:04
+[/hon/Salomon] 
+[/hon/Salomon] Salomon
+3rdで味方の強化は出来るが2ndが死にスキルなため、ultがcd中が弱い。ultもcdが長くmidwarsでは使いにくい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:16:50
+[/hon/Solstice] 
+[/hon/Solstice] Solstice
+昼の2ndはハラス、アシスト狙い共に強いが、2ndを伸ばすと7分30秒～15分がいまいちになる。スキルはお好み。横からのultを狙うといいが、バレてgankされないように。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:18:58
+[/hon/Prisoner%20945] 
+[/hon/Prisoner%20945] Prisoner 945
+リフトウォーカー、グラディエーター等と組むとhookが非常に楽。パッシブがあるため、dpsにもいける。相手にする場合、不注意な味方がいるとレイプゲームになりがち。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-07 (月) 16:22:11
+HELLBOURNE
+ [/hon/Accursed] 
+[/hon/Accursed] Accursed
+mid warではかなり優秀なHERO、devやガントのアンチとしても -- 2012-07-21 (土) 11:23:01
+stomで羽が生える -- 2012-10-06 (土) 21:30:06
+死なないが倒せない性格がモロに出る。殺せるのは中盤までなのでそれまでになんとかしてビルドを軌道に乗せたい。 -- 2013-07-12 (金) 02:53:22
+Valの５秒スタンも怖くない。自分が食らわないように。 -- 2014-03-28 (金) 11:00:38
+猿やDampのような飛び込む系のHeroと相性が良い。装備が揃うとこいつ自身の殴りも侮れなくなる。 -- 2014-04-13 (日) 06:12:18
+2-1-2-1-2-u-2-1-1で。殴りビルドへ行く。序盤は2ndのハラスは痛いが、マナがすぐなくなるので計画的に。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:07:36
+[/hon/Balphagore] 
+[/hon/Balphagore] Balphagore
+midwarではultチャージが常に100を目指せる。TBなどスキルをバラまく相手に対するアンチとして優秀な他、1stと2ndも非常に優秀なhero -- 2012-07-24 (火) 23:18:44
+Ultは強いがCDが長い。1st、2ndもDotで瞬間火力がないし射程も短いので、Ult頼みの一発屋になりがち。 -- 2012-07-25 (水) 01:48:15
+↑の方の意見と同じ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:10:46
+[/hon/Cthulhuphant] 
+[/hon/Cthulhuphant] Cthulhuphant
+森狩りヒーローでは一番midwar向け -- 2012-08-08 (水) 04:13:17
+うかつに前に出たヒーローを1stの突進からキルを取る事ができる。ultも割と使える。スロー効果を活かすためにもさらにスローを付けるのがお勧め。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:12:49
+[/hon/Deadwood] 
+[/hon/Deadwood] Deadwood
+射程が長いAOEdismoveの使い勝手が良好だが、低レベル時は拘束時間が厳しい。好きにKS取れるので金には困らない -- 2012-07-30 (月) 17:32:12
+hookerとの相性はいいが、その他はいまいち。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:13:56
+[/hon/Devourer] 
+[/hon/Devourer] Devourer
+banしないとmayiaがくるぞ -- 2012-07-15 (日) 02:03:05
+Hookは確かに強いが、引っ掛けたHeroを潰しにかかったところを他敵HeroのAOEでまとめて処理されないよう注意。 -- 2014-04-13 (日) 06:16:06
+8割方banされる。1-2-1-3-1-uあたりで。↑の方の通り、崖ごしのhookでも無い限り、油断はしない。キル数が多いゲームでの固さは異常。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:16:24
+「当たればいいや」でなくhook相手はちゃんと選ぶ。リープやAoEスタン持ちだと割と容易に逃げられるし、タンクを引っ張ると粘られた間に他の敵から集中攻撃受けやすい。 -- 2014-04-15 (火) 20:17:39
+[/hon/Lord%20Salforis] 
+[/hon/Lord%20Salforis] Lord Salforis
+3rdは貼りついて追いかけるというのが難しい上に対象も多いので、伸ばさない。1stのnukeを伸ばすのがお勧め。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:17:56
+[/hon/Electrician] 
+[/hon/Electrician] Electrician
+stunゲーのmid warでは非常に使いにくい・・・ -- 2012-07-21 (土) 11:23:41
+ultのcdが4秒になり、バーブド消し等に使えるかもしれない。1stはすぐ解除されるし、戦力としては微妙。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:19:52
+[/hon/Gauntlet] 
+[/hon/Gauntlet] Gauntlet
+Grappleの精度次第、引き寄せが決まれば1killほぼ確定、ultもCDが短めで強力 -- 2012-07-21 (土) 11:27:46
+Grappleとultの通り道stunでNullstone持ちを拘束できる底力がある。終盤までにケリをつけたいが、長引くようなら３番をなんとかして叩き込む為に固さが欲しくなる。 -- 2013-07-12 (金) 02:55:55
+2ndがLv1の時は射程が短いため、hookを狙うのはLv3からでもいいと思う。中盤以降pkからの誘拐に注意する。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:21:31
+[/hon/Kraken] 
+[/hon/Kraken] Kraken
+imba戦闘範囲が狭いのでultを入れやすく戦いの幅も広いmana管理が大事 -- 2012-07-24 (火) 02:48:10
+ultが有効。フラックス等と組まれると非常にうっとうしい。2ndでのスタンは割とやりやすい。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:23:09
+[/hon/Magmus] 
+[/hon/Magmus] Magmus
+ultを入れやすい環境にあるがAoEスキルもちの相手が多いためPKinのタイミングと場所はしっかりと考えないとただのゴミ -- 2012-07-24 (火) 02:49:47
+ultを狙うよりもstunをしっかり入れることのが重要。序盤の叩き合いで２番のダメージも結構バカにならないので１でも取っておくとアシストを稼げる。 -- 2013-07-12 (金) 02:57:36
+1-2-1-2-1-u-1-2-2-2　靴、pkからマジックダメージ強化。終盤はあまり強くないのでlateゲームにならないようがんばる。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:24:23
+AOEスタンが豊富なので敵の目の前で透明化し続けるのは無謀。 -- 2014-04-16 (水) 00:21:08
+[/hon/Maliken] 
+[/hon/Maliken] Maliken
+1st投げてればいいだけの簡単HEROワープするのは装備ができてから -- 2012-08-17 (金) 03:51:02
+1-2-1-2-1-u-1-2-2-2　序盤は1stのnukeだけで役に立てる。靴からインサニへ。固まったところへ飛びこまれないように注意。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:26:52
+[/hon/Pharaoh] 
+[/hon/Pharaoh] Pharaoh
+ゲロが強い。2ndは事故率が高いのでノーマルゲーム以上に気を遣う -- 2012-07-25 (水) 02:51:46
+まとめて閉じ込められれば強い。どうしても死にやすいが、ゲロであらかじめ相手を削ってこっそり有利な状況にしておくとか工夫がいる。 -- 2013-07-12 (金) 03:11:00
+3-1-3-2-3-u-1-1-1。　こう着状態でのハラスはものすごいうざい。靴、バーブド、スタマス。相手のレンジキャリーに飛ぶ。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:29:33
+[/hon/Moraxus] 
+[/hon/Moraxus] Moraxus
+実は2ndでDeｖのhookを防げる -- 2012-10-09 (火) 23:09:00
+序盤はpkで飛び込んでultを使っても即死なんて事も多いため、ヘルムから行くのが良いと思う。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:31:25
+[/hon/Pestilence] 
+[/hon/Pestilence] Pestilence
+pkを持つと化ける、敵の構成によりbkb必須。Arti・flint・EW等の長射程range carryをpickされた場合アンチとして運用していける。 -- 2012-07-21 (土) 11:34:16
+殴りもStunも近づかないと仕事ができず、足は速いがDisableが多いため過信は禁物。序盤死に役にならないように気をつけよう。 -- 2014-03-28 (金) 10:35:18
+pkを持つ。ultはどんどん付ける。キャリーを目指すが、かなりハード。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:32:29
+装備が揃うまではULTを撒いてスタンを入れたら逃げるようなプレイで生存に徹するべき。最近純nerfされたためますます微妙に。 -- 2014-04-15 (火) 20:13:16
+[/hon/Amun-Ra] 
+[/hon/Amun-Ra] Amun-Ra
+生でStunを当てるのは難しい。２発目以降か戦端が開いて敵が集まったところに。 -- 2014-04-13 (日) 06:17:23
+Lv6以前で、1stでハラス死に行った所で死なない様注意。中盤にかけて暴れる事ができるが、終盤は固いだけな感じになってしまう。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:33:50
+[/hon/Ravenor] 
+[/hon/Ravenor] Ravenor
+1-2-2-1-2-u-2-1-1-1　3rdはultがlv2になるくらいからでいいと思う。飛び込んでから2ndでの2発は強力。終盤も強い。殴り続けるためにスローを付けるのがお勧め。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:35:34
+[/hon/War%20Beast] 
+[/hon/War%20Beast] War Beast
+最強Heroの一角。banまたは即pickが望ましい -- 2012-07-15 (日) 08:59:31
+レンジが多い場合、攻撃力上昇との相性はいい。自身は高速で突っ込んで、涙目で高速で戻ってくる事になる場合が多い。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:36:46
+[/hon/Lodestone] 
+[/hon/Lodestone] Lodestone
+視界外からの突然のイニシエートに注意する。スキルは強いが、殴りキャラとしては微妙。 -- 個人的意見[/hon/::cmd/edit?page=%E5%80%8B%E4%BA%BA%E7%9A%84%E6%84%8F%E8%A6%8B&refer=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ? 2014-04-15 (火) 17:38:19
+おすすめアイテム [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=y26414b6] 
+最初のお買い物(とりあえず迷ったらこれ)
+[/hon/Power%20Supply] [/hon/Marchers] 
+Mid WarsにおけるCoreItem
+[/hon/Ring%20of%20Sorcery] [/hon/Barbed%20Armor] [/hon/Harkon%27s%20Blade] [/hon/Icon%20of%20the%20Goddess] 
+豆知識？ [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=k047f6cc] 
+Map
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/mw_map.png?rev=f9c9529f2ab0d8afd75f0dafbb38467d&t=20120708191547] 
+おすすめのWardの設置場所
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/mw_ward_hell.jpg?rev=bccbe0ded29c2e89c23ae3f88146d20b&t=20120708191620] 
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/mw_ward_leg.jpg?rev=d197a9b39455492be0aea0cb518da94a&t=20120708191624] 
+厨二アイテム
+ちっちゃいZorgathから出ます。全てのRuneの効果を凝縮
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/tabletofpower.png?rev=52eb6dc70cb2068e46ab139ee3bdaa2f&t=20120708191628] 
+デカい方のTransmutansteinから出るTokens of Sight
+範囲900の視界を完全に得る事が出来る（インビジも看破）
+Award [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=ye2a58e6] 
+ゲーム終了時に各プレイヤーに2つの賞が与えられる。
+複数の条件を満たした時の優先順位は不明だが、達成が困難なものが優先されると思われる。
+Hero damage, kills and assists
+ 画像 | Award名 | Award詳細 | 
+ | First! | I'm not embarrassed to say you were my first! Scored a Bloodlust. | 
+ | Devastating | That's going to leave a mark! Dealt the most damage to heroes. | 
+ | Gentle | I'll go easy on you. Dealt the least damage to heroes. | 
+ | Executioner | Now you see me, now you're dead! Earned the most Hero Kills. | 
+ | Pacifist | You're not worth my time. Had the least Hero Kills. | 
+ | Double or Nothing | Never bet against me. Scored the most Double Taps. | 
+ | Threepeat | Pwning is as easy as 1, 2, 3. Scored the most Triple Kills. | 
+ | Destroyer | You can run, but you can't hide from me! Scored the most Quad Kills. | 
+ | BAMF | Nuff said! Scored the most Annihilations. | 
+ | Streak | I'm going streaking! Scored the most 3x Streaks. | 
+ | Spree | I just keep going and going and going. Scored the most 5x Streaks. | 
+ | Champion | Is there no one who can face me? Scored the most 10x Streaks. | 
+ | Deity | Bow down, mortal! Scored the most 15x Streaks. | 
+ | Avenger | Think you're tough? Think again! Scored the most Retributions. | 
+ | Bully | What are you going to do about it? Scored the most Nemeses. | 
+ | Intimidator | Why am I so much better than you? Scored the most Smackdowns. | 
+ | Boldest | You remember how you tried to Taunt me? Yeah, about that. Scored the most Humiliations. | 
+ | Savior | Never fear, your savior is here! Earned the most Hero Assists. | 
+ | Soloist | You'll be fine without me! Had the least Hero Assists. | 
+ | Lively | Death? Ain't nobody got time for that! Spent the least amount of time dead. | 
+ | Cautious | Fear Death? Death fears me! Died the fewest times. | 
+Buildings and creeps
+ 画像 | Award名 | Award詳細 | 
+ | Pillager | Dominating the countryside! Dealt the most damage to buildings. | 
+ | Neighborly | I respect your property, but that's about it. Dealt the least damage to buildings. | 
+ | Wrecking Ball | Bet they wish they had insurance on that. Destroyed the most buildings. | 
+ | Preservationist | Preserve what few buildings are left in Newerth! Destroyed the least buildings. | 
+ | Exterminator | Not to worry, I'll take care of this infestation. Killed the most creeps. | 
+ | Naturalist | There are bigger fish to fry. Killed the least creeps. | 
+ | Betrayer | Better me than them! Scored the most creep denies. | 
+ | Good Samaritan | Best friends forever <3! Scored the least creep denies. | 
+ | Hunter | Welcome to the jungle! Killed the most neutral creeps. | 
+ | Game Warden | Save the neutrals! Killed the least neutral creeps. | 
+ | Kongor Lover | All he needs is some love! | 
+Misc
+ 画像 | Award名 | Award詳細 | 
+ | Caffeinated | There's a direct correlation between APM and skill, right? Had the most actions per minute | 
+ | Most Efficient | When will they realize one click can get you to the same place? Had the least actions per minute | 
+ | Glutton | Never get between a man and his potion! Used the most consumables. | 
+ | Miser | There are more important things to buy! Used the least consumables. | 
+ | Prosperous | Give me the gold; I want the gold! Earned the most gold. | 
+ | Big Spender | You can't take it with you. Spent the most gold. | 
+ | Frugal | But what if I need it later? Spent the least gold. | 
+ | Peeping Tom | I see you! Placed the most wards. | 
+ | Scout | It's a tough job, but someone has to do it. | 
+ | Most Adventurous | Leave no stone unturned, no lane unexplored! | 
+ | Pulled them in | Made action happen. | 
+ | Wizard | Made magic happen. Figuratively or literally, you ask? I can't reveal my secrets. | 
+ | Hero | Get on my level! Was the highest level at the end of the match. | 
+ | Best Looking | It's hard looking this good. | 
+ | Best Mannered | Good game, well played. Let's play another! | 
+ | Greenhorn | Training for perfection. | 
+ | Veteran | Only the most elite live to tell the tale. | 
+ | The Hero Newerth Deserves | Newerth asked for a Hero and I answered the call. | 
+ | The Chosen One | Don't you wish you were me? | 
+ | HoNored | The lucky winner of the HoNor medallion! | 
+ | Had a Good Time | Can't get enough of Mid Wars! | 
+ | MID PLS | I called it first! Why is everyone else here? | 
+ | Motivated | Whether it's a kill or a tower, I'll do whatever it takes. | 
+ | Tower Diver | Almost...Almost...Just one more hit... | 
+ | Guys? Guuuuys? | Caught in the wrong place at the wrong time. | 
+ | Wha!? | Did that just happen? | 
+ | For Other Reasons | If you have to ask, you'll never know. | 
+ | Fought in the Shade | The sun makes me sweat, let's take this fight somewhere cooler. | 
+ | Team Spirit | Revenant isn't the only one. We got this team! | 
+ | Friend to the Chiprels | Fear the Chiprel and his friend. | 
+※分類は[http://forums.heroesofnewerth.com/showthread.php?421392-Mid-Wars-Match-Awards-Compiled-List!] Mid Wars Match Awards - Compiled List!を参考にしています。
+コメント [/hon/::cmd/edit?page=MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6&id=v9641d46] 
+ tbでボトル持って1st連打するだけで１分毎のルーン取り放題を繰り返せる。やったねゴリちゃん仲間も消えるよ！ -- 2013-08-08 (木) 18:36:18
+結果の表示が糞になってるな -- 2013-09-30 (月) 18:16:07
+序盤、特に使い道がない時にIllusionを取れた場合、こっそり裏側から敵ワープ出口近辺に置いとくと勝手に鳥を落とせたりする。 -- 2014-03-28 (金) 10:42:08
+Carry数で劣っている場合、優勢でも油断せずにさっさとTowerや本陣を攻めて勝ちを決めるべき。最初は優勢だったのに敵の森（ワープゾーン近く）でダラダラと殺し合いを続けた結果敵Carryに巻き返されたゲームをいくつも見た。 -- 2014-04-13 (日) 06:06:01
+断る。 -- 2014-04-15 (火) 21:52:03
+midwarで一番やってはいけないのはfeed。feedするとint奴隷が1000ダメージ叩き出してきたりする。そうなるとcarryが育ってきてもhex等から何もできずに死ぬ。 -- 2014-04-18 (金) 17:34:15
+個人的意見という便所の落書き -- 2014-04-18 (金) 20:58:41
+なんかZorgaが消えて代わりにとんでもないものがとんでもないことするようになってるぞ。 -- 2014-05-08 (木) 23:12:29
+サンタスレイヤーってなんだこいつ。とうとうクリスマス廃止派の男たちの怨霊が形になったのか。 -- 2014-12-19 (金) 01:43:14
+BLITZモードのMIDWARSがカオス過ぎてうけるｗｗｗ -- 2016-02-13 (土) 22:51:07
+ 初めての方へ
+[/hon/%E5%88%9D%E5%BF%83%E8%80%85%E5%90%91%E3%81%91%E3%82%AC%E3%82%A4%E3%83%89] 初心者向けガイド
+[/hon/1%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8BHoN] 1から始めるHoN
+[/hon/Goblinstore] ゲーム内ショップ解説
+[/hon/%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%9E%E3%83%8A%E3%83%BC] ルールとマナー
+[/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MidWarsについて
+[/hon/%E7%94%A8%E8%AA%9E%E9%9B%86] 用語集
+[/hon/%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A] 環境設定
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+HEROの紹介
+[/hon/%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E7%B4%B9%E4%BB%8B] ヒーロー紹介
+[/hon/Hero] HoNRヒーロー一覧
+[/hon/Hero#u87f90d9] Agility
+[/hon/Hero#r6ecd546] Intelligence
+[/hon/Hero#x880c310] Strength
+･[/hon/OldHero] 旧ヒーロー一覧
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方
+アイテム
+[/hon/%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] HoNRアイテム一覧
+･[/hon/%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧ベースアイテム一覧
+･[/hon/%E6%97%A7%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧アイテム一覧
+データ
+[/hon/Hero%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9] ステータスの効果
+[/hon/Modifier] Modifier
+[/hon/Rune] Rune
+[/hon/%E5%90%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E8%A9%B3%E7%B4%B0] Creep詳細
+[/hon/Kongor] Kongor
+[/hon/Illusion] Illusion
+[/hon/Range%E8%A1%A8] Range表
+Tips
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合
+[/hon/%E8%84%B1%E5%88%9D%E5%BF%83%E8%80%85%E3%82%AC%E3%82%A4%E3%83%89] 脱初心者ガイド
+[/hon/%E5%A5%B4%E9%9A%B7%E3%81%AE%E3%81%99%E3%82%9D%E3%82%81] 奴隷のすゝめ
+[/hon/%E7%8A%B6%E6%85%8B%E7%95%B0%E5%B8%B8%E8%A7%A3%E8%AA%AC] 状態異常解説
+[/hon/%E3%83%AF%E3%83%BC%E3%83%89%E3%83%BB%E3%83%9E%E3%83%83%E3%83%97%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ワード・マップについて
+[/hon/Monkey%20Courier] Monkey Courier
+[/hon/MagicImmunity] MagicImmunity
+[/hon/%E8%B1%86%E7%9F%A5%E8%AD%98] 豆知識
+[/hon/%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89] チャットコマンド
+[/hon/MOD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MODについて
+[/hon/SpilitReason%E3%81%A7%E3%81%AE%E8%B3%BC%E5%85%A5] 公式グッズを買う
+その他
+[/hon/%E3%83%AA%E3%83%B3%E3%82%AF] リンク
+[/hon/%E9%9B%91%E8%AB%87%E6%8E%B2%E7%A4%BA%E6%9D%BF] 雑談掲示板
+[/hon/?cmd=edit&page=MenuBar] MenuBar
+[/hon/hero%E5%90%8D%E5%89%8D%EF%BC%8B%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3] hero名前＋アイコン
+[/hon/image] 画像のアップロード
+[/hon/%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC] テンプレ
+[/hon/%E6%95%B4%E5%BD%A2%E3%83%AB%E3%83%BC%E3%83%AB] 整形ルール
+[/hon/%E7%B7%B4%E7%BF%92%E3%83%9A%E3%83%BC%E3%82%B8] 練習ページ
+T.?　Y.?
+NOW.?　TOTAL.?
+[http://wikiwiki.jp/hon/?cmd=edit&page=MenuBar] 編集
+ レンタルWIKI by [https://wikiwiki.jp/] WIKIWIKI.jp* / 
+ [https://wikiwiki.jp/pp/aboutad] 広告について /
+ 無料レンタル掲示板 [https://z.wikiwiki.jp/] zawazawa
+ [/hon/::cmd/mixirss]

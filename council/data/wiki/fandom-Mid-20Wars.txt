@@ -1,0 +1,82 @@
+Källa: https://hon.fandom.com/api.php?action=parse&prop=wikitext&format=json&page=Mid%20Wars
+Hämtad: 2026-10-29
+
+[[Category:Maps]]
+[[File:MapMidwars.jpg|thumb]]
+__TOC__
+==Description==
+==Towers==
+[[File:FoC_Towers.jpg|frameless|left]]<br />
+'''Number Per Side: 4'''<br />
+<br />
+Towers are located along the lane, and within the base alongside each of the barracks. They are very sturdy defensive structures that deal a lot of damage early on.
+The two in lane must be destroyed before advancing to the enemies base.
+The Backdoor Protection System doesn't apply to towers.
+<br />
+<br />
+<br />
+
+==Barracks==
+[[File:FoC_Barracks.jpg|frameless|left]]<br />
+'''Number Per Side: 2'''<br />
+<br />
+These structures are found deep in the base and are useful in aiding the push to destroy your enemies shrine. Destroying a barracks will significantly increase the strength of your team's lane creeps. There is a single pair of barracks (ranged and melee) per side.
+The Backdoor Protection System doesn't apply to barracks.
+<br />
+<br />
+<br />
+
+==Neutrals==
+[[File:FoC_Neutrals.jpg|frameless|left]]<br />
+'''Number: 1'''<br />
+<br />
+Neutrals are found dormant in the forest. They yield gold and experience like other creeps but can be more dangerous than your average lane creeps.
+
+There is one Neutral camp at the northwest part of the map. They can spawn a group of the following Neutral creeps:
+* {{ui|Dragon Master}}, {{ui|Skeleton King}}, {{ui|Vagabond Leader}}, {{ui|Ice Ogre}}
+* {{ui|Predasaur Crusher}}, {{ui|Vulture Lord}}, {{ui|Minotaur}}, {{ui|Wolf Commander}}
+* {{ui|Dreadbeetle Queen}}, {{ui|Catman Champion}}, {{ui|Vulture Lord}}, {{ui|Wild Hunter}}
+
+
+==World Tree/Sacrificial Shrine==
+[[File:FoC_Shrine.jpg|frameless|left]]<br />
+'''Number Per Side: 1'''<br />
+<br />
+The primary game objective and heart of the legion and hellbourne defenses. The game will end if you can destroy the opposing team's shrine. The Backdoor Protection System applies to Main Base Structures.Health Regeneration mechanics on the Main Base Structures have been removed, and their Health Regeneration has been lowered from 105 to 3.
+
+
+
+
+
+==Fountain of Regeneration==
+[[File:FoC_Fountains.jpg|frameless|left]]<br />
+'''Number Per Side: 1'''<br />
+<br />
+Fountains provide a safe haven to replenish life and mana without cost and resurrects your hero on death. Enemies that approach your team's fountain will be attacked. The fountain is also home to shopkeepers that allow you to spend gold to purchase powerful items.
+
+
+
+
+==[[Runes]]==
+[[File:FoC_Runes.jpg|frameless|left]]<br />
+'''One found at the river'''<br />
+<br />
+Powerful runes will spawn at one random location every 2 minutes. These runes provide benefits to the player like double damage or invisibility. On Forest's of Caldavar, there are spawnpoints are located in the middle of both rivers.
+
+
+
+
+==Bosses==
+[[File:FoC_Bosses.jpg|frameless|left]]<br />
+'''One found at the river'''<br />
+<br />
+{{ui|Zorgath}} and {{ui|Transmutanstein}} is found in the bottom river near the middle of the map. He is very dangerous and requires a large amount of items and team effort to kill. Slaying Zorgath will drop two Runes of Power, which provides all rune effects (except Refreshment) at the same time, and Transmutanstein will drop a {{ii|Token of Sight}} - an item that provides Clearvision and True Sight and is lost on death. Zorgath and Transmutanstein have 4 minutes respawn times.
+
+==Balance==
+Mid Wars uses special values for balance purposes.
+
+===Items===
+* {{ii|Barbed Armor}}: Duration reduced from 5 seconds to 3 seconds.
+* {{ii|Ioyn Stone}}: '''Cannot be purchased.'''
+* {{ii|Jade Spire}}: Bonus cast range reduced from 250 to 100.
+* {{ii|Sacrificial Stone}}: Respawn timer reduction effect is disabled.
