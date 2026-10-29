@@ -2,6 +2,7 @@
 
 Rådets egna beslut, nyast överst. Eriks svar flyttas hit från BEHOVER-ERIK.md.
 
+- **2026-10-29: Rate-limit per websocket-anslutning.** Token bucket i `Room`: max 5 buzz/s (`BUZZ_RATE_PER_S`/`BUZZ_BURST`) och 30 meddelanden/s med klump på 60 (`MSG_*`). Överskjutande meddelanden ignoreras tyst. `spong` räknas inte, så serverns ping-mätning och den rättvisa buzzen påverkas aldrig; en vanlig spelare ligger långt under taken.
 - **2026-10-29: Spelstatistik hämtas av GitHub Action `sync-stats.yml`** (sandlådan når inte Steam). Bara publik, dokumenterad data utan nycklar: Steam-profilernas XML. WardUps interna API används inte utan tillstånd (frågat Erik). Fredagsquizet fick 3 personliga frågor om Steam-kontonas ålder, med Steam-namn eftersom kopplingen till riktiga namn saknas.
 - **2026-10-29: Kungasatsningen P1 före Bluffrundan.** Den passar kvällens mål (kröna en kung) och håller spänningen till sista frågan. Båda bygger på den hemliga svarsinsamlingen från "Alla svarar", som därför byggs först. Bildfrågor och "Dubbla poäng"-joker parkeras (jokern överlappar Lyckohjulet och satsningen).
 

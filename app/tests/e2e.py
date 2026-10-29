@@ -175,6 +175,31 @@ async ([pin]) => {
     const re = await connect(r.code, 'player'); send(re, { t: 'join', name: 'Ladd', playerId: id });
     await sleep(30); send(re, { t: 'buzz', at: Date.now() - 5000 });
     out.reload = await winner(r.host); r.all.push(re); done(r); }
+
+  // Rate-limit: 50 buzzar + 200 ping i en klump. Servern lever, taket håller och vanliga spelare påverkas inte.
+  { const r = await setup(['Flod', 'Vanlig']);
+    const flod = r.ps.Flod; let pongs = 0;
+    flod.ws.addEventListener('message', (ev) => { if (JSON.parse(ev.data).t === 'pong') pongs++; });
+    for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
+    out.floodWinner = await winner(r.host);
+    send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
+    send(r.ps.Vanlig, { t: 'buzz', at: Date.now() });
+    out.normalAfterFlood = await winner(r.host);
+    // Ny fråga direkt efter en ny flod: Flods tomma hink släpper inte igenom nästa buzz, Vanlig vinner.
+    for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
+    send(r.host, { t: 'host:next' }); await until(flod, (st) => st?.phase === 'question' && st.qIndex === 1);
+    send(flod, { t: 'buzz', at: Date.now() }); await sleep(250);
+    send(r.ps.Vanlig, { t: 'buzz', at: Date.now() });
+    out.throttled = await winner(r.host);
+    await sleep(2500);
+    for (let i = 0; i < 200; i++) send(flod, { t: 'ping', c: i });
+    await sleep(500);
+    out.floodPongs = pongs;
+    pongs = 0; await sleep(1500); send(flod, { t: 'ping', c: -1 }); await sleep(300);
+    out.pongAfter = pongs;
+    const tv = await connect(r.code, 'tv'); r.all.push(tv);
+    out.alive = (await until(tv, (st) => !!st)).players.length;
+    done(r); }
   return out;
 }
 """
@@ -396,6 +421,10 @@ def main():
         assert edge["next"]["after"] == "B", f"Buzz på nästa fråga efter avbrutet fönster fungerar inte: {edge['next']}"
         assert edge["lockedOut"] == "Kvar", f"Utlåst spelare fick buzza: {edge['lockedOut']}"
         assert edge["spam"] == "Lugn" and edge["spamBuzzed"] == 1, f"Spam-buzz skrev över första buzzen: {edge}"
+        assert edge["floodWinner"] == "Flod" and edge["normalAfterFlood"] == "Vanlig", f"Servern klarade inte buzz-flod: {edge}"
+        assert edge["throttled"] == "Vanlig", f"Buzz-taket släppte igenom flod-buzz: {edge['throttled']}"
+        assert 0 < edge["floodPongs"] <= 70, f"Meddelandetaket håller inte (pongs={edge['floodPongs']})"
+        assert edge["pongAfter"] == 1 and edge["alive"] == 2, f"Anslutningen återhämtade sig inte efter flod: {edge}"
         assert edge["reload"] == "Ladd", f"Buzz försvann vid omladdning mitt i fönstret: {edge['reload']}"
         raw.close()
 

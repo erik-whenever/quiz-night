@@ -1,7 +1,9 @@
 import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings,
 } from "../shared/types";
-import { BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, DEFAULT_SETTINGS, BUZZ_WINDOW_MS } from "../shared/types";
+import {
+  BUZZ_BURST, BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, BUZZ_RATE_PER_S, DEFAULT_SETTINGS, BUZZ_WINDOW_MS, MSG_BURST, MSG_RATE_PER_S,
+} from "../shared/types";
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
 
@@ -12,6 +14,20 @@ interface Conn {
   rtts: number[];
   /** Utestående sping: bara spong med exakt detta s godtas, och bara en gång. */
   pingS?: number;
+  /** Rate-limit: token buckets för alla meddelanden resp. buzzar. */
+  msgBucket: Bucket; buzzBucket: Bucket;
+}
+
+/** Enkel token bucket: fylls på med rate/s upp till burst. Överskjutande meddelanden ignoreras tyst. */
+interface Bucket { tokens: number; last: number }
+const bucket = (burst: number): Bucket => ({ tokens: burst, last: Date.now() });
+function take(b: Bucket, rate: number, burst: number): boolean {
+  const now = Date.now();
+  b.tokens = Math.min(burst, b.tokens + ((now - b.last) / 1000) * rate);
+  b.last = now;
+  if (b.tokens < 1) return false;
+  b.tokens -= 1;
+  return true;
 }
 const RTT_SAMPLES = 5;
 const minRtt = (c: Conn) => (c.rtts.length ? Math.min(...c.rtts) : undefined);
@@ -84,12 +100,14 @@ export class Room implements DurableObject {
     const pair = new WebSocketPair();
     const [client, server] = [pair[0], pair[1]];
     server.accept();
-    const conn: Conn = { ws: server, role, rtts: [] };
+    const conn: Conn = { ws: server, role, rtts: [], msgBucket: bucket(MSG_BURST), buzzBucket: bucket(BUZZ_BURST) };
     this.conns.add(conn);
 
     server.addEventListener("message", (ev) => {
       let msg: ClientMsg;
       try { msg = JSON.parse(ev.data as string); } catch { return; }
+      if (msg?.t !== "spong" && !take(conn.msgBucket, MSG_RATE_PER_S, MSG_BURST)) return;
+      if (msg?.t === "buzz" && !take(conn.buzzBucket, BUZZ_RATE_PER_S, BUZZ_BURST)) return;
       this.handle(conn, msg).catch((e) => this.send(conn, { t: "error", message: String(e) }));
     });
     const close = () => {
