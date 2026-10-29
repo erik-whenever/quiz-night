@@ -61,10 +61,18 @@ export function Wheel({ wheel, serverNow, size, landed }: { wheel: WheelState; s
     }
     // Fler varv ju mer tid som är kvar, så sena anslutare ändå landar samtidigt som alla andra.
     const turns = Math.max(2, Math.round((6 * left) / wheel.spinMs));
+    const prev = rot.current;
     rot.current = base + 360 * turns + landAngle(wheel);
-    let raf = requestAnimationFrame(() => { raf = requestAnimationFrame(() => setView({ rot: rot.current, ms: left })); });
-    return () => cancelAnimationFrame(raf);
-  }, [wheel, serverNow]);
+    let started = false;
+    let raf = requestAnimationFrame(() => { raf = requestAnimationFrame(() => { started = true; setView({ rot: rot.current, ms: left }); }); });
+    return () => {
+      cancelAnimationFrame(raf);
+      // Avbröts innan animationen startade: släpp snurret så nästa körning startar det igen.
+      // Annars står hjulet still på fel fält (hände vid omladdning mitt i snurr).
+      if (!started) { rot.current = prev; seen.current = null; }
+    };
+    // Bara spinId/startedAt: varje state-meddelande ger ett nytt wheel-objekt.
+  }, [wheel.spinId, wheel.startedAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={`wheel${landed ? " landed" : ""}`} style={{ width: size, height: size }}

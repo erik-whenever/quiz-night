@@ -72,7 +72,7 @@ export default function Tv({ code }: { code: string }) {
           <StealNote state={state} />
         </div>
       )}
-      {wheel && <WheelPanel wheel={wheel} serverNow={serverNow} size={Math.min(420, Math.round(window.innerHeight * 0.5))} onLanded={sfx.next} />}
+      {wheel && <WheelPanel wheel={wheel} serverNow={serverNow} size={Math.min(420, Math.round(window.innerHeight * 0.5), window.innerWidth - 64)} onLanded={sfx.next} />}
       </div>
 
       {state.phase === "finished" && (

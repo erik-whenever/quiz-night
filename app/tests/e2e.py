@@ -454,6 +454,9 @@ def main():
         expect(p1.get_by_text("Lyckohjulet snurrar")).to_be_visible()
         tv.wait_for_timeout(1200)
         shot(tv, "08b-tv-hjul-snurrar")
+        # Omladdning mitt i snurret (TV och en spelare): hjulet ska fortsätta och landa på serverns fält
+        tv.reload(); p2.reload()
+        expect(tv.get_by_text("Lyckohjulet snurrar")).to_be_visible()
         tv_twist = tv.locator(".wheel-caption[data-twist]")
         expect(tv_twist).to_be_visible(timeout=8000)
         twist = tv_twist.get_attribute("data-twist")
@@ -464,6 +467,13 @@ def main():
         expect(host.get_by_text("Nästa fråga: " + label)).to_be_visible()
         expect(tv.locator(".wheel-seg.hit")).to_have_count(1)
         tv.wait_for_timeout(500)
+        under_pointer = tv.evaluate("""() => {
+          const m = new DOMMatrix(getComputedStyle(document.querySelector('.wheel-disc')).transform);
+          const deg = ((Math.atan2(m.b, m.a) * 180 / Math.PI) % 360 + 360) % 360;
+          const segs = [...document.querySelectorAll('.wheel-seg')];
+          return [Math.floor(((360 - deg) % 360) / (360 / segs.length)), segs.findIndex((e) => e.classList.contains('hit'))];
+        }""")
+        assert under_pointer[0] == under_pointer[1], f"Hjulet på TV:n stannade på fel fält efter omladdning: {under_pointer}"
         shot(tv, "08c-tv-hjul-landat")
         shot(p1, "08d-spelare-hjul")
         shot(host, "08e-host-hjul")
