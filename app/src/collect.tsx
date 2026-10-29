@@ -1,6 +1,6 @@
 // Vyer för insamlingsrundor ("Alla svarar"): TV, spelare och host.
 // Samma byggstenar ska återanvändas av kommande rundtyper med hemliga svar.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ClientMsg, CollectResult, HostState, PlayerPublic } from "../shared/types";
 import { COLLECT_MAX_LEN } from "../shared/types";
 import { useCountdown } from "./lib/useRoom";
@@ -144,10 +144,14 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
 export function CollectHost({ state, send, serverNow }: { state: HostState; send: Send; serverNow: () => number }) {
   const c = state.collect;
   const h = state.collectHost;
+  // Bocken slår om direkt; serverns nästa state är facit och nollställer de lokala ändringarna.
+  const [local, setLocal] = useState<Record<string, boolean>>({});
+  const serverMarks = h?.correct.join(",");
+  useEffect(() => setLocal({}), [serverMarks]);
   if (!c || !h) return null;
   const judging = state.phase === "collect" || state.phase === "judge";
   const missing = state.players.filter((p) => !h.answers.some((a) => a.playerId === p.id));
-  const right = new Set(h.correct);
+  const right = new Set(h.answers.map((a) => a.playerId).filter((id) => local[id] ?? h.correct.includes(id)));
   const firstRight = h.answers.find((a) => right.has(a.playerId))?.playerId;
 
   if (!judging) {
@@ -170,7 +174,11 @@ export function CollectHost({ state, send, serverNow }: { state: HostState; send
               <li key={a.playerId}>
                 <label className={`mark${ok ? " on" : ""}`}>
                   <input type="checkbox" checked={ok} aria-label={`${p?.name ?? "Okänd"} svarade rätt`}
-                    onChange={(e) => send({ t: "host:mark", playerId: a.playerId, correct: e.target.checked })} />
+                    onChange={(e) => {
+                      const on = e.target.checked;
+                      setLocal((l) => ({ ...l, [a.playerId]: on }));
+                      send({ t: "host:mark", playerId: a.playerId, correct: on });
+                    }} />
                   <span className="n">{i + 1}</span>
                   <span className="who" style={{ color: p?.color }}>{p?.name ?? "Okänd"}</span>
                   <span className="txt">”{a.text}”</span>

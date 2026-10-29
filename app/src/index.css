@@ -201,7 +201,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .answered.done .state { color: var(--chalk); }
 
 .collect-results { list-style: none; padding: 0; margin: 0; width: min(900px, 100%); display: flex; flex-direction: column; gap: 10px; }
-.collect-results li { display: grid; grid-template-columns: minmax(80px, 1fr) 2fr auto; gap: 16px; align-items: center; text-align: left; padding: 12px 18px; border-radius: 14px; background: var(--studio-deep); border-left: 8px solid var(--c); animation: drop 380ms cubic-bezier(.2,1.6,.4,1) both; }
+.collect-results li { display: grid; grid-template-columns: 9em minmax(0, 1fr) 15em; gap: 16px; align-items: center; text-align: left; padding: 12px 18px; border-radius: 14px; background: var(--studio-deep); border-left: 8px solid var(--c); animation: drop 380ms cubic-bezier(.2,1.6,.4,1) both; }
 .collect-results .who { font: 800 1.2rem var(--display); }
 .collect-results .txt { font-size: 1.15rem; overflow-wrap: anywhere; }
 .collect-results .meta { display: flex; gap: 10px; align-items: center; justify-content: flex-end; white-space: nowrap; }

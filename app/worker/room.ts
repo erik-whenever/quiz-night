@@ -296,7 +296,8 @@ export class Room implements DurableObject {
     }
 
     if (m.t === "answer") {
-      if (!c.playerId || s.phase !== "collect" || !s.collect) return;
+      if (!c.playerId || !s.collect) return;
+      if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
       if (!s.players.some((x) => x.id === c.playerId)) return;
       const err = submitAnswer(s.collect, c.playerId, m.text);
       if (err) return this.send(c, { t: "error", message: err });
