@@ -7,6 +7,7 @@ import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
 import { OrderReveal, SkillHost, SkillPlay, SkillTv } from "./skill";
 import { SKILLS } from "../shared/skill";
+import { sfx } from "./lib/sound";
 
 type Send = (m: ClientMsg) => void;
 const secs = (ms: number) => (ms / 1000).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " s";
@@ -146,7 +147,7 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
         <div className={`choice-buttons${choices.length > 4 ? " many" : ""}`} role="group" aria-label="Välj svar">
           {choices.map((ch, i) => (
             <button key={ch} className={`choice-btn${removed.has(ch) ? " gone" : ""}`} disabled={pending || removed.has(ch)} data-letter={CHOICE_LETTERS[i]}
-              onClick={() => { if (pending) return; writeDraft(key, ch); setSentKey(key); send({ t: "answer", text: ch }); }}>
+              onClick={() => { if (pending) return; sfx.lock(); writeDraft(key, ch); setSentKey(key); send({ t: "answer", text: ch }); }}>
               <span className="letter">{CHOICE_LETTERS[i]}</span><span className="txt">{ch}</span>
             </button>
           ))}

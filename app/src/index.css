@@ -365,3 +365,20 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .choice-buttons.many .choice-btn { min-height: 56px; font-size: 1.05rem; padding: 10px; gap: 10px; }
 .choice-btn.gone { opacity: 0.25; text-decoration: line-through; }
 .choice-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+
+/* TV: musikknappen uppe till vänster, diskret */
+.music-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 5; opacity: 0.75; }
+.music-toggle:hover { opacity: 1; }
+
+/* Last hit: scenen med bågskytt och creep */
+.lh-scene { width: 100%; max-width: 420px; height: auto; overflow: visible; }
+.lh-hp { font: 800 11px var(--display); fill: var(--chalk); }
+.lh-float { font: 800 16px var(--display); }
+.lh-float.ally { fill: var(--mist); }
+.lh-float.mine { fill: var(--signal); }
+.lh-float.gold { fill: #ffd23f; font-size: 20px; }
+.lh-creep { transition: opacity 300ms; }
+.lh-creep.hit { opacity: 0.35; }
+.lh-creep.denied { opacity: 0.25; filter: grayscale(1); }
+.lh-shoot { position: relative; overflow: hidden; }
+.lh-shoot::after { content: ""; position: absolute; left: 0; bottom: 0; height: 6px; width: var(--cd, 0%); background: var(--studio-ink); opacity: 0.5; }

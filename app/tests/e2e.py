@@ -782,29 +782,29 @@ def main():
         shot(tv, "30-tv-skill")
         shot(p1, "31-spelare-skill-intro")
         p2.get_by_role("button", name="Starta").click()
-        expect(p2.get_by_role("button", name="Last hit")).to_be_visible()
+        expect(p2.get_by_role("button", name="Skjut")).to_be_visible()
         p2.reload()  # försöket är förbrukat
         expect(host.get_by_label("Skill-resultat").locator("li", has_text="Tobbe")).to_contain_text("Diskad")
         p1.get_by_role("button", name="Starta").click()
-        expect(p1.get_by_role("button", name="Last hit")).to_be_visible()
+        expect(p1.get_by_role("button", name="Skjut")).to_be_visible()
+        p1.wait_for_timeout(1500)
         shot(p1, "32-spelare-lasthit")
-        # Tryck inifrån sidan i samma bildruta som creepen hamnar under strecket (CI-maskinen är för seg för rundresor).
+        # Pilen tar BOW_DRAW + FLIGHT ms: skjut så att den landar strax efter att creepen gått under strecket.
+        # Tidpunkterna ligger i data-attribut; trycket görs inifrån sidan (CI-maskinen är för seg för rundresor).
         p1.evaluate("""async () => {
           const frame = () => new Promise((r) => requestAnimationFrame(r));
+          const el = () => document.querySelector('.lasthit');
           for (let i = 0; i < 3; i++) {
             const t0 = performance.now();
-            for (;;) {
-              const e = document.querySelector('.lasthit');
-              if (e && e.dataset.running === '1' && +e.dataset.hp > 0 && +e.dataset.hp <= +e.dataset.dmg) break;
-              if (performance.now() - t0 > 20000) throw new Error('creepen kom aldrig under strecket');
-              await frame();
-            }
-            document.querySelector('[aria-label="Last hit"]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
-            await new Promise((r) => setTimeout(r, 1100));
+            while (!(el() && el().dataset.running === '1')) { if (performance.now() - t0 > 15000) throw new Error('creep startade aldrig'); await frame(); }
+            const fireAt = +el().dataset.enterAt - +el().dataset.lead + 90;
+            while (performance.now() < fireAt) await frame();
+            document.querySelector('[aria-label="Skjut"]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+            while (el() && el().dataset.running === '1') { if (performance.now() - t0 > 20000) throw new Error('creepen tog aldrig slut'); await frame(); }
           }
         }""")
         expect(p1.get_by_text("Klart!")).to_be_visible(timeout=5000)
-        expect(p1.locator(".locked-text")).to_contain_text("last hits")
+        expect(p1.locator(".locked-text")).to_contain_text("3/3 last hits · 3 pilar")
         finish_round("33-tv-lasthit-resultat")
         res_rows = tv.get_by_label("Allas svar").locator("li")
         expect(res_rows.nth(0)).to_contain_text("Erik")

@@ -25,7 +25,7 @@ export interface SkillSpec {
 }
 
 export const SKILLS: Record<SkillKind, { name: string; info: string; seconds: number; lowerBetter: boolean; byAbs?: boolean }> = {
-  lasthit: { name: "Last hit", info: "Creepen tappar HP. Tryck när den är under ditt strecket, men innan någon annan tar den. Tre creeps.", seconds: 45, lowerBetter: true },
+  lasthit: { name: "Last hit", info: "Skjut så att pilen träffar när creepen är under ditt gula streck. Bågen spänns och pilen flyger en halv sekund, så du måste skjuta i förväg. För tidigt: du skadar bara. För sent: denied. Tre creeps.", seconds: 50, lowerBetter: true },
   aim: { name: "Flick", info: "Tio mål dyker upp ett i taget. Träffa dem så snabbt du kan. Miss kostar +0,5 s.", seconds: 35, lowerBetter: true },
   stopwatch: { name: "Stoppa klockan", info: "Klockan blir svart efter 3 sekunder. Stoppa den så nära målet du kan.", seconds: 35, lowerBetter: true, byAbs: true },
   order: { name: "Ordna rätt", info: "Tryck i rätt ordning. Ångra om du ångrar dig.", seconds: 45, lowerBetter: true },
@@ -35,6 +35,10 @@ export const SKILL_KINDS = Object.keys(SKILLS) as SkillKind[];
 /** Poäng efter placering bland godkända resultat. Delad placering ger samma poäng. */
 export const SKILL_POINTS = [3, 2, 1];
 export const LASTHIT_CREEPS = 3;
+/** Last hit: tid att spänna bågen, pilens flygtid och tid innan nästa pil (ms). */
+export const BOW_DRAW_MS = 150;
+export const ARROW_FLIGHT_MS = 500;
+export const BOW_COOLDOWN_MS = 900;
 export const AIM_TARGETS = 10;
 export const AIM_MISS_MS = 500;
 
@@ -71,7 +75,7 @@ export function lasthitCourse(seed: number): Creep[] {
       hp = Math.max(1, hp - Math.min(r.int(6, 17), hp - 1));
       hits.push({ at, hp });
     }
-    at += r.int(380, 700); // fönstret: från sista träffen över strecket till dödande träffen
+    at += r.int(450, 800); // fönstret: från sista träffen över strecket till dödande träffen
     hits.push({ at, hp: 0 });
     return { dmg, hits };
   });
@@ -112,7 +116,7 @@ export const correctOrder = (items: OrderItem[]) => [...items].sort((a, b) => a.
 
 /**
  * Ett rapporterat resultat. value tolkas per typ:
- * lasthit: (missade creeps)·100000 + summa reaktionstid ms för träffarna
+ * lasthit: (missade creeps)·100000 + antal pilar·100 (färre pilar vinner vid lika många last hits)
  * aim: total tid ms inkl. straff · stopwatch: stopptid − mål i ms (med tecken)
  * order: antal par i fel ordning (servern räknar själv) · pour: slutnivå − streck i tiondels procent (med tecken)
  * ok = false: diskad (spill, alla creeps missade, klockan aldrig stoppad).
@@ -152,7 +156,8 @@ export function skillText(kind: SkillKind, r: SkillResult, itemsCount = 0): stri
   switch (kind) {
     case "lasthit": {
       const hits = LASTHIT_CREEPS - Math.floor(v / 100000);
-      return hits === 0 ? "Inga last hits" : `${hits}/${LASTHIT_CREEPS} last hits · ${s2((v % 100000) / hits)} s snitt`;
+      const arrows = Math.round((v % 100000) / 100);
+      return `${hits === 0 ? "Inga last hits" : `${hits}/${LASTHIT_CREEPS} last hits`} · ${arrows} ${arrows === 1 ? "pil" : "pilar"}`;
     }
     case "aim": return `${s2(v)} s`;
     case "stopwatch": return r.ok ? `${v >= 0 ? "+" : "−"}${s2(Math.abs(v))} s` : "Stoppade aldrig";

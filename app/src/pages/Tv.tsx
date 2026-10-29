@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { Crown } from "../App";
 import { useRoom } from "../lib/useRoom";
-import { sfx } from "../lib/sound";
+import { music, sfx } from "../lib/sound";
 import { Podium, Scorebar } from "../components";
 import { CollectTv } from "../collect";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
@@ -11,6 +11,21 @@ import { EffectTags, TeamBoard, TeamPodium } from "../teams";
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
   const { state, error, serverNow } = useRoom(code, "tv");
+  // Bakgrundsmusik: på som standard, kommer ihåg valet. Ljud kräver ett klick på sidan först (webbläsarregel).
+  const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem("kronan.musik") !== "av"; } catch { return true; } });
+  const [unlocked, setUnlocked] = useState(false);
+  const phase = state?.phase;
+  useEffect(() => {
+    if (!musicOn || !unlocked || !phase || phase === "finished") { music.stop(); return; }
+    music.start(phase === "collect" ? "think" : "chill");
+    music.mood(phase === "collect" ? "think" : "chill");
+  }, [musicOn, unlocked, phase]);
+  useEffect(() => () => music.stop(), []);
+  const toggleMusic = () => {
+    const on = !musicOn;
+    setMusicOn(on);
+    try { localStorage.setItem("kronan.musik", on ? "på" : "av"); } catch { /* */ }
+  };
 
   const lastAt = useRef(0);
   useEffect(() => {
@@ -21,6 +36,7 @@ export default function Tv({ code }: { code: string }) {
       if (ev.correct.length) { sfx.correct(); confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); } else sfx.wrong();
     }
     if (ev.kind === "finished") {
+      music.stop();
       sfx.crown();
       const end = Date.now() + 2500;
       (function frame() {
@@ -30,6 +46,10 @@ export default function Tv({ code }: { code: string }) {
       })();
     }
   }, [state?.lastEvent]);
+  const qRef = useRef(-1);
+  useEffect(() => {
+    if (state?.phase === "collect" && state.qIndex !== qRef.current) { qRef.current = state.qIndex; sfx.question(); }
+  }, [state?.phase, state?.qIndex]);
 
   if (!state) return <main className="tv"><p className="muted">{error || `Ansluter till ${code}…`}</p></main>;
 
@@ -37,7 +57,10 @@ export default function Tv({ code }: { code: string }) {
   const wheel = pendingWheel(state);
 
   return (
-    <main className="tv" onClick={sfx.unlock}>
+    <main className="tv" onClick={() => { sfx.unlock(); setUnlocked(true); }}>
+      <button className="btn sm ghost music-toggle" aria-pressed={musicOn} onClick={(e) => { e.stopPropagation(); sfx.unlock(); setUnlocked(true); toggleMusic(); }}>
+        {musicOn ? (unlocked ? "♪ Musik på" : "♪ Klicka för ljud") : "♪ Musik av"}
+      </button>
       <div className="tv-head">
         <div className="row"><div style={{ width: 44 }}><Crown /></div><h2>{state.title}</h2></div>
         <div style={{ textAlign: "right" }}>

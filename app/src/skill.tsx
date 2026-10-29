@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ClientMsg, HostState, PlayerPublic } from "../shared/types";
 import {
-  AIM_MISS_MS, AIM_TARGETS, LASTHIT_CREEPS, SKILLS, type SkillKind, type SkillResult, type SkillSpec,
+  AIM_MISS_MS, AIM_TARGETS, ARROW_FLIGHT_MS, BOW_COOLDOWN_MS, BOW_DRAW_MS, LASTHIT_CREEPS, SKILLS, type SkillKind, type SkillResult, type SkillSpec,
   aimCourse, lasthitCourse, pourCourse, rankSkill, skillText,
 } from "../shared/skill";
 import { useCountdown } from "./lib/useRoom";
@@ -37,82 +37,164 @@ function useFrame(fn: (t: number) => void, on = true) {
 }
 
 // ===== 1. Last hit =====
+//
+// Andra creeps nöter ner creepens HP i ryck (banan från fröet, samma för alla). Ett tryck spänner bågen
+// (BOW_DRAW_MS) och pilen flyger ARROW_FLIGHT_MS. Skadan räknas först när pilen träffar:
+// HP ≤ din skada vid träffen = last hit. Högre = du skadar bara (och gör det lättare för andra att ta den).
+// Dör creepen av någon annans slag innan din pil når fram = denied. Ny pil efter BOW_COOLDOWN_MS.
 
-type CreepOutcome = "hit" | "miss" | "denied";
+type CreepOutcome = "hit" | "denied";
+interface Arrow { firedAt: number; landsAt: number }
+interface Float { id: number; text: string; kind: "ally" | "mine" | "gold"; at: number }
+
+const LH_START_MS = 900;
+const LH_PAUSE_MS = 1300;
 
 function LastHit({ seed, onDone }: { seed: number; onDone: Done }) {
   const course = useRef(lasthitCourse(seed)).current;
   const [idx, setIdx] = useState(0);
-  const [t0, setT0] = useState(() => now() + 900);
-  const [hp, setHp] = useState(100);
-  const [outcomes, setOutcomes] = useState<{ o: CreepOutcome; ms: number }[]>([]);
+  const [t0, setT0] = useState(() => now() + LH_START_MS);
+  const [, setFrame] = useState(0);
+  const [outcomes, setOutcomes] = useState<CreepOutcome[]>([]);
   const [flash, setFlash] = useState<CreepOutcome | null>(null);
+  const arrows = useRef<Arrow[]>([]);
+  const ourDmg = useRef(0);
+  const othersSeen = useRef(0);
+  const shots = useRef(0);
+  const floats = useRef<Float[]>([]);
+  const ended = useRef(-1);
   const creep = course[idx];
   const running = !flash && idx < LASTHIT_CREEPS;
 
-  const hpAt = (t: number) => {
+  /** HP efter de andra creepsens slag fram till tiden e (ms sedan creepen började). */
+  const othersHp = (e: number) => {
     let h = 100;
-    for (const x of creep.hits) if (x.at <= t) h = x.hp;
+    for (const x of creep.hits) if (x.at <= e) h = x.hp;
     return h;
   };
-  const windowStart = creep ? (creep.hits.find((x) => x.hp <= creep.dmg)?.at ?? 0) : 0;
+  const enterAt = creep ? (creep.hits.find((x) => x.hp <= creep.dmg)?.at ?? 0) : 0;
+  const killAt = creep ? creep.hits[creep.hits.length - 1].at : 0;
 
-  const finishing = useRef(-1);
-  const finish = (o: CreepOutcome, ms: number) => {
-    if (finishing.current === idx) return; // en utgång per creep
-    finishing.current = idx;
-    const all = [...outcomes, { o, ms }];
+  const end = (o: CreepOutcome) => {
+    if (ended.current === idx) return;
+    ended.current = idx;
+    const all = [...outcomes, o];
     setOutcomes(all);
     setFlash(o);
-    if (o === "hit") { sfx.correct(); haptic.correct(); } else { sfx.wrong(); haptic.wrong(); }
+    arrows.current = [];
+    if (o === "hit") { sfx.lastHit(); haptic.correct(); floats.current.push({ id: Math.random(), text: "+ guld", kind: "gold", at: now() }); }
+    else { sfx.denied(); haptic.wrong(); }
     setTimeout(() => {
       if (all.length >= LASTHIT_CREEPS) {
-        const misses = all.filter((x) => x.o !== "hit").length;
-        const react = Math.min(99999, Math.round(all.filter((x) => x.o === "hit").reduce((s, x) => s + x.ms, 0)));
-        onDone({ value: misses * 100000 + react, ok: misses < LASTHIT_CREEPS });
+        const misses = all.filter((x) => x !== "hit").length;
+        onDone({ value: misses * 100000 + Math.min(999, shots.current) * 100, ok: misses < LASTHIT_CREEPS });
         return;
       }
-      setIdx((i) => i + 1); setHp(100); setFlash(null); setT0(now() + 700);
-    }, 900);
+      ourDmg.current = 0; othersSeen.current = 0; floats.current = [];
+      setIdx((i) => i + 1); setFlash(null); setT0(now() + 700);
+    }, LH_PAUSE_MS);
   };
 
   useFrame((t) => {
+    setFrame((f) => (f + 1) % 1000000);
     const e = t - t0;
-    if (e < 0) return;
-    const h = hpAt(e);
-    if (h !== hp) setHp(h);
-    if (h <= 0) finish("denied", 0);
+    if (e < 0 || ended.current === idx) return;
+    // De andras slag (visa skadesiffror)
+    const seen = creep.hits.filter((x) => x.at <= e).length;
+    while (othersSeen.current < seen) {
+      const h = creep.hits[othersSeen.current];
+      const prev = othersSeen.current === 0 ? 100 : creep.hits[othersSeen.current - 1].hp;
+      floats.current.push({ id: Math.random(), text: `−${Math.round((prev - h.hp) * 5.5)}`, kind: "ally", at: t });
+      othersSeen.current += 1;
+      sfx.thud();
+    }
+    // Pilar som når fram, i ordning
+    for (const a of [...arrows.current].sort((x, y) => x.landsAt - y.landsAt)) {
+      if (a.landsAt > t) break;
+      arrows.current = arrows.current.filter((x) => x !== a);
+      const hpAt = othersHp(a.landsAt - t0) - ourDmg.current;
+      if (hpAt <= 0) continue; // redan död
+      if (hpAt <= creep.dmg) return end("hit");
+      ourDmg.current += creep.dmg;
+      floats.current.push({ id: Math.random(), text: `−${Math.round(creep.dmg * 5.5)}`, kind: "mine", at: t });
+      sfx.arrowHit();
+    }
+    if (othersHp(e) - ourDmg.current <= 0) end("denied");
+    floats.current = floats.current.filter((f) => t - f.at < 900);
   }, running);
 
-  const tap = () => {
-    if (!running) return;
-    const e = now() - t0;
-    if (e < 0) return;
-    const h = hpAt(e);
-    if (h > 0 && h <= creep.dmg) finish("hit", Math.max(0, e - windowStart));
-    else if (h > creep.dmg) finish("miss", 0);
+  const t = now();
+  const e = t - t0;
+  const hp = creep ? Math.max(0, (e < 0 ? 100 : othersHp(e)) - ourDmg.current) : 0;
+  const last = arrows.current.length ? Math.max(...arrows.current.map((a) => a.firedAt)) : -Infinity;
+  const cooldownLeft = Math.max(0, BOW_COOLDOWN_MS - (t - last));
+  const drawing = arrows.current.find((a) => t - a.firedAt < BOW_DRAW_MS);
+
+  const shoot = () => {
+    if (!running || e < 0 || cooldownLeft > 0) return;
+    shots.current += 1;
+    const firedAt = now();
+    arrows.current.push({ firedAt, landsAt: firedAt + BOW_DRAW_MS + ARROW_FLIGHT_MS });
+    sfx.bowDraw();
+    setTimeout(() => sfx.bowRelease(), BOW_DRAW_MS);
+    haptic.buzz();
   };
 
-  const label = flash === "hit" ? "Last hit!" : flash === "miss" ? "För tidigt, miss" : flash === "denied" ? "Denied!" : now() < t0 ? "Redo…" : "Vänta på rätt läge";
+  const label = flash === "hit" ? "Last hit!" : flash === "denied" ? "Denied!" : e < 0 ? "Redo…" : "Skjut i förväg, pilen tar en halv sekund";
+  // Scenens koordinater (viewBox 360×200)
+  const BOW_X = 58, CREEP_X = 290, Y = 128;
   return (
-    <div className="skill-game lasthit" data-hp={hp} data-dmg={creep?.dmg ?? 0} data-running={running ? "1" : "0"}>
-      <p className="muted small">Creep {Math.min(idx + 1, LASTHIT_CREEPS)} av {LASTHIT_CREEPS}</p>
-      <div className={`creep${flash ? " " + flash : ""}`} aria-hidden>
-        <svg viewBox="0 0 100 80" width="140" height="112">
-          <ellipse cx="50" cy="48" rx="34" ry="26" fill="#6b4e9b" />
-          <circle cx="38" cy="42" r="6" fill="#ffd23f" /><circle cx="62" cy="42" r="6" fill="#ffd23f" />
-          <path d="M36 60 Q50 52 64 60" stroke="#070b3a" strokeWidth="4" fill="none" />
-          <path d="M20 30 L30 40 M80 30 L70 40" stroke="#6b4e9b" strokeWidth="8" strokeLinecap="round" />
-        </svg>
-      </div>
-      <div className="hpbar" role="meter" aria-label="Creepens HP" aria-valuenow={hp} aria-valuemin={0} aria-valuemax={100}>
-        <div className="fill" style={{ width: `${hp}%`, background: hp <= (creep?.dmg ?? 0) ? "var(--go)" : "var(--buzz)" }} />
-        <div className="dmg" style={{ left: `${creep?.dmg ?? 0}%` }} title="Din skada" />
-        <span className="hpnum">{Math.round(hp * 5.5)} HP</span>
-      </div>
+    <div className="skill-game lasthit" data-hp={hp.toFixed(1)} data-dmg={creep?.dmg ?? 0} data-running={running && e >= 0 ? "1" : "0"}
+      data-enter-at={(t0 + enterAt).toFixed(0)} data-kill-at={(t0 + killAt).toFixed(0)} data-lead={BOW_DRAW_MS + ARROW_FLIGHT_MS}>
+      <p className="muted small">Creep {Math.min(idx + 1, LASTHIT_CREEPS)} av {LASTHIT_CREEPS} · din skada {Math.round((creep?.dmg ?? 0) * 5.5)}</p>
+      <svg className="lh-scene" viewBox="0 0 360 200" role="img" aria-label="Bågskytt och creep">
+        <defs>
+          <linearGradient id="lh-ground" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#2b3a8f" /><stop offset="1" stopColor="#141c5c" /></linearGradient>
+        </defs>
+        <rect x="0" y="150" width="360" height="50" fill="url(#lh-ground)" rx="10" />
+        {/* Bågskytten */}
+        <g transform={`translate(${BOW_X - 26} ${Y - 46})`}>
+          <circle cx="14" cy="10" r="9" fill="#ffd23f" />
+          <path d="M14 19 L14 52 M14 52 L4 74 M14 52 L24 74 M14 28 L34 34" stroke="#f4f5ff" strokeWidth="5" strokeLinecap="round" fill="none" />
+          <path d="M36 6 Q58 36 36 66" stroke="#c98a3c" strokeWidth="5" fill="none" strokeLinecap="round" />
+          <path d={`M36 6 L${drawing ? 22 : 36} 36 L36 66`} stroke="#f4f5ff" strokeWidth="1.5" fill="none" />
+        </g>
+        {/* Creepen med HP-mätare och strecket för din skada */}
+        <g className={`lh-creep${flash ? " " + flash : ""}`} transform={`translate(${CREEP_X - 40} ${Y - 40})`}>
+          <rect x="-4" y="-26" width="88" height="12" rx="4" fill="#070b3a" />
+          <rect x="-4" y="-26" width={(88 * hp) / 100} height="12" rx="4" fill={hp <= (creep?.dmg ?? 0) ? "#2fe08f" : "#ff3b47"} />
+          <rect x={-4 + (88 * (creep?.dmg ?? 0)) / 100 - 1.5} y="-30" width="3" height="20" fill="#ffd23f" />
+          <text x="40" y="-33" textAnchor="middle" className="lh-hp" role="meter" aria-label="Creepens HP" aria-valuenow={Math.round(hp)}>{Math.round(hp * 5.5)} HP</text>
+          <ellipse cx="40" cy="48" rx="34" ry="26" fill="#6b4e9b" />
+          <circle cx="28" cy="42" r="6" fill="#ffd23f" /><circle cx="52" cy="42" r="6" fill="#ffd23f" />
+          <path d="M26 60 Q40 52 54 60" stroke="#070b3a" strokeWidth="4" fill="none" />
+          <path d="M10 30 L20 40 M70 30 L60 40" stroke="#6b4e9b" strokeWidth="8" strokeLinecap="round" />
+        </g>
+        {/* Pilar i luften */}
+        {arrows.current.filter((a) => t - a.firedAt >= BOW_DRAW_MS).map((a) => {
+          const k = Math.min(1, (t - a.firedAt - BOW_DRAW_MS) / ARROW_FLIGHT_MS);
+          const x = BOW_X + 12 + (CREEP_X - 34 - BOW_X - 12) * k;
+          const y = Y - 10 - Math.sin(Math.PI * k) * 26;
+          const ang = Math.atan2(-Math.cos(Math.PI * k) * 26 * Math.PI, CREEP_X - BOW_X) * 180 / Math.PI;
+          return (
+            <g key={a.firedAt} transform={`translate(${x} ${y}) rotate(${ang})`}>
+              <line x1="-26" y1="0" x2="0" y2="0" stroke="#f4f5ff" strokeWidth="3" strokeLinecap="round" />
+              <path d="M0 -5 L9 0 L0 5 Z" fill="#ffd23f" />
+              <path d="M-26 0 L-31 -5 M-26 0 L-31 5" stroke="#ff9f45" strokeWidth="2" />
+            </g>
+          );
+        })}
+        {floats.current.map((f) => (
+          <text key={f.id} x={CREEP_X + (f.kind === "mine" ? 34 : f.kind === "gold" ? 0 : -44)} y={Y - 82 - (t - f.at) / 25} textAnchor="middle" className={`lh-float ${f.kind}`}
+            opacity={Math.max(0, 1 - (t - f.at) / 900)}>{f.text}</text>
+        ))}
+      </svg>
       <p className="skill-status" aria-live="polite">{label}</p>
-      <button className="btn primary big skill-tap" onPointerDown={(e) => { e.preventDefault(); tap(); }} aria-label="Last hit">Slå!</button>
-      <ol className="lasthit-log">{outcomes.map((x, i) => <li key={i} className={x.o}>{x.o === "hit" ? "✓" : "✕"}</li>)}</ol>
+      <button className="btn primary big skill-tap lh-shoot" aria-label="Skjut" disabled={!running || e < 0}
+        style={{ "--cd": `${(cooldownLeft / BOW_COOLDOWN_MS) * 100}%` } as React.CSSProperties}
+        onPointerDown={(ev) => { ev.preventDefault(); shoot(); }}>{cooldownLeft > 0 ? "Spänner…" : "Skjut!"}</button>
+      <ol className="lasthit-log">{outcomes.map((x, i) => <li key={i} className={x}>{x === "hit" ? "✓" : "✕"}</li>)}</ol>
+      <p className="muted small">Pilar: {shots.current}</p>
     </div>
   );
 }
