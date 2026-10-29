@@ -50,7 +50,7 @@ def main():
         if not line or line.startswith("#"):
             continue
         site, _, page = line.partition(":")
-        slug = re.sub(r"[^A-Za-z0-9]+", "-", page).strip("-") or "sida"
+        slug = re.sub(r"[^A-Za-z0-9]+", "-", urllib.parse.quote(page)).strip("-")
         if site == "wikiwiki":
             url = "https://wikiwiki.jp/hon/" + urllib.parse.quote(page)
             st, body = get(url)
