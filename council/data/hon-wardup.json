@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-10-29T07:55Z",
+  "fetchedAt": "2026-10-29T07:56Z",
   "home": 200,
   "tries": [
     {
@@ -131,5 +131,7 @@
   "scripts": [
     "/assets/index-0vf1QnQi.js"
   ],
-  "apiHints": []
+  "apiHints": [
+    "/api/matches/hero-icon/${e}"
+  ]
 }
