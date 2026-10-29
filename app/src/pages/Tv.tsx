@@ -72,7 +72,7 @@ export default function Tv({ code }: { code: string }) {
             </div>
           )}
           {state.phase === "buzzed" && <p className="qmeta">{left > 0 ? "har ordet, svara i Discord" : "Tiden är ute, hosten avgör"}</p>}
-          {state.revealedAnswer && <div className="answer-reveal">{state.revealedAnswer}</div>}
+          {state.revealedAnswer && state.question.mode !== "skill" && <div className="answer-reveal">{state.revealedAnswer}</div>}
           {state.collect && <CollectTv state={state} serverNow={serverNow} />}
           <StealNote state={state} />
         </div>

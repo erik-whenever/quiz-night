@@ -97,6 +97,7 @@ export default function Play({ code }: { code: string }) {
     : ev?.kind === "judged" && ev.correct.includes(me.id) ? "flash-good" : "";
   const collecting = !!state.collect && isCollectMode(state.question?.mode);
   const choice = state.question?.mode === "choice";
+  const skill = state.question?.mode === "skill";
 
   let status = "";
   if (state.phase === "lobby") status = "Väntar på att hosten startar…";
@@ -104,7 +105,7 @@ export default function Play({ code }: { code: string }) {
   else if (state.phase === "buzzed") {
     const who = state.players.find((p) => p.id === state.buzz?.playerId);
     status = myBuzz ? (left > 0 ? "Du har ordet! Säg svaret i Discord" : "Tiden är ute, hosten avgör") : `${who?.name ?? "Någon"} har ordet…`;
-  } else if (state.phase === "collect") status = choice ? "Välj rätt alternativ!" : "Alla svarar! Skriv ditt svar";
+  } else if (state.phase === "collect") status = skill ? "Skill-utmaning!" : choice ? "Välj rätt alternativ!" : "Alla svarar! Skriv ditt svar";
   else if (state.phase === "judge") status = "Hosten rättar…";
   else if (state.phase === "reveal") status = "Svaret visas";
 
@@ -149,7 +150,8 @@ export default function Play({ code }: { code: string }) {
             </div>
           )}
           <p className="muted small" style={{ textAlign: "center" }}>
-            {collecting
+            {skill ? "Skill-utmaning: bäst får 3 p, tvåa 2 p, trea 1 p."
+              : collecting
               ? `${choice ? "Svarsalternativ" : "Alla svarar"}: rätt ger poäng och snabbaste rätt får +${state.settings.fastestBonus}. Fel kostar inget.`
               : `Rätt ger poäng. Fel eller för långsam kostar ${state.settings.penalty} p. Mellanslag funkar också.`}
           </p>

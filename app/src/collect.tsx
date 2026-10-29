@@ -5,6 +5,7 @@ import type { ClientMsg, CollectResult, HostState, PlayerPublic } from "../share
 import { CHOICE_LETTERS, COLLECT_MAX_LEN, MODE_LABEL } from "../shared/types";
 import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
+import { OrderReveal, SkillHost, SkillPlay, SkillTv } from "./skill";
 
 type Send = (m: ClientMsg) => void;
 const secs = (ms: number) => (ms / 1000).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " s";
@@ -48,11 +49,13 @@ function ResultList({ state, results, highlight }: { state: HostState; results: 
           <li key={r.playerId} className={`${r.correct ? "right" : "wrong"}${highlight === r.playerId ? " me" : ""}`}
             style={{ "--c": p?.color ?? "var(--mist)", animationDelay: `${i * 120}ms` } as React.CSSProperties}>
             <span className="who">{p?.name ?? "Okänd"}</span>
-            <span className="txt">”{r.text}”</span>
+            <span className="txt">{r.place !== undefined ? r.text : `”${r.text}”`}</span>
             <span className="meta">
-              {r.fastest && <span className="fastest">Snabbast</span>}
-              <span className="time">{secs(r.ms)}</span>
-              <span className="verdict">{r.correct ? `Rätt ${plus(r.delta)}` : "Fel"}</span>
+              {r.fastest && r.place === undefined && <span className="fastest">Snabbast</span>}
+              {r.place === undefined && <span className="time">{secs(r.ms)}</span>}
+              <span className="verdict">{r.place !== undefined
+                ? (r.place > 0 ? `${r.place}:a ${r.delta ? plus(r.delta) : ""}`.trim() : "Diskad")
+                : r.correct ? `Rätt ${plus(r.delta)}` : "Fel"}</span>
             </span>
           </li>
         );
@@ -88,6 +91,12 @@ const countPicks = (results: CollectResult[]) =>
 export function CollectTv({ state, serverNow }: { state: HostState; serverNow: () => number }) {
   const c = state.collect;
   if (!c) return null;
+  if (c.mode === "skill") {
+    if (state.phase === "reveal" && c.results) {
+      return <div className="stack" style={{ alignItems: "center", width: "100%" }}><OrderReveal state={state} /><ResultList state={state} results={c.results} /></div>;
+    }
+    return <SkillTv state={state} serverNow={serverNow} />;
+  }
   const choice = c.mode === "choice";
   if (state.phase === "reveal" && c.results) {
     return (
@@ -122,6 +131,7 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
   const [sentKey, setSentKey] = useState("");
   const c = state.collect;
   if (!c) return null;
+  if (c.mode === "skill") return <SkillPlay state={state} me={me} send={send} serverNow={serverNow} />;
   const locked = c.answered.includes(me.id);
   const pending = sentKey === key && !locked;
   const mine = c.results?.find((r) => r.playerId === me.id);
@@ -199,6 +209,10 @@ export function CollectHost({ state, send, serverNow }: { state: HostState; send
   const serverMarks = h?.correct.join(",");
   useEffect(() => setLocal({}), [serverMarks]);
   if (!c || !h) return null;
+  if (c.mode === "skill") {
+    const judgingSkill = state.phase === "collect" || state.phase === "judge";
+    return judgingSkill ? <SkillHost state={state} send={send} /> : c.results ? <ResultList state={state} results={c.results} /> : null;
+  }
   const judging = state.phase === "collect" || state.phase === "judge";
   const missing = state.players.filter((p) => !h.answers.some((a) => a.playerId === p.id));
   const right = new Set(h.answers.map((a) => a.playerId).filter((id) => local[id] ?? h.correct.includes(id)));

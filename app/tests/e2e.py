@@ -306,6 +306,79 @@ async ([pin]) => {
 }
 """
 
+# Skill-rundor på protokollnivå: frö, validering, rankning och att ordningen inte läcker.
+SKILL_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Skill', questions: [
+      { id: 'k1', text: 'Flick', answer: '', mode: 'skill', skill: { kind: 'aim' } },
+      { id: 'k2', text: 'Ordna', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'Z', value: 3 }, { label: 'X', value: 1 }, { label: 'Y', value: 2 }] } },
+      { id: 'k3', text: 'Trasig', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'A', value: 1 }] } } ] }) });
+  const { code, hostKey } = await res.json();
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const connect = (role, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [], raw: [], errors: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'error') c.errors.push(m.message);
+      if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const host = await connect('host', hostKey);
+  const tv = await connect('tv');
+  const ps = {};
+  for (const n of ['A', 'B', 'C', 'D']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
+  await sleep(300);
+  const out = {};
+  const name = (st, id) => st.players.find((p) => p.id === id).name;
+  send(host, { t: 'host:start' });
+  await until(ps.A, (s) => s?.phase === 'collect');
+  await until(ps.D, (s) => s?.phase === 'collect');
+  out.mode = ps.A.state.question.mode;
+  out.seedSame = typeof ps.A.state.collect.seed === 'number' && ps.A.state.collect.seed === ps.D.state.collect.seed;
+  send(ps.A, { t: 'skill', value: 5, ok: true });          // för snabbt för tio mål
+  send(ps.A, { t: 'skill', value: 'snabb', ok: true });
+  await sleep(150);
+  out.badRejected = ps.A.errors.slice();
+  send(ps.A, { t: 'skill', value: 4000, ok: true });
+  send(ps.B, { t: 'skill', value: 5200, ok: true });
+  send(ps.C, { t: 'skill', value: 4000, ok: true });       // delad förstaplats
+  send(ps.D, { t: 'skill', value: 120000, ok: false });
+  await until(host, (s) => s?.phase === 'judge');
+  send(host, { t: 'host:judge' });
+  const r1 = await until(tv, (s) => s?.phase === 'reveal');
+  out.places = r1.collect.results.map((r) => [name(r1, r.playerId), r.place, r.delta]).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]));
+  out.places = [...out.places.filter((x) => x[1] > 0), ...out.places.filter((x) => x[1] === 0)];
+  send(host, { t: 'host:next' });
+  await until(tv, (s) => s?.phase === 'collect' && s.qIndex === 1);
+  out.itemsHidden = tv.raw.filter((r) => r.includes('"Ordna"')).every((r) => !/"value":/.test(r));
+  send(ps.A, { t: 'skill', order: ['X', 'Z', 'Y'] });
+  send(ps.B, { t: 'skill', order: ['X', 'Y', 'Z'] });
+  await sleep(200);
+  send(host, { t: 'host:judge' });
+  const r2 = await until(tv, (s) => s?.phase === 'reveal');
+  out.order = r2.collect.results.map((r) => [name(r2, r.playerId), r.place, r.delta]);
+  out.orderReveal = r2.question.skill.items.map((i) => i.label);
+  send(host, { t: 'host:next' });
+  const r3 = await until(tv, (s) => s?.qIndex === 2);
+  out.badSpec = r3.question.mode;
+  for (const c of [host, tv, ...Object.values(ps)]) c.ws.close();
+  return out;
+}
+"""
+
 # "Alla svarar" på protokollnivå: sekretess, låsning, deadline och poäng. TV-klientens råa meddelanden granskas.
 COLLECT_JS = """
 async ([pin]) => {
@@ -951,6 +1024,115 @@ def main():
         expect(p1.get_by_role("button", name="Buzza")).to_be_enabled()
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
 
+        # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
+        sdata = host.evaluate("""async ([pin]) => {
+          const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+            body: JSON.stringify({ title: 'Skill', questions: [
+              { id: 'k1', text: 'Last hit!', answer: '', mode: 'skill', skill: { kind: 'lasthit' } },
+              { id: 'k2', text: 'Flick!', answer: '', mode: 'skill', skill: { kind: 'aim' } },
+              { id: 'k3', text: 'Stoppa klockan!', answer: '', mode: 'skill', skill: { kind: 'stopwatch', target: 3 } },
+              { id: 'k4', text: 'Häll upp!', answer: '', mode: 'skill', skill: { kind: 'pour' } },
+              { id: 'k5', text: 'Ordna serierna', answer: '', mode: 'skill', skill: { kind: 'order', prompt: 'Äldst först', items: [
+                { label: 'Game of Thrones', value: 2011 }, { label: 'How I Met Your Mother', value: 2005 }, { label: 'Breaking Bad', value: 2008 } ] } } ] }) });
+          const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""", [PIN])
+        scode = sdata["code"]
+        host.goto(f"{BASE}/host/{scode}")
+        tv.goto(f"{BASE}/tv/{scode}")
+        for page, name in [(p1, "Erik"), (p2, "Tobbe")]:
+            page.goto(f"{BASE}/play/{scode}")
+            page.get_by_label("Ditt namn").fill(name)
+            page.get_by_role("button", name="Hoppa in").click()
+            expect(page.get_by_text("Väntar på att hosten startar")).to_be_visible()
+
+        def finish_round(shot_name):
+            if host.get_by_role("button", name="Stäng utmaningen").count():
+                host.get_by_role("button", name="Stäng utmaningen").click()
+            host.get_by_role("button", name="Bekräfta och visa resultaten").click()
+            expect(tv.get_by_label("Allas svar")).to_be_visible()
+            tv.wait_for_timeout(700)
+            shot(tv, shot_name)
+
+        # 1. Last hit
+        host.get_by_role("button", name="Starta första frågan").click()
+        expect(tv.get_by_text("Spela i mobilen")).to_be_visible()
+        expect(tv.locator(".mode-tag")).to_have_text("Last hit")
+        shot(tv, "30-tv-skill")
+        shot(p1, "31-spelare-skill-intro")
+        p2.get_by_role("button", name="Starta").click()
+        expect(p2.get_by_role("button", name="Last hit")).to_be_visible()
+        p2.reload()  # försöket är förbrukat
+        expect(host.get_by_label("Skill-resultat").locator("li", has_text="Tobbe")).to_contain_text("Diskad")
+        p1.get_by_role("button", name="Starta").click()
+        for creep in range(3):
+            p1.wait_for_function("() => { const e = document.querySelector('.lasthit'); return e && e.dataset.running === '1' && +e.dataset.hp > 0 && +e.dataset.hp <= +e.dataset.dmg; }", timeout=15000)
+            if creep == 0: shot(p1, "32-spelare-lasthit")
+            p1.get_by_role("button", name="Last hit").dispatch_event("pointerdown")
+            p1.wait_for_timeout(1000)
+        expect(p1.get_by_text("Klart!")).to_be_visible(timeout=5000)
+        expect(p1.locator(".locked-text")).to_contain_text("3/3 last hits")
+        finish_round("33-tv-lasthit-resultat")
+        res_rows = tv.get_by_label("Allas svar").locator("li")
+        expect(res_rows.nth(0)).to_contain_text("Erik")
+        expect(res_rows.nth(0)).to_contain_text("1:a +3")
+        expect(res_rows.nth(1)).to_contain_text("Diskad")
+        expect(p1.get_by_text("1:a plats +3 p")).to_be_visible()
+
+        # 2. Flick
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        p1.get_by_role("button", name="Starta").click()
+        for i in range(10):
+            p1.wait_for_function(f"() => document.querySelector('.aim-field')?.dataset.target === '{i}'", timeout=5000)
+            if i == 3: shot(p1, "34-spelare-flick")
+            p1.get_by_role("button", name="Mål").dispatch_event("pointerdown")
+        expect(p1.get_by_text("Klart!")).to_be_visible()
+        finish_round("35-tv-flick-resultat")
+
+        # 3. Stoppa klockan (mål 3 s, klockan blir svart efter 3 s)
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        p1.get_by_role("button", name="Starta").click()
+        p1.wait_for_timeout(1500)
+        shot(p1, "36-spelare-stoppa-klockan")
+        p1.wait_for_timeout(1350)
+        p1.get_by_role("button", name="Stopp").dispatch_event("pointerdown")
+        expect(p1.locator(".locked-text")).to_contain_text(" s")
+        sw = p1.locator(".locked-text").inner_text()
+        assert sw.startswith(("+", "−")), f"Stoppa klockan visar fel: {sw}"
+        finish_round("37-tv-klockan-resultat")
+
+        # 4. Häll upp
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        p1.get_by_role("button", name="Starta").click()
+        pour = p1.get_by_role("button", name="Häll")
+        pour.dispatch_event("pointerdown")
+        p1.wait_for_function("() => { const e = document.querySelector('[data-level]'); return +e.dataset.level >= +e.dataset.target - 6; }", timeout=10000)
+        shot(p1, "38-spelare-hall-upp")
+        pour.dispatch_event("pointerup")
+        expect(p1.get_by_text("Klart!")).to_be_visible(timeout=5000)
+        assert "Spillde" not in p1.locator(".locked-text").inner_text(), "Häll upp spillde trots släpp under strecket"
+        finish_round("39-tv-hall-resultat")
+
+        # 5. Ordna rätt: TV och mobil visar sakerna men inte årtalen före reveal
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        for yr in ("2005", "2008", "2011"):
+            assert yr not in tv.inner_text("body") and yr not in p1.inner_text("body"), f"Årtalet {yr} läckte före reveal"
+        p1.get_by_role("button", name="Starta").click()
+        for label in ("How I Met Your Mother", "Breaking Bad", "Game of Thrones"):
+            p1.get_by_role("button", name=label).click()
+        shot(p1, "40-spelare-ordna")
+        p1.get_by_role("button", name="Lås ordning").click()
+        p2.get_by_role("button", name="Starta").click()
+        for label in ("Breaking Bad", "How I Met Your Mother", "Game of Thrones"):
+            p2.get_by_role("button", name=label).click()
+        p2.get_by_role("button", name="Lås ordning").click()
+        expect(tv.get_by_text("Hosten kollar resultaten")).to_be_visible()
+        host.get_by_role("button", name="Bekräfta och visa resultaten").click()
+        expect(tv.get_by_label("Rätt ordning").locator("li").first).to_contain_text("How I Met Your Mother")
+        expect(tv.get_by_label("Allas svar").locator("li").nth(0)).to_contain_text("Helt rätt")
+        expect(tv.get_by_label("Allas svar").locator("li").nth(1)).to_contain_text("2 av 3 par rätt")
+        tv.wait_for_timeout(700)
+        shot(tv, "41-tv-ordna-facit")
+        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+
         # Rättvis buzz: direkta websocket-klienter med simulerad ping
         raw = b.new_page()
         raw.goto(BASE + "/")
@@ -1005,6 +1187,15 @@ def main():
         assert cp["scores"] == {"A": 1, "B": 2}, f"Fel poäng efter hostens ändring: {cp['scores']}"
         assert cp["noAutoTimeout"] == "buzzed", f"Servern dömde timeout själv: {cp['noAutoTimeout']}"
         assert cp["slow"] == {"kind": "timeout", "delta": -1, "locked": True}, f"För långsam fungerar inte: {cp['slow']}"
+        sk = raw.evaluate(SKILL_JS, [PIN])
+        print("Skill:", sk)
+        assert sk["mode"] == "skill" and sk["seedSame"], f"Spelarna fick inte samma frö: {sk}"
+        assert sk["itemsHidden"], "Ordna rätt skickade värden före reveal"
+        assert sk["badRejected"] == ["Ogiltigt resultat", "Ogiltigt resultat"], f"Orimliga resultat godtogs: {sk['badRejected']}"
+        assert sk["places"] == [["A", 1, 3], ["C", 1, 3], ["B", 3, 1], ["D", 0, 0]], f"Fel rankning i Flick: {sk['places']}"
+        assert sk["order"] == [["B", 1, 3], ["A", 2, 2]], f"Fel rankning i Ordna rätt: {sk['order']}"
+        assert sk["orderReveal"] == ["X", "Y", "Z"], f"Rätt ordning visades inte vid reveal: {sk['orderReveal']}"
+        assert sk["badSpec"] == "buzz", f"Ogiltig skill-spec ska bli buzz: {sk['badSpec']}"
         assert coll["doubleAll"] == 3, f"Dubbla poäng i Alla svarar ska ge 2×1 + 1 bonus: {coll['doubleAll']}"
 
         wheel = raw.evaluate(WHEEL_JS, [PIN])

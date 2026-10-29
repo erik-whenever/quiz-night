@@ -3,6 +3,14 @@ import { TopBar } from "../App";
 import { api, repoSets, uid } from "../lib/api";
 import type { Question, QuestionMode, QuestionSet } from "../../shared/types";
 import { MODE_LABEL, QUESTION_MODES, isCollectMode, validChoices } from "../../shared/types";
+import { SKILLS, SKILL_KINDS, type OrderItem, type SkillKind, validSkill } from "../../shared/skill";
+
+/** "Breaking Bad = 2008; Game of Thrones = 2011" ↔ saker att ordna */
+const parseItems = (raw: string): OrderItem[] => raw.split(";").map((x) => x.trim()).filter(Boolean).map((x) => {
+  const [label, v] = x.split("=").map((y) => y.trim());
+  return { label: label ?? "", value: Number((v ?? "").replace(",", ".")) };
+});
+const itemsText = (items?: OrderItem[]) => (items ?? []).map((i) => `${i.label} = ${i.value}`).join("; ");
 import PinGate from "./PinGate";
 
 const blank = (): QuestionSet => ({ id: uid(), title: "", theme: "", source: "bank", updatedAt: "", questions: [] });
@@ -28,7 +36,7 @@ function parseQuick(text: string): Question[] {
 }
 
 const modeNote = (s: QuestionSet) => {
-  const parts = (["all", "choice"] as const)
+  const parts = (["all", "choice", "skill"] as const)
     .map((m) => [m, s.questions.filter((q) => q.mode === m).length] as const)
     .filter(([, n]) => n > 0).map(([m, n]) => `${n} ${MODE_LABEL[m]}`);
   return parts.length ? ` · ${parts.join(", ")}` : "";
@@ -37,7 +45,9 @@ const modeNote = (s: QuestionSet) => {
 /** Första choice-fråga med ogiltiga alternativ, som felmeddelande. */
 function choiceProblem(qs: Question[]): string {
   const i = qs.findIndex((q) => q.mode === "choice" && !validChoices(q));
-  return i < 0 ? "" : `Fråga ${i + 1}: Svarsalternativ behöver 2–6 olika alternativ, och svaret måste stå exakt som ett av dem.`;
+  if (i >= 0) return `Fråga ${i + 1}: Svarsalternativ behöver 2–6 olika alternativ, och svaret måste stå exakt som ett av dem.`;
+  const j = qs.findIndex((q) => q.mode === "skill" && !validSkill(q.skill));
+  return j < 0 ? "" : `Fråga ${j + 1}: Ordna rätt behöver 3–6 saker med olika värden, t.ex. "Breaking Bad = 2008; Game of Thrones = 2011; How I Met Your Mother = 2005".`;
 }
 
 function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved: (s: QuestionSet) => void; onCancel: () => void }) {
@@ -66,11 +76,40 @@ function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved:
             <label className="mode">Rundtyp
               <select aria-label={`Rundtyp ${i + 1}`} value={q.mode ?? "buzz"} onChange={(e) => {
                 const mode = toMode(e.target.value);
-                upd(i, { mode, choices: mode === "choice" ? (q.choices?.length ? q.choices : q.answer.trim() ? [q.answer.trim()] : []) : undefined });
+                upd(i, { mode, choices: mode === "choice" ? (q.choices?.length ? q.choices : q.answer.trim() ? [q.answer.trim()] : []) : undefined,
+                  skill: mode === "skill" ? (q.skill ?? { kind: "lasthit" }) : undefined });
               }}>
                 {QUESTION_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
               </select>
             </label>
+            {q.mode === "skill" && (
+              <div className="choices row" style={{ alignItems: "end" }}>
+                <label style={{ flex: "0 0 auto" }}>Utmaning
+                  <select aria-label={`Utmaning ${i + 1}`} value={q.skill?.kind ?? "lasthit"}
+                    onChange={(e) => upd(i, { skill: { ...q.skill, kind: e.target.value as SkillKind } })}>
+                    {SKILL_KINDS.map((k) => <option key={k} value={k}>{SKILLS[k].name}</option>)}
+                  </select>
+                </label>
+                {q.skill?.kind === "stopwatch" && (
+                  <label style={{ flex: "0 0 120px" }}>Mål (s)
+                    <input type="number" min={3} max={30} step={0.5} aria-label={`Mål ${i + 1}`} value={q.skill.target ?? 10}
+                      onChange={(e) => upd(i, { skill: { ...q.skill!, target: +e.target.value } })} />
+                  </label>
+                )}
+                {q.skill?.kind === "order" && (
+                  <>
+                    <label style={{ flex: "0 0 160px" }}>Ordning
+                      <input aria-label={`Ordning ${i + 1}`} value={q.skill.prompt ?? ""} placeholder="Äldst först"
+                        onChange={(e) => upd(i, { skill: { ...q.skill!, prompt: e.target.value } })} />
+                    </label>
+                    <label style={{ flex: 1, minWidth: 220 }}>Saker (namn = värde; …)
+                      <input aria-label={`Saker ${i + 1}`} defaultValue={itemsText(q.skill.items)} placeholder="Breaking Bad = 2008; Game of Thrones = 2011"
+                        onChange={(e) => upd(i, { skill: { ...q.skill!, items: parseItems(e.target.value) } })} />
+                    </label>
+                  </>
+                )}
+              </div>
+            )}
             {q.mode === "choice" && (
               <label className="choices">Alternativ (separera med ;)
                 <input aria-label={`Alternativ ${i + 1}`} defaultValue={(q.choices ?? []).join("; ")} placeholder="Rätt svar; Fel 1; Fel 2; Fel 3"
@@ -96,7 +135,7 @@ function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved:
       <div className="row">
         <button className="btn primary" disabled={!s.title.trim() || !s.questions.length} onClick={async () => {
           try {
-            const clean = { ...s, questions: s.questions.filter((q) => q.text.trim() && q.answer.trim()) };
+            const clean = { ...s, questions: s.questions.filter((q) => q.text.trim() && (q.answer.trim() || q.mode === "skill")) };
             const problem = choiceProblem(clean.questions);
             if (problem) return setErr(problem);
             onSaved(await api.saveSet(clean));

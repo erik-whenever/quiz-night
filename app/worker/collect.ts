@@ -6,6 +6,8 @@ import type {
   CollectAnswer, CollectHost, CollectPublic, CollectResult, QuestionMode, Settings,
 } from "../shared/types";
 import { COLLECT_GRACE_MS, COLLECT_MAX_LEN } from "../shared/types";
+import type { SkillSpec } from "../shared/skill";
+import { orderErrors, orderRight, rankSkill, skillText, validateSkill } from "../shared/skill";
 
 /** Serverns fulla tillstånd för en insamling (sparas i Durable Object-lagringen). */
 export interface CollectServer {
@@ -15,10 +17,40 @@ export interface CollectServer {
   answers: CollectAnswer[]; // i inlämningsordning
   correct: string[]; // playerIds som hosten markerat som rätt
   results?: CollectResult[]; // sätts vid rättning
+  seed?: number; // skill-rundor
 }
 
-export function startCollect(mode: CollectServer["mode"], seconds: number, now = Date.now()): CollectServer {
-  return { mode, startedAt: now, deadline: now + seconds * 1000, answers: [], correct: [] };
+export function startCollect(mode: CollectServer["mode"], seconds: number, now = Date.now(), seed?: number): CollectServer {
+  return { mode, startedAt: now, deadline: now + seconds * 1000, answers: [], correct: [], ...(seed !== undefined ? { seed } : {}) };
+}
+
+/** Lämna ett skill-resultat. Ordna rätt räknas av servern; övriga typer valideras. */
+export function submitSkill(c: CollectServer, spec: SkillSpec, playerId: string,
+  msg: { value?: unknown; ok?: unknown; order?: unknown }, now = Date.now()): string | null {
+  if (now > c.deadline + COLLECT_GRACE_MS) return "Tiden är ute";
+  if (c.answers.some((a) => a.playerId === playerId)) return "Du har redan lämnat ditt resultat";
+  let value: number, ok: boolean;
+  if (spec.kind === "order") {
+    const order = Array.isArray(msg.order) ? msg.order.map(String) : [];
+    const bad = orderErrors(spec.items!, order);
+    if (bad === null) return "Ordna alla saker först";
+    value = bad; ok = true;
+    const text = `${skillText("order", { value, ok }, order.length)} · ${orderRight(spec.items!, order)} på rätt plats`;
+    c.answers.push({ playerId, text, at: now, ms: now - c.startedAt, value, ok });
+    return null;
+  }
+  const err = validateSkill(spec.kind, msg.value, msg.ok);
+  if (err) return err;
+  value = msg.value as number; ok = msg.ok as boolean;
+  if (spec.kind === "lasthit" && value >= 300000) ok = false; // inga träffar
+  c.answers.push({ playerId, text: skillText(spec.kind, { value, ok }), at: now, ms: now - c.startedAt, value, ok });
+  return null;
+}
+
+/** Poäng för skill-rundor: 3/2/1 efter placering (· mult), sorterat efter placering. */
+export function scoreSkill(c: CollectServer, spec: SkillSpec, mult: number): CollectResult[] {
+  const ranked = rankSkill(spec.kind, c.answers.map((a) => ({ ...a, value: a.value ?? 0, ok: !!a.ok })), mult);
+  return ranked.map(({ item, place, points }) => ({ ...item, correct: points > 0, fastest: place === 1, delta: points, place }));
 }
 
 /** Lämna ett svar. Returnerar felmeddelande, eller null om svaret togs emot. Ett svar per spelare (låst). */
@@ -56,6 +88,7 @@ export function collectPublic(c: CollectServer, revealed: boolean): CollectPubli
     mode: c.mode, startedAt: c.startedAt, deadline: c.deadline,
     answered: c.answers.map((a) => a.playerId),
     results: revealed ? c.results : undefined,
+    ...(c.seed !== undefined ? { seed: c.seed } : {}),
   };
 }
 

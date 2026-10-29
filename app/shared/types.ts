@@ -1,4 +1,6 @@
 // Delade typer mellan klient (src/) och server (worker/).
+import type { OrderItem, SkillSpec } from "./skill";
+export type { SkillSpec, SkillKind, OrderItem } from "./skill";
 
 export interface Question {
   id: string;
@@ -12,17 +14,20 @@ export interface Question {
   mode?: QuestionMode;
   /** Svarsalternativ för "choice" (2–6 st). `answer` måste vara exakt ett av dem. */
   choices?: string[];
+  /** Skill-utmaning i mobilen för "skill", se shared/skill.ts. `answer` behövs inte. */
+  skill?: SkillSpec;
 }
 
-export type QuestionMode = "buzz" | "all" | "choice";
+export type QuestionMode = "buzz" | "all" | "choice" | "skill";
 export const QUESTION_MODES: { value: QuestionMode; label: string }[] = [
   { value: "buzz", label: "Buzz (muntligt)" },
   { value: "all", label: "Alla svarar" },
   { value: "choice", label: "Svarsalternativ" },
+  { value: "skill", label: "Skill-utmaning" },
 ];
 /** Rundtyper som samlar in hemliga svar från alla spelare (fas "collect"). */
-export const isCollectMode = (m: QuestionMode | undefined): m is Exclude<QuestionMode, "buzz"> => m === "all" || m === "choice";
-export const MODE_LABEL: Record<QuestionMode, string> = { buzz: "Buzz", all: "Alla svarar", choice: "Svarsalternativ" };
+export const isCollectMode = (m: QuestionMode | undefined): m is Exclude<QuestionMode, "buzz"> => m === "all" || m === "choice" || m === "skill";
+export const MODE_LABEL: Record<QuestionMode, string> = { buzz: "Buzz", all: "Alla svarar", choice: "Svarsalternativ", skill: "Skill-utmaning" };
 /** Bokstäver för svarsalternativen (A–F). */
 export const CHOICE_LETTERS = ["A", "B", "C", "D", "E", "F"];
 export const MAX_CHOICES = CHOICE_LETTERS.length;
@@ -77,6 +82,9 @@ export interface CollectAnswer {
   text: string;
   at: number;
   ms: number;
+  /** Skill-rundor: rapporterat värde (se SkillResult) och om resultatet är godkänt. */
+  value?: number;
+  ok?: boolean;
 }
 
 /** Rättat svar, visas för alla först vid reveal. */
@@ -84,6 +92,8 @@ export interface CollectResult extends CollectAnswer {
   correct: boolean;
   delta: number;
   fastest: boolean;
+  /** Skill-rundor: placering (1 = bäst, 0 = diskad). Resultaten är då sorterade efter placering. */
+  place?: number;
 }
 
 /**
@@ -96,6 +106,8 @@ export interface CollectPublic {
   deadline: number;
   answered: string[];
   results?: CollectResult[];
+  /** Skill-rundor: slumpfrö så att alla får samma bana. */
+  seed?: number;
 }
 
 /** Hostens del: alla svar i inlämningsordning och vilka som hittills är markerade som rätt. */
@@ -112,7 +124,9 @@ export interface PublicState {
   players: PlayerPublic[];
   qIndex: number;
   qCount: number;
-  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode; choices?: string[] };
+  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode; choices?: string[];
+    /** För "order" skickas sakerna blandade och utan värden fram till reveal. */
+    skill?: Omit<SkillSpec, "items"> & { items?: (Pick<OrderItem, "label"> & Partial<OrderItem>)[] } };
   revealedAnswer?: string;
   buzz: BuzzState | null;
   lockedOut: string[];
@@ -148,6 +162,8 @@ export type ClientMsg =
   | { t: "type"; text: string }
   /** Hemligt svar i en insamlingsrunda. Kan bara lämnas en gång (låses). */
   | { t: "answer"; text: string }
+  /** Resultat i en skill-runda (en gång per spelare). order = etiketterna i vald ordning för "Ordna rätt". */
+  | { t: "skill"; value?: number; ok?: boolean; order?: string[] }
   | { t: "host:start" }
   | { t: "host:next" }
   | { t: "host:correct" }

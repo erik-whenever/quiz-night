@@ -6,8 +6,9 @@ import {
   isCollectMode, activeTwist, answerSecondsFor, validChoices,
 } from "../shared/types";
 import {
-  type CollectServer, collectHost, collectPublic, markAnswer, scoreAll, startCollect, submitAnswer,
+  type CollectServer, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
 } from "./collect";
+import { SKILLS, correctOrder, orderShuffle, validSkill } from "../shared/skill";
 import type { WheelState } from "../shared/types";
 import { spinWheel, stealTarget } from "./wheel";
 
@@ -67,11 +68,26 @@ interface Persisted {
 
 /** Okänd mode blir buzz. En choice-fråga utan giltiga alternativ blir också buzz (muntligt). */
 export function normalizeQuestion(q: Question): Question {
+  if (q.mode === "skill") {
+    const skill = validSkill(q.skill);
+    if (skill) {
+      const answer = skill.kind === "order" ? correctOrder(skill.items!).map((i) => i.label).join(" → ") : "";
+      return { ...q, answer, skill, choices: undefined };
+    }
+    return { ...q, mode: undefined, skill: undefined, choices: undefined, answer: q.answer || "–" };
+  }
   if (q.mode === "choice") {
     const choices = validChoices(q);
-    return choices ? { ...q, answer: q.answer.trim(), choices } : { ...q, mode: undefined, choices: undefined };
+    return choices ? { ...q, answer: q.answer.trim(), choices, skill: undefined } : { ...q, mode: undefined, choices: undefined, skill: undefined };
   }
-  return { ...q, mode: isCollectMode(q.mode) ? q.mode : undefined, choices: undefined };
+  return { ...q, mode: isCollectMode(q.mode) ? q.mode : undefined, choices: undefined, skill: undefined };
+}
+
+/** Skill-specen som spelarna får: sakerna i "Ordna rätt" blandade och utan värden tills reveal. */
+function publicSkill(q: Question, seed: number, revealed: boolean) {
+  const sk = q.skill!;
+  if (sk.kind !== "order") return sk;
+  return { ...sk, items: revealed ? correctOrder(sk.items!) : orderShuffle(sk.items!, seed).map((i) => ({ label: i.label })) };
 }
 
 export class Room implements DurableObject {
@@ -161,8 +177,9 @@ export class Room implements DurableObject {
       code: s.code, title: s.title, phase: s.phase, players: s.players, qIndex: s.qIndex, qCount: s.questions.length,
       question: q && s.phase !== "lobby"
         ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "buzz",
-            ...(q.mode === "choice" ? { choices: q.choices } : {}) } : undefined,
-      revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? q?.answer : undefined,
+            ...(q.mode === "choice" ? { choices: q.choices } : {}),
+            ...(q.mode === "skill" && q.skill ? { skill: publicSkill(q, s.collect?.seed ?? 0, s.phase === "reveal") } : {}) } : undefined,
+      revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? (q?.answer || undefined) : undefined,
       buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
       collect: s.collect && s.phase !== "finished" ? collectPublic(s.collect, s.phase === "reveal") : undefined,
       wheel: s.wheel ?? null,
@@ -227,7 +244,10 @@ export class Room implements DurableObject {
     const s = this.s!;
     const q = s.questions[s.qIndex];
     if (!q || !isCollectMode(q.mode)) { s.collect = null; return false; }
-    s.collect = startCollect(q.mode, s.settings.collectSeconds);
+    if (q.mode === "skill" && q.skill) {
+      const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+      s.collect = startCollect("skill", q.skill.seconds ?? SKILLS[q.skill.kind].seconds, Date.now(), seed);
+    } else s.collect = startCollect(q.mode, s.settings.collectSeconds);
     s.phase = "collect";
     this.armCollectTimer();
     return true;
@@ -252,7 +272,8 @@ export class Room implements DurableObject {
     this.clearCollectTimer();
     if (s.phase === "collect") c.deadline = Math.min(c.deadline, Date.now());
     const q = s.questions[s.qIndex];
-    c.results = scoreAll(c, (q?.points ?? 1) * (activeTwist(s) === "double" ? 2 : 1), s.settings);
+    const mult = activeTwist(s) === "double" ? 2 : 1;
+    c.results = c.mode === "skill" && q?.skill ? scoreSkill(c, q.skill, mult) : scoreAll(c, (q?.points ?? 1) * mult, s.settings);
     for (const r of c.results) {
       const p = s.players.find((x) => x.id === r.playerId);
       if (p) p.score += r.delta;
@@ -332,7 +353,7 @@ export class Room implements DurableObject {
     }
 
     if (m.t === "answer") {
-      if (!c.playerId || !s.collect) return;
+      if (!c.playerId || !s.collect || s.collect.mode === "skill") return;
       if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
       if (!s.players.some((x) => x.id === c.playerId)) return;
       const q = s.questions[s.qIndex];
@@ -342,6 +363,19 @@ export class Room implements DurableObject {
       if (err) return this.send(c, { t: "error", message: err });
       // Svarsalternativ rättas automatiskt; hosten kan ändra innan hen bekräftar.
       if (choices && String(m.text).trim() === q!.answer) markAnswer(s.collect, c.playerId, true);
+      const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
+      if (waiting.length === 0) return this.closeCollect();
+      await this.save();
+      return this.broadcast();
+    }
+
+    if (m.t === "skill") {
+      const q = s.questions[s.qIndex];
+      if (!c.playerId || !s.collect || s.collect.mode !== "skill" || !q?.skill) return;
+      if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
+      if (!s.players.some((x) => x.id === c.playerId)) return;
+      const err = submitSkill(s.collect, q.skill, c.playerId, m);
+      if (err) return this.send(c, { t: "error", message: err });
       const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
       if (waiting.length === 0) return this.closeCollect();
       await this.save();

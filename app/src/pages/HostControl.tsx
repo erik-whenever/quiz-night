@@ -78,7 +78,7 @@ function Control({ code }: { code: string }) {
             {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
               <>
                 <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{state.question.text}</p>
-                <div className="answer-box">Svar: {state.answer}</div>
+                {state.answer && <div className="answer-box">Svar: {state.answer}</div>}
                 {state.collect && <CollectHost state={state} send={send} serverNow={serverNow} />}
                 <HostWheel state={state} send={send} serverNow={serverNow} />
 
