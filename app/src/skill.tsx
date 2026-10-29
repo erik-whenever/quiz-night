@@ -374,7 +374,8 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
       </div>
     );
   }
-  if (locked || (mine && state.phase !== "collect")) {
+  // Ett försök per spelare: har jag spelat klart visas resultatet, även innan servern hunnit bekräfta.
+  if (locked || mine) {
     return (
       <div className="locked-card" role="status">
         <p className="display big-verdict">Klart!</p>

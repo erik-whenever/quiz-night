@@ -449,6 +449,27 @@ DIFF_JS = js("""
   return { seen };
 """)
 
+# Last hit där alla tre creeps missas ska godtas (bugg 2026-10-29: avvisades och gick att spela om), och bara en gång.
+LASTHIT_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const room = await mkRoom({ title: 'LH', questions: [{ id: 'k', text: 'LH', answer: '', mode: 'skill', skill: { kind: 'lasthit' } }] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['L' + tag, 'M' + tag]);
+  const [L, M] = Object.values(ps);
+  send(host, { t: 'host:start' });
+  await until(L, (s) => s.phase === 'collect');
+  send(L, { t: 'skill', value: 3 * 100000 + 7 * 100, ok: false });   // alla tre denied, sju pilar
+  await until(host, (s) => s.collect.answered.includes(L.id));
+  send(L, { t: 'skill', value: 300, ok: true }); await sleep(150);    // andra försöket
+  const out = { errors: L.errors.slice() };
+  send(M, { t: 'skill', value: 1 * 100000 + 4 * 100, ok: true });
+  const st = await until(host, (s) => s.phase === 'reveal' || s.phase === 'judge');
+  if (st.phase === 'judge') { send(host, { t: 'host:judge' }); await until(host, (s) => s.phase === 'reveal'); }
+  out.results = host.state.collect.results.map((r) => [r.text, r.place]);
+  closeAll(host, L, M);
+  return out;
+""")
+
 # Skill-rundor på protokollnivå: frö, validering, rankning och att ordningen inte läcker.
 SKILL_JS = """
 async ([pin]) => {
@@ -879,14 +900,28 @@ def main():
         join(p1, bcode, "Erik" + bt)
         join(p2, bcode, "Tobbe" + bt)
         host.get_by_role("button", name="Starta första frågan").click()
-        expect(tv.get_by_text("svarar, snacka högt")).to_be_visible()
-        expect(p2.get_by_text("har turen")).to_be_visible()
+        expect(tv.locator(".turn-banner")).to_contain_text("har turen")
+        assert "snacka" not in host.inner_text("body").lower(), "Hostkontrollen säger åt värden att snacka högt"
+        # Åskådaren ser lagets kort med pratande medlemmar, nedräkning och skuggtips
+        spec = p2.locator(".spectator")
+        expect(spec).to_contain_text("har turen")
+        expect(spec.get_by_label("Svarar nu").locator("li")).to_have_count(1)
+        expect(spec.get_by_role("timer")).to_be_visible()
+        expect(p2.get_by_role("group", name="Skuggtips").get_by_role("button")).to_have_count(4)
+        p2.get_by_role("group", name="Skuggtips").get_by_role("button").filter(has_text="Gul").click()
+        expect(p2.get_by_text("Ditt skuggtips är sparat")).to_be_visible()
         expect(choices_of(p1)).to_have_count(4)
         shot(tv, "60-tv-lagens-tur")
         shot(p2, "61-spelare-vantar")
         shot(p1, "62-spelare-er-tur")
         pick(p1, "Gul")
         expect(tv.locator(".answer-reveal")).to_have_text("Gul")
+        # Den som inte hade turen ser lagets resultat, inte "Du hann inte svara"
+        expect(p2.get_by_text("tog den")).to_be_visible()
+        expect(p2.get_by_text("Ditt skuggtips var rätt")).to_be_visible()
+        assert p2.get_by_text("Du hann inte svara").count() == 0, "Åskådaren fick 'Du hann inte svara'"
+        expect(p1.get_by_text("Rätt! +1 p")).to_be_visible()
+        shot(p2, "61b-spelare-lagresultat")
         # Värden drar reglaget mitt i kvällen
         host.get_by_label("Svårighet").fill("5")
         expect(host.locator(".difficulty strong")).to_have_text("Riktigt svår")
@@ -900,15 +935,17 @@ def main():
         shot(p1, "64-spelare-buzzer")
         p2.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(choices_of(p2)).to_have_count(4)
-        expect(p1.get_by_text("svarar…")).to_be_visible()
+        expect(p1.locator(".spectator")).to_contain_text("buzzade!")
         shot(tv, "65-tv-buzzat")
         pick_wrong(p2, "Jupiter")
-        expect(p2.get_by_text("utlåsta")).to_be_visible()
+        expect(p2.locator(".spectator")).to_contain_text("utlåst")
+        shot(p2, "65b-spelare-utlast")
         p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(p1.locator(".choice-btn.gone")).to_have_count(1)
         pick(p1, "Jupiter")
         expect(tv.locator(".answer-reveal")).to_have_text("Jupiter")
         expect(tv.locator(".chip", has_text="Tobbe" + bt)).to_contain_text("-1")
+        expect(p2.get_by_text("Fel, −1 p")).to_be_visible()
         tv.wait_for_timeout(500)
         shot(tv, "66-tv-buzz-facit")
         assert not page_errors, f"Sidfel: {page_errors}"
@@ -1173,6 +1210,11 @@ def main():
         df = raw.evaluate(DIFF_JS, [PIN])
         print("Svårighet:", df)
         assert df["seen"] == ["d5:5", "d1:1", "sk", "d3:3", "d4:4", "d2:2"], f"Svårighetsreglaget väljer fel fråga: {df['seen']}"
+
+        lh = raw.evaluate(LASTHIT_JS, [PIN])
+        print("Last hit:", lh)
+        assert lh["errors"] == ["Du har redan lämnat ditt resultat"], f"Last hit gick att lämna två gånger eller avvisades: {lh['errors']}"
+        assert lh["results"] == [["2/3 last hits · 4 pilar", 1], ["Inga last hits · 7 pilar", 0]], f"Fel resultat i Last hit: {lh['results']}"
 
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)

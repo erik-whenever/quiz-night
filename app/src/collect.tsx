@@ -104,7 +104,7 @@ export function FormatBanner({ state, serverNow, size = 90 }: { state: HostState
   if (c.format === "turn") {
     return (
       <div className="collect-banner turn-banner" style={{ "--c": who.color } as React.CSSProperties}>
-        <span className="mode-tag">Lagens tur</span><span><strong style={{ color: who.color }}>{who.name}</strong> svarar, snacka högt!</span>
+        <span className="mode-tag">Lagens tur</span><span><strong style={{ color: who.color }}>{who.name}</strong> har turen</span>
         <CollectClock state={state} serverNow={serverNow} size={size} />
       </div>
     );
@@ -167,6 +167,108 @@ const writeDraft = (k: string, v: string) => { try { sessionStorage.setItem(k, v
 /** Kom ihåg mitt val (visas som "låst" även efter omladdning), t.ex. när det valdes med tangentbordet. */
 export const rememberAnswer = (code: string, q: number, text: string) => writeDraft(draftKey(code, q), text);
 
+const shadowKey = (code: string, q: number) => `kronan.skugga.${code}.${q}`;
+
+/** Medlemmarna i en enhet (lag eller spelare). */
+function unitMembers(state: HostState, unit?: string) {
+  const t = state.teams.find((x) => x.id === unit);
+  return t ? state.players.filter((p) => t.members.includes(p.id)) : state.players.filter((p) => p.id === unit);
+}
+
+/**
+ * Åskådarkortet när ett annat lag har turen (eller har buzzat): lagets färg, medlemmarna med en pratande
+ * ljudvåg, stor nedräkning och alternativen. Ett tryck på ett alternativ är ett hemligt skuggtips som bara
+ * den här telefonen ser och som avslöjas vid facit ("Du hade också rätt").
+ */
+function Spectator({ state, serverNow, title, sub, deadline, total }: {
+  state: HostState; serverNow: () => number; title: React.ReactNode; sub: string; deadline?: number; total: number;
+}) {
+  const c = state.collect!;
+  const who = unitInfo(state, c.turn);
+  const members = unitMembers(state, c.turn);
+  const left = useCountdown(deadline, serverNow);
+  const key = shadowKey(state.code, state.qIndex);
+  const [shadow, setShadow] = useState(() => readDraft(key));
+  const choices = state.question?.choices ?? [];
+  return (
+    <div className="spectator" style={{ "--c": who.color } as React.CSSProperties} role="status">
+      <div className="spectator-head">
+        <div>
+          <p className="spectator-title">{title}</p>
+          <p className="muted small">{sub}</p>
+        </div>
+        {deadline ? <Countdown ms={left} total={total} size={84} /> : null}
+      </div>
+      {members.length > 0 && (
+        <ul className="spectator-members" aria-label="Svarar nu">
+          {members.map((p) => (
+            <li key={p.id} style={{ "--p": p.color } as React.CSSProperties}>
+              <span className="dot">{initials(p.name)}</span><span className="name">{p.name}</span>
+              <span className="talk" aria-hidden="true"><i /><i /><i /><i /><i /></span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {choices.length > 0 && (
+        <>
+          <p className="muted small spectator-hint">{shadow ? "Ditt skuggtips är sparat, bara du ser det." : "Vad skulle du svarat? Tryck för ett hemligt skuggtips."}</p>
+          <div className={`shadow-grid${choices.length > 4 ? " many" : ""}`} role="group" aria-label="Skuggtips">
+            {choices.map((ch, i) => (
+              <button key={ch} className={`shadow-btn${shadow === ch ? " on" : ""}${c.tried?.includes(ch) ? " gone" : ""}`}
+                aria-pressed={shadow === ch} disabled={c.tried?.includes(ch)}
+                onClick={() => { const v = shadow === ch ? "" : ch; setShadow(v); writeDraft(key, v); }}>
+                <span className="letter">{CHOICE_LETTERS[i]}</span><span className="txt">{ch}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Facit för lagens tur och buzzer: lagets resultat i stället för "Du hann inte svara", plus ditt skuggtips. */
+function TeamReveal({ state, me }: { state: HostState; me: PlayerPublic }) {
+  const c = state.collect!;
+  const res = c.results ?? [];
+  const myUnit = unitOf(state.teams, me.id);
+  const unitOfR = (pid: string) => unitOf(state.teams, pid);
+  const winner = res.find((r) => r.correct);
+  const mineWrong = res.filter((r) => !r.correct && unitOfR(r.playerId) === myUnit);
+  const shadow = readDraft(shadowKey(state.code, state.qIndex));
+  const right = state.revealedAnswer;
+  const pts = winner ? (winner.delta || state.question?.points || 1) : 0;
+  let verdict: React.ReactNode; let cls = "";
+  if (winner && unitOfR(winner.playerId) === myUnit) { verdict = `Rätt! +${pts} p ${state.teams.length ? "till hela laget" : ""}`; cls = "right"; }
+  else if (mineWrong.length) {
+    verdict = c.format === "buzz" ? `Fel, −${state.settings.penalty} p` : "Fel den här gången";
+    cls = "wrong";
+  } else if (winner) {
+    const w = unitInfo(state, unitOfR(winner.playerId));
+    verdict = <><span style={{ color: w.color }}>{w.name}</span> tog den</>;
+  } else if (c.format === "turn" && !res.length) {
+    const t = unitInfo(state, c.turn);
+    verdict = c.turn === myUnit ? `${state.teams.length ? "Ni" : "Du"} hann inte svara` : <><span style={{ color: t.color }}>{t.name}</span> hann inte svara</>;
+  } else if (c.format === "turn") {
+    const t = unitInfo(state, c.turn);
+    verdict = <><span style={{ color: t.color }}>{t.name}</span> svarade fel</>;
+  } else {
+    verdict = "Ingen tog den";
+  }
+  const answered = res.map((r) => ({ r, u: unitInfo(state, unitOfR(r.playerId)) }));
+  return (
+    <div className={`locked-card ${cls}`} role="status">
+      <p className="display big-verdict">{verdict}</p>
+      {answered.length > 0 && <p className="muted">{answered.map(({ r, u }, i) => (
+        <span key={i}>{i ? " · " : ""}<span style={{ color: u.color }}>{u.name}</span> svarade ”{r.text}”</span>
+      ))}</p>}
+      {shadow && unitOf(state.teams, me.id) !== c.turn && !answered.some(({ r }) => unitOfR(r.playerId) === myUnit) && (
+        <p className="shadow-result">{shadow === right ? "Ditt skuggtips var rätt 😎" : `Ditt skuggtips: ”${shadow}”, inte rätt den här gången`}</p>
+      )}
+    </div>
+  );
+}
+
 /** Spelare: alternativknappar (ett tryck låser), sedan låst bekräftelse och till sist eget resultat. */
 export function CollectPlay({ state, me, send, serverNow }: { state: HostState; me: PlayerPublic; send: Send; serverNow: () => number }) {
   const key = draftKey(state.code, state.qIndex);
@@ -183,10 +285,9 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
   const teamWord = state.teams.length ? "Ert lag" : "Du";
 
   if (state.phase === "collect" && c.format === "turn" && c.turn !== myUnit) {
-    return <div className="locked-card turn-wait" role="status" style={{ "--c": who.color } as React.CSSProperties}>
-      <p className="display big-verdict"><span style={{ color: who.color }}>{who.name}</span> har turen</p>
-      <p className="muted">Lyssna på dem i Discord. Nästa fråga kan vara er.</p>
-    </div>;
+    return <Spectator state={state} serverNow={serverNow}
+      title={<><span style={{ color: who.color }}>{who.name}</span> har turen</>}
+      sub="Lyssna på dem i Discord. Nästa fråga kan vara er." deadline={c.deadline} total={c.deadline - c.startedAt} />;
   }
   if (state.phase === "collect" && c.format === "buzz" && c.turn !== myUnit) {
     const lockedOut = c.lockedOut?.includes(myUnit);
@@ -201,9 +302,14 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
         </div>
       );
     }
-    return <div className="locked-card" role="status">
-      <p className="display big-verdict">{lockedOut ? `${teamWord} är utlåsta` : <><span style={{ color: who.color }}>{who.name}</span> svarar…</>}</p>
-    </div>;
+    if (lockedOut && !c.turn) {
+      return <Spectator state={state} serverNow={serverNow} title={`${teamWord} är utlåst`}
+        sub="Hoppas att ingen annan heller vet…" deadline={c.deadline} total={c.deadline - c.startedAt} />;
+    }
+    return <Spectator state={state} serverNow={serverNow}
+      title={<><span style={{ color: who.color }}>{who.name}</span> buzzade!</>}
+      sub={lockedOut ? `${teamWord} är utlåst på den här frågan.` : "Svarar de fel kan ni buzza igen."}
+      deadline={c.answerDeadline} total={state.settings.buzzAnswerSeconds * 1000} />;
   }
 
   if (state.phase === "collect" && !locked) {
@@ -227,6 +333,7 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
     );
   }
 
+  if (state.phase === "reveal" && c.results && c.format !== "all") return <TeamReveal state={state} me={me} />;
   if (state.phase === "reveal" && c.results) {
     return (
       <div className={`locked-card ${mine ? (mine.correct ? "right" : "wrong") : ""}`} role="status">

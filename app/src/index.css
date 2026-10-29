@@ -394,3 +394,32 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .difficulty strong { color: var(--signal); }
 .diff-pips { color: var(--signal); letter-spacing: 2px; }
 .qrow .diff { padding: 8px 6px; font-size: 0.8rem; letter-spacing: 1px; }
+
+/* Åskådarkortet: när ett annat lag har turen eller har buzzat */
+.spectator { position: relative; display: grid; gap: 14px; padding: 18px; border-radius: 20px; text-align: left;
+  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--c) 32%, transparent), transparent 60%), var(--studio-deep);
+  box-shadow: inset 0 0 0 3px var(--c), 0 0 32px color-mix(in srgb, var(--c) 35%, transparent);
+  animation: spec-glow 2.4s ease-in-out infinite; }
+@keyframes spec-glow { 50% { box-shadow: inset 0 0 0 3px var(--c), 0 0 52px color-mix(in srgb, var(--c) 55%, transparent); } }
+.spectator-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.spectator-title { font: 800 clamp(1.5rem, 7vw, 2rem) var(--display); line-height: 1.05; margin: 0 0 4px; }
+.spectator-members { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.spectator-members li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 14px; background: rgba(7, 11, 58, 0.55); }
+.spectator-members .dot { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--p); color: var(--studio-ink); font: 800 0.8rem var(--display); }
+.spectator-members .name { flex: 1; font-weight: 700; }
+.talk { display: inline-flex; gap: 3px; align-items: center; height: 22px; }
+.talk i { display: block; width: 4px; height: 6px; border-radius: 2px; background: var(--c); animation: talk 0.9s ease-in-out infinite; }
+.talk i:nth-child(2) { animation-delay: -0.6s; } .talk i:nth-child(3) { animation-delay: -0.3s; }
+.talk i:nth-child(4) { animation-delay: -0.75s; } .talk i:nth-child(5) { animation-delay: -0.15s; }
+@keyframes talk { 0%, 100% { height: 5px; } 50% { height: 22px; } }
+.spectator-hint { margin: 0; }
+.shadow-grid { display: grid; gap: 8px; }
+.shadow-grid.many { grid-template-columns: 1fr 1fr; }
+.shadow-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 0; border-radius: 12px; background: rgba(7, 11, 58, 0.55);
+  color: var(--chalk); font: 700 1rem var(--display); text-align: left; cursor: pointer; box-shadow: inset 0 0 0 2px var(--line); }
+.shadow-btn .letter { flex: none; display: grid; place-items: center; width: 1.7em; height: 1.7em; border-radius: 8px; background: rgba(255, 210, 63, 0.18); color: var(--signal); }
+.shadow-btn.on { box-shadow: inset 0 0 0 3px var(--signal); }
+.shadow-btn.on .letter { background: var(--signal); color: var(--studio-ink); }
+.shadow-btn.gone { opacity: 0.3; text-decoration: line-through; }
+.shadow-result { margin: 6px 0 0; font-weight: 700; color: var(--signal); }
+@media (prefers-reduced-motion: reduce) { .spectator, .talk i { animation: none; } }

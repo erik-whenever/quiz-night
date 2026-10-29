@@ -129,7 +129,7 @@ export function validateSkill(kind: SkillKind, value: unknown, ok: unknown): str
   const v = value;
   const within = (lo: number, hi: number) => v >= lo && v <= hi && Number.isInteger(v);
   const good =
-    kind === "lasthit" ? within(0, LASTHIT_CREEPS * 100000) :
+    kind === "lasthit" ? within(0, LASTHIT_CREEPS * 100000 + 99999) :
     kind === "aim" ? within(AIM_TARGETS * 80, 120000) :
     kind === "stopwatch" ? within(-60000, 60000) :
     kind === "pour" ? within(-1000, 1000) : false;

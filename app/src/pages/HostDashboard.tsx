@@ -74,7 +74,7 @@ function Dashboard() {
             <h3>Regler</h3>
             <label>Spelform
               <select aria-label="Spelform" value={playMode} onChange={(e) => setPlayMode(e.target.value as typeof playMode)}>
-                <option value="turns">Lagens tur (lagen turas om, snacka högt)</option>
+                <option value="turns">Lagens tur (lagen turas om)</option>
                 <option value="all">Alla svarar samtidigt</option>
               </select>
             </label>
