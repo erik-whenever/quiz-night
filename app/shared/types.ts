@@ -1,4 +1,8 @@
 // Delade typer mellan klient (src/) och server (worker/).
+//
+// Sedan 2026-10-29 är varje fråga antingen svarsalternativ i mobilen ("choice", standard) eller en
+// skill-utmaning ("skill"). Muntliga buzz-svar och fritextsvar är borttagna (Eriks beslut), så att
+// allt rättas automatiskt och värden kan spela med utan att se facit.
 import type { OrderItem, SkillSpec } from "./skill";
 export type { SkillSpec, SkillKind, OrderItem } from "./skill";
 import type { CoinNote, Effects, ShopItem, Team, TeamMode, TokenItem, Wallet } from "./teams";
@@ -7,38 +11,41 @@ export type { CoinNote, Effects, ShopItem, Team, TeamMode, TokenItem, Wallet } f
 export interface Question {
   id: string;
   text: string;
+  /** Rätt svar. Måste stå exakt som ett av `choices` (inte för skill). */
   answer: string;
   points?: number; // standard 1
   category?: string;
   imageUrl?: string;
-  /** Rundtyp. "buzz" (standard): först att buzza får ordet och svarar muntligt, hosten dömer.
-   * "all": alla skriver ett hemligt svar. "choice": alla väljer bland `choices` i mobilen. Se Collect*. */
+  /** "choice" (standard om utelämnad) eller "skill". */
   mode?: QuestionMode;
-  /** Svarsalternativ för "choice" (2–6 st). `answer` måste vara exakt ett av dem. */
+  /**
+   * Alla alternativ inklusive rätt svar: rätt svar + felalternativ, 2–12 st. Värden väljer i rummet hur
+   * många som visas per fråga (`Settings.choiceCount`); servern slumpar då rätt svar plus så många fel.
+   * Ge gärna 7 felalternativ så att det går att köra upp till 8 alternativ.
+   */
   choices?: string[];
   /** Skill-utmaning i mobilen för "skill", se shared/skill.ts. `answer` behövs inte. */
   skill?: SkillSpec;
 }
 
-export type QuestionMode = "buzz" | "all" | "choice" | "skill";
+export type QuestionMode = "choice" | "skill";
 export const QUESTION_MODES: { value: QuestionMode; label: string }[] = [
-  { value: "buzz", label: "Buzz (muntligt)" },
-  { value: "all", label: "Alla svarar" },
   { value: "choice", label: "Svarsalternativ" },
   { value: "skill", label: "Skill-utmaning" },
 ];
-/** Rundtyper som samlar in hemliga svar från alla spelare (fas "collect"). */
-export const isCollectMode = (m: QuestionMode | undefined): m is Exclude<QuestionMode, "buzz"> => m === "all" || m === "choice" || m === "skill";
-export const MODE_LABEL: Record<QuestionMode, string> = { buzz: "Buzz", all: "Alla svarar", choice: "Svarsalternativ", skill: "Skill-utmaning" };
-/** Bokstäver för svarsalternativen (A–F). */
-export const CHOICE_LETTERS = ["A", "B", "C", "D", "E", "F"];
-export const MAX_CHOICES = CHOICE_LETTERS.length;
+export const MODE_LABEL: Record<QuestionMode, string> = { choice: "Svarsalternativ", skill: "Skill-utmaning" };
+/** Bokstäver för de alternativ som visas (A–H). */
+export const CHOICE_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+/** Flest alternativ som visas på en fråga, och flest som en fråga får ha totalt. */
+export const MAX_SHOWN = CHOICE_LETTERS.length;
+export const MAX_POOL = 12;
+export const MIN_SHOWN = 2;
 
-/** Giltiga alternativ för en choice-fråga (trimmade, unika, 2–6 st och innehåller svaret), annars null. */
+/** Giltiga alternativ (trimmade, unika, 2–12 st och innehåller svaret), annars null. */
 export function validChoices(q: Pick<Question, "choices" | "answer">): string[] | null {
   if (!Array.isArray(q.choices)) return null;
   const c = [...new Set(q.choices.map((x) => String(x ?? "").trim()).filter(Boolean))];
-  if (c.length < 2 || c.length > MAX_CHOICES || !c.includes(String(q.answer ?? "").trim())) return null;
+  if (c.length < 2 || c.length > MAX_POOL || !c.includes(String(q.answer ?? "").trim())) return null;
   return c;
 }
 
@@ -52,17 +59,20 @@ export interface QuestionSet {
 }
 
 export interface Settings {
-  answerSeconds: number; // riktmärke för svarstid efter buzz (hosten dömer, ingen automatisk timeout)
-  penalty: number; // poäng som dras vid fel/timeout
-  collectSeconds: number; // tid att lämna svar i insamlingsrundor ("Alla svarar")
-  fastestBonus: number; // extra poäng till snabbaste rätt svar i "Alla svarar"
+  /** Sekunder att svara på en alternativfråga. */
+  collectSeconds: number;
+  /** Extra poäng till snabbaste rätt svar. */
+  fastestBonus: number;
+  /** Hur många alternativ som visas per fråga (rätt + fel). Ändras i lobbyn eller under kvällen, gäller från nästa fråga. */
+  choiceCount: number;
+  /** Värden spelar själv: facit och andras svar skickas aldrig till hostkontrollen. Kan inte stängas av efter start. */
+  hostPlays: boolean;
 }
 
-/**
- * collect = alla lämnar hemliga svar (servern äger nedräkningen), judge = insamlingen stängd, hosten rättar.
- * Efter judge kommer reveal som vanligt.
- */
-export type Phase = "lobby" | "question" | "buzzed" | "collect" | "judge" | "reveal" | "finished";
+export const DEFAULT_SETTINGS: Settings = { collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true };
+
+/** collect = alla väljer (servern äger nedräkningen), judge = tiden ute, reveal = svaret visas. */
+export type Phase = "lobby" | "collect" | "judge" | "reveal" | "finished";
 
 export interface PlayerPublic {
   id: string;
@@ -72,13 +82,7 @@ export interface PlayerPublic {
   connected: boolean;
 }
 
-export interface BuzzState {
-  playerId: string;
-  deadline: number; // epoch ms, bara riktmärke: hosten avgör "för långsam"
-  typedAnswer?: string;
-}
-
-/** Ett inlämnat svar i en insamlingsrunda. at = servertid vid inlämning, ms = tid sedan insamlingen öppnade. */
+/** Ett inlämnat svar. at = servertid vid inlämning, ms = tid sedan frågan öppnade. */
 export interface CollectAnswer {
   playerId: string;
   text: string;
@@ -99,11 +103,11 @@ export interface CollectResult extends CollectAnswer {
 }
 
 /**
- * Publik del av en insamlingsrunda. Före reveal syns bara VILKA som svarat, aldrig vad.
- * results sätts först när phase är "reveal" (eller "finished").
+ * Publik del av en fråga. Före reveal syns bara VILKA som svarat, aldrig vad.
+ * results sätts först när phase är "reveal".
  */
 export interface CollectPublic {
-  mode: Exclude<QuestionMode, "buzz">;
+  mode: QuestionMode;
   startedAt: number;
   deadline: number;
   answered: string[];
@@ -114,7 +118,7 @@ export interface CollectPublic {
   extra?: Record<string, number>;
 }
 
-/** Hostens del: alla svar i inlämningsordning och vilka som hittills är markerade som rätt. */
+/** Hostens del (bara när värden inte spelar): alla svar i inlämningsordning och vilka som är rätt. */
 export interface CollectHost {
   answers: CollectAnswer[];
   correct: string[];
@@ -128,12 +132,12 @@ export interface PublicState {
   players: PlayerPublic[];
   qIndex: number;
   qCount: number;
-  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode; choices?: string[];
+  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode;
+    /** De alternativ som visas på den här frågan, i visningsordning. */
+    choices?: string[];
     /** För "order" skickas sakerna blandade och utan värden fram till reveal. */
     skill?: Omit<SkillSpec, "items"> & { items?: (Pick<OrderItem, "label"> & Partial<OrderItem>)[] } };
   revealedAnswer?: string;
-  buzz: BuzzState | null;
-  lockedOut: string[];
   lastEvent?: GameEvent;
   settings: Settings;
   serverNow: number;
@@ -149,52 +153,39 @@ export interface PublicState {
   coinLog: CoinNote[];
   /** Butikseffekter för pågående fråga, eller nästa mellan frågorna. */
   effects: Effects;
+  /** Bara till spelaren själv: alternativ som 50/50 har tagit bort för hen på pågående fråga. */
+  myRemoved?: string[];
 }
 
-/** Hosten ser dessutom rätt svar. */
+/** Hosten ser dessutom facit och svaren, men bara när värden inte spelar själv. */
 export interface HostState extends PublicState {
   answer?: string;
   collectHost?: CollectHost;
 }
 
 export type GameEvent =
-  | { kind: "buzz"; playerId: string; at: number }
-  | { kind: "correct"; playerId: string; delta: number; at: number; stolenFrom?: string; stolen?: number }
-  | { kind: "wrong"; playerId: string; delta: number; at: number }
-  | { kind: "timeout"; playerId: string; delta: number; at: number }
-  /** Spelaren som hade ordet använde ett Pass: inget straff, utlåst från frågan. */
-  | { kind: "pass"; playerId: string; delta: number; at: number }
-  | { kind: "reveal"; at: number }
-  /** En insamlingsrunda är rättad: poäng utdelade, svaren visas. */
-  | { kind: "judged"; correct: string[]; fastestId?: string; at: number }
+  /** En fråga är rättad: poäng utdelade, svaren visas. Stjäl-twisten fyller i stolenFrom/stolen. */
+  | { kind: "judged"; correct: string[]; fastestId?: string; at: number; stolenFrom?: string; stolen?: number; stealer?: string }
   | { kind: "finished"; at: number };
 
 // Klient -> server
 export type ClientMsg =
   | { t: "join"; name: string; playerId?: string }
-  /** at = klientens uppskattade servertid vid tryck (Date.now() + klockoffset). Servern klampar. */
-  | { t: "buzz"; at?: number }
-  | { t: "type"; text: string }
-  /** Hemligt svar i en insamlingsrunda. Kan bara lämnas en gång (låses). */
+  /** Valt alternativ (eller fritext i gamla klienter). Kan bara lämnas en gång (låses). */
   | { t: "answer"; text: string }
   /** Resultat i en skill-runda (en gång per spelare). order = etiketterna i vald ordning för "Ordna rätt". */
   | { t: "skill"; value?: number; ok?: boolean; order?: string[] }
   | { t: "host:start" }
   | { t: "host:next" }
-  | { t: "host:correct" }
-  | { t: "host:wrong" }
-  /** Spelaren som har ordet tog för lång tid på sig (räknas som fel, men visas som "För långsam"). */
-  | { t: "host:slow" }
-  | { t: "host:reveal" }
   | { t: "host:adjust"; playerId: string; delta: number }
   | { t: "host:kick"; playerId: string }
   | { t: "host:settings"; settings: Partial<Settings> }
   | { t: "host:finish" }
-  /** Markera ett inlämnat svar som rätt/fel (kan ändras tills host:judge). */
+  /** Ändra rättningen av ett svar (bara när värden inte spelar). */
   | { t: "host:mark"; playerId: string; correct: boolean }
-  /** Stäng insamlingen innan tiden gått ut. */
+  /** Stäng frågan innan tiden gått ut. */
   | { t: "host:close" }
-  /** Bekräfta rättningen: servern delar ut poäng och visar svaren. */
+  /** Visa svaret: stänger frågan om den är öppen, delar ut poäng och visar facit. */
   | { t: "host:judge" }
   /** Snurra lyckohjulet (bara i lobbyn eller när svaret visas). Servern slumpar utfallet. */
   | { t: "host:spin" }
@@ -202,22 +193,16 @@ export type ClientMsg =
   | { t: "host:teams"; mode: TeamMode }
   /** Köp i butiken (lobbyn). */
   | { t: "buy"; item: ShopItem }
-  /** Aktivera en vara mellan frågorna för nästa fråga. target = lag/spelare att sabotera. */
-  | { t: "use"; item: Exclude<TokenItem, "pass">; target?: string }
-  /** Passa när man har ordet (kräver ett Pass). */
-  | { t: "pass" }
-  | { t: "ping"; c: number }
-  /** Svar på serverns sping, ekar s oförändrat så servern själv kan mäta RTT. */
-  | { t: "spong"; s: number };
+  /** Använd en vara. Dubbla poäng/Sabotage mellan frågorna (target = lag/spelare), 50/50 under en fråga. */
+  | { t: "use"; item: TokenItem; target?: string }
+  | { t: "ping"; c: number };
 
 // Server -> klient
 export type ServerMsg =
   | { t: "state"; state: PublicState | HostState }
   | { t: "joined"; playerId: string }
   | { t: "error"; message: string }
-  | { t: "pong"; c: number; s: number }
-  /** Servern mäter klientens RTT: klienten svarar direkt med { t: "spong", s }. */
-  | { t: "sping"; s: number };
+  | { t: "pong"; c: number; s: number };
 
 export interface LeagueEntry {
   id: string;
@@ -236,21 +221,10 @@ export interface HubPublic {
   wallets?: Wallet[];
 }
 
-/** Rättvis buzz: hur länge servern samlar buzzar efter den första innan vinnaren väljs. */
-export const BUZZ_WINDOW_MS = 150;
-/** Tak för hur mycket tidigare än ankomsten en buzz någonsin får räknas. */
-export const BUZZ_MAX_COMP_MS = 70;
-/** Tillåten mätbrus utöver uppmätt RTT/2 när en buzz-tidsstämpel klampas. */
-export const BUZZ_JITTER_MS = 25;
-/** Rate-limit per anslutning (token bucket): buzzar per sekund och hur många som får komma i en klump. */
-export const BUZZ_RATE_PER_S = 5;
-export const BUZZ_BURST = 5;
-/** Generellt tak för alla meddelanden per anslutning (spong undantas, servern styr takten själv). */
+/** Generellt tak för alla meddelanden per anslutning (token bucket). */
 export const MSG_RATE_PER_S = 30;
 export const MSG_BURST = 60;
-
-export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1, collectSeconds: 30, fastestBonus: 1 };
-/** Max längd på ett svar i en insamlingsrunda. */
+/** Max längd på ett svar. */
 export const COLLECT_MAX_LEN = 80;
 /** Nätfördröjning som tillåts efter deadline innan ett svar avvisas. */
 export const COLLECT_GRACE_MS = 500;
@@ -258,7 +232,7 @@ export const COLLECT_GRACE_MS = 500;
 // ===== Lyckohjulet =====
 
 /** Twistar som hjulet kan ge nästa fråga. */
-export type TwistId = "double" | "safe" | "steal" | "blitz" | "none";
+export type TwistId = "double" | "fifty" | "steal" | "blitz" | "none";
 
 export interface WheelState {
   /** Ökar för varje snurr, så klienterna vet när ett nytt snurr börjar. */
@@ -275,31 +249,21 @@ export interface WheelState {
 
 export const TWISTS: Record<TwistId, { label: string; short: string; info: string }> = {
   double: { label: "Dubbla poäng", short: "Dubbelt", info: "Rätt svar ger dubbla poäng." },
-  safe: { label: "Ingen straffavgift", short: "Inget straff", info: "Fel svar eller för långsam kostar inget." },
-  steal: { label: "Stjäl", short: "Stjäl", info: "Den som svarar rätt tar poängen från ledaren." },
-  blitz: { label: "Blixt", short: "Blixt", info: "Halverad svarstid efter buzz." },
+  fifty: { label: "50/50 för alla", short: "50/50", info: "Hälften av felalternativen försvinner för alla." },
+  steal: { label: "Stjäl", short: "Stjäl", info: "Snabbaste rätt svar tar poängen från ledaren." },
+  blitz: { label: "Blixt", short: "Blixt", info: "Halverad svarstid." },
   none: { label: "Nit", short: "Nit", info: "Ingen twist den här gången." },
 };
 
 /** Hjulets fält medsols från toppen. Varje twist två gånger, så alla utfall är lika troliga. */
-export const WHEEL_SEGMENTS: TwistId[] = ["double", "safe", "steal", "blitz", "none", "double", "safe", "steal", "blitz", "none"];
+export const WHEEL_SEGMENTS: TwistId[] = ["double", "fifty", "steal", "blitz", "none", "double", "fifty", "steal", "blitz", "none"];
 export const WHEEL_SPIN_MS = 4500;
+/** Twistar som passar före en skill-utmaning (där finns inga alternativ och tiden är fast). */
+export const SKILL_TWISTS: TwistId[] = ["double", "steal", "none"];
 
 /** Twisten som gäller för den fråga som pågår just nu, annars null. */
 export function activeTwist(st: { phase: Phase; qIndex: number; wheel?: WheelState | null }): TwistId | null {
   const w = st.wheel;
   if (!w || w.forQ !== st.qIndex || w.result === "none") return null;
-  return ["question", "buzzed", "collect", "judge", "reveal"].includes(st.phase) ? w.result : null;
-}
-
-/** Svarstid i sekunder efter buzz, med hänsyn till Blixt. */
-export function answerSecondsFor(st: { phase: Phase; qIndex: number; wheel?: WheelState | null; settings: Settings }): number {
-  const s = st.settings.answerSeconds;
-  return activeTwist(st) === "blitz" ? Math.max(2, Math.ceil(s / 2)) : s;
-}
-
-/** Hela svarstiden för pågående buzz (med Blixt, Extra tid och Sabotage), för nedräkningsringen. */
-export function buzzTotalMs(st: { phase: Phase; qIndex: number; wheel?: WheelState | null; settings: Settings; buzz: BuzzState | null; lastEvent?: GameEvent }): number {
-  if (st.buzz && st.lastEvent?.kind === "buzz") return Math.max(1000, st.buzz.deadline - st.lastEvent.at);
-  return answerSecondsFor(st) * 1000;
+  return ["collect", "judge", "reveal"].includes(st.phase) ? w.result : null;
 }

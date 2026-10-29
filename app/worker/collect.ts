@@ -1,6 +1,6 @@
 // Hemlig svarsinsamling: alla spelare lämnar ett svar var, servern äger tiden.
-// Används av "Alla svarar" och är tänkt att återanvändas av kommande rundtyper
-// ("Vem sa det?", Kungasatsningen, Bluffrundan): de lägger till eget innehåll i svaret
+// Varje fråga går hit: svarsalternativ ("choice") och skill-utmaningar ("skill").
+// Kommande rundtyper (Kungasatsningen, Bluffrundan m.fl.) lägger till eget innehåll i svaret
 // och en egen poängfunktion, men insamling, sekretess och nedräkning är desamma.
 import type {
   CollectAnswer, CollectHost, CollectPublic, CollectResult, QuestionMode, Settings,
@@ -11,7 +11,11 @@ import { orderErrors, orderRight, rankSkill, skillText, validateSkill } from "..
 
 /** Serverns fulla tillstånd för en insamling (sparas i Durable Object-lagringen). */
 export interface CollectServer {
-  mode: Exclude<QuestionMode, "buzz">;
+  mode: QuestionMode;
+  /** Alternativ som visas på frågan (slumpat urval ur frågans alla alternativ), i visningsordning. */
+  choices?: string[];
+  /** 50/50: alternativ som tagits bort för en viss spelare. */
+  removed?: Record<string, string[]>;
   startedAt: number;
   deadline: number;
   answers: CollectAnswer[]; // i inlämningsordning
@@ -77,7 +81,7 @@ export function markAnswer(c: CollectServer, playerId: string, correct: boolean)
 }
 
 /**
- * Poäng för "Alla svarar": frågans poäng till alla rätt, bonus till den som lämnade rätt svar först
+ * Poäng för alternativfrågor: frågans poäng till alla rätt, bonus till den som lämnade rätt svar först
  * (servertid vid inlämning). Fel svar och utebliven inlämning kostar ingenting.
  */
 export function scoreAll(c: CollectServer, points: number, settings: Settings): CollectResult[] {

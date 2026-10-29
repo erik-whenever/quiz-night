@@ -37,7 +37,6 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
         else if (m.t === "error") setError(m.message);
         else if (m.t === "joined") onJoined.current?.(m.playerId);
         else if (m.t === "pong") { const now = Date.now(); offset.current = m.s - (m.c + now) / 2; }
-        else if (m.t === "sping") sock.send(JSON.stringify({ t: "spong", s: m.s }));
       };
       sock.onclose = (ev) => {
         clearInterval(pinger); setConnected(false);
@@ -54,8 +53,6 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
   }, [code, role, opts.hostKey]);
 
   const send = useCallback((m: ClientMsg) => {
-    // Rättvis buzz: stämpla trycket med uppskattad servertid så servern kan kompensera för ping.
-    if (m.t === "buzz" && m.at === undefined) m = { ...m, at: Date.now() + offset.current };
     if (ws.current?.readyState === 1) ws.current.send(JSON.stringify(m));
     else queue.current.push(m);
   }, []);

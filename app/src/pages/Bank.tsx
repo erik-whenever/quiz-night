@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { TopBar } from "../App";
 import { api, repoSets, uid } from "../lib/api";
 import type { Question, QuestionMode, QuestionSet } from "../../shared/types";
-import { MODE_LABEL, QUESTION_MODES, isCollectMode, validChoices } from "../../shared/types";
+import { MAX_POOL, QUESTION_MODES, validChoices } from "../../shared/types";
 import { SKILLS, SKILL_KINDS, type OrderItem, type SkillKind, validSkill } from "../../shared/skill";
+import PinGate from "./PinGate";
 
 /** "Breaking Bad = 2008; Game of Thrones = 2011" ↔ saker att ordna */
 const parseItems = (raw: string): OrderItem[] => raw.split(";").map((x) => x.trim()).filter(Boolean).map((x) => {
@@ -11,41 +12,36 @@ const parseItems = (raw: string): OrderItem[] => raw.split(";").map((x) => x.tri
   return { label: label ?? "", value: Number((v ?? "").replace(",", ".")) };
 });
 const itemsText = (items?: OrderItem[]) => (items ?? []).map((i) => `${i.label} = ${i.value}`).join("; ");
-import PinGate from "./PinGate";
 
 const blank = (): QuestionSet => ({ id: uid(), title: "", theme: "", source: "bank", updatedAt: "", questions: [] });
 
-/** Rundtyp från JSON eller snabbinklistring: "alla" ger Alla svarar, "alt" ger Svarsalternativ, allt annat buzz (= utelämnat). */
-function toMode(raw: unknown): QuestionMode | undefined {
-  const m = typeof raw === "string" ? raw.trim().toLowerCase() : "";
-  const mode = m === "alla" || m === "alla svarar" ? "all"
-    : m === "alt" || m === "alternativ" || m === "svarsalternativ" ? "choice" : (m as QuestionMode);
-  return isCollectMode(mode) ? mode : undefined;
-}
+/** Rundtyp från JSON eller formuläret: "skill" ger skill-utmaning, allt annat svarsalternativ (= utelämnat). */
+const toMode = (raw: unknown): QuestionMode | undefined => (raw === "skill" ? "skill" : undefined);
 
-const splitChoices = (raw: string) => raw.split(";").map((x) => x.trim()).filter(Boolean);
+const splitList = (raw: string) => raw.split(";").map((x) => x.trim()).filter(Boolean);
+/** Felalternativen = alla alternativ utom rätt svar. */
+const wrongOf = (q: Question) => (q.choices ?? []).filter((c) => c.trim() !== q.answer.trim());
+const withChoices = (answer: string, wrong: string[]) => [...new Set([answer.trim(), ...wrong].filter(Boolean))];
 
-/** "Fråga | Svar | poäng | alla" eller "Fråga | Svar | poäng | alt | A; B; C; D" per rad → frågor */
+/** "Fråga | Svar | Fel 1; Fel 2; Fel 3 | poäng" per rad → frågor */
 function parseQuick(text: string): Question[] {
   return text.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
-    const [t, a, p, m, ch] = l.split("|").map((x) => x.trim());
-    const mode = toMode(m);
-    return { id: uid(), text: t ?? "", answer: a ?? "", points: p ? Number(p) || 1 : undefined, mode,
-      ...(mode === "choice" ? { choices: splitChoices(ch ?? "") } : {}) };
+    const [t, a, wrong, p] = l.split("|").map((x) => x.trim());
+    return { id: uid(), text: t ?? "", answer: a ?? "", choices: withChoices(a ?? "", splitList(wrong ?? "")), points: p ? Number(p) || 1 : undefined };
   }).filter((q) => q.text);
 }
 
+const playable = (q: Question) => (q.mode === "skill" ? !!validSkill(q.skill) : !!validChoices(q));
 const modeNote = (s: QuestionSet) => {
-  const parts = (["all", "choice", "skill"] as const)
-    .map((m) => [m, s.questions.filter((q) => q.mode === m).length] as const)
-    .filter(([, n]) => n > 0).map(([m, n]) => `${n} ${MODE_LABEL[m]}`);
-  return parts.length ? ` · ${parts.join(", ")}` : "";
+  const skill = s.questions.filter((q) => q.mode === "skill").length;
+  const bad = s.questions.filter((q) => !playable(q)).length;
+  return `${skill ? ` · ${skill} skill` : ""}${bad ? ` · ${bad} saknar alternativ` : ""}`;
 };
 
-/** Första choice-fråga med ogiltiga alternativ, som felmeddelande. */
+/** Första fråga som inte går att spela, som felmeddelande. */
 function choiceProblem(qs: Question[]): string {
-  const i = qs.findIndex((q) => q.mode === "choice" && !validChoices(q));
-  if (i >= 0) return `Fråga ${i + 1}: Svarsalternativ behöver 2–6 olika alternativ, och svaret måste stå exakt som ett av dem.`;
+  const i = qs.findIndex((q) => q.mode !== "skill" && !validChoices(q));
+  if (i >= 0) return `Fråga ${i + 1}: skriv minst ett felalternativ (gärna 7, så kan du köra upp till 8 alternativ). Högst ${MAX_POOL} alternativ totalt.`;
   const j = qs.findIndex((q) => q.mode === "skill" && !validSkill(q.skill));
   return j < 0 ? "" : `Fråga ${j + 1}: Ordna rätt behöver 3–6 saker med olika värden, t.ex. "Breaking Bad = 2008; Game of Thrones = 2011; How I Met Your Mother = 2005".`;
 }
@@ -70,14 +66,15 @@ function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved:
           <div className="qrow" key={q.id}>
             <span className="n">{i + 1}</span>
             <textarea rows={1} aria-label={`Fråga ${i + 1}`} value={q.text} onChange={(e) => upd(i, { text: e.target.value })} placeholder="Fråga" />
-            <input className="a" aria-label={`Svar ${i + 1}`} value={q.answer} onChange={(e) => upd(i, { answer: e.target.value })} placeholder="Svar" />
+            <input className="a" aria-label={`Svar ${i + 1}`} value={q.answer} disabled={q.mode === "skill"}
+              onChange={(e) => upd(i, { answer: e.target.value, ...(q.mode !== "skill" ? { choices: withChoices(e.target.value, wrongOf(q)) } : {}) })}
+              placeholder={q.mode === "skill" ? "–" : "Rätt svar"} />
             <input type="number" aria-label={`Poäng ${i + 1}`} min={1} value={q.points ?? 1} onChange={(e) => upd(i, { points: +e.target.value })} />
             <button className="btn sm ghost" aria-label={`Ta bort fråga ${i + 1}`} onClick={() => setS({ ...s, questions: s.questions.filter((_, j) => j !== i) })}>✕</button>
             <label className="mode">Rundtyp
-              <select aria-label={`Rundtyp ${i + 1}`} value={q.mode ?? "buzz"} onChange={(e) => {
+              <select aria-label={`Rundtyp ${i + 1}`} value={q.mode ?? "choice"} onChange={(e) => {
                 const mode = toMode(e.target.value);
-                upd(i, { mode, choices: mode === "choice" ? (q.choices?.length ? q.choices : q.answer.trim() ? [q.answer.trim()] : []) : undefined,
-                  skill: mode === "skill" ? (q.skill ?? { kind: "lasthit" }) : undefined });
+                upd(i, { mode, skill: mode === "skill" ? (q.skill ?? { kind: "lasthit" }) : undefined });
               }}>
                 {QUESTION_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
               </select>
@@ -110,23 +107,23 @@ function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved:
                 )}
               </div>
             )}
-            {q.mode === "choice" && (
-              <label className="choices">Alternativ (separera med ;)
-                <input aria-label={`Alternativ ${i + 1}`} defaultValue={(q.choices ?? []).join("; ")} placeholder="Rätt svar; Fel 1; Fel 2; Fel 3"
-                  onChange={(e) => upd(i, { choices: splitChoices(e.target.value) })} />
+            {q.mode !== "skill" && (
+              <label className="choices">Felalternativ (separera med ;)
+                <input aria-label={`Felalternativ ${i + 1}`} defaultValue={wrongOf(q).join("; ")} placeholder="Fel 1; Fel 2; Fel 3 … gärna 7 st"
+                  onChange={(e) => upd(i, { choices: withChoices(q.answer, splitList(e.target.value)) })} />
               </label>
             )}
           </div>
         ))}
-        <button className="btn ghost" onClick={() => setS({ ...s, questions: [...s.questions, { id: uid(), text: "", answer: "" }] })}>Lägg till fråga</button>
+        <button className="btn ghost" onClick={() => setS({ ...s, questions: [...s.questions, { id: uid(), text: "", answer: "", choices: [] }] })}>Lägg till fråga</button>
       </div>
 
       <details>
         <summary className="muted">Klistra in många på en gång</summary>
         <div className="stack" style={{ marginTop: 12 }}>
-          <p className="muted small">En fråga per rad: <code>Fråga | Svar | poäng | alla</code>. Poäng är valfritt, skriv <code>alla</code> sist för en Alla svarar-fråga,
-            eller <code>Fråga | Svar | poäng | alt | Svar; Fel 1; Fel 2; Fel 3</code> för svarsalternativ i mobilen.</p>
-          <textarea rows={6} value={quick} onChange={(e) => setQuick(e.target.value)} placeholder={"Vilket år kom HoN ut? | 2010\nVad heter Kungens hund? | …"} />
+          <p className="muted small">En fråga per rad: <code>Fråga | Rätt svar | Fel 1; Fel 2; Fel 3 | poäng</code>. Poäng är valfritt.
+            Skriv gärna 7 felalternativ, så kan du välja upp till 8 alternativ på kvällen.</p>
+          <textarea rows={6} value={quick} onChange={(e) => setQuick(e.target.value)} placeholder={"Vilket år kom HoN ut? | 2010 | 2008; 2009; 2011; 2012\nVilken krydda är dyrast? | Saffran | Vanilj; Kardemumma; Svartpeppar"} />
           <button className="btn" onClick={() => { setS({ ...s, questions: [...s.questions, ...parseQuick(quick)] }); setQuick(""); }} disabled={!quick.trim()}>Lägg till raderna</button>
         </div>
       </details>
@@ -135,7 +132,8 @@ function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved:
       <div className="row">
         <button className="btn primary" disabled={!s.title.trim() || !s.questions.length} onClick={async () => {
           try {
-            const clean = { ...s, questions: s.questions.filter((q) => q.text.trim() && (q.answer.trim() || q.mode === "skill")) };
+            const clean = { ...s, questions: s.questions.filter((q) => q.text.trim() && (q.answer.trim() || q.mode === "skill"))
+              .map((q) => (q.mode === "skill" ? { ...q, choices: undefined } : { ...q, mode: undefined, choices: withChoices(q.answer, wrongOf(q)) })) };
             const problem = choiceProblem(clean.questions);
             if (problem) return setErr(problem);
             onSaved(await api.saveSet(clean));

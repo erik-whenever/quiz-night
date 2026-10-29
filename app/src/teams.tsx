@@ -17,7 +17,7 @@ export function TeamBoard({ state, highlight, compact }: { state: HostState; hig
           <span className="team-name">{team.name}</span>
           <span className="team-members">
             {members.map((m) => (
-              <span key={m.id} className={`mini${m.connected ? "" : " off"}${state.buzz?.playerId === m.id ? " active" : ""}`} style={{ "--p": m.color } as React.CSSProperties}>
+              <span key={m.id} className={`mini${m.connected ? "" : " off"}${state.collect?.answered.includes(m.id) && state.phase === "collect" ? " active" : ""}`} style={{ "--p": m.color } as React.CSSProperties}>
                 <span className="dot">{initials(m.name)}</span>{m.name} <b>{m.score}</b>
               </span>
             ))}
@@ -160,11 +160,13 @@ export function PlayerShop({ state, me, send }: { state: HostState; me: PlayerPu
   );
 }
 
-/** Pass-knappen när man har ordet. */
-export function PassButton({ state, me, send }: { state: HostState; me: PlayerPublic; send: Send }) {
-  const n = state.wallets?.[me.id]?.items.pass ?? 0;
-  if (!n || state.phase !== "buzzed" || state.buzz?.playerId !== me.id) return null;
-  return <button className="btn ghost" onClick={() => send({ t: "pass" })}>Använd pass ({n} kvar), inget straff</button>;
+/** 50/50 under en alternativfråga: hälften av felalternativen försvinner för mig. */
+export function FiftyButton({ state, me, send }: { state: HostState; me: PlayerPublic; send: Send }) {
+  const n = state.wallets?.[me.id]?.items.fifty ?? 0;
+  const c = state.collect;
+  if (!n || state.phase !== "collect" || c?.mode !== "choice" || c.answered.includes(me.id) || state.myRemoved?.length) return null;
+  if ((state.question?.choices?.length ?? 0) < 3) return null;
+  return <button className="btn ghost" onClick={() => send({ t: "use", item: "fifty" })}>Använd 50/50 ({n} kvar)</button>;
 }
 
 /** Senast visade mynthändelse. Modulnivå: spelarvyn byter nyckel vid varje händelse (blinkeffekten), så komponenten monteras om. */

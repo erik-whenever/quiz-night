@@ -1,27 +1,22 @@
 import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import { Crown } from "../App";
-import { useCountdown, useRoom } from "../lib/useRoom";
+import { useRoom } from "../lib/useRoom";
 import { sfx } from "../lib/sound";
-import { Countdown, Podium, Scorebar } from "../components";
+import { Podium, Scorebar } from "../components";
 import { CollectTv } from "../collect";
-import { buzzTotalMs } from "../../shared/types";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { EffectTags, TeamBoard, TeamPodium } from "../teams";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
   const { state, error, serverNow } = useRoom(code, "tv");
-  const left = useCountdown(state?.buzz?.deadline, serverNow);
 
   const lastAt = useRef(0);
   useEffect(() => {
     const ev = state?.lastEvent;
     if (!ev || ev.at === lastAt.current) return;
     lastAt.current = ev.at;
-    if (ev.kind === "buzz") sfx.buzz();
-    if (ev.kind === "correct") { sfx.correct(); confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); }
-    if (ev.kind === "wrong" || ev.kind === "timeout") sfx.wrong();
     if (ev.kind === "judged") {
       if (ev.correct.length) { sfx.correct(); confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); } else sfx.wrong();
     }
@@ -38,7 +33,6 @@ export default function Tv({ code }: { code: string }) {
 
   if (!state) return <main className="tv"><p className="muted">{error || `Ansluter till ${code}…`}</p></main>;
 
-  const buzzer = state.players.find((p) => p.id === state.buzz?.playerId);
   const joinUrl = `${location.host}/play/${code}`;
   const wheel = pendingWheel(state);
 
@@ -62,20 +56,13 @@ export default function Tv({ code }: { code: string }) {
         </div>
       )}
 
-      {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
+      {(state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
         <div className="question-card">
           <TwistBadge state={state} />
           <EffectTags state={state} />
           <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}</p>
           {state.question.imageUrl && <img src={state.question.imageUrl} alt="" style={{ maxHeight: "35vh", borderRadius: 16 }} />}
           <p className="question-text">{state.question.text}</p>
-          {state.phase === "buzzed" && buzzer && (
-            <div className="buzz-banner" style={{ "--player": buzzer.color } as React.CSSProperties}>
-              <span>{buzzer.name}</span>
-              <Countdown ms={left} total={buzzTotalMs(state)} size={90} />
-            </div>
-          )}
-          {state.phase === "buzzed" && <p className="qmeta">{left > 0 ? "har ordet, svara i Discord" : "Tiden är ute, hosten avgör"}</p>}
           {state.revealedAnswer && state.question.mode !== "skill" && <div className="answer-reveal">{state.revealedAnswer}</div>}
           {state.collect && <CollectTv state={state} serverNow={serverNow} />}
           <StealNote state={state} />

@@ -4,18 +4,18 @@
   "theme": "Allmänbildning",
   "updatedAt": "2026-10-27",
   "questions": [
-    { "id": "q1", "text": "Vilket år släpptes det första Heroes of Newerth i full version?", "answer": "2010", "category": "Spel" },
-    { "id": "q2", "text": "Vilket grundämne har kemiska beteckningen Au?", "answer": "Guld", "category": "Vetenskap" },
-    { "id": "q2b", "text": "Vad heter Sveriges största sjö?", "answer": "Vänern", "category": "Geografi", "mode": "all" },
-    { "id": "q3", "text": "Vad heter Sveriges högsta berg?", "answer": "Kebnekaise", "category": "Geografi" },
-    { "id": "q4", "text": "Vilket företag utvecklade ursprungligen Minecraft?", "answer": "Mojang", "category": "Spel" },
-    { "id": "q5", "text": "Hur många spelare har ett lag på planen i en vanlig Dota 2- eller HoN-match?", "answer": "5", "category": "Spel" },
-    { "id": "q6", "text": "Vilken stad är huvudstad i Australien?", "answer": "Canberra", "category": "Geografi" },
-    { "id": "q7", "text": "Vilken svensk grupp vann Eurovision 1974?", "answer": "ABBA", "category": "Musik" },
-    { "id": "q8", "text": "Hur många hål spelas det på en vanlig golfrunda?", "answer": "18", "category": "Sport" },
-    { "id": "q9", "text": "Vilken planet är störst i vårt solsystem?", "answer": "Jupiter", "category": "Vetenskap" },
-    { "id": "q10", "text": "Vilken skotsk ö är känd för rökig, torvig whisky från bl.a. Laphroaig och Ardbeg?", "answer": "Islay", "category": "Dryck", "points": 2 },
-    { "id": "q11", "text": "Vilket år föll Berlinmuren?", "answer": "1989", "category": "Historia" },
-    { "id": "q12", "text": "Vad står förkortningen MOBA för?", "answer": "Multiplayer Online Battle Arena", "category": "Spel", "points": 2 }
+    { "id": "q1", "text": "Vilket år släpptes det första Heroes of Newerth i full version?", "answer": "2010", "category": "Spel", "choices": ["2010", "2006", "2007", "2008", "2009", "2011", "2012", "2013"] },
+    { "id": "q2", "text": "Vilket grundämne har kemiska beteckningen Au?", "answer": "Guld", "category": "Vetenskap", "choices": ["Guld", "Silver", "Aluminium", "Argon", "Koppar", "Platina", "Tenn", "Järn"] },
+    { "id": "q2b", "text": "Vad heter Sveriges största sjö?", "answer": "Vänern", "category": "Geografi", "choices": ["Vänern", "Vättern", "Mälaren", "Hjälmaren", "Storsjön", "Siljan", "Torneträsk", "Bolmen"] },
+    { "id": "q3", "text": "Vad heter Sveriges högsta berg?", "answer": "Kebnekaise", "category": "Geografi", "choices": ["Kebnekaise", "Sarektjåkkå", "Kaskasatjåkka", "Helagsfjället", "Åreskutan", "Sylarna", "Akka", "Mullfjället"] },
+    { "id": "q4", "text": "Vilket företag utvecklade ursprungligen Minecraft?", "answer": "Mojang", "category": "Spel", "choices": ["Mojang", "DICE", "King", "Paradox Interactive", "Starbreeze", "Rovio", "Supercell", "Massive Entertainment"] },
+    { "id": "q5", "text": "Hur många spelare har ett lag på planen i en vanlig Dota 2- eller HoN-match?", "answer": "5", "category": "Spel", "choices": ["5", "3", "4", "6", "7", "8", "10", "11"] },
+    { "id": "q6", "text": "Vilken stad är huvudstad i Australien?", "answer": "Canberra", "category": "Geografi", "choices": ["Canberra", "Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Hobart", "Darwin"] },
+    { "id": "q7", "text": "Vilken svensk grupp vann Eurovision 1974?", "answer": "ABBA", "category": "Musik", "choices": ["ABBA", "Carola", "Herreys", "Roxette", "Loreen", "Europe", "The Ark", "Måns Zelmerlöw"] },
+    { "id": "q8", "text": "Hur många hål spelas det på en vanlig golfrunda?", "answer": "18", "category": "Sport", "choices": ["18", "9", "12", "14", "16", "20", "21", "24"] },
+    { "id": "q9", "text": "Vilken planet är störst i vårt solsystem?", "answer": "Jupiter", "category": "Vetenskap", "choices": ["Jupiter", "Saturnus", "Neptunus", "Uranus", "Jorden", "Mars", "Venus", "Merkurius"] },
+    { "id": "q10", "text": "Vilken skotsk ö är känd för rökig, torvig whisky från bl.a. Laphroaig och Ardbeg?", "answer": "Islay", "category": "Dryck", "points": 2, "choices": ["Islay", "Skye", "Orkney", "Arran", "Mull", "Jura", "Lewis", "Shetland"] },
+    { "id": "q11", "text": "Vilket år föll Berlinmuren?", "answer": "1989", "category": "Historia", "choices": ["1989", "1985", "1986", "1987", "1988", "1990", "1991", "1992"] },
+    { "id": "q12", "text": "Vad står förkortningen MOBA för?", "answer": "Multiplayer Online Battle Arena", "category": "Spel", "points": 2, "choices": ["Multiplayer Online Battle Arena", "Massive Online Battle Arena", "Multiplayer Online Brawl Arena", "Mobile Online Battle Arena", "Multiplayer Open Battle Arena", "Massively Online Battle Adventure", "Multiplayer Online Base Attack", "Multi-Objective Battle Arena"] }
   ]
 }

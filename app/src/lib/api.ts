@@ -39,7 +39,7 @@ export const api = {
   deleteLeague: (id: string) => call("/api/hub/league/" + encodeURIComponent(id), { method: "DELETE" }),
   async createRoom(set: QuestionSet, settings: Partial<Settings>, shuffle: boolean) {
     const qs = shuffle ? [...set.questions].sort(() => Math.random() - 0.5) : set.questions;
-    const r = await call<{ code: string; hostKey: string }>("/api/rooms", {
+    const r = await call<{ code: string; hostKey: string; skipped: number }>("/api/rooms", {
       method: "POST", body: JSON.stringify({ title: set.title, questions: qs, settings }),
     });
     saveHostKey(r.code, r.hostKey);

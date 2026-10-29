@@ -5,27 +5,27 @@
 // Säsongstabellen summerar sedan varje spelares kvällsresultat, och nästa kväll blir det nya lag.
 //
 // Mynt: tjänas under kvällen och betalas ut till plånboken (per spelarnamn, i Hub) när hosten kröner.
-// Butiken är öppen i lobbyn. Engångsvaror (pass, dubbelt, sabotage) ligger kvar i plånboken tills de används.
+// Butiken är öppen i lobbyn. Engångsvaror (50/50, dubbelt, sabotage) ligger kvar i plånboken tills de används.
 
 export interface Team { id: string; name: string; color: string; members: string[] }
 
 /** 0 = alla mot alla, annars önskad lagstorlek (udda spelare hamnar i ett lag med en extra). */
 export type TeamMode = 0 | 2 | 3;
 
-export type TokenItem = "pass" | "double" | "sabotage";
+export type TokenItem = "fifty" | "double" | "sabotage";
 export type ShopItem = TokenItem | "extra" | "veto";
 
 export interface Wallet { name: string; coins: number; items: Partial<Record<TokenItem, number>> }
 
 export const SHOP: Record<ShopItem, { name: string; price: number; info: string; token: boolean }> = {
-  extra: { name: "Extra tid", price: 6, token: false, info: "+5 s på varje fråga för ditt lag i kväll (buzz-riktmärket och insamlingar)." },
-  pass: { name: "Pass", price: 3, token: true, info: "När du har ordet: passa utan straff. Frågan går vidare till de andra." },
+  extra: { name: "Extra tid", price: 6, token: false, info: "+5 s på varje fråga för ditt lag i kväll." },
+  fifty: { name: "50/50", price: 3, token: true, info: "Under en fråga: hälften av felalternativen försvinner för dig." },
   double: { name: "Dubbla poäng", price: 4, token: true, info: "Aktivera mellan frågorna: ditt lag får dubbla poäng på nästa fråga." },
   sabotage: { name: "Sabotage", price: 4, token: true, info: "Aktivera mellan frågorna: ett annat lag får halverad tid på nästa fråga." },
   veto: { name: "Veto", price: 5, token: false, info: "I lobbyn: slumpa om lagen, och du hamnar inte med samma lagkamrat igen." },
 };
 export const SHOP_ITEMS = Object.keys(SHOP) as ShopItem[];
-export const TOKEN_ITEMS: TokenItem[] = ["pass", "double", "sabotage"];
+export const TOKEN_ITEMS: TokenItem[] = ["fifty", "double", "sabotage"];
 
 /** Mynt man tjänar. Välkomstbonusen ges när en plånbok skapas, så alla kan handla direkt. */
 export const COINS = { correct: 1, skillWin: 2, streak: 2, streakLen: 3, winner: 3, welcome: 10 };

@@ -10,7 +10,7 @@ const mod = (a: number, m: number) => ((a % m) + m) % m;
 
 /** Två rader per etikett så de får plats i ett smalt fält. */
 const LINES: Record<TwistId, string[]> = {
-  double: ["Dubbla", "poäng"], safe: ["Inget", "straff"], steal: ["Stjäl"], blitz: ["Blixt"], none: ["Nit"],
+  double: ["Dubbla", "poäng"], fifty: ["50/50"], steal: ["Stjäl"], blitz: ["Blixt"], none: ["Nit"],
 };
 
 const reducedMotion = () => {
@@ -148,11 +148,11 @@ export function TwistBadge({ state }: { state: HostState }) {
   );
 }
 
-/** "Erik stal 1 p från Tobbe" efter ett rätt svar med Stjäl. */
+/** "Erik stal 1 p från Tobbe" efter en fråga med Stjäl. */
 export function StealNote({ state }: { state: HostState }) {
   const ev = state.lastEvent;
-  if (state.phase !== "reveal" || ev?.kind !== "correct" || !ev.stolenFrom) return null;
-  const who = state.players.find((p) => p.id === ev.playerId)?.name ?? "Någon";
+  if (state.phase !== "reveal" || ev?.kind !== "judged" || !ev.stolenFrom) return null;
+  const who = state.players.find((p) => p.id === ev.stealer)?.name ?? "Någon";
   const from = state.players.find((p) => p.id === ev.stolenFrom)?.name ?? "ledaren";
   return <p className="qmeta steal-note">{who} stal {ev.stolen} p från {from}</p>;
 }

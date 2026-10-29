@@ -1,8 +1,11 @@
 """
-End-to-end-test av ett helt quizflöde: host + TV + två spelare.
+End-to-end-test av Kronan: host + TV + spelare i webbläsare, plus protokolltester mot servern.
 Kör mot en lokal server:  npx wrangler dev --port 8787  (med HOST_PIN=1234 i .dev.vars)
     python3 tests/e2e.py [bas-url] [skärmdumpsmapp]
 Avslutar med kod 1 om något steg misslyckas. Används av Testaren i AI-rådet.
+
+Sedan 2026-10-29 är alla frågor svarsalternativ (eller skill-utmaningar). Värden kan spela själv,
+och då skickas aldrig facit till hostkontrollen; det kontrolleras här.
 """
 import sys, os, json, urllib.request
 from playwright.sync_api import sync_playwright, expect
@@ -12,334 +15,239 @@ SHOTS = sys.argv[2] if len(sys.argv) > 2 else "e2e-shots"
 PIN = os.environ.get("HOST_PIN", "1234")
 os.makedirs(SHOTS, exist_ok=True)
 
-FAIR_BUZZ_JS = """
-async ([pin]) => {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Rättvis buzz', questions: [1, 2, 3, 4, 5].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
-  const { code, hostKey } = await res.json();
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  // Klient som svarar på serverns RTT-mätning (sping) efter spongDelay ms; fakeS ekar ett förfalskat s.
-  const connect = (role, spongDelay = 0, key, fakeS = 0) => new Promise((resolve) => {
-    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
-    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
-    const c = { ws, state: null, id: null, waiters: [] };
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.t === 'sping') setTimeout(() => ws.send(JSON.stringify({ t: 'spong', s: m.s - fakeS })), spongDelay);
-      if (m.t === 'joined') c.id = m.playerId;
-      if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
-    };
-    ws.onopen = () => resolve(c);
-  });
-  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
-    if (pred(c.state)) return resolve(c.state);
-    const t = setTimeout(() => reject(new Error('timeout i väntan på state')), ms);
-    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
-  });
-  const send = (c, m) => c.ws.send(JSON.stringify(m));
-  const host = await connect('host', 0, hostKey);
-  const snabb = await connect('player', 0);      // låg ping
-  const seg = await connect('player', 120);      // simulerad verklig hög ping: alla spong fördröjs 120 ms
-  const fusk = await connect('player', 0);       // låg ping men ljuger om tidsstämpeln
-  const falskS = await connect('player', 0, undefined, 9000); // låtsas ha 9 s RTT via falskt s
-  const drojer = await connect('player', 300);   // låg ping men fördröjer spong 300 ms för att blåsa upp RTT
-  for (const [c, n] of [[snabb, 'Snabb'], [seg, 'Seg'], [fusk, 'Fuskare'], [falskS, 'FalskS'], [drojer, 'Fördröjd']]) send(c, { t: 'join', name: n });
-  await sleep(900); // låt servern hinna mäta RTT
-  const name = (st) => st.players.find((p) => p.id === st.buzz?.playerId)?.name;
-  const out = {};
-
-  // 1) Snabb anländer först, Seg 30 ms senare men tryckte 60 ms innan ankomst (≈ RTT/2) => justerat ~30 ms före Snabb.
-  send(host, { t: 'host:start' });
-  await until(snabb, (st) => st?.phase === 'question' && st.qIndex === 0);
-  await until(seg, (st) => st?.phase === 'question' && st.qIndex === 0);
-  send(snabb, { t: 'buzz', at: Date.now() });
-  await sleep(30);
-  send(seg, { t: 'buzz', at: Date.now() - 60 });
-  out.fair = name(await until(host, (st) => st?.phase === 'buzzed'));
-
-  // 2) Fuskaren (låg ping) skickar en tidsstämpel 10 s bakåt, 60 ms efter Snabb => klampas, Snabb vinner.
-  send(host, { t: 'host:next' });
-  await until(snabb, (st) => st?.phase === 'question' && st.qIndex === 1);
-  await until(fusk, (st) => st?.phase === 'question' && st.qIndex === 1);
-  send(snabb, { t: 'buzz', at: Date.now() });
-  await sleep(60);
-  send(fusk, { t: 'buzz', at: Date.now() - 10000 });
-  out.cheat = name(await until(host, (st) => st?.phase === 'buzzed'));
-
-  // 3) Ensam buzz utan tidsstämpel fungerar som förut.
-  send(host, { t: 'host:next' });
-  await until(fusk, (st) => st?.phase === 'question' && st.qIndex === 2);
-  send(fusk, { t: 'buzz' });
-  out.single = name(await until(host, (st) => st?.phase === 'buzzed'));
-
-  // 4) Falskt s i spong ignoreras: ingen RTT godtas, så 120 ms efter Snabb med at långt bakåt förlorar.
-  send(host, { t: 'host:next' });
-  await until(falskS, (st) => st?.phase === 'question' && st.qIndex === 3);
-  send(snabb, { t: 'buzz', at: Date.now() });
-  await sleep(120);
-  send(falskS, { t: 'buzz', at: Date.now() - 100000 });
-  out.fakeS = name(await until(host, (st) => st?.phase === 'buzzed'));
-
-  // 5) Fördröjd spong ger högst taket (70 ms) i fördel: 120 ms efter Snabb förlorar ändå.
-  send(host, { t: 'host:next' });
-  await until(drojer, (st) => st?.phase === 'question' && st.qIndex === 4);
-  send(snabb, { t: 'buzz', at: Date.now() });
-  await sleep(120);
-  send(drojer, { t: 'buzz', at: Date.now() - 100000 });
-  out.delayedSpong = name(await until(host, (st) => st?.phase === 'buzzed'));
-  for (const c of [host, snabb, seg, fusk, falskS, drojer]) c.ws.close();
-  return out;
-}
-"""
-
-# Kantfall kring buzz-fönstret. Varje fall får ett eget rum.
-EDGE_BUZZ_JS = """
-async ([pin]) => {
+# Gemensamt för protokolltesterna: skapa rum, ansluta websocket-klienter och vänta på state.
+LIB = """
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const connect = (code, role, key) => new Promise((resolve) => {
-    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
-    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
-    const c = { ws, state: null, id: null, waiters: [], states: [] };
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
-      if (m.t === 'joined') c.id = m.playerId;
-      if (m.t === 'state') { c.state = m.state; c.states.push(m.state); c.waiters = c.waiters.filter((w) => !w()); }
-    };
-    ws.onopen = () => resolve(c);
-  });
-  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
-    if (pred(c.state)) return resolve(c.state);
-    const t = setTimeout(() => reject(new Error('timeout i väntan på state')), ms);
-    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
-  });
-  const send = (c, m) => c.ws.send(JSON.stringify(m));
-  const name = (st) => st.players.find((p) => p.id === st.buzz?.playerId)?.name ?? null;
-  const setup = async (names) => {
-    const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-      body: JSON.stringify({ title: 'Kantfall', questions: [1, 2, 3].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
-    const { code, hostKey } = await res.json();
-    const host = await connect(code, 'host', hostKey);
-    const ps = {};
-    for (const n of names) { ps[n] = await connect(code, 'player'); send(ps[n], { t: 'join', name: n }); }
-    await sleep(400);
-    send(host, { t: 'host:start' });
-    await until(host, (st) => st?.phase === 'question');
-    for (const n of names) await until(ps[n], (st) => st?.phase === 'question');
-    return { code, host, ps, all: [host, ...Object.values(ps)] };
+  const mkRoom = async (body) => {
+    const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    return { status: res.status, ...(await res.json()) };
   };
-  const winner = async (host) => { try { return name(await until(host, (st) => st?.phase === 'buzzed', 1500)); } catch { return null; } };
-  const done = (r) => r.all.forEach((c) => c.ws.close());
-  const out = {};
-
-  // Exakt samtidigt (samma tick, samma at): den som kom först vinner, alltid.
-  out.simultaneous = [];
-  for (let i = 0; i < 3; i++) {
-    const r = await setup(['A', 'B']);
-    const at = Date.now(); send(r.ps.A, { t: 'buzz', at }); send(r.ps.B, { t: 'buzz', at });
-    out.simultaneous.push(await winner(r.host)); done(r);
-  }
-
-  // Host går till nästa fråga / visar svaret / avslutar mitt i fönstret: ingen buzz ska dyka upp efteråt.
-  for (const [k, msg, phase] of [['next', 'host:next', 'question'], ['reveal', 'host:reveal', 'reveal'], ['finish', 'host:finish', 'finished']]) {
-    const r = await setup(['A', 'B']);
-    send(r.ps.A, { t: 'buzz' }); await sleep(20); send(r.host, { t: msg });
-    await sleep(400);
-    out[k] = { phase: r.host.state.phase === phase, buzz: name(r.host.state) };
-    if (k === 'next') { send(r.ps.B, { t: 'buzz' }); out[k].after = await winner(r.host); }
-    done(r);
-  }
-
-  // Utlåst spelare som buzzar (även med fusk-tidsstämpel) räknas inte.
-  { const r = await setup(['Ut', 'Kvar']);
-    send(r.ps.Ut, { t: 'buzz' }); await until(r.host, (st) => st?.phase === 'buzzed');
-    send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
-    send(r.ps.Kvar, { t: 'buzz', at: Date.now() }); send(r.ps.Ut, { t: 'buzz', at: Date.now() - 9999 });
-    out.lockedOut = await winner(r.host); done(r); }
-
-  // Samma spelare spammar buzz med allt bättre tidsstämplar: första buzzen gäller.
-  { const r = await setup(['Lugn', 'Spam']);
-    send(r.ps.Lugn, { t: 'buzz', at: Date.now() }); await sleep(40);
-    send(r.ps.Spam, { t: 'buzz', at: Date.now() });
-    for (let i = 0; i < 30; i++) send(r.ps.Spam, { t: 'buzz', at: 0 });
-    out.spam = await winner(r.host); await sleep(300);
-    out.spamBuzzed = r.host.states.filter((s) => s.phase === 'buzzed').length; done(r); }
-
-  // Spelare buzzar och laddar om mitt i fönstret: buzzen står kvar, ny buzz efter återanslutning ignoreras.
-  { const r = await setup(['Ladd', 'Annan']);
-    const id = r.ps.Ladd.id;
-    send(r.ps.Ladd, { t: 'buzz', at: Date.now() }); r.ps.Ladd.ws.close();
-    await sleep(30); send(r.ps.Annan, { t: 'buzz', at: Date.now() });
-    const re = await connect(r.code, 'player'); send(re, { t: 'join', name: 'Ladd', playerId: id });
-    await sleep(30); send(re, { t: 'buzz', at: Date.now() - 5000 });
-    out.reload = await winner(r.host); r.all.push(re); done(r); }
-
-  // Rate-limit: 50 buzzar + 200 ping i en klump. Servern lever, taket håller och vanliga spelare påverkas inte.
-  { const r = await setup(['Flod', 'Vanlig']);
-    const flod = r.ps.Flod; let pongs = 0;
-    flod.ws.addEventListener('message', (ev) => { if (JSON.parse(ev.data).t === 'pong') pongs++; });
-    for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
-    out.floodWinner = await winner(r.host);
-    send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
-    send(r.ps.Vanlig, { t: 'buzz', at: Date.now() });
-    out.normalAfterFlood = await winner(r.host);
-    // Ny fråga direkt efter en ny flod: Flods tomma hink släpper inte igenom nästa buzz, Vanlig vinner.
-    // Tidskänsligt: hinken fylls på med en buzz per 200 ms. Vänta först tills den är exakt full (taket 5),
-    // så floden tömmer den till ~0 och marginalen blir hela 200 ms. Tog host:next-rundan ändå för lång tid
-    // (långsam CI) görs ett nytt försök på nästa fråga; Python hoppar över kontrollen om alla blev för långsamma.
-    for (let q = 1; q <= 2; q++) {
-      await sleep(1100);
-      const t0 = performance.now();
-      for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
-      // Olika anslutningar har ingen inbördes ordning på servern: vänta på en pong på Flods anslutning
-      // så att hela floden är behandlad innan host:next, annars kan en flod-buzz med token kvar landa i nya frågan.
-      await new Promise((resolve) => {
-        const c = -100 - q;
-        const h = (ev) => { const m = JSON.parse(ev.data); if (m.t === 'pong' && m.c === c) { flod.ws.removeEventListener('message', h); resolve(); } };
-        flod.ws.addEventListener('message', h); send(flod, { t: 'ping', c });
-      });
-      send(r.host, { t: 'host:next' }); await until(flod, (st) => st?.phase === 'question' && st.qIndex === q);
-      send(flod, { t: 'buzz', at: Date.now() });
-      out.throttleGapMs = Math.round(performance.now() - t0);
-      await sleep(250);
-      send(r.ps.Vanlig, { t: 'buzz', at: Date.now() });
-      out.throttled = await winner(r.host);
-      if (out.throttleGapMs < 150) break;
-    }
-    await sleep(2500);
-    pongs = 0;
-    for (let i = 0; i < 200; i++) send(flod, { t: 'ping', c: i });
-    await sleep(500);
-    out.floodPongs = pongs;
-    pongs = 0; await sleep(1500); send(flod, { t: 'ping', c: -1 }); await sleep(300);
-    out.pongAfter = pongs;
-    const tv = await connect(r.code, 'tv'); r.all.push(tv);
-    out.alive = (await until(tv, (st) => !!st)).players.length;
-    done(r); }
-
-  // Legitimt snabbt spel: buzz, fel, ny fråga, buzz direkt igen (tre gånger i rad) går alltid igenom,
-  // och hosten kan rätta poäng med 40 host:adjust i följd utan att något stryps.
-  { const r = await setup(['Snabb', 'Annan']);
-    out.fastRebuzz = [];
-    for (let q = 0; q < 3; q++) {
-      if (q > 0) { send(r.host, { t: 'host:next' }); await until(r.ps.Snabb, (st) => st?.phase === 'question' && st.qIndex === q); }
-      send(r.ps.Snabb, { t: 'buzz', at: Date.now() });
-      out.fastRebuzz.push(await winner(r.host));
-      send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
-    }
-    const before = r.host.state.players.find((p) => p.name === 'Annan').score;
-    for (let i = 0; i < 40; i++) send(r.host, { t: 'host:adjust', playerId: r.ps.Annan.id, delta: 1 });
-    const st = await until(r.host, (s) => s.players.find((p) => p.name === 'Annan').score === before + 40, 1500).catch(() => r.host.state);
-    out.adjusted = st.players.find((p) => p.name === 'Annan').score - before;
-    done(r); }
-  return out;
-}
-"""
-
-# Svarsalternativ och "för långsam" på protokollnivå.
-CHOICE_JS = """
-async ([pin]) => {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Alt', settings: { collectSeconds: 10, answerSeconds: 3 }, questions: [
-      { id: 'c1', text: 'Välj', answer: 'B1', mode: 'choice', choices: ['A1', 'B1', 'C1'] },
-      { id: 'c2', text: 'Muntlig', answer: 'Hemligt' } ] }) });
-  const { code, hostKey } = await res.json();
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const connect = (role, key) => new Promise((resolve) => {
+  const connect = (code, role, key) => new Promise((resolve) => {
     const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
     const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
     const c = { ws, state: null, id: null, waiters: [], raw: [], errors: [] };
     ws.onmessage = (ev) => {
       const m = JSON.parse(ev.data);
-      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
       if (m.t === 'joined') c.id = m.playerId;
       if (m.t === 'error') c.errors.push(m.message);
       if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
     };
     ws.onopen = () => resolve(c);
   });
-  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
-    if (pred(c.state)) return resolve(c.state);
+  const until = (c, pred, ms = 4000) => new Promise((resolve, reject) => {
+    if (c.state && pred(c.state)) return resolve(c.state);
     const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
-    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+    c.waiters.push(() => (c.state && pred(c.state)) ? (clearTimeout(t), resolve(c.state), true) : false);
   });
   const send = (c, m) => c.ws.send(JSON.stringify(m));
-  const host = await connect('host', hostKey);
-  const tv = await connect('tv');
-  const ps = {};
-  for (const n of ['A', 'B']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
-  await sleep(300);
-  const out = {};
-  send(host, { t: 'host:start' });
-  const st = await until(tv, (s) => s?.phase === 'collect');
-  out.mode = st.question.mode; out.choices = st.question.choices;
-  send(ps.A, { t: 'answer', text: 'Påhittat' }); await sleep(150);
-  out.invalidRejected = ps.A.errors.slice();
-  send(ps.B, { t: 'answer', text: 'B1' }); await sleep(80);
-  send(ps.A, { t: 'answer', text: 'C1' });
-  await until(host, (s) => s?.phase === 'judge');
-  const name = (id) => host.state.players.find((p) => p.id === id).name;
-  out.autoMarked = host.state.collectHost.correct.map(name);
-  out.leak = tv.raw.filter((r) => /"revealedAnswer"|"results"|"collectHost"|"answer":/.test(r)).length;
-  // Hosten ändrar: A:s val räknas också som rätt
-  send(host, { t: 'host:mark', playerId: ps.A.id, correct: true });
-  await sleep(100);
-  send(host, { t: 'host:judge' });
-  await until(tv, (s) => s?.phase === 'reveal');
-  out.scores = Object.fromEntries(tv.state.players.map((p) => [p.name, p.score]));
-  // Muntlig buzz: ingen automatisk timeout, hosten säger "för långsam"
-  send(host, { t: 'host:next' });
-  await until(tv, (s) => s?.phase === 'question');
-  send(ps.A, { t: 'buzz' });
-  await until(tv, (s) => s?.phase === 'buzzed');
-  await sleep(3600);
-  out.noAutoTimeout = tv.state.phase;
-  const before = tv.state.players.find((p) => p.name === 'A').score;
-  send(host, { t: 'host:slow' });
-  const after = await until(tv, (s) => s?.lastEvent?.kind === 'timeout');
-  out.slow = { kind: after.lastEvent.kind, delta: after.players.find((p) => p.name === 'A').score - before, locked: after.lockedOut.includes(ps.A.id) };
-  for (const c of [host, tv, ps.A, ps.B]) c.ws.close();
-  return out;
-}
+  const players = async (code, names) => {
+    const ps = {};
+    for (const n of names) { ps[n] = await connect(code, 'player'); send(ps[n], { t: 'join', name: n }); }
+    for (const n of names) await until(ps[n], () => !!ps[n].id);
+    return ps;
+  };
+  const score = (st, id) => st.players.find((p) => p.id === id).score;
+  const closeAll = (...cs) => cs.forEach((c) => c.ws.close());
 """
 
+
+def js(body):
+    return "async ([pin]) => {" + LIB + body + "\n}"
+
+
+POOL = "['R', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7']"
+
+# Svarsalternativ: urval, antal, rättning, poäng, spelbara frågor och att facit inte läcker.
+CHOICE_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const room = await mkRoom({ title: 'Alt', settings: { choiceCount: 4, collectSeconds: 10, hostPlays: false }, questions: [
+    { id: 'c1', text: 'Ett', answer: 'R', choices: """ + POOL + """ },
+    { id: 'c2', text: 'Två', answer: 'R', choices: """ + POOL + """ },
+    { id: 'c3', text: 'Tre', answer: 'R', choices: ['R', 'F1', 'F2'] },
+    { id: 'x1', text: 'Gammal muntlig fråga utan alternativ', answer: 'Hemligt' } ] });
+  const out = { skipped: room.skipped };
+  const host = await connect(room.code, 'host', room.hostKey);
+  const tv = await connect(room.code, 'tv');
+  const ps = await players(room.code, ['A' + tag, 'B' + tag]);
+  const [A, B] = Object.values(ps);
+  await until(tv, (s) => s.players.length === 2);
+  out.qCount = tv.state.qCount;
+  send(host, { t: 'host:start' });
+  const s1 = await until(tv, (s) => s.phase === 'collect');
+  out.shown1 = s1.question.choices.length;
+  out.hasAnswer = s1.question.choices.includes('R') && new Set(s1.question.choices).size === s1.question.choices.length;
+  out.hostSeesAnswer = host.state.answer;
+  send(host, { t: 'host:next' }); await sleep(150);
+  out.nextBlocked = host.errors.slice();
+  send(host, { t: 'host:settings', settings: { choiceCount: 6 } }); await sleep(150);
+  out.shownAfterChange = tv.state.question.choices.length;
+  send(A, { t: 'answer', text: 'Påhittat' }); await sleep(150);
+  out.invalid = A.errors.slice();
+  const wrong = s1.question.choices.find((x) => x !== 'R');
+  send(B, { t: 'answer', text: wrong }); await sleep(60);
+  send(A, { t: 'answer', text: 'R' });
+  await until(tv, (s) => s.phase === 'judge');
+  send(A, { t: 'answer', text: wrong }); await sleep(150);
+  out.lateOrTwice = A.errors.slice(1);
+  out.leak = tv.raw.filter((r) => /"revealedAnswer"|"results"|"collectHost"|"answer":/.test(r)).length;
+  out.autoMarked = host.state.collectHost.correct.length === 1 && host.state.collectHost.correct[0] === A.id;
+  send(host, { t: 'host:judge' });
+  const r1 = await until(tv, (s) => s.phase === 'reveal');
+  out.revealed = r1.revealedAnswer;
+  out.scores = [score(r1, A.id), score(r1, B.id)];
+  send(host, { t: 'host:next' });
+  const s2 = await until(tv, (s) => s.phase === 'collect' && s.qIndex === 1);
+  out.shown2 = s2.question.choices.length;
+  send(host, { t: 'host:judge' });
+  await until(tv, (s) => s.phase === 'reveal');
+  send(host, { t: 'host:next' });
+  const s3 = await until(tv, (s) => s.phase === 'collect' && s.qIndex === 2);
+  out.shown3 = s3.question.choices.length;
+  const empty = await mkRoom({ title: 'Tomt', questions: [{ id: 'x', text: 'Muntlig', answer: 'Ja' }] });
+  out.emptyStatus = empty.status;
+  closeAll(host, tv, A, B);
+  return out;
+""")
+
+# Spelande värd: hostkontrollen får aldrig facit eller andras val, och läget går inte att stänga av under spelet.
+HOSTPLAYS_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const room = await mkRoom({ title: 'Värd', settings: { hostPlays: true, collectSeconds: 10 }, questions: [
+    { id: 'h1', text: 'Ett', answer: 'HEMLIGT-SVAR', choices: ['HEMLIGT-SVAR', 'Fel A', 'Fel B', 'Fel C'] },
+    { id: 'h2', text: 'Två', answer: 'R', choices: ['R', 'F'] } ] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['V' + tag, 'W' + tag]);
+  const [V, W] = Object.values(ps);
+  const out = {};
+  send(host, { t: 'host:start' });
+  await until(host, (s) => s.phase === 'collect');
+  send(V, { t: 'answer', text: 'Fel A' });
+  await until(host, (s) => s.collect.answered.length === 1);
+  send(host, { t: 'host:mark', playerId: V.id, correct: true }); await sleep(150);
+  send(host, { t: 'host:settings', settings: { hostPlays: false } }); await sleep(150);
+  out.errors = host.errors.slice();
+  out.stillPlays = host.state.settings.hostPlays;
+  const before = host.raw.slice();
+  out.leak = before.filter((r) => /"answer":|"collectHost"|"revealedAnswer"|"results"/.test(r)).length;
+  out.choicesShown = host.state.question.choices.length;
+  send(host, { t: 'host:judge' });
+  const r = await until(host, (s) => s.phase === 'reveal');
+  out.revealed = r.revealedAnswer;
+  out.vScore = score(r, V.id);
+  // I lobbyn går läget att stänga av
+  const room2 = await mkRoom({ title: 'Lobby', settings: { hostPlays: true }, questions: [{ id: 'l', text: 'L', answer: 'R', choices: ['R', 'F'] }] });
+  const host2 = await connect(room2.code, 'host', room2.hostKey);
+  await until(host2, () => true);
+  send(host2, { t: 'host:settings', settings: { hostPlays: false } });
+  await until(host2, (s) => s.settings.hostPlays === false);
+  out.lobbyOff = host2.state.settings.hostPlays;
+  closeAll(host, host2, V, W);
+  return out;
+""")
+
+# 50/50: köps i lobbyn, används under frågan och tar bort hälften av felen bara för köparen.
+FIFTY_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const room = await mkRoom({ title: '50/50', settings: { choiceCount: 8, collectSeconds: 15 }, questions: [
+    { id: 'f1', text: 'Ett', answer: 'R', choices: """ + POOL + """ } ] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['K' + tag, 'L' + tag]);
+  const [K, L] = Object.values(ps);
+  await until(host, (s) => Object.keys(s.wallets).length === 2);
+  const out = {};
+  send(K, { t: 'use', item: 'fifty' }); await sleep(150);            // i lobbyn: går inte
+  send(K, { t: 'buy', item: 'fifty' });
+  await until(K, (s) => s.wallets[K.id].items.fifty === 1);
+  send(host, { t: 'host:start' });
+  await until(K, (s) => s.phase === 'collect');
+  send(K, { t: 'use', item: 'fifty' });
+  const k = await until(K, (s) => (s.myRemoved ?? []).length > 0);
+  out.removed = k.myRemoved.length;
+  out.answerKept = !k.myRemoved.includes('R');
+  out.othersSee = (L.state.myRemoved ?? []).length + L.raw.filter((r) => r.includes('"myRemoved"')).length + host.raw.filter((r) => r.includes('"myRemoved"')).length;
+  send(K, { t: 'use', item: 'fifty' }); await sleep(150);            // två gånger: nej
+  out.errors = K.errors.slice();
+  out.left = K.state.wallets[K.id].items.fifty;
+  closeAll(host, K, L);
+  return out;
+""")
+
+# Lyckohjulet med svarsalternativ: snurra tills varje twist kommit upp och kontrollera effekten.
+WHEEL_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (i) => ({ id: 'w' + i, text: 'Fråga ' + i, answer: 'R', choices: """ + POOL + """ });
+  const room = await mkRoom({ title: 'Hjul', settings: { choiceCount: 8, collectSeconds: 20, fastestBonus: 1 }, questions: [
+    q(1), q(2), q(3), q(4), q(5), { id: 'ws', text: 'Skill', answer: '', mode: 'skill', skill: { kind: 'aim' } }] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['A' + tag, 'B' + tag]);
+  const [A, B] = Object.values(ps);
+  const out = { seen: {} };
+  const spin = async () => {
+    await sleep(45);  // under serverns rate-limit (30 meddelanden/s), annars slängs snurr tyst
+    const prev = host.state.wheel?.spinId ?? 0;
+    send(host, { t: 'host:spin' });
+    const st = await until(host, (s) => (s.wheel?.spinId ?? 0) > prev);
+    out.seen[st.wheel.result] = (out.seen[st.wheel.result] ?? 0) + 1;
+    return st.wheel.result;
+  };
+  const spinFor = async (want) => {
+    for (let i = 0; i < 80; i++) if (await spin() === want) return;
+    throw new Error('hjulet gav aldrig ' + want);
+  };
+  const next = async () => { const i = host.state.qIndex; send(host, { t: 'host:next' }); return until(host, (s) => s.phase === 'collect' && s.qIndex === i + 1); };
+  const answer = async (c, text) => { send(c, { t: 'answer', text }); await until(host, (s) => s.collect.answered.includes(c.id)); };
+  const judge = async () => { send(host, { t: 'host:judge' }); return until(host, (s) => s.phase === 'reveal'); };
+  // Spelare kan inte snurra
+  send(A, { t: 'host:spin' }); await sleep(150);
+  out.playerSpin = A.errors.slice();
+  // Dubbla poäng: rätt 1 p + bonus 1, dubblat
+  await spinFor('double');
+  let st = await next();
+  await answer(A, 'R');
+  st = await judge();
+  out.double = score(st, A.id);
+  // 50/50 för alla: 8 alternativ blir rätt + hälften av 7 fel = 5
+  await spinFor('fifty');
+  st = await next();
+  out.fifty = st.question.choices.length;
+  await judge();
+  // Blixt: halverad svarstid
+  await spinFor('blitz');
+  st = await next();
+  out.blitzMs = st.collect.deadline - st.collect.startedAt;
+  await judge();
+  // Stjäl: B svarar snabbast rätt och tar frågans poäng från ledaren A
+  await spinFor('steal');
+  st = await next();
+  const a0 = score(st, A.id), b0 = score(st, B.id);
+  await answer(B, 'R'); await sleep(30);
+  await answer(A, 'R');
+  st = await judge();
+  out.steal = { a: score(st, A.id) - a0, b: score(st, B.id) - b0, stealer: st.lastEvent.stealer === B.id, from: st.lastEvent.stolenFrom === A.id };
+  // Nit: inget särskilt, normal tid
+  await spinFor('none');
+  st = await next();
+  out.normalMs = st.collect.deadline - st.collect.startedAt;
+  out.noneShown = st.question.choices.length;
+  await judge();
+  // Före skill-utmaningen: bara Dubbla poäng, Stjäl eller Nit
+  const skillTwists = new Set();
+  for (let i = 0; i < 30; i++) skillTwists.add(await spin());
+  out.skillTwists = [...skillTwists].sort();
+  closeAll(host, A, B);
+  return out;
+""")
+
 # Lag, mynt och butik på protokollnivå. Unika namn per körning, eftersom plånböckerna sparas i Hub.
-TEAMS_JS = """
-async ([pin]) => {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+TEAMS_JS = js("""
   const tag = Math.random().toString(36).slice(2, 6);
   const N = (n) => n + tag;
-  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Lag', settings: { answerSeconds: 10, penalty: 1, collectSeconds: 20 }, questions: [
-      { id: 'q1', text: 'Ett', answer: '1' }, { id: 'q2', text: 'Två', answer: '2' },
-      { id: 'q3', text: 'Tre', answer: '3', mode: 'all' }, { id: 'q4', text: 'Fyra', answer: '4' } ] }) });
-  const { code, hostKey } = await res.json();
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const connect = (role, key) => new Promise((resolve) => {
-    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
-    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
-    const c = { ws, state: null, id: null, waiters: [], errors: [] };
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
-      if (m.t === 'joined') c.id = m.playerId;
-      if (m.t === 'error') c.errors.push(m.message);
-      if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
-    };
-    ws.onopen = () => resolve(c);
-  });
-  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
-    if (pred(c.state)) return resolve(c.state);
-    const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
-    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
-  });
-  const send = (c, m) => c.ws.send(JSON.stringify(m));
-  const host = await connect('host', hostKey);
+  const q = (i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'R', choices: """ + POOL + """ });
+  const room = await mkRoom({ title: 'Lag', settings: { collectSeconds: 20, choiceCount: 8, hostPlays: false }, questions: [q(1), q(2), q(3)] });
+  const host = await connect(room.code, 'host', room.hostKey);
   const ps = {};
-  for (const n of ['A', 'B', 'C', 'D']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: N(n) }); }
+  for (const n of ['A', 'B', 'C', 'D']) { ps[n] = await connect(room.code, 'player'); send(ps[n], { t: 'join', name: N(n) }); }
   await until(host, (s) => s && Object.keys(s.wallets).length === 4);
   const st = () => host.state;
   const id = (n) => ps[n].id;
@@ -348,28 +256,24 @@ async ([pin]) => {
   const mate = (n) => teamOf(n).members.find((x) => x !== id(n));
   const out = {};
   out.welcome = ['A', 'B', 'C', 'D'].map((n) => w(n).coins);
-
   send(host, { t: 'host:teams', mode: 3 });
   await until(host, (s) => s.teams.length > 0);
   out.split3 = st().teams.map((t) => t.members.length).sort();
   send(host, { t: 'host:teams', mode: 2 });
   await until(host, (s) => s.teamMode === 2);
   out.split2 = st().teams.map((t) => t.members.length).sort();
-
   // Butiken
   send(ps.A, { t: 'buy', item: 'extra' });
   await until(host, (s) => s.wallets[id('A')].coins === 4);
   send(ps.A, { t: 'buy', item: 'extra' }); await sleep(150);   // laget har redan
-  send(ps.A, { t: 'buy', item: 'pass' });
-  await until(host, (s) => s.wallets[id('A')].items.pass === 1);
+  send(ps.A, { t: 'buy', item: 'fifty' });
+  await until(host, (s) => s.wallets[id('A')].items.fifty === 1);
   send(ps.A, { t: 'buy', item: 'double' }); await sleep(150);  // 1 mynt kvar: för dyrt
   out.errorsA = ps.A.errors.slice();
-  // Veto: D slumpar om och hamnar inte med samma lagkamrat
   const oldMate = mate('D');
   send(ps.D, { t: 'buy', item: 'veto' });
   await until(host, (s) => s.wallets[id('D')].coins === 5);
   out.vetoNewMate = mate('D') !== oldMate;
-  // B köper och aktiverar Dubbla poäng för fråga 1; C köper Sabotage
   send(ps.B, { t: 'buy', item: 'double' });
   await until(host, (s) => s.wallets[id('B')].items.double === 1);
   send(ps.B, { t: 'use', item: 'double' });
@@ -379,64 +283,61 @@ async ([pin]) => {
   await until(host, (s) => s.wallets[id('C')].items.sabotage === 1);
   const pub = await (await fetch('/api/hub/public')).json();
   out.hubWallet = pub.wallets.find((x) => x.name === N('A'))?.coins;
-
-  // Fråga 1: B:s lagkamrat svarar rätt med dubbla poäng
+  // Fråga 1: B:s lagkamrat svarar rätt (1 p + 1 bonus) med dubbla poäng
   const bm = Object.keys(ps).find((n) => id(n) === mate('B'));
   send(host, { t: 'host:start' });
-  await until(host, (s) => s.phase === 'question');
-  send(ps[bm], { t: 'buzz' });
-  await until(host, (s) => s.phase === 'buzzed');
-  send(host, { t: 'host:correct' });
+  await until(host, (s) => s.phase === 'collect');
+  send(ps[bm], { t: 'answer', text: 'R' });
+  await until(host, (s) => s.collect.answered.length === 1);
+  send(host, { t: 'host:judge' });
   await until(host, (s) => s.phase === 'reveal');
   out.doubleScore = st().players.find((p) => p.id === id(bm)).score;
   out.coinCorrect = st().coinsTonight[id(bm)];
-
-  // Mellan frågorna: C saboterar A:s lag inför fråga 2. A har Extra tid: (10 + 5) / 2 = 7,5 s.
+  // Mellan frågorna: C saboterar A:s lag inför fråga 2. A har Extra tid: (20 + 5) / 2 = 12,5 s, alltså −7,5 s mot grundtiden.
   send(ps.C, { t: 'use', item: 'sabotage', target: teamOf('C').id }); await sleep(150);  // eget lag: nej
   out.errorsC = ps.C.errors.slice();
   const aTeam = teamOf('A').id;
-  if (aTeam !== teamOf('C').id) {
+  out.sameTeamAC = aTeam === teamOf('C').id;
+  if (!out.sameTeamAC) {
     send(ps.C, { t: 'use', item: 'sabotage', target: aTeam });
     await until(host, (s) => s.effects.sabotage.includes(aTeam));
   }
-  out.sameTeamAC = aTeam === teamOf('C').id;
   send(host, { t: 'host:next' });
-  await until(host, (s) => s.phase === 'question' && s.qIndex === 1);
-  send(ps.A, { t: 'buzz' });
-  const b2 = await until(host, (s) => s.phase === 'buzzed');
-  out.buzzMs = b2.buzz.deadline - b2.lastEvent.at;
-  const scoreA = b2.players.find((p) => p.id === id('A')).score;
-  send(ps.A, { t: 'pass' });
-  const p2 = await until(host, (s) => s.lastEvent?.kind === 'pass');
-  out.pass = { delta: p2.players.find((p) => p.id === id('A')).score - scoreA, locked: p2.lockedOut.includes(id('A')), left: p2.wallets[id('A')].items.pass };
-
-  // Fråga 3 (Alla svarar): A:s lag har +5 s egen deadline, sabotaget gällde bara fråga 2
+  const c2 = await until(host, (s) => s.phase === 'collect' && s.qIndex === 1);
+  out.extraQ2 = c2.collect.extra?.[id('A')] ?? 0;
+  // A använder 50/50 och svarar fel
+  send(ps.A, { t: 'use', item: 'fifty' });
+  const a2 = await until(ps.A, (s) => (s.myRemoved ?? []).length > 0);
+  const wrongLeft = a2.question.choices.find((x) => x !== 'R' && !a2.myRemoved.includes(x));
+  send(ps.A, { t: 'answer', text: wrongLeft });
+  await until(host, (s) => s.collect.answered.includes(id('A')));
+  send(host, { t: 'host:judge' });
+  await until(host, (s) => s.phase === 'reveal');
+  out.fiftyLeft = st().wallets[id('A')].items.fifty;
+  // Fråga 3: A:s lag har +5 s egen deadline, sabotaget gällde bara fråga 2
   send(host, { t: 'host:next' });
-  const c3 = await until(host, (s) => s.phase === 'collect');
+  const c3 = await until(host, (s) => s.phase === 'collect' && s.qIndex === 2);
   out.extraCollect = c3.collect.extra?.[id('A')] ?? 0;
   out.extraOther = c3.collect.extra?.[id('C')] ?? 0;
   send(host, { t: 'host:finish' });
   await until(host, (s) => s.phase === 'finished');
-
   // Kröning: lagets snitt som resultat, mynt betalas ut en gång
   const before = Object.fromEntries((await (await fetch('/api/hub/public')).json()).wallets.map((x) => [x.name, x.coins]));
-  const entry = await (await fetch(`/api/rooms/${code}/crown`, { method: 'POST', headers: { 'x-host-pin': pin } })).json();
-  await fetch(`/api/rooms/${code}/crown`, { method: 'POST', headers: { 'x-host-pin': pin } }); // dubbelklick
+  const entry = await (await fetch(`/api/rooms/${room.code}/crown`, { method: 'POST', headers: { 'x-host-pin': pin } })).json();
+  await fetch(`/api/rooms/${room.code}/crown`, { method: 'POST', headers: { 'x-host-pin': pin } }); // dubbelklick
   const after = Object.fromEntries((await (await fetch('/api/hub/public')).json()).wallets.map((x) => [x.name, x.coins]));
   out.results = entry.results.map((r) => [r.name.replace(tag, ''), r.score, !!r.team]);
   out.paid = Object.fromEntries(Object.keys(entry.coins).map((n) => [n.replace(tag, ''), after[n] - before[n] === entry.coins[n]]));
   out.winnerBonus = entry.coins[N(bm)];
-  for (const c of [host, ...Object.values(ps)]) c.ws.close();
+  closeAll(host, ...Object.values(ps));
   return out;
-}
-"""
+""")
 
-# Skill-rundor på protokollnivå: frö, validering, rankning och att ordningen inte läcker.
 SKILL_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Skill', questions: [
+    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false }, questions: [
       { id: 'k1', text: 'Flick', answer: '', mode: 'skill', skill: { kind: 'aim' } },
       { id: 'k2', text: 'Ordna', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'Z', value: 3 }, { label: 'X', value: 1 }, { label: 'Y', value: 2 }] } },
       { id: 'k3', text: 'Trasig', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'A', value: 1 }] } } ] }) });
@@ -448,7 +349,6 @@ async ([pin]) => {
     const c = { ws, state: null, id: null, waiters: [], raw: [], errors: [] };
     ws.onmessage = (ev) => {
       const m = JSON.parse(ev.data);
-      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
       if (m.t === 'joined') c.id = m.playerId;
       if (m.t === 'error') c.errors.push(m.message);
       if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
@@ -496,249 +396,8 @@ async ([pin]) => {
   const r2 = await until(tv, (s) => s?.phase === 'reveal');
   out.order = r2.collect.results.map((r) => [name(r2, r.playerId), r.place, r.delta]);
   out.orderReveal = r2.question.skill.items.map((i) => i.label);
-  send(host, { t: 'host:next' });
-  const r3 = await until(tv, (s) => s?.qIndex === 2);
-  out.badSpec = r3.question.mode;
+  out.qCount = r2.qCount;  // den trasiga utmaningen hoppades över
   for (const c of [host, tv, ...Object.values(ps)]) c.ws.close();
-  return out;
-}
-"""
-
-# "Alla svarar" på protokollnivå: sekretess, låsning, deadline och poäng. TV-klientens råa meddelanden granskas.
-COLLECT_JS = """
-async ([pin]) => {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Alla svarar', settings: { collectSeconds: 5 }, questions: [
-      { id: 'a1', text: 'Hemlig fråga', answer: 'FACIT-XYZ', points: 2, mode: 'all' },
-      { id: 'a2', text: 'Vanlig fråga', answer: 'Buzzsvar' },
-      { id: 'a3', text: 'Bluff-mode', answer: 'X', mode: 'nonsens' },
-      { id: 'a4', text: 'Hjul och alla svarar', answer: 'Y', mode: 'all' } ] }) });
-  const { code, hostKey } = await res.json();
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const connect = (role, key) => new Promise((resolve) => {
-    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
-    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
-    const c = { ws, state: null, id: null, waiters: [], raw: [], errors: [] };
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
-      if (m.t === 'joined') c.id = m.playerId;
-      if (m.t === 'error') c.errors.push(m.message);
-      if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
-    };
-    ws.onopen = () => resolve(c);
-  });
-  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
-    if (pred(c.state)) return resolve(c.state);
-    const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
-    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
-  });
-  const send = (c, m) => c.ws.send(JSON.stringify(m));
-  const host = await connect('host', hostKey);
-  const tv = await connect('tv');
-  const ps = {};
-  for (const n of ['A', 'B', 'C', 'D']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
-  await sleep(300);
-  const id = (n) => ps[n].id;
-  const score = (st, n) => st.players.find((p) => p.name === n).score;
-  const out = {};
-
-  send(host, { t: 'host:start' });
-  const st0 = await until(tv, (st) => st?.phase === 'collect');
-  out.startPhase = st0.phase; out.mode = st0.question.mode;
-  out.countdown = st0.collect.deadline - st0.collect.startedAt;
-  send(ps.A, { t: 'buzz' }); await sleep(250);
-  out.buzzIgnored = host.state.phase === 'collect' && host.state.buzz === null;
-
-  send(ps.B, { t: 'answer', text: '   ' });           // tomt: avvisas
-  send(ps.B, { t: 'answer', text: 'Fel-svar-B' });    // först, men fel
-  await sleep(80);
-  send(ps.A, { t: 'answer', text: 'Ratt-svar-A' });   // rätt, näst först
-  await sleep(80);
-  send(ps.A, { t: 'answer', text: 'Byter-svar-A' });  // låst: avvisas
-  await until(host, (st) => st?.collectHost?.answers.length === 2);
-  await sleep(200); // låt felsvaren hinna fram
-  out.order = host.state.collectHost.answers.map((a) => a.text);
-  out.timesIncreasing = host.state.collectHost.answers[0].at <= host.state.collectHost.answers[1].at;
-  out.publicAnswered = tv.state.collect.answered.length;
-  out.errorsB = ps.B.errors.slice(); out.errorsA = ps.A.errors.slice();
-
-  // C och D svarar inte: servern stänger själv vid deadline. C:s sena svar avvisas.
-  await until(tv, (st) => st?.phase === 'judge', 7000);
-  send(ps.C, { t: 'answer', text: 'For-sent-C' }); await sleep(200);
-  out.lateRejected = ps.C.errors.includes('Tiden är ute') && host.state.collectHost.answers.length === 2;
-
-  // Hosten markerar B rätt, ångrar sig, markerar A rätt. Sedan bekräftelse.
-  send(host, { t: 'host:mark', playerId: id('B'), correct: true });
-  send(host, { t: 'host:mark', playerId: id('A'), correct: true });
-  send(host, { t: 'host:mark', playerId: id('B'), correct: false });
-  send(host, { t: 'host:mark', playerId: id('C'), correct: true }); // har inget svar: ignoreras
-  await until(host, (st) => st?.collectHost?.correct.length === 1 && st.collectHost.correct[0] === id('A'));
-  const secret = ['FACIT-XYZ', 'Fel-svar-B', 'Ratt-svar-A', 'Byter-svar-A', 'For-sent-C'];
-  out.leakBeforeReveal = [tv, ps.A, ps.B, ps.C, ps.D].flatMap((c) => c.raw).filter((r) => secret.some((x) => r.includes(x))).length;
-  send(host, { t: 'host:judge' });
-  const st1 = await until(tv, (st) => st?.phase === 'reveal');
-  out.scores = { A: score(st1, 'A'), B: score(st1, 'B'), C: score(st1, 'C'), D: score(st1, 'D') };
-  out.results = st1.collect.results.map((r) => [r.text, r.correct, r.fastest, r.delta]);
-  out.revealed = st1.revealedAnswer;
-  send(host, { t: 'host:mark', playerId: id('B'), correct: true }); await sleep(200); // efter rättning: ingen effekt
-  out.afterJudge = score(tv.state, 'B');
-
-  // Nästa fråga är en vanlig buzz-fråga och fungerar som förut.
-  send(host, { t: 'host:next' });
-  const st2 = await until(tv, (st) => st?.phase === 'question' && st.qIndex === 1);
-  out.buzzMode = st2.question.mode; out.buzzCollect = st2.collect ?? null;
-  send(ps.C, { t: 'answer', text: 'ignoreras' });
-  send(ps.C, { t: 'buzz' });
-  out.buzzWinner = (await until(host, (st) => st?.phase === 'buzzed')).buzz.playerId === id('C');
-  // Okänd mode behandlas som buzz.
-  send(host, { t: 'host:next' });
-  out.unknownMode = (await until(tv, (st) => st?.qIndex === 2)).phase;
-  // Lyckohjulet före en Alla svarar-fråga: bara Dubbla poäng eller Nit, och Dubbla poäng dubblar frågans poäng.
-  send(host, { t: 'host:reveal' }); await until(host, (st) => st?.phase === 'reveal');
-  const seen = new Set();
-  for (let i = 0; i < 40; i++) {
-    const before = host.state.wheel?.spinId ?? 0;
-    send(host, { t: 'host:spin' });
-    const w = (await until(host, (st) => (st?.wheel?.spinId ?? 0) > before)).wheel;
-    seen.add(w.result);
-    if (seen.size >= 2 && w.result === 'double') break;
-  }
-  out.wheelBeforeAll = [...seen].sort();
-  const a0 = score(host.state, 'A');
-  send(host, { t: 'host:next' });
-  await until(host, (st) => st?.phase === 'collect' && st.qIndex === 3);
-  send(ps.A, { t: 'answer', text: 'Y' });
-  await until(host, (st) => st?.collectHost?.answers.length === 1);
-  send(host, { t: 'host:close' }); await until(host, (st) => st?.phase === 'judge');
-  send(host, { t: 'host:mark', playerId: id('A'), correct: true });
-  await until(host, (st) => st?.collectHost?.correct.length === 1);
-  send(host, { t: 'host:judge' });
-  out.doubleAll = score(await until(host, (st) => st?.phase === 'reveal'), 'A') - a0;
-  for (const c of [host, tv, ...Object.values(ps)]) c.ws.close();
-  return out;
-}
-"""
-
-# Lyckohjulet via direkta websocket-klienter. Servern slumpar, så testet snurrar tills varje twist
-# kommit upp (läser utfallet ur state) och kontrollerar sedan just den twistens effekt på nästa fråga.
-WHEEL_JS = """
-async ([pin]) => {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Hjul', settings: { answerSeconds: 10, penalty: 1 },
-      questions: [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
-  const { code, hostKey } = await res.json();
-  const connect = (role, key) => new Promise((resolve) => {
-    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
-    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
-    const c = { ws, state: null, id: null, waiters: [], errors: [] };
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
-      if (m.t === 'joined') c.id = m.playerId;
-      if (m.t === 'error') c.errors.push(m.message);
-      if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
-    };
-    ws.onopen = () => resolve(c);
-  });
-  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
-    if (pred(c.state)) return resolve(c.state);
-    const t = setTimeout(() => reject(new Error('timeout i väntan på state')), ms);
-    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
-  });
-  const send = (c, m) => c.ws.send(JSON.stringify(m));
-  const host = await connect('host', hostKey);
-  const ps = {};
-  for (const n of ['A', 'B', 'C']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
-  await until(host, (st) => st?.players.length === 3);
-  const score = (n) => host.state.players.find((p) => p.name === n).score;
-  const scores = () => Object.fromEntries(host.state.players.map((p) => [p.name, p.score]));
-  const out = { seen: {}, spins: 0 };
-
-  // Snurra tills hjulet ger twisten (servern slumpar; max 120 försök).
-  const spinFor = async (twist) => {
-    for (let i = 0; i < 120; i++) {
-      const before = host.state.wheel?.spinId ?? 0;
-      send(host, { t: 'host:spin' });
-      const st = await until(host, (s) => (s.wheel?.spinId ?? 0) > before);
-      out.spins++;
-      out.seen[st.wheel.result] = (out.seen[st.wheel.result] ?? 0) + 1;
-      if (st.wheel.forQ !== st.qIndex + 1) throw new Error('snurret gäller inte nästa fråga');
-      if (st.wheel.result === twist) return st.wheel;
-    }
-    throw new Error('hjulet gav aldrig ' + twist);
-  };
-  const next = async () => {
-    const q = host.state.qIndex;
-    send(host, { t: host.state.phase === 'lobby' ? 'host:start' : 'host:next' });
-    await until(host, (s) => s.qIndex === q + 1 && s.phase === 'question');
-    for (const n of ['A', 'B', 'C']) await until(ps[n], (s) => s.qIndex === q + 1 && s.phase === 'question');
-  };
-  const buzz = async (n) => { send(ps[n], { t: 'buzz' }); return until(host, (s) => s.phase === 'buzzed'); };
-  const judge = async (kind) => { const q = host.state.qIndex; send(host, { t: kind }); await until(host, (s) => s.qIndex === q && s.phase !== 'buzzed'); };
-
-  // Spelare får inte snurra; snurr under pågående fråga nekas.
-  send(ps.A, { t: 'host:spin' }); await sleep(200);
-  out.playerSpin = { errors: ps.A.errors.slice(), wheel: host.state.wheel ?? null };
-
-  // 1) Dubbla poäng (snurras i lobbyn): rätt svar ger 2 p, och spelarna ser twisten.
-  let w = await spinFor('double');
-  out.playerSeesWheel = (await until(ps.B, (s) => s.wheel?.spinId === w.spinId)).wheel.result;
-  await next();
-  out.duringQuestion = { ...host.state.wheel, playerWheel: ps.C.state.wheel?.result };
-  send(host, { t: 'host:spin' }); await sleep(200);
-  out.spinDuringQuestion = { errors: host.errors.slice(), spinId: host.state.wheel?.spinId };
-  await buzz('A'); await judge('host:correct');
-  out.double = score('A');
-
-  // 2) Utan nytt snurr: twisten är förbrukad, vanlig poäng igen.
-  await next();
-  out.afterDouble = { wheel: host.state.wheel ?? null };
-  await buzz('A'); await judge('host:correct');
-  out.plain = score('A');
-
-  // 3) Ingen straffavgift: fel svar kostar inget.
-  await spinFor('safe'); await next();
-  const b0 = score('B');
-  await buzz('B'); await judge('host:wrong');
-  out.safe = { delta: score('B') - b0, event: host.state.lastEvent.delta };
-  send(host, { t: 'host:reveal' }); await until(host, (s) => s.phase === 'reveal');
-
-  // 4) Stjäl: C tar poängen från ledaren A (A leder med 3).
-  await spinFor('steal'); await next();
-  const s0 = scores();
-  await buzz('C'); await judge('host:correct');
-  const s1 = scores();
-  out.steal = { A: s1.A - s0.A, C: s1.C - s0.C, B: s1.B - s0.B, stolenFrom: host.state.players.find((p) => p.id === host.state.lastEvent.stolenFrom)?.name };
-
-  // 5) Blixt: halverad svarstid (10 s -> 5 s).
-  await spinFor('blitz'); await next();
-  const st = await buzz('B');
-  out.blitzMs = st.buzz.deadline - st.serverNow;
-  await judge('host:correct');
-
-  // 6) Nit: ingen effekt.
-  await spinFor('none'); await next();
-  const a0 = score('A');
-  await buzz('A'); await judge('host:wrong');
-  out.none = score('A') - a0;
-
-  // 7) Vanlig fråga efter Nit: full svarstid igen.
-  await next();
-  const st2 = await buzz('C');
-  out.normalMs = st2.buzz.deadline - st2.serverNow;
-  await judge('host:correct');
-
-  // Sista frågan: det finns ingen nästa fråga att snurra för.
-  await next();
-  await buzz('A'); await judge('host:correct');
-  const errs = host.errors.length;
-  send(host, { t: 'host:spin' }); await sleep(200);
-  out.lastSpinRejected = host.errors.length > errs;
-  for (const c of [host, ...Object.values(ps)]) c.ws.close();
   return out;
 }
 """
@@ -749,7 +408,7 @@ def shot(page, name):
 
 
 # Samma mönster som HAPTIC i src/lib/sound.ts
-VIB_BUZZ, VIB_RIGHT, VIB_WRONG = [60], [40, 60, 40, 60, 120], [300, 80, 300]
+VIB_RIGHT, VIB_WRONG = [40, 60, 40, 60, 120], [300, 80, 300]
 
 # Android-liknande: spela in navigator.vibrate-anrop
 STUB_VIBRATE = """
@@ -810,6 +469,42 @@ def check_pwa(page):
     assert page.evaluate("fetch('/api/hub/public', {cache: 'no-store'}).then(r => r.status)") == 200
 
 
+def choices_of(page):
+    return page.get_by_role("group", name="Välj svar").get_by_role("button")
+
+
+def pick(page, text):
+    choices_of(page).filter(has_text=text).first.click()
+
+
+def pick_wrong(page, right):
+    btns = choices_of(page)
+    for i in range(btns.count()):
+        t = btns.nth(i).inner_text()
+        if right not in t and btns.nth(i).is_enabled():
+            btns.nth(i).click()
+            return t
+    raise AssertionError("hittade inget fel alternativ")
+
+
+def create_room(host, title, questions, settings):
+    """Skapa ett rum via API:t från hostens sida och spara hostnyckeln så att /host/KOD fungerar."""
+    return host.evaluate("""async ([pin, body]) => {
+      const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""",
+        [PIN, {"title": title, "questions": questions, "settings": settings}])
+
+
+def join(page, code, name):
+    page.goto(f"{BASE}/play/{code}")
+    page.get_by_label("Ditt namn").fill(name)
+    page.get_by_role("button", name="Hoppa in").click()
+    expect(page.get_by_text("Väntar på att hosten startar")).to_be_visible()
+
+
+POOL8 = ["Rätt", "Fel 1", "Fel 2", "Fel 3", "Fel 4", "Fel 5", "Fel 6", "Fel 7"]
+
+
 def main():
     with sync_playwright() as pw:
         b = pw.chromium.launch()
@@ -820,39 +515,31 @@ def main():
         p1.add_init_script(STUB_VIBRATE)
         p2.add_init_script(NO_VIBRATE)
         page_errors = []
-        for pg in (p1, p2):
+        for pg in (p1, p2, host, tv):
             pg.on("pageerror", lambda e: page_errors.append(str(e)))
 
-        # Startsida
-        page_errors = []
-        p1.on("pageerror", lambda e: page_errors.append(str(e)))
+        # Startsida och installbar app
         p1.goto(BASE + "/")
         expect(p1.get_by_role("heading", name="Vem tar kronan i veckan?")).to_be_visible()
         shot(p1, "01-start-mobil")
-
-        # Installbar som app (PWA)
         check_pwa(p1)
-        assert not page_errors, f"Sidfel på startsidan: {page_errors}"
 
-        # Host loggar in och sätter kort svarstid
+        # Host loggar in, väljer premiärsetet, 4 alternativ och spelar själv (standard)
         host.goto(BASE + "/host")
         host.get_by_label("Host-PIN").fill(PIN)
         host.get_by_role("button", name="Lås upp").click()
         expect(host.get_by_role("heading", name="Starta kvällens quiz")).to_be_visible()
-        host.get_by_label("Sekunder att svara efter buzz").fill("3")
-        host.get_by_label("Straff vid fel eller för långsam (poäng)").fill("1")
-        shot(host, "02-host-dashboard")
-        # Välj alltid premiärsetet uttryckligen: nyare set hamnar överst och testet förväntar sig dess svar.
+        host.get_by_label("Antal svarsalternativ").select_option("4")
+        expect(host.get_by_label("Jag spelar själv (dölj facit för mig)")).to_be_checked()
         host.locator("label", has_text="Premiär: Blandat").get_by_role("radio").check()
+        shot(host, "02-host-dashboard")
         host.get_by_role("button", name="Öppna rum").click()
         host.wait_for_url("**/host/*")
         code = host.url.rstrip("/").split("/")[-1]
         print("Rum:", code)
-
         tv.goto(f"{BASE}/tv/{code}")
         expect(tv.get_by_label("Rumskod")).to_have_text(code)
 
-        # Spelare går med via koden
         for page, name in [(p1, "Erik"), (p2, "Tobbe")]:
             page.goto(BASE + "/")
             page.get_by_label("Rumskod från hosten").fill(code)
@@ -861,44 +548,43 @@ def main():
             page.get_by_role("button", name="Hoppa in").click()
             expect(page.get_by_text("Väntar på att hosten startar")).to_be_visible()
         expect(tv.get_by_text("2 spelare inne")).to_be_visible()
+        assert p1.get_by_role("button", name="Buzza").count() == 0, "Buzzern finns kvar"
         # Spelarsidan styrs av service workern och klarar en omladdning (websocket återansluter)
         assert p1.evaluate("!!navigator.serviceWorker.controller"), "/play styrs inte av service workern"
         p1.reload()
         expect(p1.get_by_text("Väntar på att hosten startar")).to_be_visible()
-        expect(tv.get_by_text("2 spelare inne")).to_be_visible()
         shot(tv, "03-tv-lobby")
         shot(p1, "04-spelare-lobby")
 
-        # Fråga 1: Erik buzzar och svarar rätt
+        # Fråga 1: fyra alternativ. Värden spelar själv och ser inget facit; TV:n visar inte rätt svar.
         host.get_by_role("button", name="Starta första frågan").click()
-        expect(p1.get_by_role("button", name="Buzza")).to_be_enabled()
+        expect(choices_of(p1)).to_have_count(4)
+        expect(tv.get_by_label("Svarsalternativ").locator("li")).to_have_count(4)
+        expect(host.get_by_text("Du spelar själv, så du ser inte facit")).to_be_visible()
+        assert host.get_by_text("Svar:").count() == 0, "Hosten ser facit trots att hen spelar"
+        assert tv.locator(".choice-tile.right").count() == 0, "TV:n markerar rätt svar före reveal"
         shot(tv, "05-tv-fraga")
-        shot(p1, "06-spelare-buzzer")
-        p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
-        expect(p2.get_by_text("Erik har ordet")).to_be_visible()
-        expect(p2.get_by_role("button", name="Buzza")).to_be_disabled()
-        wait_vib(p1, [VIB_BUZZ])
-        assert p2.evaluate("'vibrate' in navigator") is False, "iOS-stubben fungerar inte"
-        shot(tv, "07-tv-buzz")
-        shot(host, "08-host-buzz")
-        # Hosten ser svaret, TV:n gör det inte
-        expect(host.get_by_text("Svar: 2010")).to_be_visible()
-        assert "2010" not in tv.inner_text("body"), "TV-vyn läcker svaret innan reveal!"
-        host.get_by_role("button", name="Rätt (R)").click()
+        shot(p1, "06-spelare-alternativ")
+        shot(host, "07-host-spelande-vard")
+        pick_wrong(p2, "2010")
+        pick(p1, "2010")
+        expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
+        expect(tv.get_by_text("Tiden är ute")).to_be_visible()   # alla har svarat: frågan stängs direkt
+        host.get_by_role("button", name="Visa svaret (V)").click()
         expect(tv.locator(".answer-reveal")).to_have_text("2010")
-        expect(p1.locator(".chip").first).to_contain_text("1")
-        wait_vib(p1, [VIB_BUZZ, VIB_RIGHT])
+        expect(tv.locator(".choice-tile.right")).to_contain_text("2010")
+        expect(p1.get_by_text("Rätt! +2 p")).to_be_visible()
+        expect(p2.get_by_text("Fel den här gången")).to_be_visible()
+        wait_vib(p1, [VIB_RIGHT])
+        shot(tv, "08-tv-facit")
 
         # Lyckohjulet: hosten snurrar mellan frågorna, TV och spelare ser samma utfall
         host.get_by_role("button", name="Snurra hjulet").click()
         expect(tv.locator(".wheel")).to_be_visible()
-        expect(tv.get_by_text("Lyckohjulet snurrar")).to_be_visible()
         expect(p1.get_by_text("Lyckohjulet snurrar")).to_be_visible()
         tv.wait_for_timeout(1200)
         shot(tv, "08b-tv-hjul-snurrar")
-        # Omladdning mitt i snurret (TV och en spelare): hjulet ska fortsätta och landa på serverns fält
         tv.reload(); p2.reload()
-        expect(tv.get_by_text("Lyckohjulet snurrar")).to_be_visible()
         tv_twist = tv.locator(".wheel-caption[data-twist]")
         expect(tv_twist).to_be_visible(timeout=8000)
         twist = tv_twist.get_attribute("data-twist")
@@ -907,7 +593,6 @@ def main():
         expect(p1.locator(".wheel-result")).to_have_text(label)
         expect(p2.locator(".wheel-result")).to_have_text(label)
         expect(host.get_by_text("Nästa fråga: " + label)).to_be_visible()
-        expect(tv.locator(".wheel-seg.hit")).to_have_count(1)
         tv.wait_for_timeout(500)
         under_pointer = tv.evaluate("""() => {
           const m = new DOMMatrix(getComputedStyle(document.querySelector('.wheel-disc')).transform);
@@ -917,51 +602,40 @@ def main():
         }""")
         assert under_pointer[0] == under_pointer[1], f"Hjulet på TV:n stannade på fel fält efter omladdning: {under_pointer}"
         shot(tv, "08c-tv-hjul-landat")
-        shot(p1, "08d-spelare-hjul")
-        shot(host, "08e-host-hjul")
 
-        # Fråga 2: Tobbe buzzar och svarar fel, låses ute; Erik låter tiden gå ut
+        # Värden ändrar antal alternativ under kvällen: 6 från nästa fråga
+        host.get_by_text("Kvällens regler").click()
+        host.get_by_label("Antal svarsalternativ").select_option("6")
+        expect(host.get_by_text("gäller från nästa fråga")).to_be_visible()
+        # Facit går inte att slå på mitt i kvällen
+        expect(host.get_by_label("Jag spelar själv (dölj facit och andras svar för mig)")).to_be_disabled()
+        shot(host, "09-host-regler")
+
+        # Fråga 2 (Guld): 6 alternativ (4 med 50/50 från hjulet). Erik väljer med tangentbordet, Tobbe hinner inte.
         host.get_by_role("button", name="Nästa fråga (N)").click()
-        expect(p2.get_by_role("button", name="Buzza")).to_be_enabled()
+        want = 4 if twist == "fifty" else 6
+        expect(choices_of(p1)).to_have_count(want)
         if twist != "none":
             expect(tv.locator(f'.twist-badge[data-twist="{twist}"]')).to_be_visible()
-            expect(p1.locator(f'.twist-badge[data-twist="{twist}"]')).to_be_visible()
-            shot(tv, "08f-tv-fraga-med-twist")
-            shot(p1, "08g-spelare-twist")
-        expect(tv.locator(".wheel")).to_have_count(0)
-        assert "Guld" not in tv.inner_text("body"), "TV-vyn läcker svaret innan reveal (fråga 2)!"
-        p2.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
-        expect(host.get_by_role("button", name="Fel (F)")).to_be_visible()
-        host.get_by_role("button", name="Fel (F)").click()
-        expect(p2.get_by_text("Du är utlåst")).to_be_visible()
-        # Tobbe (utan vibrate) kunde buzza och få fel utan sidfel; Erik vibrerar inte för andras buzz
-        assert vib(p1) == [VIB_BUZZ, VIB_RIGHT], f"Vibrerade för annan spelare: {vib(p1)}"
-        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
-        p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
-        expect(p1.get_by_role("timer")).to_be_visible()
-        expect(p1.get_by_text("Du har ordet")).to_be_visible()
-        assert p1.locator("input").count() == 0, "Buzz ska vara muntligt, inget svarsfält i mobilen"
-        shot(p1, "09-spelare-nedrakning")
-        # Ingen automatisk timeout: efter 3 s har Erik fortfarande ordet tills hosten dömer
-        expect(tv.get_by_text("Tiden är ute, hosten avgör")).to_be_visible(timeout=6000)
-        expect(p1.get_by_text("Tiden är ute, hosten avgör")).to_be_visible()
-        host.wait_for_timeout(500)
-        expect(host.get_by_role("button", name="För långsam (T)")).to_be_visible()
-        assert tv.locator(".answer-reveal").count() == 0, "Servern dömde timeout själv"
-        shot(host, "09b-host-for-langsam")
-        shot(tv, "09c-tv-tiden-ute")
-        host.get_by_role("button", name="För långsam (T)").click()
-        # För långsam => straff, alla utlåsta => svaret visas automatiskt
-        expect(tv.locator(".answer-reveal")).to_be_visible(timeout=6000)
-        wait_vib(p1, [VIB_BUZZ, VIB_RIGHT, VIB_BUZZ, VIB_WRONG])
-        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
-        # Erik laddar om: senaste händelsen (hans timeout) är gammal och ska inte vibrera igen
+        letters = [choices_of(p1).nth(i).get_attribute("data-letter") for i in range(want)]
+        texts = [choices_of(p1).nth(i).inner_text() for i in range(want)]
+        guld = next(l for l, t in zip(letters, texts) if "Guld" in t)
+        p1.locator("h2, p").first.click()
+        p1.keyboard.press(guld.lower())
+        expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
+        expect(p1.locator(".locked-text")).to_have_text("”Guld”")
+        shot(p1, "10-spelare-last")
+        host.get_by_role("button", name="Visa svaret (V)").click()   # stänger frågan i förtid
+        expect(tv.locator(".answer-reveal")).to_have_text("Guld")
+        expect(p2.get_by_text("Du hann inte svara")).to_be_visible()
+        # Erik laddar om: senaste händelsen är gammal och ska inte vibrera igen
+        n_vib = len(vib(p1))
         p1.reload()
         expect(p1.locator(".chip").first).to_contain_text("Erik")
-        p1.wait_for_timeout(1000)
-        assert vib(p1) == [], f"Vibrerade för gammal händelse efter omladdning: {vib(p1)}"
+        p1.wait_for_timeout(800)
+        assert vib(p1) == [], f"Vibrerade för gammal händelse efter omladdning: {vib(p1)} (före: {n_vib})"
 
-        # Fråga 3: Alla svarar. En tredje spelare hoppar in mitt i quizet.
+        # Fråga 3 (Vänern): Sanna hoppar in mitt i quizet. Alla svarar; snabbaste rätt får bonus.
         p3 = b.new_page(viewport={"width": 390, "height": 844})
         p3.on("pageerror", lambda e: page_errors.append(str(e)))
         p3.goto(f"{BASE}/play/{code}")
@@ -970,189 +644,113 @@ def main():
         expect(tv.locator(".chip", has_text="Sanna")).to_be_visible()
         host.get_by_role("button", name="Nästa fråga (N)").click()
         for pg in (p1, p2, p3):
-            expect(pg.get_by_label("Ditt svar")).to_be_visible()
-            assert pg.get_by_role("button", name="Buzza").count() == 0, "Buzzern visas i Alla svarar"
-        expect(tv.get_by_text("Skriv ditt svar i mobilen")).to_be_visible()
-        expect(tv.get_by_role("timer")).to_be_visible()
-        shot(p1, "13-spelare-alla-svarar")
-        p1.get_by_label("Ditt svar").fill("Vänern")
-        p1.get_by_role("button", name="Lås svar").click()
-        expect(p1.get_by_text("Ditt svar är låst")).to_be_visible()
-        expect(p1.locator(".locked-text")).to_have_text("”Vänern”")
-        p3.get_by_label("Ditt svar").fill("Vättern")
-        p3.get_by_role("button", name="Lås svar").click()
-        expect(p3.get_by_text("Ditt svar är låst")).to_be_visible()
-        expect(tv.locator(".answered.done")).to_have_count(2)
-        expect(host.get_by_label("Inlämnade svar").locator("li")).to_have_count(2)
-        shot(tv, "14-tv-alla-svarar")
-        shot(p1, "15-spelare-svar-last")
-        for secret in ("Vänern", "Vättern"):
-            assert secret not in tv.inner_text("body"), f"TV-vyn läcker {secret} under insamlingen!"
-        p2.wait_for_timeout(700)  # Tobbe är långsammast
-        p2.get_by_label("Ditt svar").fill("vänern")
-        p2.get_by_role("button", name="Lås svar").click()
-        # Alla har svarat: insamlingen stängs direkt och hosten rättar
-        expect(tv.get_by_text("Hosten rättar")).to_be_visible()
-        expect(p2.get_by_text("Hosten rättar").first).to_be_visible()
-        for secret in ("Vänern", "Vättern", "vänern"):
-            assert secret not in tv.inner_text("body"), f"TV-vyn läcker {secret} före reveal!"
-        mark = host.get_by_label("Inlämnade svar")
-        assert [t.split("”")[1] for t in mark.locator("li").all_inner_texts()] == ["Vänern", "Vättern", "vänern"], "Fel inlämningsordning hos hosten"
-        host.get_by_label("Sanna svarade rätt").check()
-        expect(host.get_by_label("Sanna svarade rätt")).to_be_checked()
-        host.get_by_label("Sanna svarade rätt").uncheck()  # hosten ångrar sig
-        host.get_by_label("Erik svarade rätt").check()
-        host.get_by_label("Tobbe svarade rätt").check()
-        expect(host.get_by_label("Tobbe svarade rätt")).to_be_checked()
-        expect(host.get_by_label("Sanna svarade rätt")).not_to_be_checked()
-        expect(mark.locator("li", has_text="Erik")).to_contain_text("Bonus")
-        shot(host, "16-host-ratta")
-        # Under rättningen får varken knapp eller N/V-tangent hoppa vidare och kasta allas svar
-        assert host.get_by_role("button", name="Nästa fråga (N)").count() == 0, "Nästa fråga visas under rättningen"
-        host.locator("h1, h2").first.click()
-        host.keyboard.press("n")
+            expect(choices_of(pg)).to_have_count(6)
+        pick(p1, "Vänern")
+        expect(tv.locator(".answered.done")).to_have_count(1)
+        pick_wrong(p3, "Vänern")
+        p2.wait_for_timeout(500)
+        pick(p2, "Vänern")
+        expect(tv.get_by_text("Tiden är ute")).to_be_visible()
+        assert host.locator(".answer-box").count() == 0, "Spelande värd ser facit"
         host.keyboard.press("v")
-        host.wait_for_timeout(400)
-        expect(host.get_by_text("Insamlingen är stängd")).to_be_visible()
-        expect(host.get_by_label("Erik svarade rätt")).to_be_checked()
-        host.get_by_role("button", name="Bekräfta och visa svaren").click()
-        expect(tv.locator(".answer-reveal")).to_have_text("Vänern")
         results = tv.get_by_label("Allas svar").locator("li")
         expect(results).to_have_count(3)
         expect(results.nth(0)).to_contain_text("Snabbast")
         expect(results.nth(0)).to_contain_text("Rätt +2")
         expect(results.nth(1)).to_contain_text("Fel")
         expect(results.nth(2)).to_contain_text("Rätt +1")
-        expect(p1.get_by_text("Rätt! +2 p")).to_be_visible()
-        expect(p2.get_by_text("Rätt! +1 p")).to_be_visible()
-        expect(p3.get_by_text("Fel den här gången")).to_be_visible()
-        wait_vib(p1, [VIB_RIGHT])
         tv.wait_for_timeout(800)
-        shot(tv, "17-tv-alla-svarar-facit")
-        shot(p1, "18-spelare-alla-svarar-ratt")
-        shot(p3, "19-spelare-alla-svarar-fel")
-        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
-
-        before = len(json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"])
+        shot(tv, "11-tv-alla-svar")
+        assert not page_errors, f"Sidfel: {page_errors}"
 
         # Avsluta och kröna
+        before = len(json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"])
         host.once("dialog", lambda d: d.accept())
         host.get_by_role("button", name="Avsluta i förtid").click()
         expect(tv.get_by_role("heading", name="Kvällens kung")).to_be_visible()
         host.get_by_role("button", name="Kröna vinnaren och spara i tabellen").click()
         expect(host.get_by_text("Sparat i tabellen")).to_be_visible()
         tv.wait_for_timeout(600)
-        shot(tv, "10-tv-pallen")
-
+        shot(tv, "12-tv-pallen")
         league = json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"]
         assert len(league) == before + 1, "Kröningen sparades inte i tabellen"
         res = {r["name"]: r["score"] for r in league[0]["results"]}
-        # Erik: +1 -1 +1 +1 bonus, Tobbe: -1 +1, Sanna: fel kostar inget i Alla svarar.
-        # Ingen straffavgift (hjulet) gör fråga 2:s fel och timeout gratis; övriga twistar påverkar inte fel svar.
-        expected = {"Erik": 3, "Tobbe": 1, "Sanna": 0} if twist == "safe" else {"Erik": 2, "Tobbe": 0, "Sanna": 0}
+        # Erik: 2 + 2 (3 med hjulets dubbla poäng, bonusen dubblas inte) + 2, Tobbe: 1 på fråga 3, Sanna: fel kostar inget
+        expected = {"Erik": 7 if twist == "double" else 6, "Tobbe": 1, "Sanna": 0}
         assert res == expected, f"Fel slutpoäng med twisten {twist}: {res}, väntade {expected}"
-        p1.goto(BASE + "/tabell")
-        expect(p1.get_by_role("heading", name="Säsongen")).to_be_visible()
-        shot(p1, "11-tabell")
 
-        # Frågebank: skapa set via snabbinklistring
+        # Frågebanken: rätt svar + felalternativ, snabbinklistring och JSON-import
         host.goto(BASE + "/bank")
         host.get_by_role("button", name="Nytt set").click()
         host.get_by_label("Titel").fill("Test-set")
         host.get_by_text("Klistra in många på en gång").click()
-        host.get_by_placeholder("Vilket år kom HoN ut?").fill("Fråga A | Svar A\nFråga B | Svar B | 2\nFråga C | Svar C | 1 | alla")
+        host.locator("textarea").last.fill("Fråga A | Svar A | Fel 1; Fel 2\nFråga B | Svar B | | 2")
         host.get_by_role("button", name="Lägg till raderna").click()
-        expect(host.get_by_label("Rundtyp 3")).to_have_value("all")
-        expect(host.get_by_label("Rundtyp 1")).to_have_value("buzz")
-        host.get_by_label("Rundtyp 1").select_option("all")
-        shot(host, "12-bank-editor")
+        expect(host.get_by_label("Felalternativ 1")).to_have_value("Fel 1; Fel 2")
         host.get_by_role("button", name="Spara set").click()
-        expect(host.get_by_text("Test-set").first).to_be_visible()
-        expect(host.get_by_text("3 frågor · 2 Alla svarar").first).to_be_visible()
+        expect(host.get_by_text("Fråga 2: skriv minst ett felalternativ")).to_be_visible()
+        host.get_by_label("Felalternativ 2").fill("X; Y; Z")
+        shot(host, "13-bank-editor")
+        host.get_by_role("button", name="Spara set").click()
         saved = host.locator(".panel", has_text="Test-set").first
+        expect(saved).to_contain_text("2 frågor")
         saved.get_by_role("button", name="Redigera").click()
-        expect(host.get_by_label("Rundtyp 1")).to_have_value("all")
-        expect(host.get_by_label("Rundtyp 2")).to_have_value("buzz")
-        expect(host.get_by_label("Rundtyp 3")).to_have_value("all")
+        expect(host.get_by_label("Felalternativ 2")).to_have_value("X; Y; Z")
+        host.get_by_label("Rundtyp 2").select_option("skill")
+        expect(host.get_by_label("Utmaning 2")).to_be_visible()
         host.get_by_role("button", name="Stäng").click()
-        # JSON-import läser "mode": "all"
         imp = os.path.join(SHOTS, "import-test.json")
         with open(imp, "w") as f:
             json.dump({"title": "Importerat", "questions": [
-                {"text": "Importerad 1", "answer": "X", "mode": "all"}, {"text": "Importerad 2", "answer": "Y"}]}, f)
+                {"text": "Importerad", "answer": "X", "choices": ["X", "Y"]},
+                {"text": "Skill", "answer": "", "mode": "skill", "skill": {"kind": "aim"}}]}, f)
         host.locator('input[type="file"]').set_input_files(imp)
-        expect(host.get_by_label("Rundtyp 1")).to_have_value("all")
-        expect(host.get_by_label("Rundtyp 2")).to_have_value("buzz")
+        expect(host.get_by_label("Rundtyp 1")).to_have_value("choice")
+        expect(host.get_by_label("Felalternativ 1")).to_have_value("Y")
+        expect(host.get_by_label("Rundtyp 2")).to_have_value("skill")
         os.remove(imp)
 
-        # Snabbinklistring med svarsalternativ och felkontroll
-        host.get_by_role("button", name="Nytt set").click()
-        host.get_by_label("Titel").fill("Alt-set")
-        host.get_by_text("Klistra in många på en gång").click()
-        host.get_by_placeholder("Vilket år kom HoN ut?").fill("Fråga X | Rätt | 1 | alt | Fel 1; Rätt; Fel 2\nFråga Y | Saknas | 1 | alt | A; B")
-        host.get_by_role("button", name="Lägg till raderna").click()
-        expect(host.get_by_label("Rundtyp 1")).to_have_value("choice")
-        expect(host.get_by_label("Alternativ 1")).to_have_value("Fel 1; Rätt; Fel 2")
-        host.get_by_role("button", name="Spara set").click()
-        expect(host.get_by_text("Fråga 2: Svarsalternativ behöver")).to_be_visible()
-        host.get_by_label("Alternativ 2").fill("A; B; Saknas")
-        host.get_by_role("button", name="Spara set").click()
-        expect(host.get_by_text("2 frågor · 2 Svarsalternativ").first).to_be_visible()
-
-        # Svarsalternativ i mobilen: TV visar alternativen men inte vilket som är rätt, hosten bekräftar
-        cdata = host.evaluate("""async ([pin]) => {
-          const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Alternativ', settings: { collectSeconds: 20 }, questions: [
-              { id: 'c1', text: 'Vilken krydda är dyrast per kilo?', answer: 'Saffran', points: 2, mode: 'choice', choices: ['Kardemumma', 'Saffran', 'Vanilj', 'Svartpeppar'] },
-              { id: 'c2', text: 'Trasig alternativfråga', answer: 'Z', mode: 'choice', choices: ['X', 'Y'] } ] }) });
-          const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""", [PIN])
-        ccode = cdata["code"]
-        host.goto(f"{BASE}/host/{ccode}")
-        tv.goto(f"{BASE}/tv/{ccode}")
+        # Värden spelar inte: facit och alla svar syns, 8 alternativ, Sanna använder 50/50
+        adata = create_room(host, "Med facit", [
+            {"id": "a1", "text": "Vilket är rätt?", "answer": "Rätt", "choices": POOL8, "points": 2}],
+            {"hostPlays": False, "choiceCount": 8, "collectSeconds": 30})
+        acode = adata["code"]
+        at = acode.lower()  # unika namn: plånböckerna sparas mellan körningar
+        host.goto(f"{BASE}/host/{acode}")
+        tv.goto(f"{BASE}/tv/{acode}")
         for page, name in [(p1, "Erik"), (p2, "Tobbe"), (p3, "Sanna")]:
-            page.goto(f"{BASE}/play/{ccode}")
-            page.get_by_label("Ditt namn").fill(name)
-            page.get_by_role("button", name="Hoppa in").click()
-            expect(page.get_by_text("Väntar på att hosten startar")).to_be_visible()
+            join(page, acode, name + at)
+        p3.get_by_role("button", name="Köp 50/50 för 3 mynt").click()
+        expect(p3.get_by_text("50/50 ×")).to_be_visible()
         host.get_by_role("button", name="Starta första frågan").click()
-        choices = tv.get_by_label("Svarsalternativ").locator("li")
-        expect(choices).to_have_count(4)
-        expect(tv.get_by_text("Välj i mobilen")).to_be_visible()
-        assert tv.locator(".choice-tile.right").count() == 0, "TV:n markerar rätt alternativ före reveal!"
-        for pg in (p1, p2, p3):
-            expect(pg.get_by_role("group", name="Välj svar").get_by_role("button")).to_have_count(4)
-            assert pg.get_by_role("button", name="Buzza").count() == 0, "Buzzern visas vid svarsalternativ"
-        shot(tv, "20-tv-alternativ")
-        shot(p1, "21-spelare-alternativ")
-        p2.get_by_role("button", name="Vanilj").click()
-        expect(p2.get_by_text("Ditt val är låst")).to_be_visible()
-        p1.get_by_role("button", name="Saffran").click()
-        expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
+        expect(host.get_by_text("Svar: Rätt")).to_be_visible()
+        expect(choices_of(p3)).to_have_count(8)
+        p3.get_by_role("button", name="Använd 50/50").click()
+        expect(p3.locator(".choice-btn.gone")).to_have_count(3)
+        shot(p3, "14-spelare-5050")
+        pick_wrong(p2, "Rätt")
+        pick(p1, "Rätt")
         p3.wait_for_timeout(300)
-        p3.get_by_role("button", name="Saffran").click()
-        expect(tv.get_by_text("Hosten rättar")).to_be_visible()
+        pick(p3, "Rätt")
+        mark = host.get_by_label("Inlämnade svar")
+        expect(mark.locator("li")).to_have_count(3)
+        expect(host.get_by_label(f"Erik{at} svarade rätt")).to_be_checked()
+        expect(host.get_by_label(f"Sanna{at} svarade rätt")).to_be_checked()
+        expect(host.get_by_label(f"Tobbe{at} svarade rätt")).not_to_be_checked()
         assert tv.locator(".choice-tile.right").count() == 0, "TV:n markerar rätt alternativ under rättningen!"
-        expect(host.get_by_label("Erik svarade rätt")).to_be_checked()
-        expect(host.get_by_label("Sanna svarade rätt")).to_be_checked()
-        expect(host.get_by_label("Tobbe svarade rätt")).not_to_be_checked()
-        shot(host, "22-host-alternativ")
-        host.get_by_role("button", name="Bekräfta och visa svaren").click()
-        expect(tv.locator(".choice-tile.right")).to_contain_text("Saffran")
+        shot(host, "15-host-med-facit")
+        host.get_by_role("button", name="Visa svaret (V)").click()
         expect(tv.locator(".choice-tile.right .picks")).to_have_text("2")
         expect(p1.get_by_text("Rätt! +3 p")).to_be_visible()
         expect(p3.get_by_text("Rätt! +2 p")).to_be_visible()
-        expect(p2.get_by_text("Fel den här gången")).to_be_visible()
-        tv.wait_for_timeout(600)
-        shot(tv, "23-tv-alternativ-facit")
-        # Ogiltiga alternativ (svaret saknas) blir en vanlig muntlig buzz-fråga
-        host.get_by_role("button", name="Nästa fråga (N)").click()
-        expect(p1.get_by_role("button", name="Buzza")).to_be_enabled()
-        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+        tv.wait_for_timeout(700)
+        shot(tv, "16-tv-8-alternativ")
+        assert not page_errors, f"Sidfel: {page_errors}"
 
         # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
         sdata = host.evaluate("""async ([pin]) => {
           const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Skill', questions: [
+            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false }, questions: [
               { id: 'k1', text: 'Last hit!', answer: '', mode: 'skill', skill: { kind: 'lasthit' } },
               { id: 'k2', text: 'Flick!', answer: '', mode: 'skill', skill: { kind: 'aim' } },
               { id: 'k3', text: 'Stoppa klockan!', answer: '', mode: 'skill', skill: { kind: 'stopwatch', target: 3 } },
@@ -1281,10 +879,8 @@ def main():
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
 
         # Lag och butik i webbläsaren: hosten slumpar lag, spelarna ser sitt lag och handlar
-        tdata = host.evaluate("""async ([pin]) => {
-          const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Lagkväll', questions: [ { id: 'l1', text: 'Vad heter Kongors studio?', answer: 'Kongor Studios' } ] }) });
-          const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""", [PIN])
+        tdata = create_room(host, "Lagkväll", [
+            {"id": "l1", "text": "Vad heter Kongors studio?", "answer": "Kongor Studios", "choices": ["Kongor Studios", "S2 Games", "Garena", "Valve"]}], {})
         tcode = tdata["code"]
         tag = tcode.lower()
         host.goto(f"{BASE}/host/{tcode}")
@@ -1301,20 +897,24 @@ def main():
         expect(p1.get_by_text("Du är i")).to_be_visible()
         shot(host, "50-host-lag")
         shot(tv, "51-tv-lag-lobby")
-        # Sanna köper Dubbla poäng och aktiverar det för första frågan; Erik köper ett Pass
+        # Sanna köper Dubbla poäng och aktiverar det för första frågan; Erik köper 50/50
         p3.get_by_role("button", name="Köp Dubbla poäng för 4 mynt").click()
         expect(p3.get_by_label("Mynt", exact=True)).to_contain_text("6")
         p3.get_by_role("button", name="Dubbla poäng nästa fråga").click()
         expect(tv.locator(".effect-tag.double")).to_be_visible()
-        p1.get_by_role("button", name="Köp Pass för 3 mynt").click()
-        expect(p1.get_by_text("Pass ×1")).to_be_visible()
+        p1.get_by_role("button", name="Köp 50/50 för 3 mynt").click()
+        expect(p1.get_by_text("50/50 ×1")).to_be_visible()
         shot(p1, "52-spelare-butik")
         host.get_by_role("button", name="Starta första frågan").click()
         expect(tv.locator(".effect-tag.double")).to_be_visible()
-        p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
-        expect(p1.get_by_role("button", name="Använd pass (1 kvar), inget straff")).to_be_visible()
-        shot(p1, "53-spelare-pass")
-        host.get_by_role("button", name="Rätt (R)").click()
+        p1.get_by_role("button", name="Använd 50/50 (1 kvar)").click()
+        expect(p1.locator(".choice-btn.gone")).to_have_count(1)
+        shot(p1, "53-spelare-5050")
+        pick(p1, "Kongor Studios")
+        expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
+        pick_wrong(p2, "Kongor")
+        pick_wrong(p3, "Kongor")
+        host.get_by_role("button", name="Visa svaret (V)").click()
         expect(p1.locator(".coin-toast")).to_contain_text("rätt svar")
         shot(tv, "54-tv-lag-fraga")
         host.get_by_role("button", name="Avsluta och visa pallen (N)").click()
@@ -1333,80 +933,65 @@ def main():
         host.once("dialog", lambda d: d.accept())
         host.get_by_role("button", name="Ta bort Lagkväll").first.click()
         expect(host.get_by_role("button", name="Ta bort Lagkväll")).to_have_count(nights - 1)
-        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+        assert not page_errors, f"Sidfel: {page_errors}"
 
-        # Rättvis buzz: direkta websocket-klienter med simulerad ping
+        # ===== Protokolltester direkt mot servern =====
         raw = b.new_page()
         raw.goto(BASE + "/")
-        fair = raw.evaluate(FAIR_BUZZ_JS, [PIN])
-        print("Rättvis buzz:", fair)
-        assert fair["fair"] == "Seg", f"Spelaren med lägst justerad tid ska vinna, vann: {fair['fair']}"
-        assert fair["cheat"] == "Snabb", f"Fusk-tidsstämpeln klampades inte, vann: {fair['cheat']}"
-        assert fair["single"] == "Fuskare", f"Ensam buzz utan tidsstämpel ska fungera, vann: {fair['single']}"
-        assert fair["fakeS"] == "Snabb", f"Falskt s i spong godtogs, vann: {fair['fakeS']}"
-        assert fair["delayedSpong"] == "Snabb", f"Fördröjd spong gav mer än taket i fördel, vann: {fair['delayedSpong']}"
 
-        edge = raw.evaluate(EDGE_BUZZ_JS, [PIN])
-        print("Buzz-kantfall:", edge)
-        assert edge["simultaneous"] == ["A", "A", "A"], f"Exakt samtidiga buzzar ska vinnas av den som kom först: {edge['simultaneous']}"
-        for k in ("next", "reveal", "finish"):
-            assert edge[k]["phase"] and edge[k]["buzz"] is None, f"host:{k} under buzz-fönstret läckte en buzz: {edge[k]}"
-        assert edge["next"]["after"] == "B", f"Buzz på nästa fråga efter avbrutet fönster fungerar inte: {edge['next']}"
-        assert edge["lockedOut"] == "Kvar", f"Utlåst spelare fick buzza: {edge['lockedOut']}"
-        assert edge["spam"] == "Lugn" and edge["spamBuzzed"] == 1, f"Spam-buzz skrev över första buzzen: {edge}"
-        assert edge["floodWinner"] == "Flod" and edge["normalAfterFlood"] == "Vanlig", f"Servern klarade inte buzz-flod: {edge}"
-        if edge["throttleGapMs"] < 150:
-            assert edge["throttled"] == "Vanlig", f"Buzz-taket släppte igenom flod-buzz: {edge['throttled']} ({edge['throttleGapMs']} ms)"
-        else:
-            print(f"VARNING: buzz-taket kunde inte kontrolleras, host:next tog {edge['throttleGapMs']} ms (gräns 150)")
-        assert 0 < edge["floodPongs"] <= 70, f"Meddelandetaket håller inte (pongs={edge['floodPongs']})"
-        assert edge["pongAfter"] == 1 and edge["alive"] == 2, f"Anslutningen återhämtade sig inte efter flod: {edge}"
-        assert edge["fastRebuzz"] == ["Snabb"] * 3, f"Legitim snabb buzz ströps: {edge['fastRebuzz']}"
-        assert edge["adjusted"] == 40, f"Hostens poängjusteringar ströps: {edge['adjusted']} av 40"
-        assert edge["reload"] == "Ladd", f"Buzz försvann vid omladdning mitt i fönstret: {edge['reload']}"
-        coll = raw.evaluate(COLLECT_JS, [PIN])
-        print("Alla svarar:", coll)
-        assert coll["startPhase"] == "collect" and coll["mode"] == "all", f"Insamlingen startade inte: {coll}"
-        assert 4900 <= coll["countdown"] <= 5100, f"Servern satte fel nedräkning: {coll['countdown']}"
-        assert coll["buzzIgnored"], "Buzz godtogs under insamlingen"
-        assert coll["order"] == ["Fel-svar-B", "Ratt-svar-A"] and coll["timesIncreasing"], f"Fel ordning/låsning: {coll['order']}"
-        assert coll["errorsA"] == ["Du har redan låst ditt svar"] and coll["errorsB"] == ["Skriv ett svar först"], f"Fel felmeddelanden: {coll}"
-        assert coll["publicAnswered"] == 2, "Publikt state visar inte vilka som svarat"
-        assert coll["lateRejected"], "Svar efter deadline godtogs eller insamlingen stängdes inte"
-        assert coll["leakBeforeReveal"] == 0, f"Svar eller facit läckte i publikt state före reveal ({coll['leakBeforeReveal']} meddelanden)"
-        assert coll["scores"] == {"A": 3, "B": 0, "C": 0, "D": 0}, f"Fel poäng (2 p + 1 bonus till A, inget straff): {coll['scores']}"
-        assert coll["results"] == [["Fel-svar-B", False, False, 0], ["Ratt-svar-A", True, True, 3]], f"Fel resultat: {coll['results']}"
-        assert coll["revealed"] == "FACIT-XYZ" and coll["afterJudge"] == 0, f"Fel efter rättning: {coll}"
-        assert coll["buzzMode"] == "buzz" and coll["buzzCollect"] is None and coll["buzzWinner"], f"Buzz-fråga efter Alla svarar trasig: {coll}"
-        assert coll["unknownMode"] == "question", f"Okänd mode ska bli buzz: {coll['unknownMode']}"
-        assert coll["wheelBeforeAll"] == ["double", "none"], f"Hjulet gav twist som inte passar Alla svarar: {coll['wheelBeforeAll']}"
-        cp = raw.evaluate(CHOICE_JS, [PIN])
-        print("Svarsalternativ:", cp)
-        assert cp["mode"] == "choice" and cp["choices"] == ["A1", "B1", "C1"], f"Alternativen kom inte fram: {cp}"
-        assert cp["invalidRejected"] == ["Välj ett av alternativen"], f"Svar utanför alternativen godtogs: {cp['invalidRejected']}"
-        assert cp["autoMarked"] == ["B"], f"Rätt alternativ förbockades inte: {cp['autoMarked']}"
-        assert cp["leak"] == 0, f"Facit eller val läckte före reveal ({cp['leak']} meddelanden)"
-        assert cp["scores"] == {"A": 1, "B": 2}, f"Fel poäng efter hostens ändring: {cp['scores']}"
-        assert cp["noAutoTimeout"] == "buzzed", f"Servern dömde timeout själv: {cp['noAutoTimeout']}"
-        assert cp["slow"] == {"kind": "timeout", "delta": -1, "locked": True}, f"För långsam fungerar inte: {cp['slow']}"
+        ch = raw.evaluate(CHOICE_JS, [PIN])
+        print("Svarsalternativ:", ch)
+        assert ch["skipped"] == 1 and ch["qCount"] == 3, f"Frågor utan alternativ ska hoppas över: {ch}"
+        assert ch["emptyStatus"] == 400, "Ett set utan spelbara frågor ska ge fel"
+        assert ch["shown1"] == 4 and ch["hasAnswer"], f"Fel urval av alternativ: {ch}"
+        assert ch["hostSeesAnswer"] == "R", "Värd som inte spelar ska se facit"
+        assert ch["nextBlocked"] == ["Visa svaret först"], f"Nästa fråga gick under pågående fråga: {ch['nextBlocked']}"
+        assert ch["shownAfterChange"] == 4 and ch["shown2"] == 6 and ch["shown3"] == 3, f"Antal alternativ följer inte inställningen: {ch}"
+        assert ch["invalid"] == ["Välj ett av alternativen"] and ch["lateOrTwice"] == ["Tiden är ute"], f"Fel felmeddelanden: {ch}"
+        assert ch["leak"] == 0, f"Facit eller svar läckte till TV:n före reveal ({ch['leak']} meddelanden)"
+        assert ch["autoMarked"] and ch["revealed"] == "R" and ch["scores"] == [2, 0], f"Rättning/poäng fel: {ch}"
+
+        hp = raw.evaluate(HOSTPLAYS_JS, [PIN])
+        print("Spelande värd:", hp)
+        assert hp["leak"] == 0, f"Facit eller svar skickades till spelande värd ({hp['leak']} meddelanden)"
+        assert hp["errors"] == ["Rättningen är automatisk när du spelar själv",
+                                "Du spelar själv i kväll: facit kan bara visas om du stänger av det innan start"], f"Fel felmeddelanden: {hp['errors']}"
+        assert hp["stillPlays"] is True and hp["lobbyOff"] is False, f"Spelande värd kunde stängas av mitt i: {hp}"
+        assert hp["revealed"] == "HEMLIGT-SVAR" and hp["vScore"] == 0 and hp["choicesShown"] == 4, f"Fel efter reveal: {hp}"
+
+        fi = raw.evaluate(FIFTY_JS, [PIN])
+        print("50/50:", fi)
+        assert fi["removed"] == 3 and fi["answerKept"], f"50/50 tog bort fel antal eller rätt svar: {fi}"
+        assert fi["othersSee"] == 0, "Andra fick se vilka alternativ 50/50 tog bort"
+        assert fi["errors"] == ["50/50 används under en fråga med alternativ", "Du har redan använt 50/50 på den här frågan"], f"Fel felmeddelanden: {fi['errors']}"
+        assert fi["left"] == 0, "50/50 drogs inte från plånboken"
+
+        wh = raw.evaluate(WHEEL_JS, [PIN])
+        print("Lyckohjulet:", wh)
+        assert wh["playerSpin"] == ["Bara hosten kan göra det"], "Spelare kunde snurra hjulet"
+        assert wh["double"] == 3, f"Dubbla poäng dubblar frågans poäng men inte bonusen (1 × 2 + 1): {wh['double']}"
+        assert wh["fifty"] == 5, f"50/50 för alla ska ge rätt + 4 av 7 fel: {wh['fifty']}"
+        assert wh["blitzMs"] == 10000 and wh["normalMs"] == 20000 and wh["noneShown"] == 8, f"Blixt/Nit fel: {wh}"
+        assert wh["steal"] == {"a": 0, "b": 3, "stealer": True, "from": True}, f"Stjäl fungerar inte: {wh['steal']}"
+        assert set(wh["skillTwists"]) <= {"double", "steal", "none"}, f"Hjulet gav twist som inte passar en skill-utmaning: {wh['skillTwists']}"
+
         tm = raw.evaluate(TEAMS_JS, [PIN])
         print("Lag och butik:", tm)
         assert tm["welcome"] == [10, 10, 10, 10], f"Välkomstbonusen blev fel: {tm['welcome']}"
         assert tm["split3"] == [2, 2] and tm["split2"] == [2, 2], f"Fel lagindelning: {tm}"
         assert tm["errorsA"] == ["Ditt lag har redan Extra tid i kväll", "Du har 1 mynt, Dubbla poäng kostar 4"], f"Butiken släppte igenom fel köp: {tm['errorsA']}"
         assert tm["vetoNewMate"], "Veto gav samma lagkamrat igen"
-        assert tm["doubleUnit"] and tm["doubleScore"] == 2 and tm["coinCorrect"] == 1, f"Dubbla poäng/mynt fungerar inte: {tm}"
+        assert tm["doubleUnit"] and tm["doubleScore"] == 4 and tm["coinCorrect"] == 1, f"Dubbla poäng/mynt fungerar inte: {tm}"
         assert tm["hubWallet"] == 1, f"Plånboken sparades inte i Hub: {tm['hubWallet']}"
         assert tm["errorsC"] == ["Välj ett annat lag att sabotera"], f"Gick att sabotera eget lag: {tm['errorsC']}"
-        want_ms = 15000 if tm["sameTeamAC"] else 7500
-        assert abs(tm["buzzMs"] - want_ms) < 5, f"Extra tid/Sabotage gav fel svarstid: {tm['buzzMs']} (väntade {want_ms})"
-        assert tm["pass"] == {"delta": 0, "locked": True, "left": 0}, f"Pass fungerar inte: {tm['pass']}"
-        assert tm["extraCollect"] == 5000 and tm["extraOther"] in (0, 5000), f"Extra tid i insamling fel: {tm}"
+        assert tm["extraQ2"] == (5000 if tm["sameTeamAC"] else -7500), f"Extra tid/Sabotage gav fel svarstid: {tm['extraQ2']}"
+        assert tm["fiftyLeft"] == 0, "50/50 drogs inte"
+        assert tm["extraCollect"] == 5000 and tm["extraOther"] in (0, 5000), f"Extra tid fel: {tm}"
         assert all(t for _, _, t in tm["results"]), "Lagnamn saknas i tabellen"
-        scores = sorted(r[1] for r in tm["results"])
-        assert scores == [0, 0, 1, 1], f"Kvällens resultat ska vara lagets snitt (2/2 = 1 för vinnarlaget): {tm['results']}"
+        assert sorted(r[1] for r in tm["results"]) == [0, 0, 2, 2], f"Kvällens resultat ska vara lagets snitt (4/2 = 2): {tm['results']}"
         assert all(tm["paid"].values()), f"Mynten betalades inte ut exakt en gång: {tm['paid']}"
         assert tm["winnerBonus"] == 1 + 3, f"Vinnaren ska få 1 (rätt svar) + 3 (vinst): {tm['winnerBonus']}"
+
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)
         assert sk["mode"] == "skill" and sk["seedSame"], f"Spelarna fick inte samma frö: {sk}"
@@ -1415,23 +1000,7 @@ def main():
         assert sk["places"] == [["A", 1, 3], ["C", 1, 3], ["B", 3, 1], ["D", 0, 0]], f"Fel rankning i Flick: {sk['places']}"
         assert sk["order"] == [["B", 1, 3], ["A", 2, 2]], f"Fel rankning i Ordna rätt: {sk['order']}"
         assert sk["orderReveal"] == ["X", "Y", "Z"], f"Rätt ordning visades inte vid reveal: {sk['orderReveal']}"
-        assert sk["badSpec"] == "buzz", f"Ogiltig skill-spec ska bli buzz: {sk['badSpec']}"
-        assert coll["doubleAll"] == 3, f"Dubbla poäng i Alla svarar ska ge 2×1 + 1 bonus: {coll['doubleAll']}"
-
-        wheel = raw.evaluate(WHEEL_JS, [PIN])
-        print("Lyckohjulet:", wheel)
-        assert wheel["playerSpin"]["errors"] and wheel["playerSpin"]["wheel"] is None, f"Spelare kunde snurra hjulet: {wheel['playerSpin']}"
-        assert wheel["playerSeesWheel"] == "double", "Spelarna fick inte hjulets utfall"
-        assert wheel["duringQuestion"]["forQ"] == 0 and wheel["duringQuestion"]["playerWheel"] == "double", f"Twisten gäller inte första frågan: {wheel['duringQuestion']}"
-        assert wheel["spinDuringQuestion"]["errors"] and wheel["spinDuringQuestion"]["spinId"] == wheel["duringQuestion"]["spinId"], "Hjulet gick att snurra under en fråga"
-        assert wheel["double"] == 2, f"Dubbla poäng gav {wheel['double']}"
-        assert wheel["afterDouble"]["wheel"] is None and wheel["plain"] == 3, f"Twisten nollställdes inte: {wheel}"
-        assert wheel["safe"] == {"delta": 0, "event": 0}, f"Ingen straffavgift drog ändå poäng: {wheel['safe']}"
-        assert wheel["steal"] == {"A": -1, "C": 1, "B": 0, "stolenFrom": "A"}, f"Stjäl fungerade inte: {wheel['steal']}"
-        assert 4000 < wheel["blitzMs"] <= 5100, f"Blixt halverade inte svarstiden: {wheel['blitzMs']} ms"
-        assert wheel["none"] == -1, f"Nit ska inte ändra något: {wheel['none']}"
-        assert wheel["normalMs"] > 9000, f"Svarstiden återställdes inte efter Blixt: {wheel['normalMs']} ms"
-        assert wheel["lastSpinRejected"], "Hjulet gick att snurra efter sista frågan"
+        assert sk["qCount"] == 2, f"Ogiltig skill-utmaning ska hoppas över: {sk['qCount']}"
         raw.close()
 
         b.close()

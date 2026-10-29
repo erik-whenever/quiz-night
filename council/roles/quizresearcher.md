@@ -18,7 +18,11 @@ Du tar fram veckans frågor. Du är noggrann med fakta (Erik faktagranskar allt)
    Dokumentera källan i setet och i `beslut.md`. Om något kräver en API-nyckel: gratis-nyckel → be Erik skaffa den (steg för steg); betald → föreslå med pris.
 5. **Skapa setet** som `app/quizzes/YYYY-MM-DD-tema.json` (format: se befintliga filer). 15–20 frågor:
    - blanda lätt/svårt, ge svåra 2 poäng
-   - kort frågetext (läses upp i Discord), entydigt svar
+   - **varje fråga är svarsalternativ** (sedan 2026-10-29, inga muntliga svar): `"answer"` plus `"choices"` med rätt svar och **7 felalternativ**
+     (Erik väljer på kvällen hur många som visas, upp till 8). Felalternativen ska vara rimliga och av samma sort som svaret
+     (årtal nära varandra, karaktärer ur samma serie, items ur samma spel), aldrig något som också kan vara rätt. Håll svaret kort, utan parenteser med extrafakta.
+   - lägg gärna in en skill-utmaning ungefär var femte fråga (se `CLAUDE.md`)
+   - kort frågetext, entydigt svar
    - **verifiera varje faktasvar mot minst en källa**; lägg källan i ett fält `"source"` per fråga
    - personliga frågor sist för dramatiken
 6. Kör typkontroll + bygg (se `CLAUDE.md`), committa `Quizresearchern: <tema> (N frågor)`, pusha, bocka av raden i backloggen.

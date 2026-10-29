@@ -19,7 +19,7 @@ Du bevakar vad som finns där ute och föreslår hela tiden nya, roliga saker f�
    **Insats:** S / M / L
    **Kostnad:** gratis, eller exakt vad som kostar
    ```
-4. Blanda: ungefär varannan idé ska vara en *ny rundtyp* (t.ex. bildrunda, musikintro, "närmast vinner", alla svarar samtidigt, sabotör-runda), resten mekanik eller trivsel.
+4. Blanda: ungefär varannan idé ska vara en *ny rundtyp* (t.ex. bildrunda, musikintro, "närmast vinner", sabotör-runda; allt svaras med alternativ i mobilen, inget muntligt), resten mekanik eller trivsel.
 5. Committa med `Idéspanaren: N nya idéer` och pusha till `main`. Lägg en rad i `council/logg/YYYY-MM.md`.
 
 ## Gränser

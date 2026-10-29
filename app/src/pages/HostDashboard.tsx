@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, navigate, TopBar } from "../App";
 import { api, repoSets } from "../lib/api";
-import type { HubPublic, QuestionSet } from "../../shared/types";
+import type { HubPublic, Question, QuestionSet } from "../../shared/types";
+import { DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, validChoices } from "../../shared/types";
+import { validSkill } from "../../shared/skill";
+
+/** Frågor som går att spela: svarsalternativ eller skill-utmaning. Andra hoppas över av servern. */
+const playable = (q: Question) => (q.mode === "skill" ? !!validSkill(q.skill) : !!validChoices(q));
 import PinGate from "./PinGate";
 
 function Dashboard() {
   const [bank, setBank] = useState<QuestionSet[]>([]);
   const [hub, setHub] = useState<HubPublic | null>(null);
   const [selected, setSelected] = useState("");
-  const [answerSeconds, setAnswerSeconds] = useState(10);
-  const [penalty, setPenalty] = useState(1);
+  const [choiceCount, setChoiceCount] = useState(DEFAULT_SETTINGS.choiceCount);
+  const [collectSeconds, setCollectSeconds] = useState(DEFAULT_SETTINGS.collectSeconds);
+  const [hostPlays, setHostPlays] = useState(DEFAULT_SETTINGS.hostPlays);
   const [shuffle, setShuffle] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -33,7 +39,7 @@ function Dashboard() {
     if (!set) return;
     setBusy(true); setErr("");
     try {
-      const { code } = await api.createRoom(set, { answerSeconds, penalty }, shuffle);
+      const { code } = await api.createRoom(set, { choiceCount, collectSeconds, hostPlays }, shuffle);
       navigate("/host/" + code);
     } catch (e) { setErr((e as Error).message); setBusy(false); }
   }
@@ -53,7 +59,8 @@ function Dashboard() {
                   <input type="radio" name="set" checked={s.id === selected} onChange={() => setSelected(s.id)} style={{ width: "auto" }} />
                   <span style={{ flex: 1 }}>
                     <strong>{s.title}</strong>
-                    <span className="muted small"> · {s.questions.length} frågor</span>
+                    <span className="muted small"> · {s.questions.filter(playable).length} frågor
+                      {s.questions.some((q) => !playable(q)) && <span className="err"> · {s.questions.filter((q) => !playable(q)).length} saknar alternativ och hoppas över</span>}</span>
                   </span>
                   <span className={`tag ${s.source}`}>{s.source === "repo" ? "från rådet" : "egen"}</span>
                 </label>
@@ -63,11 +70,18 @@ function Dashboard() {
 
           <section className="panel stack">
             <h3>Regler</h3>
-            <label>Sekunder att svara efter buzz (riktmärke)
-              <input type="number" min={3} max={60} value={answerSeconds} onChange={(e) => setAnswerSeconds(+e.target.value)} />
+            <label>Antal svarsalternativ per fråga
+              <select aria-label="Antal svarsalternativ" value={choiceCount} onChange={(e) => setChoiceCount(+e.target.value)}>
+                {Array.from({ length: MAX_SHOWN - MIN_SHOWN + 1 }, (_, i) => i + MIN_SHOWN).map((n) => <option key={n} value={n}>{n} alternativ</option>)}
+              </select>
             </label>
-            <label>Straff vid fel eller för långsam (poäng)
-              <input type="number" min={0} max={10} value={penalty} onChange={(e) => setPenalty(+e.target.value)} />
+            <p className="muted small">Fler alternativ gör det svårare. Rätt svar plus slumpade felalternativ ur frågan; har en fråga färre blir det så många den har. Går att ändra under kvällen.</p>
+            <label>Sekunder att svara
+              <input type="number" aria-label="Sekunder att svara" min={5} max={180} value={collectSeconds} onChange={(e) => setCollectSeconds(+e.target.value)} />
+            </label>
+            <label style={{ flexDirection: "row", alignItems: "center" }}>
+              <input type="checkbox" checked={hostPlays} onChange={(e) => setHostPlays(e.target.checked)} style={{ width: "auto" }} />
+              Jag spelar själv (dölj facit för mig)
             </label>
             <label style={{ flexDirection: "row", alignItems: "center" }}>
               <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} style={{ width: "auto" }} />

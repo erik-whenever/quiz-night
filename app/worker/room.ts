@@ -1,23 +1,22 @@
 import type {
-  ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings,
+  ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings, WheelState,
 } from "../shared/types";
 import {
-  BUZZ_BURST, BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, BUZZ_RATE_PER_S, DEFAULT_SETTINGS, BUZZ_WINDOW_MS, MSG_BURST, MSG_RATE_PER_S,
-  isCollectMode, activeTwist, answerSecondsFor, validChoices,
+  DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, validChoices,
 } from "../shared/types";
 import {
-  type CollectServer, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
+  type CollectServer, collectEnd, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
 } from "./collect";
 import { SKILLS, correctOrder, orderShuffle, validSkill } from "../shared/skill";
-import type { WheelState } from "../shared/types";
 import { spinWheel, stealTarget } from "./wheel";
-import { collectEnd } from "./collect";
 import {
   COINS, EXTRA_TIME_MS, SHOP, TEAM_COLORS, TEAM_NAMES, type CoinNote, type Effects, type ShopItem, type Team,
   type TeamMode, type TokenItem, type Wallet, splitTeams, unitOf,
 } from "../shared/teams";
 
 interface Env { HUB: DurableObjectNamespace }
+
+/** Slumpad ordning med crypto. */
 const shuffled = <T,>(xs: T[]) => {
   const a = [...xs];
   const r = crypto.getRandomValues(new Uint32Array(a.length));
@@ -26,16 +25,13 @@ const shuffled = <T,>(xs: T[]) => {
 };
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
+/** Kortaste svarstid efter Blixt eller Sabotage. */
+const MIN_COLLECT_MS = 5000;
 
-interface Player extends PlayerPublic {}
 interface Conn {
   ws: WebSocket; role: "host" | "tv" | "player"; playerId?: string;
-  /** Senaste RTT-mätningarna (ms); lägsta används, så fördröjda spong inte blåser upp kompensationen. */
-  rtts: number[];
-  /** Utestående sping: bara spong med exakt detta s godtas, och bara en gång. */
-  pingS?: number;
-  /** Rate-limit: token buckets för alla meddelanden resp. buzzar. */
-  msgBucket: Bucket; buzzBucket: Bucket;
+  /** Rate-limit: token bucket för alla meddelanden. */
+  msgBucket: Bucket;
 }
 
 /** Enkel token bucket: fylls på med rate/s upp till burst. Överskjutande meddelanden ignoreras tyst. */
@@ -49,35 +45,20 @@ function take(b: Bucket, rate: number, burst: number): boolean {
   b.tokens -= 1;
   return true;
 }
-const RTT_SAMPLES = 5;
-const minRtt = (c: Conn) => (c.rtts.length ? Math.min(...c.rtts) : undefined);
-
-/**
- * Hur mycket tidigare än ankomsten en buzz får räknas. Klientens påstådda fördröjning (ankomst - at)
- * godtas bara upp till serverns egen mätning av (lägsta) RTT/2 plus lite brus, och aldrig mer än BUZZ_MAX_COMP_MS.
- */
-export function buzzCompensation(arrival: number, at: number | undefined, rtt: number | undefined): number {
-  if (typeof at !== "number" || !Number.isFinite(at)) return 0;
-  const max = Math.min(BUZZ_MAX_COMP_MS, (rtt ?? 0) / 2 + BUZZ_JITTER_MS);
-  return Math.max(0, Math.min(max, arrival - at));
-}
 
 interface Persisted {
   code: string;
   title: string;
   phase: Phase;
-  players: Player[];
+  players: PlayerPublic[];
   questions: Question[];
   qIndex: number;
-  buzz: { playerId: string; deadline: number; typedAnswer?: string } | null;
-  lockedOut: string[];
   settings: Settings;
   lastEvent?: GameEvent;
   hostKey: string;
-  /** Pågående/senaste insamlingsrunda för aktuell fråga (null för buzz-frågor). */
+  /** Pågående/senaste fråga. */
   collect?: CollectServer | null;
   wheel?: WheelState | null;
-  // Lag och mynt (rum skapade före lagen fylls på i konstruktorn).
   teamMode: TeamMode;
   teams: Team[];
   wallets: Record<string, Wallet>;
@@ -95,21 +76,19 @@ const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "co
   teamMode: 0, teams: [], wallets: {}, coins: {}, coinLog: [], streak: {}, extraBuyers: [], doubleFor: {}, sabotageFor: {},
 });
 
-/** Okänd mode blir buzz. En choice-fråga utan giltiga alternativ blir också buzz (muntligt). */
-export function normalizeQuestion(q: Question): Question {
+/**
+ * Normalisera en fråga från JSON eller frågebanken. Skill med giltig spec blir skill, allt med giltiga
+ * alternativ blir choice (oavsett gammalt mode). Frågor utan alternativ går inte att spela: null.
+ */
+export function normalizeQuestion(q: Question): Question | null {
   if (q.mode === "skill") {
     const skill = validSkill(q.skill);
-    if (skill) {
-      const answer = skill.kind === "order" ? correctOrder(skill.items!).map((i) => i.label).join(" → ") : "";
-      return { ...q, answer, skill, choices: undefined };
-    }
-    return { ...q, mode: undefined, skill: undefined, choices: undefined, answer: q.answer || "–" };
+    if (!skill) return null;
+    const answer = skill.kind === "order" ? correctOrder(skill.items!).map((i) => i.label).join(" → ") : "";
+    return { ...q, mode: "skill", answer, skill, choices: undefined };
   }
-  if (q.mode === "choice") {
-    const choices = validChoices(q);
-    return choices ? { ...q, answer: q.answer.trim(), choices, skill: undefined } : { ...q, mode: undefined, choices: undefined, skill: undefined };
-  }
-  return { ...q, mode: isCollectMode(q.mode) ? q.mode : undefined, choices: undefined, skill: undefined };
+  const choices = validChoices(q);
+  return choices ? { ...q, mode: "choice", answer: q.answer.trim(), choices, skill: undefined } : null;
 }
 
 /** Skill-specen som spelarna får: sakerna i "Ordna rätt" blandade och utan värden tills reveal. */
@@ -119,22 +98,25 @@ function publicSkill(q: Question, seed: number, revealed: boolean) {
   return { ...sk, items: revealed ? correctOrder(sk.items!) : orderShuffle(sk.items!, seed).map((i) => ({ label: i.label })) };
 }
 
+const clampSettings = (s: Settings): Settings => ({
+  collectSeconds: Math.max(5, Math.min(180, Math.round(s.collectSeconds))),
+  fastestBonus: Math.max(0, Math.min(5, Math.round(s.fastestBonus))),
+  choiceCount: Math.max(MIN_SHOWN, Math.min(MAX_SHOWN, Math.round(s.choiceCount))),
+  hostPlays: !!s.hostPlays,
+});
+
 export class Room implements DurableObject {
   private s: Persisted | null = null;
   private conns = new Set<Conn>();
-  private timer: ReturnType<typeof setTimeout> | null = null;
-  /** Buzzar som samlas under fönstret efter första buzz: playerId -> justerad tid. */
-  private pending: { cands: Map<string, number>; timer: ReturnType<typeof setTimeout> } | null = null;
-  /** Stänger insamlingen när tiden gått ut. */
+  /** Stänger frågan när tiden gått ut. */
   private collectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private ctx: DurableObjectState, private env: Env) {
     ctx.blockConcurrencyWhile(async () => {
-      this.s = (await ctx.storage.get<Persisted>("s")) ?? null;
-      if (this.s) {
-        this.s.settings = { ...DEFAULT_SETTINGS, ...this.s.settings }; // rum skapade före nya inställningar
-        this.s = { ...TEAM_DEFAULTS(), ...this.s };
-        // Insamling som pågick när objektet sövdes: stäng den direkt eller vid deadline.
+      const s = (await ctx.storage.get<Persisted>("s")) ?? null;
+      if (s) {
+        this.s = { ...TEAM_DEFAULTS(), ...s, settings: clampSettings({ ...DEFAULT_SETTINGS, ...s.settings }) };
+        // Fråga som pågick när objektet sövdes: stäng den direkt eller vid deadline.
         if (this.s.phase === "collect" && this.s.collect) this.armCollectTimer();
       }
     });
@@ -147,14 +129,15 @@ export class Room implements DurableObject {
 
     if (url.pathname.endsWith("/init") && req.method === "POST") {
       const body = await req.json<{ code: string; title: string; questions: Question[]; hostKey: string; settings?: Partial<Settings> }>();
+      const questions = body.questions.map(normalizeQuestion).filter((q): q is Question => !!q);
+      if (!questions.length) return Response.json({ error: "Inga spelbara frågor: varje fråga behöver svarsalternativ eller vara en skill-utmaning" }, { status: 400 });
       this.s = {
-        code: body.code, title: body.title, phase: "lobby", players: [],
-        questions: body.questions.map(normalizeQuestion),
-        qIndex: -1, buzz: null, lockedOut: [], settings: { ...DEFAULT_SETTINGS, ...body.settings }, hostKey: body.hostKey,
+        code: body.code, title: body.title, phase: "lobby", players: [], questions, qIndex: -1,
+        settings: clampSettings({ ...DEFAULT_SETTINGS, ...body.settings }), hostKey: body.hostKey,
         ...TEAM_DEFAULTS(),
       };
       await this.save();
-      return Response.json({ ok: true });
+      return Response.json({ ok: true, skipped: body.questions.length - questions.length });
     }
 
     if (url.pathname.endsWith("/results")) {
@@ -173,14 +156,13 @@ export class Room implements DurableObject {
     const pair = new WebSocketPair();
     const [client, server] = [pair[0], pair[1]];
     server.accept();
-    const conn: Conn = { ws: server, role, rtts: [], msgBucket: bucket(MSG_BURST), buzzBucket: bucket(BUZZ_BURST) };
+    const conn: Conn = { ws: server, role, msgBucket: bucket(MSG_BURST) };
     this.conns.add(conn);
 
     server.addEventListener("message", (ev) => {
       let msg: ClientMsg;
       try { msg = JSON.parse(ev.data as string); } catch { return; }
-      if (msg?.t !== "spong" && !take(conn.msgBucket, MSG_RATE_PER_S, MSG_BURST)) return;
-      if (msg?.t === "buzz" && !take(conn.buzzBucket, BUZZ_RATE_PER_S, BUZZ_BURST)) return;
+      if (!take(conn.msgBucket, MSG_RATE_PER_S, MSG_BURST)) return;
       this.handle(conn, msg).catch((e) => this.send(conn, { t: "error", message: String(e) }));
     });
     const close = () => {
@@ -194,74 +176,42 @@ export class Room implements DurableObject {
     server.addEventListener("close", close);
     server.addEventListener("error", close);
 
-    this.send(conn, { t: "state", state: this.view(role) });
-    this.sping(conn);
+    this.send(conn, { t: "state", state: this.view(conn) });
     return new Response(null, { status: 101, webSocket: client });
   }
 
   private send(c: Conn, m: ServerMsg) { try { c.ws.send(JSON.stringify(m)); } catch { /* stängd */ } }
 
-  private view(role: Conn["role"]): PublicState | HostState {
+  private view(c: Conn): PublicState | HostState {
     const s = this.s!;
     const q = s.questions[s.qIndex];
+    const col = s.collect;
     const base: PublicState = {
       code: s.code, title: s.title, phase: s.phase, players: s.players, qIndex: s.qIndex, qCount: s.questions.length,
       question: q && s.phase !== "lobby"
-        ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "buzz",
-            ...(q.mode === "choice" ? { choices: q.choices } : {}),
-            ...(q.mode === "skill" && q.skill ? { skill: publicSkill(q, s.collect?.seed ?? 0, s.phase === "reveal") } : {}) } : undefined,
+        ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "choice",
+            ...(q.mode === "choice" && col?.choices ? { choices: col.choices } : {}),
+            ...(q.mode === "skill" && q.skill ? { skill: publicSkill(q, col?.seed ?? 0, s.phase === "reveal") } : {}) } : undefined,
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? (q?.answer || undefined) : undefined,
-      buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
-      collect: s.collect && s.phase !== "finished" ? collectPublic(s.collect, s.phase === "reveal") : undefined,
+      lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
+      collect: col && s.phase !== "finished" ? collectPublic(col, s.phase === "reveal") : undefined,
       wheel: s.wheel ?? null,
       teamMode: s.teamMode, teams: s.teams, wallets: s.wallets, coinsTonight: s.coins, coinLog: s.coinLog.slice(-12),
       effects: this.effects(),
+      ...(c.playerId && col?.removed?.[c.playerId] ? { myRemoved: col.removed[c.playerId] } : {}),
     };
-    if (role === "host") return { ...base, answer: q?.answer, collectHost: s.collect ? collectHost(s.collect) : undefined };
+    // Spelande värd: hostkontrollen får exakt samma som alla andra, inget facit och inga svar.
+    if (c.role === "host" && !s.settings.hostPlays) {
+      return { ...base, answer: q?.answer, collectHost: col ? collectHost(col) : undefined };
+    }
     return base;
   }
 
   private broadcast() {
-    for (const c of this.conns) this.send(c, { t: "state", state: this.view(c.role) });
+    for (const c of this.conns) this.send(c, { t: "state", state: this.view(c) });
   }
 
-  /** Servern mäter själv RTT, så klienten inte kan ljuga om sin ping. */
-  private sping(c: Conn) {
-    const now = Date.now();
-    if (c.pingS !== undefined && now - c.pingS < 3000) return; // en mätning i taget
-    c.pingS = now;
-    this.send(c, { t: "sping", s: now });
-  }
-
-  private clearPending() { if (this.pending) { clearTimeout(this.pending.timer); this.pending = null; } }
-
-  /** Fönstret är slut: lägst justerad tid vinner (vid lika vinner den som kom först). */
-  private async resolveBuzz() {
-    const s = this.s!;
-    const cands = this.pending?.cands;
-    this.pending = null;
-    if (!cands || s.phase !== "question" || s.buzz) return;
-    let winner: string | null = null;
-    let best = Infinity;
-    for (const [pid, t] of cands) {
-      if (s.lockedOut.includes(pid) || !s.players.some((x) => x.id === pid)) continue;
-      if (t < best) { best = t; winner = pid; }
-    }
-    if (!winner) return;
-    const secs = answerSecondsFor(s);
-    const deadline = Date.now() + this.timeFor(winner, secs * 1000);
-    s.buzz = { playerId: winner, deadline };
-    s.phase = "buzzed";
-    s.lastEvent = { kind: "buzz", playerId: winner, at: Date.now() };
-    // Ingen automatisk timeout: spelaren har ordet tills hosten dömer rätt, fel eller för långsam.
-    this.clearTimer();
-    await this.save();
-    this.broadcast();
-  }
-
-  private clearTimer() { if (this.timer) { clearTimeout(this.timer); this.timer = null; } }
-
-  // ===== Hemlig svarsinsamling (Alla svarar m.fl.) =====
+  // ===== Frågorna =====
 
   private clearCollectTimer() { if (this.collectTimer) { clearTimeout(this.collectTimer); this.collectTimer = null; } }
 
@@ -272,25 +222,34 @@ export class Room implements DurableObject {
     this.collectTimer = setTimeout(() => { void this.closeCollect(); }, Math.max(0, collectEnd(c) - Date.now()) + 50);
   }
 
-  /** Aktuell fråga är en insamlingsrunda: öppna insamlingen. Returnerar false för vanliga buzz-frågor. */
-  private maybeStartCollect(): boolean {
+  /**
+   * Öppna aktuell fråga. Alternativfrågor: rätt svar plus (choiceCount − 1) slumpade fel, i slumpad ordning
+   * (50/50-twisten tar bort hälften av felen, Blixt halverar tiden). Skill: slumpfrö och utmaningens egen tid.
+   */
+  private startQuestion() {
     const s = this.s!;
     const q = s.questions[s.qIndex];
-    if (!q || !isCollectMode(q.mode)) { s.collect = null; return false; }
+    const twist = activeTwist({ phase: "collect", qIndex: s.qIndex, wheel: s.wheel });
     if (q.mode === "skill" && q.skill) {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0];
       s.collect = startCollect("skill", q.skill.seconds ?? SKILLS[q.skill.kind].seconds, Date.now(), seed);
-    } else s.collect = startCollect(q.mode, s.settings.collectSeconds);
+    } else {
+      const wrong = shuffled(q.choices!.filter((x) => x !== q.answer));
+      let n = Math.min(s.settings.choiceCount - 1, wrong.length);
+      if (twist === "fifty") n = Math.max(1, Math.ceil(n / 2));
+      const secs = twist === "blitz" ? Math.max(MIN_COLLECT_MS / 1000, s.settings.collectSeconds / 2) : s.settings.collectSeconds;
+      s.collect = startCollect("choice", secs);
+      s.collect.choices = shuffled([q.answer, ...wrong.slice(0, n)]);
+    }
     // Extra tid och Sabotage: varje spelare får egen deadline.
     const base = s.collect.deadline - s.collect.startedAt;
     const extra = Object.fromEntries(s.players.map((p) => [p.id, Math.round(this.timeFor(p.id, base) - base)]).filter(([, ms]) => ms !== 0));
     if (Object.keys(extra).length) s.collect.extra = extra;
     s.phase = "collect";
     this.armCollectTimer();
-    return true;
   }
 
-  /** Tiden ute, alla har svarat eller hosten stänger: gå till rättning. */
+  /** Tiden ute, alla har svarat eller hosten stänger. */
   private async closeCollect() {
     const s = this.s!;
     this.clearCollectTimer();
@@ -301,7 +260,7 @@ export class Room implements DurableObject {
     this.broadcast();
   }
 
-  /** Hosten bekräftar rättningen: dela ut poäng och visa svaren. */
+  /** Visa svaret: dela ut poäng (rättat automatiskt) och avslöja facit. */
   private judgeCollect() {
     const s = this.s!;
     const c = s.collect;
@@ -309,7 +268,8 @@ export class Room implements DurableObject {
     this.clearCollectTimer();
     if (s.phase === "collect") c.deadline = Math.min(c.deadline, Date.now());
     const q = s.questions[s.qIndex];
-    const mult = activeTwist(s) === "double" ? 2 : 1;
+    const twist = activeTwist(s);
+    const mult = twist === "double" ? 2 : 1;
     c.results = c.mode === "skill" && q?.skill ? scoreSkill(c, q.skill, mult) : scoreAll(c, (q?.points ?? 1) * mult, s.settings);
     for (const r of c.results) {
       r.delta *= this.multFor(r.playerId);
@@ -318,17 +278,19 @@ export class Room implements DurableObject {
       if (c.mode === "skill") { if (r.place === 1) this.award(r.playerId, COINS.skillWin, "vann utmaningen"); }
       else if (r.correct) this.onCorrect(r.playerId); else this.streakReset(r.playerId);
     }
+    // Stjäl: snabbaste rätt (eller vinnaren av utmaningen) tar frågans poäng från ledaren.
+    const fastest = c.results.find((r) => r.fastest && r.delta > 0);
+    const steal = twist === "steal" && fastest ? stealTarget(s.players, fastest.playerId, (q?.points ?? 1)) : null;
+    if (steal) {
+      steal.from.score -= steal.amount;
+      const p = s.players.find((x) => x.id === fastest!.playerId);
+      if (p) p.score += steal.amount;
+    }
     s.phase = "reveal";
     s.lastEvent = { kind: "judged", correct: c.results.filter((r) => r.correct).map((r) => r.playerId),
-      fastestId: c.results.find((r) => r.fastest)?.playerId, at: Date.now() };
+      fastestId: fastest?.playerId, at: Date.now(),
+      ...(steal ? { stolenFrom: steal.from.id, stolen: steal.amount, stealer: fastest!.playerId } : {}) };
     return true;
-  }
-
-  private delta(sign: 1 | -1) {
-    const q = this.s!.questions[this.s!.qIndex];
-    const twist = activeTwist(this.s!);
-    if (sign === 1) return (q?.points ?? 1) * (twist === "double" ? 2 : 1);
-    return twist === "safe" ? 0 : -this.s!.settings.penalty;
   }
 
   // ===== Lag, mynt och butik =====
@@ -363,7 +325,7 @@ export class Room implements DurableObject {
     const u = this.unit(pid);
     let ms = baseMs;
     if (s.extraBuyers.some((id) => this.unit(id) === u)) ms += EXTRA_TIME_MS;
-    if ((s.sabotageFor[s.qIndex] ?? []).includes(u)) ms /= 2;
+    if ((s.sabotageFor[s.qIndex] ?? []).includes(u)) ms = Math.max(MIN_COLLECT_MS, ms / 2);
     return ms;
   }
 
@@ -407,39 +369,12 @@ export class Room implements DurableObject {
     [...s.teams].sort((a, b) => a.members.length - b.members.length)[0].members.push(pid);
   }
 
-  /** Fel, för långsam eller pass: dra poäng (inte vid pass), lås ute spelaren, öppna för andra att buzza. */
-  private async punish(kind: "wrong" | "timeout" | "pass") {
-    const s = this.s!;
-    if (s.phase !== "buzzed" || !s.buzz) return;
-    this.clearTimer();
-    const pid = s.buzz.playerId;
-    const d = kind === "pass" ? 0 : this.delta(-1);
-    if (kind !== "pass") this.streakReset(pid);
-    const p = s.players.find((x) => x.id === pid);
-    if (p) p.score += d;
-    s.lockedOut.push(pid);
-    s.buzz = null;
-    s.lastEvent = { kind, playerId: pid, delta: d, at: Date.now() };
-    const eligible = s.players.filter((x) => x.connected && !s.lockedOut.includes(x.id));
-    s.phase = eligible.length === 0 ? "reveal" : "question";
-    await this.save();
-    this.broadcast();
-  }
-
-  private async shop(c: Conn, m: Extract<ClientMsg, { t: "buy" | "use" | "pass" }>) {
+  private async shop(c: Conn, m: Extract<ClientMsg, { t: "buy" | "use" }>) {
     const s = this.s!;
     const pid = c.playerId;
     const p = pid ? s.players.find((x) => x.id === pid) : undefined;
     if (!pid || !p) return;
     const err = (message: string) => this.send(c, { t: "error", message });
-
-    if (m.t === "pass") {
-      if (s.phase !== "buzzed" || s.buzz?.playerId !== pid) return err("Du har inte ordet");
-      const r = await this.hubCall("/wallet/use", { name: p.name, item: "pass" });
-      if (r.error) return err(r.error);
-      s.wallets[pid] = r.wallet!;
-      return this.punish("pass");
-    }
 
     if (m.t === "buy") {
       const item = m.item as ShopItem;
@@ -453,43 +388,62 @@ export class Room implements DurableObject {
       s.wallets[pid] = r.wallet!;
       if (item === "extra") s.extraBuyers.push(pid);
       if (item === "veto") this.drawTeams({ pid, mates });
-    } else {
-      const item = m.item as TokenItem;
-      if (item !== "double" && item !== "sabotage") return err("Okänd vara");
-      if (s.phase !== "lobby" && s.phase !== "reveal") return err("Aktivera mellan frågorna");
-      const q = this.effectQ();
-      if (q >= s.questions.length) return err("Det finns ingen nästa fråga");
-      const own = this.unit(pid);
-      if (item === "double") {
-        if ((s.doubleFor[q] ?? []).includes(own)) return err("Dubbla poäng är redan aktiverat för nästa fråga");
-      } else {
-        const units = s.teams.length ? s.teams.map((t) => t.id) : s.players.map((x) => x.id);
-        if (!m.target || !units.includes(m.target) || m.target === own) return err("Välj ett annat lag att sabotera");
-        if ((s.sabotageFor[q] ?? []).includes(m.target)) return err("De är redan saboterade på nästa fråga");
-      }
+      await this.save();
+      return this.broadcast();
+    }
+
+    const item = m.item as TokenItem;
+    if (item === "fifty") {
+      const col = s.collect;
+      if (s.phase !== "collect" || !col?.choices) return err("50/50 används under en fråga med alternativ");
+      if (col.answers.some((a) => a.playerId === pid)) return err("Du har redan svarat");
+      if (col.removed?.[pid]) return err("Du har redan använt 50/50 på den här frågan");
+      const q = s.questions[s.qIndex];
+      const wrong = col.choices.filter((x) => x !== q.answer);
+      if (wrong.length < 2) return err("Det finns för få fel alternativ kvar");
       const r = await this.hubCall("/wallet/use", { name: p.name, item });
       if (r.error) return err(r.error);
       s.wallets[pid] = r.wallet!;
-      if (item === "double") s.doubleFor[q] = [...(s.doubleFor[q] ?? []), own];
-      else s.sabotageFor[q] = [...(s.sabotageFor[q] ?? []), m.target!];
+      col.removed = { ...col.removed, [pid]: shuffled(wrong).slice(0, Math.floor(wrong.length / 2)) };
+      await this.save();
+      return this.broadcast();
     }
+    if (item !== "double" && item !== "sabotage") return err("Okänd vara");
+    if (s.phase !== "lobby" && s.phase !== "reveal") return err("Aktivera mellan frågorna");
+    const q = this.effectQ();
+    if (q >= s.questions.length) return err("Det finns ingen nästa fråga");
+    const own = this.unit(pid);
+    if (item === "double") {
+      if ((s.doubleFor[q] ?? []).includes(own)) return err("Dubbla poäng är redan aktiverat för nästa fråga");
+    } else {
+      const units = s.teams.length ? s.teams.map((t) => t.id) : s.players.map((x) => x.id);
+      if (!m.target || !units.includes(m.target) || m.target === own) return err("Välj ett annat lag att sabotera");
+      if ((s.sabotageFor[q] ?? []).includes(m.target)) return err("De är redan saboterade på nästa fråga");
+    }
+    const r = await this.hubCall("/wallet/use", { name: p.name, item });
+    if (r.error) return err(r.error);
+    s.wallets[pid] = r.wallet!;
+    if (item === "double") s.doubleFor[q] = [...(s.doubleFor[q] ?? []), own];
+    else s.sabotageFor[q] = [...(s.sabotageFor[q] ?? []), m.target!];
+    await this.save();
+    this.broadcast();
+  }
+
+  /** Stäng frågan direkt när alla anslutna har svarat. */
+  private async afterAnswer() {
+    const s = this.s!;
+    const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
+    if (waiting.length === 0) return this.closeCollect();
     await this.save();
     this.broadcast();
   }
 
   private async handle(c: Conn, m: ClientMsg) {
     const s = this.s!;
-    if (m.t === "ping") { this.send(c, { t: "pong", c: m.c, s: Date.now() }); return this.sping(c); }
-    if (m.t === "spong") {
-      if (c.pingS === undefined || m.s !== c.pingS) return; // förfalskat eller redan använt s
-      c.rtts.push(Date.now() - c.pingS);
-      if (c.rtts.length > RTT_SAMPLES) c.rtts.shift();
-      c.pingS = undefined;
-      return;
-    }
+    if (m.t === "ping") return this.send(c, { t: "pong", c: m.c, s: Date.now() });
 
     if (m.t === "join") {
-      const name = m.name.trim().slice(0, 20);
+      const name = String(m.name ?? "").trim().slice(0, 20);
       if (!name) return this.send(c, { t: "error", message: "Skriv ett namn" });
       let p = m.playerId ? s.players.find((x) => x.id === m.playerId) : undefined;
       if (!p) p = s.players.find((x) => x.name.toLowerCase() === name.toLowerCase() && !x.connected);
@@ -501,43 +455,27 @@ export class Room implements DurableObject {
         s.players.push(p);
       }
       p.connected = true;
-      c.role = "player"; c.playerId = p.id;
+      if (c.role !== "host") c.role = "player";
+      c.playerId = p.id;
       this.placeInTeam(p.id);
       this.send(c, { t: "joined", playerId: p.id });
-      this.sping(c);
       const w = await this.hubCall("/wallet/get", { name: p.name });
       if (w.wallet) s.wallets[p.id] = w.wallet;
       await this.save();
       return this.broadcast();
     }
 
-    if (m.t === "buzz") {
-      if (!c.playerId || s.phase !== "question" || s.buzz) return;
-      if (s.lockedOut.includes(c.playerId)) return;
-      const now = Date.now();
-      const adjusted = now - buzzCompensation(now, m.at, minRtt(c));
-      if (!this.pending) {
-        this.pending = { cands: new Map(), timer: setTimeout(() => { this.resolveBuzz(); }, BUZZ_WINDOW_MS) };
-      }
-      if (!this.pending.cands.has(c.playerId)) this.pending.cands.set(c.playerId, adjusted);
-      return;
-    }
-
     if (m.t === "answer") {
-      if (!c.playerId || !s.collect || s.collect.mode === "skill") return;
+      const col = s.collect;
+      if (!c.playerId || !col || col.mode !== "choice") return;
       if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
       if (!s.players.some((x) => x.id === c.playerId)) return;
-      const q = s.questions[s.qIndex];
-      const choices = s.collect.mode === "choice" ? q?.choices : undefined;
-      if (choices && !choices.includes(String(m.text ?? "").trim())) return this.send(c, { t: "error", message: "Välj ett av alternativen" });
-      const err = submitAnswer(s.collect, c.playerId, m.text);
+      const text = String(m.text ?? "").trim();
+      if (!col.choices?.includes(text)) return this.send(c, { t: "error", message: "Välj ett av alternativen" });
+      const err = submitAnswer(col, c.playerId, text);
       if (err) return this.send(c, { t: "error", message: err });
-      // Svarsalternativ rättas automatiskt; hosten kan ändra innan hen bekräftar.
-      if (choices && String(m.text).trim() === q!.answer) markAnswer(s.collect, c.playerId, true);
-      const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
-      if (waiting.length === 0) return this.closeCollect();
-      await this.save();
-      return this.broadcast();
+      if (text === s.questions[s.qIndex].answer) markAnswer(col, c.playerId, true);
+      return this.afterAnswer();
     }
 
     if (m.t === "skill") {
@@ -547,55 +485,27 @@ export class Room implements DurableObject {
       if (!s.players.some((x) => x.id === c.playerId)) return;
       const err = submitSkill(s.collect, q.skill, c.playerId, m);
       if (err) return this.send(c, { t: "error", message: err });
-      const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
-      if (waiting.length === 0) return this.closeCollect();
-      await this.save();
-      return this.broadcast();
+      return this.afterAnswer();
     }
 
-    if (m.t === "buy" || m.t === "use" || m.t === "pass") return this.shop(c, m);
-
-    if (m.t === "type") {
-      if (s.buzz && s.buzz.playerId === c.playerId) { s.buzz.typedAnswer = m.text.slice(0, 120); this.broadcast(); }
-      return;
-    }
+    if (m.t === "buy" || m.t === "use") return this.shop(c, m);
 
     if (c.role !== "host") return this.send(c, { t: "error", message: "Bara hosten kan göra det" });
 
     switch (m.t) {
       case "host:start":
       case "host:next": {
-        this.clearTimer(); this.clearPending(); this.clearCollectTimer();
-        if (s.qIndex + 1 >= s.questions.length) { s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() }; }
-        else { s.qIndex += 1; s.phase = "question"; s.buzz = null; s.lockedOut = []; s.lastEvent = undefined; }
+        if (s.phase === "collect" || s.phase === "judge") return this.send(c, { t: "error", message: "Visa svaret först" });
+        this.clearCollectTimer();
+        if (s.qIndex + 1 >= s.questions.length) { s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() }; }
+        else { s.qIndex += 1; s.lastEvent = undefined; }
         // Twisten gäller bara frågan den snurrades för.
         if (s.wheel && (s.phase === "finished" || s.wheel.forQ < s.qIndex)) s.wheel = null;
-        if (s.phase !== "finished") this.maybeStartCollect();
+        if (s.phase !== "finished") this.startQuestion();
         break;
       }
-      case "host:correct": {
-        if (s.phase !== "buzzed" || !s.buzz) return;
-        this.clearTimer();
-        const d = this.delta(1) * this.multFor(s.buzz.playerId);
-        this.onCorrect(s.buzz.playerId);
-        const steal = activeTwist(s) === "steal" ? stealTarget(s.players, s.buzz.playerId, d) : null;
-        const p = s.players.find((x) => x.id === s.buzz!.playerId);
-        if (p) p.score += d;
-        if (steal) steal.from.score -= steal.amount;
-        s.lastEvent = { kind: "correct", playerId: s.buzz.playerId, delta: d, at: Date.now(),
-          ...(steal ? { stolenFrom: steal.from.id, stolen: steal.amount } : {}) };
-        s.phase = "reveal";
-        break;
-      }
-      case "host:wrong": return this.punish("wrong");
-      case "host:slow": return this.punish("timeout");
-      case "host:reveal": {
-        // I insamlingsrundor betyder "visa svaret" nästa steg: stäng insamlingen, sedan bekräfta rättningen.
-        if (s.phase === "collect") return this.closeCollect();
-        if (s.phase === "judge") { this.judgeCollect(); break; }
-        this.clearTimer(); this.clearPending(); s.buzz = null; s.phase = "reveal"; s.lastEvent = { kind: "reveal", at: Date.now() };
-        break;
-      }
+      case "host:judge": { if (!this.judgeCollect()) return; break; }
+      case "host:close": return this.closeCollect();
       case "host:adjust": {
         const p = s.players.find((x) => x.id === m.playerId); if (p) p.score += m.delta; break;
       }
@@ -612,31 +522,32 @@ export class Room implements DurableObject {
         break;
       }
       case "host:settings": {
-        const n = m.settings;
-        if (n.answerSeconds) s.settings.answerSeconds = Math.max(3, Math.min(60, Math.round(n.answerSeconds)));
-        if (n.penalty !== undefined) s.settings.penalty = Math.max(0, Math.min(10, Math.round(n.penalty)));
-        if (n.collectSeconds) s.settings.collectSeconds = Math.max(5, Math.min(180, Math.round(n.collectSeconds)));
-        if (n.fastestBonus !== undefined) s.settings.fastestBonus = Math.max(0, Math.min(5, Math.round(n.fastestBonus)));
+        const n = m.settings ?? {};
+        // Spelande värd kan slås på när som helst, men av bara i lobbyn (annars kan man fuska fram facit).
+        if (n.hostPlays === false && s.settings.hostPlays && s.phase !== "lobby") {
+          return this.send(c, { t: "error", message: "Du spelar själv i kväll: facit kan bara visas om du stänger av det innan start" });
+        }
+        s.settings = clampSettings({ ...s.settings, ...Object.fromEntries(Object.entries(n).filter(([, v]) => v !== undefined && v !== null)) });
         break;
       }
       case "host:spin": {
         if (s.phase !== "lobby" && s.phase !== "reveal") return this.send(c, { t: "error", message: "Hjulet kan bara snurras mellan frågorna" });
         if (s.qIndex + 1 >= s.questions.length) return this.send(c, { t: "error", message: "Det finns ingen nästa fråga att snurra för" });
-        const nextCollect = isCollectMode(s.questions[s.qIndex + 1]?.mode);
-        s.wheel = spinWheel(s.wheel, s.qIndex + 1, Date.now(), nextCollect ? (t) => t === "double" || t === "none" : undefined);
+        const nextSkill = s.questions[s.qIndex + 1]?.mode === "skill";
+        s.wheel = spinWheel(s.wheel, s.qIndex + 1, Date.now(), nextSkill ? (t) => SKILL_TWISTS.includes(t) : undefined);
         break;
       }
       case "host:finish": {
-        this.clearTimer(); this.clearPending(); this.clearCollectTimer(); s.wheel = null; s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
+        this.clearCollectTimer(); s.wheel = null; s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() };
         break;
       }
       case "host:mark": {
+        if (s.settings.hostPlays) return this.send(c, { t: "error", message: "Rättningen är automatisk när du spelar själv" });
         if (!s.collect || (s.phase !== "collect" && s.phase !== "judge")) return;
         markAnswer(s.collect, m.playerId, !!m.correct);
         break;
       }
-      case "host:close": return this.closeCollect();
-      case "host:judge": { if (!this.judgeCollect()) return; break; }
+      default: return;
     }
     await this.save();
     this.broadcast();

@@ -1,5 +1,5 @@
 """
-Röktest mot produktion efter publicering. Skapar ett rum, en spelare går med och buzzar.
+Röktest mot produktion efter publicering. Skapar ett rum, en spelare går med och svarar.
 Sparar inget i säsongstabellen eller frågebanken.
     HOST_PIN=... python3 tests/smoke.py https://kronan.example.workers.dev
 """
@@ -19,8 +19,8 @@ def req(path, data=None, pin=True):
 
 def main():
     assert "league" in req("/api/hub/public", pin=False), "hub/public svarar inte"
-    room = req("/api/rooms", {"title": "Röktest", "questions": [{"id": "s1", "text": "Röktest?", "answer": "Ja"}],
-                              "settings": {"answerSeconds": 5}})
+    room = req("/api/rooms", {"title": "Röktest", "questions": [{"id": "s1", "text": "Röktest?", "answer": "Ja", "choices": ["Ja", "Nej"]}],
+                              "settings": {"collectSeconds": 10}})
     code = room["code"]
     with sync_playwright() as pw:
         b = pw.chromium.launch()

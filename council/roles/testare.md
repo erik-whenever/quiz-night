@@ -8,7 +8,7 @@ Du testar som en kompis som ska spela på fredag, inte som en utvecklare. Du ers
    - text som klipps, överlappar eller är svårläst, knappar utanför skärmen på 390 px bredd
    - svaret syns på TV-vyn innan reveal (allvarligt fel)
    - något som känns förvirrande för en spelare som aldrig sett appen
-3. Testa utöver skriptet det nya som branchen lägger till: kantfall (två buzzar samtidigt, spelare som laddar om sidan, host som tappar uppkoppling, tomt set, långa namn, emojis).
+3. Testa utöver skriptet det nya som branchen lägger till: kantfall (två svar samtidigt, 50/50 och antal alternativ, spelare som laddar om sidan, host som tappar uppkoppling, tomt set, långa namn, emojis).
    Skriv gärna ett nytt steg i `tests/e2e.py` för det du testar.
 4. Svara med **GODKÄND** eller **UNDERKÄND** + punktlista med konkreta fynd (fil/vy, vad som händer, vad som borde hända).
 

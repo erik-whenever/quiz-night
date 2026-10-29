@@ -46,10 +46,12 @@ export default {
       const code = randomCode();
       const hostKey = crypto.randomUUID();
       const stub = env.ROOM.get(env.ROOM.idFromName(code));
-      await stub.fetch(new Request("https://room/init", {
+      const init = await stub.fetch(new Request("https://room/init", {
         method: "POST", body: JSON.stringify({ code, hostKey, title: body.title, questions: body.questions, settings: body.settings }),
       }));
-      return json({ code, hostKey });
+      const r = await init.json<{ error?: string; skipped?: number }>();
+      if (!init.ok) return json({ error: r.error ?? "Kunde inte skapa rummet" }, 400);
+      return json({ code, hostKey, skipped: r.skipped ?? 0 });
     }
 
     const m = p.match(/^\/api\/rooms\/([A-Z0-9]{4})\/(ws|crown)$/);

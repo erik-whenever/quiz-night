@@ -1,37 +1,64 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, TopBar } from "../App";
 import { api, hostKeyFor } from "../lib/api";
-import { useCountdown, useRoom } from "../lib/useRoom";
-import { Countdown, Podium } from "../components";
+import { useRoom } from "../lib/useRoom";
+import { Podium } from "../components";
 import { CollectHost } from "../collect";
-import { buzzTotalMs } from "../../shared/types";
+import type { ClientMsg, HostState } from "../../shared/types";
+import { MAX_SHOWN, MIN_SHOWN } from "../../shared/types";
 import { HostWheel } from "../wheel";
 import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
 
+/** Kvällens regler. Kan ändras när som helst; antal alternativ och svarstid gäller från nästa fråga. */
+export function RuleSettings({ state, send }: { state: HostState; send: (m: ClientMsg) => void }) {
+  const s = state.settings;
+  const started = state.phase !== "lobby";
+  const set = (settings: Partial<HostState["settings"]>) => send({ t: "host:settings", settings });
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      <label>Antal svarsalternativ
+        <select aria-label="Antal svarsalternativ" value={s.choiceCount} onChange={(e) => set({ choiceCount: +e.target.value })}>
+          {Array.from({ length: MAX_SHOWN - MIN_SHOWN + 1 }, (_, i) => i + MIN_SHOWN).map((n) => (
+            <option key={n} value={n}>{n} alternativ{n === 4 ? " (standard)" : ""}</option>
+          ))}
+        </select>
+      </label>
+      <label>Sekunder att svara
+        <input type="number" aria-label="Sekunder att svara" min={5} max={180} key={`cs${s.collectSeconds}`} defaultValue={s.collectSeconds}
+          onBlur={(e) => +e.target.value !== s.collectSeconds && set({ collectSeconds: +e.target.value })} />
+      </label>
+      <label>Bonus till snabbaste rätt
+        <input type="number" aria-label="Bonus till snabbaste rätt" min={0} max={5} key={`fb${s.fastestBonus}`} defaultValue={s.fastestBonus}
+          onBlur={(e) => +e.target.value !== s.fastestBonus && set({ fastestBonus: +e.target.value })} />
+      </label>
+      <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <input type="checkbox" style={{ width: "auto" }} checked={s.hostPlays} disabled={started && s.hostPlays}
+          onChange={(e) => set({ hostPlays: e.target.checked })} />
+        Jag spelar själv (dölj facit och andras svar för mig)
+      </label>
+      {started && <p className="muted small">Ändringar av antal alternativ och tid gäller från nästa fråga.{s.hostPlays ? " Facit kan inte visas för dig förrän kvällen är slut." : ""}</p>}
+    </div>
+  );
+}
+
 function Control({ code }: { code: string }) {
   const hostKey = hostKeyFor(code);
   const { state, error, send, serverNow, connected } = useRoom(code, "host", { hostKey });
-  const left = useCountdown(state?.buzz?.deadline, serverNow);
   const [crowned, setCrowned] = useState("");
   const [copied, setCopied] = useState("");
 
-  // Under insamling/rättning skulle N kasta allas svar och V stänga insamlingen i förtid: bara knapparna gäller då.
-  const collecting = state?.phase === "collect" || state?.phase === "judge";
-  const collectingRef = useRef(collecting);
-  collectingRef.current = collecting;
-
-  // Tangentbord: R = rätt, F = fel, T = för långsam, N = nästa, V = visa svar
+  // Tangentbord: V = visa svaret (under en fråga), N = nästa fråga (när svaret visas eller i lobbyn)
+  const phaseRef = useRef(state?.phase);
+  phaseRef.current = state?.phase;
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === "INPUT") return;
-      if (collectingRef.current) return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "SELECT") return;
       const k = e.key.toLowerCase();
-      if (k === "r") send({ t: "host:correct" });
-      if (k === "f") send({ t: "host:wrong" });
-      if (k === "t") send({ t: "host:slow" });
-      if (k === "n") send({ t: "host:next" });
-      if (k === "v") send({ t: "host:reveal" });
+      const ph = phaseRef.current;
+      if (k === "v" && (ph === "collect" || ph === "judge")) send({ t: "host:judge" });
+      if (k === "n" && ph === "reveal") send({ t: "host:next" });
     };
     window.addEventListener("keydown", on);
     return () => window.removeEventListener("keydown", on);
@@ -41,9 +68,9 @@ function Control({ code }: { code: string }) {
   if (!state) return <main className="narrow"><p className="muted">{error || "Ansluter…"}</p></main>;
 
   const tvUrl = `${location.origin}/tv/${code}`;
-  const buzzer = state.players.find((p) => p.id === state.buzz?.playerId);
   const copy = (txt: string, label: string) => { navigator.clipboard?.writeText(txt); setCopied(label); setTimeout(() => setCopied(""), 1500); };
   const sorted = [...state.players].sort((a, b) => b.score - a.score);
+  const inQuestion = state.phase === "collect" || state.phase === "judge" || state.phase === "reveal";
 
   return (
     <>
@@ -63,7 +90,11 @@ function Control({ code }: { code: string }) {
             {copied && <span className="small muted" role="status">{copied}</span>}
           </div>
         </div>
-        <p className="muted small">Skärmdela TV-vyn i Discord. Den här sidan visar svaren, så dela inte den.</p>
+        <p className="muted small">
+          {state.settings.hostPlays
+            ? <>Du spelar själv: den här sidan visar inget facit. Gå med som spelare i mobilen via <strong>{location.host}/play/{code}</strong>.</>
+            : "Skärmdela TV-vyn i Discord. Den här sidan visar svaren, så dela inte den."}
+        </p>
 
         <div className="host-grid">
           <section className="panel stack">
@@ -78,41 +109,18 @@ function Control({ code }: { code: string }) {
               </>
             )}
 
-            {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
+            {inQuestion && state.question && (
               <>
                 <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{state.question.text}</p>
                 {state.answer && <div className="answer-box">Svar: {state.answer}</div>}
                 <EffectTags state={state} />
-                {state.collect && <CollectHost state={state} send={send} serverNow={serverNow} />}
+                <CollectHost state={state} send={send} serverNow={serverNow} />
                 <HostWheel state={state} send={send} serverNow={serverNow} />
-
-                {state.phase === "question" && <p className="muted" aria-live="polite">Fritt fram att buzza… {state.lockedOut.length > 0 && `(${state.lockedOut.length} utlåsta)`}</p>}
-
-                {state.phase === "buzzed" && buzzer && (
-                  <div className="stack" style={{ alignItems: "center" }}>
-                    <div className="row" style={{ justifyContent: "center" }}>
-                      <Countdown ms={left} total={buzzTotalMs(state)} size={96} />
-                      <div>
-                        <p className="display" style={{ fontSize: "1.8rem", color: buzzer.color }}>{buzzer.name}</p>
-                        <p className="muted small" aria-live="polite">{left > 0 ? "har ordet och svarar i Discord" : "Riktmärket har gått ut, du avgör"}</p>
-                      </div>
-                    </div>
-                    <div className="judge" style={{ width: "100%" }}>
-                      <button className="btn go big" onClick={() => send({ t: "host:correct" })}>Rätt (R)</button>
-                      <button className="btn bad big" onClick={() => send({ t: "host:wrong" })}>Fel (F)</button>
-                      <button className={`btn big ${left > 0 ? "ghost" : "bad"}`} onClick={() => send({ t: "host:slow" })}>För långsam (T)</button>
-                    </div>
-                  </div>
+                {state.phase === "reveal" && (
+                  <button className="btn primary big" onClick={() => send({ t: "host:next" })}>
+                    {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
+                  </button>
                 )}
-
-                <div className="row">
-                  {(state.phase === "question" || state.phase === "buzzed") && <button className="btn ghost" onClick={() => send({ t: "host:reveal" })}>Visa svaret (V)</button>}
-                  {!collecting && (
-                    <button className={`btn ${state.phase === "reveal" ? "primary big" : "ghost"}`} onClick={() => send({ t: "host:next" })}>
-                      {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
-                    </button>
-                  )}
-                </div>
               </>
             )}
 
@@ -141,7 +149,7 @@ function Control({ code }: { code: string }) {
                 {sorted.map((p) => (
                   <tr key={p.id} style={{ opacity: p.connected ? 1 : 0.5 }}>
                     <td><span style={{ color: p.color }}>●</span> {p.name}
-                      {state.wallets?.[p.id] && <span className="muted small"> · 🪙 {state.wallets[p.id].coins}{state.coinsTonight?.[p.id] ? ` +${state.coinsTonight[p.id]}` : ""}</span>}{state.lockedOut.includes(p.id) && <span className="tag" style={{ marginLeft: 6 }}>utlåst</span>}</td>
+                      {state.wallets?.[p.id] && <span className="muted small"> · 🪙 {state.wallets[p.id].coins}{state.coinsTonight?.[p.id] ? ` +${state.coinsTonight[p.id]}` : ""}</span>}</td>
                     <td className="num display">{p.score}</td>
                     <td className="num" style={{ whiteSpace: "nowrap" }}>
                       <button className="btn sm ghost" aria-label={`Ge ${p.name} en poäng`} onClick={() => send({ t: "host:adjust", playerId: p.id, delta: 1 })}>+1</button>{" "}
@@ -152,26 +160,9 @@ function Control({ code }: { code: string }) {
                 ))}
               </tbody>
             </table>
-            <details>
-              <summary className="muted">Regler just nu</summary>
-              <div className="stack" style={{ marginTop: 12 }}>
-                <label>Sekunder att svara (riktmärke, du dömer)
-                  <input type="number" min={3} max={60} defaultValue={state.settings.answerSeconds}
-                    onBlur={(e) => send({ t: "host:settings", settings: { answerSeconds: +e.target.value } })} />
-                </label>
-                <label>Straff
-                  <input type="number" min={0} max={10} defaultValue={state.settings.penalty}
-                    onBlur={(e) => send({ t: "host:settings", settings: { penalty: +e.target.value } })} />
-                </label>
-                <label>Sekunder för Alla svarar och alternativ
-                  <input type="number" min={5} max={180} defaultValue={state.settings.collectSeconds}
-                    onBlur={(e) => send({ t: "host:settings", settings: { collectSeconds: +e.target.value } })} />
-                </label>
-                <label>Bonus till snabbaste rätt
-                  <input type="number" min={0} max={5} defaultValue={state.settings.fastestBonus}
-                    onBlur={(e) => send({ t: "host:settings", settings: { fastestBonus: +e.target.value } })} />
-                </label>
-              </div>
+            <details open={state.phase === "lobby"}>
+              <summary className="muted">Kvällens regler</summary>
+              <div style={{ marginTop: 12 }}><RuleSettings state={state} send={send} /></div>
             </details>
             {state.phase !== "finished" && state.phase !== "lobby" && (
               <button className="btn sm ghost" onClick={() => confirm("Avsluta quizet nu?") && send({ t: "host:finish" })}>Avsluta i förtid</button>

@@ -1,11 +1,12 @@
-// Vyer för insamlingsrundor ("Alla svarar"): TV, spelare och host.
+// Vyer för frågorna (svarsalternativ och skill-utmaningar): TV, spelare och host.
 // Samma byggstenar ska återanvändas av kommande rundtyper med hemliga svar.
 import { useEffect, useState } from "react";
 import type { ClientMsg, CollectResult, HostState, PlayerPublic } from "../shared/types";
-import { CHOICE_LETTERS, COLLECT_MAX_LEN, MODE_LABEL } from "../shared/types";
+import { CHOICE_LETTERS } from "../shared/types";
 import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
 import { OrderReveal, SkillHost, SkillPlay, SkillTv } from "./skill";
+import { SKILLS } from "../shared/skill";
 
 type Send = (m: ClientMsg) => void;
 const secs = (ms: number) => (ms / 1000).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " s";
@@ -97,23 +98,21 @@ export function CollectTv({ state, serverNow }: { state: HostState; serverNow: (
     }
     return <SkillTv state={state} serverNow={serverNow} />;
   }
-  const choice = c.mode === "choice";
   if (state.phase === "reveal" && c.results) {
     return (
       <div className="stack" style={{ alignItems: "center", width: "100%" }}>
-        {choice && <ChoiceGrid state={state} picks={countPicks(c.results)} />}
+        <ChoiceGrid state={state} picks={countPicks(c.results)} />
         <ResultList state={state} results={c.results} />
       </div>
     );
   }
   return (
     <div className="stack" style={{ alignItems: "center", width: "100%" }}>
-      {choice && <ChoiceGrid state={state} />}
+      <ChoiceGrid state={state} />
       <div className="collect-banner">
-        <span className="mode-tag">{MODE_LABEL[c.mode]}</span>
         {state.phase === "collect"
-          ? <><span>{choice ? "Välj i mobilen" : "Skriv ditt svar i mobilen"}</span><CollectClock state={state} serverNow={serverNow} size={90} /></>
-          : <span>Hosten rättar…</span>}
+          ? <><span>Välj i mobilen</span><CollectClock state={state} serverNow={serverNow} size={90} /></>
+          : <span>Tiden är ute</span>}
       </div>
       <AnsweredGrid state={state} />
     </div>
@@ -123,11 +122,12 @@ export function CollectTv({ state, serverNow }: { state: HostState; serverNow: (
 const draftKey = (code: string, q: number) => `kronan.svar.${code}.${q}`;
 const readDraft = (k: string) => { try { return sessionStorage.getItem(k) ?? ""; } catch { return ""; } };
 const writeDraft = (k: string, v: string) => { try { sessionStorage.setItem(k, v); } catch { /* */ } };
+/** Kom ihåg mitt val (visas som "låst" även efter omladdning), t.ex. när det valdes med tangentbordet. */
+export const rememberAnswer = (code: string, q: number, text: string) => writeDraft(draftKey(code, q), text);
 
-/** Spelare: textfält + "Lås svar" under insamlingen, sedan låst bekräftelse och till sist eget resultat. */
+/** Spelare: alternativknappar (ett tryck låser), sedan låst bekräftelse och till sist eget resultat. */
 export function CollectPlay({ state, me, send, serverNow }: { state: HostState; me: PlayerPublic; send: Send; serverNow: () => number }) {
   const key = draftKey(state.code, state.qIndex);
-  const [text, setText] = useState(() => readDraft(key));
   const [sentKey, setSentKey] = useState("");
   const c = state.collect;
   if (!c) return null;
@@ -135,38 +135,23 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
   const locked = c.answered.includes(me.id);
   const pending = sentKey === key && !locked;
   const mine = c.results?.find((r) => r.playerId === me.id);
+  const removed = new Set(state.myRemoved ?? []);
 
-  if (state.phase === "collect" && !locked && c.mode === "choice") {
+  if (state.phase === "collect" && !locked) {
     const choices = state.question?.choices ?? [];
     return (
       <div className="stack collect-form">
         <div className="row" style={{ justifyContent: "center" }}><CollectClock state={state} serverNow={serverNow} size={110} /></div>
         <p className="muted small" style={{ textAlign: "center" }}>Ett tryck låser ditt val.</p>
-        <div className="choice-buttons" role="group" aria-label="Välj svar">
+        <div className={`choice-buttons${choices.length > 4 ? " many" : ""}`} role="group" aria-label="Välj svar">
           {choices.map((ch, i) => (
-            <button key={ch} className="choice-btn" disabled={pending} data-letter={CHOICE_LETTERS[i]}
+            <button key={ch} className={`choice-btn${removed.has(ch) ? " gone" : ""}`} disabled={pending || removed.has(ch)} data-letter={CHOICE_LETTERS[i]}
               onClick={() => { if (pending) return; writeDraft(key, ch); setSentKey(key); send({ t: "answer", text: ch }); }}>
               <span className="letter">{CHOICE_LETTERS[i]}</span><span className="txt">{ch}</span>
             </button>
           ))}
         </div>
       </div>
-    );
-  }
-
-  if (state.phase === "collect" && !locked) {
-    return (
-      <form className="stack collect-form" onSubmit={(e) => {
-        e.preventDefault();
-        if (!text.trim() || pending) return;
-        writeDraft(key, text.trim()); setSentKey(key); send({ t: "answer", text: text.trim() });
-      }}>
-        <div className="row" style={{ justifyContent: "center" }}><CollectClock state={state} serverNow={serverNow} size={110} /></div>
-        <label htmlFor="collect-answer">Ditt svar</label>
-        <input id="collect-answer" value={text} maxLength={COLLECT_MAX_LEN} autoFocus autoComplete="off" enterKeyHint="done"
-          onChange={(e) => { setText(e.target.value); writeDraft(key, e.target.value); }} placeholder="Skriv här, ingen annan ser det" />
-        <button className="btn primary big" disabled={!text.trim() || pending}>{pending ? "Låser…" : "Lås svar"}</button>
-      </form>
     );
   }
 
@@ -189,18 +174,36 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
     <div className="locked-card" role="status">
       {locked ? (
         <>
-          <p className="display big-verdict"><span aria-hidden>🔒</span> {c.mode === "choice" ? "Ditt val är låst" : "Ditt svar är låst"}</p>
+          <p className="display big-verdict"><span aria-hidden>🔒</span> Ditt val är låst</p>
           {draft && <p className="locked-text">”{draft}”</p>}
-          <p className="muted">{state.phase === "collect"
-            ? `${c.answered.length} av ${state.players.length} har svarat`
-            : "Hosten rättar…"}</p>
+          <p className="muted">{state.phase === "collect" ? `${c.answered.length} av ${state.players.length} har svarat` : "Väntar på att svaret visas…"}</p>
         </>
       ) : <p className="display big-verdict">Tiden är ute</p>}
     </div>
   );
 }
 
-/** Host: alla svar i inlämningsordning, bocka för rätt, bekräfta. */
+/** Spelande värd: bara hur många som svarat och nedräkningen, aldrig facit eller vad någon valt. */
+function HostProgress({ state, send, serverNow }: { state: HostState; send: Send; serverNow: () => number }) {
+  const c = state.collect!;
+  const skill = c.mode === "skill" && state.question?.skill ? SKILLS[state.question.skill.kind].name : null;
+  return (
+    <div className="stack">
+      <div className="row">
+        <CollectClock state={state} serverNow={serverNow} size={72} />
+        <p className="muted" aria-live="polite">
+          {skill ? `${skill}: ` : ""}{c.answered.length} av {state.players.length} {skill ? "klara" : "har svarat"}.
+          {state.phase === "judge" ? " Tiden är ute." : ""}
+        </p>
+      </div>
+      <AnsweredGrid state={state} />
+      <p className="muted small">Du spelar själv, så du ser inte facit. Rättningen sker automatiskt.</p>
+      <button className="btn primary big" onClick={() => send({ t: "host:judge" })}>{skill ? "Visa resultaten (V)" : "Visa svaret (V)"}</button>
+    </div>
+  );
+}
+
+/** Host: spelande värd ser bara framstegen. Annars alla svar i inlämningsordning, med möjlighet att ändra rättningen. */
 export function CollectHost({ state, send, serverNow }: { state: HostState; send: Send; serverNow: () => number }) {
   const c = state.collect;
   const h = state.collectHost;
@@ -208,27 +211,20 @@ export function CollectHost({ state, send, serverNow }: { state: HostState; send
   const [local, setLocal] = useState<Record<string, boolean>>({});
   const serverMarks = h?.correct.join(",");
   useEffect(() => setLocal({}), [serverMarks]);
-  if (!c || !h) return null;
-  if (c.mode === "skill") {
-    const judgingSkill = state.phase === "collect" || state.phase === "judge";
-    return judgingSkill ? <SkillHost state={state} send={send} /> : c.results ? <ResultList state={state} results={c.results} /> : null;
-  }
+  if (!c) return null;
   const judging = state.phase === "collect" || state.phase === "judge";
+  if (!judging) return c.results ? <ResultList state={state} results={c.results} /> : null;
+  if (state.settings.hostPlays || !h) return <HostProgress state={state} send={send} serverNow={serverNow} />;
+  if (c.mode === "skill") return <SkillHost state={state} send={send} />;
   const missing = state.players.filter((p) => !h.answers.some((a) => a.playerId === p.id));
   const right = new Set(h.answers.map((a) => a.playerId).filter((id) => local[id] ?? h.correct.includes(id)));
   const firstRight = h.answers.find((a) => right.has(a.playerId))?.playerId;
-
-  if (!judging) {
-    return c.results ? <ResultList state={state} results={c.results} /> : null;
-  }
   return (
     <div className="stack">
       <div className="row">
         <CollectClock state={state} serverNow={serverNow} size={72} />
         <p className="muted" aria-live="polite">
-          {state.phase === "collect"
-            ? `${MODE_LABEL[c.mode]}: ${h.answers.length} av ${state.players.length} har låst sitt svar.`
-            : c.mode === "choice" ? "Insamlingen är stängd. Rätt alternativ är förbockat, ändra om du vill." : "Insamlingen är stängd. Bocka för rätt svar."}
+          {state.phase === "collect" ? `${h.answers.length} av ${state.players.length} har svarat.` : "Tiden är ute. Rätt alternativ är förbockat, ändra om du vill."}
         </p>
       </div>
       {h.answers.length === 0 ? <p className="muted">Inga svar än.</p> : (
@@ -259,10 +255,7 @@ export function CollectHost({ state, send, serverNow }: { state: HostState; send
       <p className="muted small">
         Rätt ger {state.question?.points ?? 1} p, snabbaste rätt får +{state.settings.fastestBonus} i bonus. Fel kostar inget.
       </p>
-      <div className="row">
-        {state.phase === "collect" && <button className="btn ghost" onClick={() => send({ t: "host:close" })}>Stäng insamlingen</button>}
-        <button className="btn primary big" onClick={() => send({ t: "host:judge" })}>Bekräfta och visa svaren</button>
-      </div>
+      <button className="btn primary big" onClick={() => send({ t: "host:judge" })}>Visa svaret (V)</button>
     </div>
   );
 }

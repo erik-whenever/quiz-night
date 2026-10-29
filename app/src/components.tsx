@@ -9,7 +9,7 @@ export function Scorebar({ state, highlight }: { state: HostState; highlight?: s
   if (!sorted.length) return <p className="muted" style={{ textAlign: "center" }}>Inga spelare än.</p>;
   return (
     <div className="scorebar" aria-label="Poängställning">
-      {sorted.map((p) => <Chip key={p.id} p={p} locked={state.lockedOut.includes(p.id)} active={highlight === p.id || state.buzz?.playerId === p.id} />)}
+      {sorted.map((p) => <Chip key={p.id} p={p} active={highlight === p.id} />)}
     </div>
   );
 }

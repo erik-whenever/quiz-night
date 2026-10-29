@@ -9,6 +9,7 @@ Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 - [x] 2026-10-28 | DEMO: `app/quizzes/2026-10-demo-allmanbildning.json` (20 lätta–medel allmänfrågor) för en testkväll med gänget så snart som möjligt. Feedbacken hamnar i `council/feedback.md`.
 
 ## Redo
+- OBS 2026-10-29: allt är svarsalternativ nu. Idéer nedan som bygger på buzz eller fritext (Fallande poäng, Kungens fråga, Bluffrundan) måste göras om till alternativ eller skill innan de byggs; Produktägaren ser över dem.
 - [ ] P1 | M | Rundtyp "Vem sa det?" (citat): `"mode": "quote"` med `quote`, `answer` (karaktär) och valfria `choices` (4 alternativ). Med `choices` återanvänds Svarsalternativ (`mode: "choice"`, klart 2026-10-29). Utan `choices` är det vanlig buzz. TV-vyn visar citatet stort i citattecken med serien dold till reveal. Gänget älskar tv-seriecitat (Breaking Bad, GoT, HIMYM). Klart när e2e kör en citatfråga med alternativ och rätt spelare får poäng.
 - [ ] P1 | M | Rundtyp "Närmast på skalan": `"mode": "closest"` med `min`/`max`/`answer` i fråge-JSON (och valbar i frågebanken). Alla drar ett reglage på mobilen och låser sin gissning före tidens slut; TV:n visar allas nålar på en tallinje en i taget och sist rätt svar. Närmast 3 p, tvåa 1 p, prick rätt +2 bonus. Servern räknar avstånd. Klart när e2e låter tre spelare gissa olika tal, rätt spelare får 3 p och TV-vyn inte visar svaret före reveal.
 - [ ] P2 | S | Kvällens pris: efter sista frågan röstar alla på mobilen i två kategorier (standard "Kvällens fail" och "Modigaste chansningen", hosten kan byta namn). En röst per spelare och kategori, inte på sig själv. TV-vyn visar vinnarna som prisutdelning och utmärkelsen sparas i `Hub` och syns vid namnet i `/tabell`. Klart när e2e röstar med fyra spelare och priset syns i tabellen.
@@ -31,6 +32,7 @@ Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 - ~~2026-10-28 Utvecklingsansvarig: "Testa gärna" (buzz-känsla, vibration, hemskärm)~~ → 2026-10-29 PO: lagt som frågor i `feedback.md` under Fredagsquiz 30 okt, testas på riktigt på quizkvällen.
 
 ## Klart
+- [x] 2026-10-29 | Eriks beslut: bara svarsalternativ (antal väljs av värden), spelande värd utan facit, 50/50 i butiken och hjulet. Se `beslut.md`. Buzz och fritext borttaget.
 - [x] 2026-10-29 | Eriks önskemål: lag (americano, lagets snitt), mynt per spelarnamn och butik med Extra tid, Pass, Dubbla poäng, Sabotage och Veto. Se `beslut.md`. Följ upp i `feedback.md` efter första lagkvällen: priser, intjäning och om butiken behöver fler varor.
 - [x] 2026-10-29 | Eriks önskemål: skill-utmaningar Last hit, Flick, Stoppa klockan, Ordna rätt, Häll upp. Fem stycken ligger i fredagsquizet. Fler idéer som Erik inte valt (Reaktionstest, Emoji-jakt, Tappa-race, Simon) får Idéspanaren ta upp igen om gänget vill ha fler.
 - [x] 2026-10-29 | Eriks önskemål: buzz ger bara ordet, hosten dömer Rätt/Fel/För långsam (ingen auto-timeout). Ny rundtyp Svarsalternativ (`mode: "choice"`) i mobilen, valbar i frågebanken och snabbinklistringen (`| alt | A; B; C`). 4 frågor i fredagsquizet är alternativfrågor.

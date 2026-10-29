@@ -1,20 +1,20 @@
 {
   "id": "2026-10-demo-allt",
   "title": "Demo: Allt i appen",
-  "theme": "Går igenom varje rundtyp i tur och ordning: buzz, alternativ, alla svarar och alla fem skill-utmaningar",
+  "theme": "Går igenom allt i tur och ordning: svarsalternativ, 50/50, antal alternativ, spelande värd, alla fem skill-utmaningar, butiken och hjulet",
   "updatedAt": "2026-10-29",
   "questions": [
-    { "id": "d1", "text": "Demo buzz (rätt): Vilken färg har en mogen banan?", "answer": "Gul", "category": "Demo: buzz" },
-    { "id": "d2", "text": "Demo buzz (fel, för långsam, pass): Vad heter Sveriges huvudstad?", "answer": "Stockholm", "category": "Demo: buzz" },
-    { "id": "d3", "text": "Demo svarsalternativ: Vilken krydda är dyrast per kilo?", "answer": "Saffran", "category": "Demo: alternativ", "mode": "choice", "choices": ["Kardemumma", "Saffran", "Vanilj", "Svartpeppar"] },
-    { "id": "d4", "text": "Demo alla svarar: Vilken är Sveriges största sjö?", "answer": "Vänern", "category": "Demo: alla svarar", "mode": "all" },
-    { "id": "d5", "text": "Demo skill: Last hit! Slå när creepen är under det gula strecket.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": { "kind": "lasthit" } },
-    { "id": "d6", "text": "Demo skill: Flick! Tio mål, snabbast vinner.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": { "kind": "aim" } },
-    { "id": "d7", "text": "Demo skill: Stoppa klockan på exakt 10 sekunder.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": { "kind": "stopwatch", "target": 10 } },
-    { "id": "d8", "text": "Demo skill: Häll upp! Släpp vid strecket utan att spilla.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": { "kind": "pour" } },
-    { "id": "d9", "text": "Demo skill: Ordna serierna efter premiärår.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": { "kind": "order", "prompt": "Äldst först", "items": [{ "label": "How I Met Your Mother", "value": 2005, "show": "2005" }, { "label": "Breaking Bad", "value": 2008, "show": "2008" }, { "label": "Game of Thrones", "value": 2011, "show": "2011" }, { "label": "Better Call Saul", "value": 2015, "show": "2015" }] } },
-    { "id": "d10", "text": "Demo dubbla poäng och sabotage: Vem säger ”Suit up!”?", "answer": "Barney Stinson", "category": "Demo: butik" },
-    { "id": "d11", "text": "Demo lyckohjul: Vad heter Gus Frings kycklingkedja i Breaking Bad?", "answer": "Los Pollos Hermanos", "category": "Demo: hjulet" },
-    { "id": "d12", "text": "Demo sista frågan: Vilket år släpptes Counter-Strike 2?", "answer": "2023", "category": "Demo: alternativ", "mode": "choice", "choices": ["2021", "2022", "2023", "2024"] }
+    { "id": "d1", "text": "Demo svarsalternativ: Vilken färg har en mogen banan?", "answer": "Gul", "category": "Demo: alternativ", "choices": ["Gul", "Grön", "Brun", "Röd", "Orange", "Blå", "Lila", "Svart"] },
+    { "id": "d2", "text": "Demo 50/50 (köp i lobbyn, använd nu): Vad heter Sveriges huvudstad?", "answer": "Stockholm", "category": "Demo: 50/50", "choices": ["Stockholm", "Göteborg", "Malmö", "Uppsala", "Västerås", "Örebro", "Linköping", "Sundsvall"] },
+    { "id": "d3", "text": "Demo 8 alternativ (ändra antalet i Kvällens regler först): Vilken krydda är dyrast per kilo?", "answer": "Saffran", "category": "Demo: antal alternativ", "choices": ["Saffran", "Kardemumma", "Vanilj", "Svartpeppar", "Kanel", "Muskotnöt", "Kryddnejlika", "Stjärnanis"] },
+    { "id": "d4", "text": "Demo spelande värd: Vilken är Sveriges största sjö?", "answer": "Vänern", "category": "Demo: spelande värd", "choices": ["Vänern", "Vättern", "Mälaren", "Hjälmaren", "Storsjön", "Siljan", "Torneträsk", "Bolmen"] },
+    { "id": "d5", "text": "Demo skill: Last hit! Slå när creepen är under det gula strecket.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": {"kind": "lasthit"} },
+    { "id": "d6", "text": "Demo skill: Flick! Tio mål, snabbast vinner.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": {"kind": "aim"} },
+    { "id": "d7", "text": "Demo skill: Stoppa klockan på exakt 10 sekunder.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": {"kind": "stopwatch", "target": 10} },
+    { "id": "d8", "text": "Demo skill: Häll upp! Släpp vid strecket utan att spilla.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": {"kind": "pour"} },
+    { "id": "d9", "text": "Demo skill: Ordna serierna efter premiärår.", "answer": "", "category": "Demo: skill", "mode": "skill", "skill": {"kind": "order", "prompt": "Äldst först", "items": [{"label": "How I Met Your Mother", "value": 2005, "show": "2005"}, {"label": "Breaking Bad", "value": 2008, "show": "2008"}, {"label": "Game of Thrones", "value": 2011, "show": "2011"}, {"label": "Better Call Saul", "value": 2015, "show": "2015"}]} },
+    { "id": "d10", "text": "Demo dubbla poäng och sabotage: Vem säger ”Suit up!”?", "answer": "Barney Stinson (How I Met Your Mother)", "category": "Demo: butik", "choices": ["Barney Stinson (How I Met Your Mother)", "Ted Mosby (How I Met Your Mother)", "Marshall Eriksen (How I Met Your Mother)", "Robin Scherbatsky (How I Met Your Mother)", "Joey Tribbiani (Friends)", "Chandler Bing (Friends)", "Harvey Specter (Suits)", "Michael Scott (The Office)"] },
+    { "id": "d11", "text": "Demo lyckohjul: Vad heter Gus Frings kycklingkedja i Breaking Bad?", "answer": "Los Pollos Hermanos", "category": "Demo: hjulet", "choices": ["Los Pollos Hermanos", "El Pollo Loco", "Pollo Feliz", "Chicken Brothers", "Casa Pollo", "Taco Hermanos", "Gus's Chicken", "Fring's Fried Chicken"] },
+    { "id": "d12", "text": "Demo sista frågan: Vilket år släpptes Counter-Strike 2?", "answer": "2023", "category": "Demo: alternativ", "choices": ["2023", "2019", "2020", "2021", "2022", "2024", "2025", "2018"] }
   ]
 }
