@@ -171,13 +171,13 @@ th { color: var(--mist); font-weight: 600; font-size: 0.9rem; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Editor */
-.qrow { display: grid; grid-template-columns: 28px 1fr 1fr 64px 36px; gap: 8px; align-items: start; }
+.qrow { display: grid; grid-template-columns: 28px 1fr 1fr 92px 64px 36px; gap: 8px; align-items: start; }
 .qrow .mode { grid-column: 2 / 4; display: flex; gap: 8px; align-items: center; flex-direction: row; font-weight: 600; color: var(--mist); font-size: 0.9rem; }
-.qrow .choices { grid-column: 2 / 6; font-weight: 600; color: var(--mist); font-size: 0.9rem; }
+.qrow .choices { grid-column: 2 / 7; font-weight: 600; color: var(--mist); font-size: 0.9rem; }
 .qrow .mode select { width: auto; padding: 6px 10px; font-size: 0.9rem; }
 .qrow .n { color: var(--mist); font-weight: 700; padding-top: 12px; text-align: right; }
 @media (max-width: 640px) {
-  .qrow { grid-template-columns: 1fr 64px 36px; }
+  .qrow { grid-template-columns: 1fr 92px 64px 36px; }
   .qrow .n { display: none; }
   .qrow .a { grid-column: 1 / 2; }
   .qrow .mode, .qrow .choices { grid-column: 1 / -1; }
@@ -382,3 +382,15 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .lh-creep.denied { opacity: 0.25; filter: grayscale(1); }
 .lh-shoot { position: relative; overflow: hidden; }
 .lh-shoot::after { content: ""; position: absolute; left: 0; bottom: 0; height: 6px; width: var(--cd, 0%); background: var(--studio-ink); opacity: 0.5; }
+
+/* Lagens tur och buzzer */
+.turn-banner { box-shadow: inset 0 0 0 3px var(--c); }
+.turn-banner.buzzed { animation: drop 300ms cubic-bezier(.2,1.6,.4,1); }
+.buzz-open .mode-tag { background: var(--buzz); color: var(--chalk); }
+.choice-tile.tried { opacity: 0.35; text-decoration: line-through; }
+.turn-wait { box-shadow: inset 0 0 0 3px var(--c); }
+.difficulty { gap: 6px; }
+.difficulty input[type="range"] { width: 100%; accent-color: var(--signal); padding: 0; }
+.difficulty strong { color: var(--signal); }
+.diff-pips { color: var(--signal); letter-spacing: 2px; }
+.qrow .diff { padding: 8px 6px; font-size: 0.8rem; letter-spacing: 1px; }

@@ -5,10 +5,23 @@ import { useRoom } from "../lib/useRoom";
 import { Podium } from "../components";
 import { CollectHost } from "../collect";
 import type { ClientMsg, HostState } from "../../shared/types";
-import { MAX_SHOWN, MIN_SHOWN } from "../../shared/types";
+import { DIFFICULTY_LABELS, MAX_SHOWN, MIN_SHOWN } from "../../shared/types";
 import { HostWheel } from "../wheel";
 import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
+
+/** Svårighetsreglaget: styr vilken fråga som kommer härnäst, går att dra mitt i kvällen. */
+export function DifficultySlider({ state, send }: { state: HostState; send: (m: ClientMsg) => void }) {
+  const d = state.settings.difficulty;
+  return (
+    <label className="difficulty">
+      <span className="spread"><span>Svårighet på nästa fråga</span><strong aria-live="polite">{DIFFICULTY_LABELS[d]}</strong></span>
+      <input type="range" aria-label="Svårighet" min={0} max={5} step={1} value={d}
+        onChange={(e) => send({ t: "host:settings", settings: { difficulty: +e.target.value } })} />
+      <span className="spread muted small"><span>Setets ordning</span><span>Lätt</span><span>Svår</span></span>
+    </label>
+  );
+}
 
 /** Kvällens regler. Kan ändras när som helst; antal alternativ och svarstid gäller från nästa fråga. */
 export function RuleSettings({ state, send }: { state: HostState; send: (m: ClientMsg) => void }) {
@@ -17,6 +30,22 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
   const set = (settings: Partial<HostState["settings"]>) => send({ t: "host:settings", settings });
   return (
     <div className="stack" style={{ gap: 10 }}>
+      <label>Spelform
+        <select aria-label="Spelform" value={s.playMode} onChange={(e) => set({ playMode: e.target.value as HostState["settings"]["playMode"] })}>
+          <option value="turns">Lagens tur (lagen turas om)</option>
+          <option value="all">Alla svarar samtidigt</option>
+        </select>
+      </label>
+      <label>Buzzerfråga
+        <select aria-label="Buzzerfråga" value={s.buzzEvery} onChange={(e) => set({ buzzEvery: +e.target.value })}>
+          <option value={0}>Aldrig</option>
+          {[2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>Var {n}:{n === 2 ? "a" : "e"} fråga</option>)}
+        </select>
+      </label>
+      <label>Straff för fel buzzersvar
+        <input type="number" aria-label="Straff för fel buzzersvar" min={0} max={5} key={`pe${s.penalty}`} defaultValue={s.penalty}
+          onBlur={(e) => +e.target.value !== s.penalty && set({ penalty: +e.target.value })} />
+      </label>
       <label>Antal svarsalternativ
         <select aria-label="Antal svarsalternativ" value={s.choiceCount} onChange={(e) => set({ choiceCount: +e.target.value })}>
           {Array.from({ length: MAX_SHOWN - MIN_SHOWN + 1 }, (_, i) => i + MIN_SHOWN).map((n) => (
@@ -37,7 +66,7 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
           onChange={(e) => set({ hostPlays: e.target.checked })} />
         Jag spelar själv (dölj facit och andras svar för mig)
       </label>
-      {started && <p className="muted small">Ändringar av antal alternativ och tid gäller från nästa fråga.{s.hostPlays ? " Facit kan inte visas för dig förrän kvällen är slut." : ""}</p>}
+      {started && <p className="muted small">Ändringar av spelform, antal alternativ och tid gäller från nästa fråga.{s.hostPlays ? " Facit kan inte visas för dig förrän kvällen är slut." : ""}</p>}
     </div>
   );
 }
@@ -103,6 +132,7 @@ function Control({ code }: { code: string }) {
                 <h3>Väntar på spelare</h3>
                 <p className="muted">{state.players.length} inne. Starta när alla är med.</p>
                 <HostTeams state={state} send={send} />
+                <DifficultySlider state={state} send={send} />
                 <EffectTags state={state} />
                 <button className="btn primary big" onClick={() => send({ t: "host:start" })} disabled={!state.players.length}>Starta första frågan</button>
                 <HostWheel state={state} send={send} serverNow={serverNow} />
@@ -116,6 +146,7 @@ function Control({ code }: { code: string }) {
                 <EffectTags state={state} />
                 <CollectHost state={state} send={send} serverNow={serverNow} />
                 <HostWheel state={state} send={send} serverNow={serverNow} />
+                <DifficultySlider state={state} send={send} />
                 {state.phase === "reveal" && (
                   <button className="btn primary big" onClick={() => send({ t: "host:next" })}>
                     {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}

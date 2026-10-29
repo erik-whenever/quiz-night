@@ -7,6 +7,7 @@ import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
 import { OrderReveal, SkillHost, SkillPlay, SkillTv } from "./skill";
 import { SKILLS } from "../shared/skill";
+import { unitOf } from "../shared/teams";
 import { sfx } from "./lib/sound";
 
 type Send = (m: ClientMsg) => void;
@@ -76,13 +77,51 @@ export function ChoiceGrid({ state, picks }: { state: HostState; picks?: Record<
   return (
     <ol className="choice-grid" aria-label="Svarsalternativ">
       {choices.map((ch, i) => (
-        <li key={ch} className={`choice-tile${right ? (ch === right ? " right" : " dim") : ""}`} data-letter={CHOICE_LETTERS[i]}>
+        <li key={ch} className={`choice-tile${right ? (ch === right ? " right" : " dim") : state.collect?.tried?.includes(ch) ? " tried" : ""}`} data-letter={CHOICE_LETTERS[i]}>
           <span className="letter">{CHOICE_LETTERS[i]}</span>
           <span className="txt">{ch}</span>
           {picks && <span className="picks">{picks[ch] ?? 0}</span>}
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Namn och färg för en enhet (lag eller spelare). */
+export function unitInfo(state: HostState, unit?: string) {
+  const t = state.teams.find((x) => x.id === unit);
+  if (t) return { name: t.name, color: t.color };
+  const p = state.players.find((x) => x.id === unit);
+  return { name: p?.name ?? "?", color: p?.color ?? "var(--mist)" };
+}
+
+/** Banner för lagens tur och buzzer (TV och host). */
+export function FormatBanner({ state, serverNow, size = 90 }: { state: HostState; serverNow: () => number; size?: number }) {
+  const c = state.collect;
+  const answerLeft = useCountdown(state.phase === "collect" && c?.turn && c.answerDeadline ? c.answerDeadline : undefined, serverNow);
+  if (!c || c.mode !== "choice" || state.phase !== "collect" || c.format === "all") return null;
+  const who = unitInfo(state, c.turn);
+  if (c.format === "turn") {
+    return (
+      <div className="collect-banner turn-banner" style={{ "--c": who.color } as React.CSSProperties}>
+        <span className="mode-tag">Lagens tur</span><span><strong style={{ color: who.color }}>{who.name}</strong> svarar, snacka högt!</span>
+        <CollectClock state={state} serverNow={serverNow} size={size} />
+      </div>
+    );
+  }
+  if (c.turn) {
+    return (
+      <div className="collect-banner turn-banner buzzed" style={{ "--c": who.color } as React.CSSProperties}>
+        <span className="mode-tag">Buzz!</span><span><strong style={{ color: who.color }}>{who.name}</strong> svarar</span>
+        <Countdown ms={answerLeft} total={state.settings.buzzAnswerSeconds * 1000} size={size} />
+      </div>
+    );
+  }
+  return (
+    <div className="collect-banner buzz-open">
+      <span className="mode-tag">Buzzerfråga</span><span>Först att buzza får svara. Fel kostar {state.settings.penalty} p.</span>
+      <CollectClock state={state} serverNow={serverNow} size={size} />
+    </div>
   );
 }
 
@@ -110,12 +149,14 @@ export function CollectTv({ state, serverNow }: { state: HostState; serverNow: (
   return (
     <div className="stack" style={{ alignItems: "center", width: "100%" }}>
       <ChoiceGrid state={state} />
-      <div className="collect-banner">
-        {state.phase === "collect"
-          ? <><span>Välj i mobilen</span><CollectClock state={state} serverNow={serverNow} size={90} /></>
-          : <span>Tiden är ute</span>}
-      </div>
-      <AnsweredGrid state={state} />
+      {c.format !== "all" && state.phase === "collect" ? <FormatBanner state={state} serverNow={serverNow} /> : (
+        <div className="collect-banner">
+          {state.phase === "collect"
+            ? <><span>Välj i mobilen</span><CollectClock state={state} serverNow={serverNow} size={90} /></>
+            : <span>Tiden är ute</span>}
+        </div>
+      )}
+      {c.format === "all" && <AnsweredGrid state={state} />}
     </div>
   );
 }
@@ -136,14 +177,44 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
   const locked = c.answered.includes(me.id);
   const pending = sentKey === key && !locked;
   const mine = c.results?.find((r) => r.playerId === me.id);
-  const removed = new Set(state.myRemoved ?? []);
+  const removed = new Set([...(state.myRemoved ?? []), ...(c.tried ?? [])]);
+  const myUnit = unitOf(state.teams, me.id);
+  const who = unitInfo(state, c.turn);
+  const teamWord = state.teams.length ? "Ert lag" : "Du";
+
+  if (state.phase === "collect" && c.format === "turn" && c.turn !== myUnit) {
+    return <div className="locked-card turn-wait" role="status" style={{ "--c": who.color } as React.CSSProperties}>
+      <p className="display big-verdict"><span style={{ color: who.color }}>{who.name}</span> har turen</p>
+      <p className="muted">Lyssna på dem i Discord. Nästa fråga kan vara er.</p>
+    </div>;
+  }
+  if (state.phase === "collect" && c.format === "buzz" && c.turn !== myUnit) {
+    const lockedOut = c.lockedOut?.includes(myUnit);
+    if (c.buzzOpen && !lockedOut) {
+      return (
+        <div className="buzzer-zone">
+          <CollectClock state={state} serverNow={serverNow} size={80} />
+          <div className="buzzer-ring"><button className="buzzer" aria-label="Buzza"
+            onPointerDown={(e) => { e.preventDefault(); sfx.unlock(); send({ t: "buzz" }); }}
+            onKeyDown={(e) => { if (e.key === "Enter") send({ t: "buzz" }); }}>BUZZ</button></div>
+          <p className="muted small">Först att buzza får svara. Fel svar kostar {state.settings.penalty} p.</p>
+        </div>
+      );
+    }
+    return <div className="locked-card" role="status">
+      <p className="display big-verdict">{lockedOut ? `${teamWord} är utlåsta` : <><span style={{ color: who.color }}>{who.name}</span> svarar…</>}</p>
+    </div>;
+  }
 
   if (state.phase === "collect" && !locked) {
     const choices = state.question?.choices ?? [];
     return (
       <div className="stack collect-form">
         <div className="row" style={{ justifyContent: "center" }}><CollectClock state={state} serverNow={serverNow} size={110} /></div>
-        <p className="muted small" style={{ textAlign: "center" }}>Ett tryck låser ditt val.</p>
+        <p className="muted small" style={{ textAlign: "center" }}>
+          {c.format === "turn" ? `${teamWord} har turen! Snacka ihop er, ett tryck låser svaret för hela laget.`
+            : c.format === "buzz" ? `${teamWord} buzzade först! Välj snabbt, fel kostar ${state.settings.penalty} p.` : "Ett tryck låser ditt val."}
+        </p>
         <div className={`choice-buttons${choices.length > 4 ? " many" : ""}`} role="group" aria-label="Välj svar">
           {choices.map((ch, i) => (
             <button key={ch} className={`choice-btn${removed.has(ch) ? " gone" : ""}`} disabled={pending || removed.has(ch)} data-letter={CHOICE_LETTERS[i]}
@@ -197,7 +268,7 @@ function HostProgress({ state, send, serverNow }: { state: HostState; send: Send
           {state.phase === "judge" ? " Tiden är ute." : ""}
         </p>
       </div>
-      <AnsweredGrid state={state} />
+      {c.format === "all" ? <AnsweredGrid state={state} /> : <FormatBanner state={state} serverNow={serverNow} size={64} />}
       <p className="muted small">Du spelar själv, så du ser inte facit. Rättningen sker automatiskt.</p>
       <button className="btn primary big" onClick={() => send({ t: "host:judge" })}>{skill ? "Visa resultaten (V)" : "Visa svaret (V)"}</button>
     </div>

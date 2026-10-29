@@ -26,7 +26,12 @@ export interface Question {
   choices?: string[];
   /** Skill-utmaning i mobilen för "skill", se shared/skill.ts. `answer` behövs inte. */
   skill?: SkillSpec;
+  /** Svårighet 1 (lätt) – 5 (svår). Värden styr med ett reglage vilken fråga som kommer härnäst. Standard 3. */
+  difficulty?: number;
 }
+
+export const DIFFICULTY_LABELS = ["Setets ordning", "Lätt", "Ganska lätt", "Medel", "Svår", "Riktigt svår"];
+export const difficultyOf = (q: Pick<Question, "difficulty">) => Math.max(1, Math.min(5, Math.round(q.difficulty ?? 3)));
 
 export type QuestionMode = "choice" | "skill";
 export const QUESTION_MODES: { value: QuestionMode; label: string }[] = [
@@ -58,6 +63,14 @@ export interface QuestionSet {
   questions: Question[];
 }
 
+/**
+ * Spelform för alternativfrågor. "all": alla svarar samtidigt. "turns": lagen (eller spelarna) turas om,
+ * bara laget som har turen svarar och diskuterar högt i Discord. Buzzerfrågor läggs in var N:e fråga (buzzEvery).
+ */
+export type PlayMode = "all" | "turns";
+/** Hur en fråga spelas: alla samtidigt, ett lags tur eller buzzer (först att trycka svarar). */
+export type QuestionFormat = "all" | "turn" | "buzz";
+
 export interface Settings {
   /** Sekunder att svara på en alternativfråga. */
   collectSeconds: number;
@@ -67,9 +80,22 @@ export interface Settings {
   choiceCount: number;
   /** Värden spelar själv: facit och andras svar skickas aldrig till hostkontrollen. Kan inte stängas av efter start. */
   hostPlays: boolean;
+  /** Spelform, se PlayMode. */
+  playMode: PlayMode;
+  /** Var N:e alternativfråga är en buzzerfråga (0 = aldrig). */
+  buzzEvery: number;
+  /** Poäng som ett fel (eller för långsamt) buzzersvar kostar varje spelare i laget. */
+  penalty: number;
+  /** Sekunder att välja svar efter buzz. */
+  buzzAnswerSeconds: number;
+  /** Målsvårighet för nästa fråga: 0 = setets ordning, annars 1–5 (närmast först). Ändras i realtid. */
+  difficulty: number;
 }
 
-export const DEFAULT_SETTINGS: Settings = { collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true };
+export const DEFAULT_SETTINGS: Settings = {
+  collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
+  playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
+};
 
 /** collect = alla väljer (servern äger nedräkningen), judge = tiden ute, reveal = svaret visas. */
 export type Phase = "lobby" | "collect" | "judge" | "reveal" | "finished";
@@ -108,6 +134,18 @@ export interface CollectResult extends CollectAnswer {
  */
 export interface CollectPublic {
   mode: QuestionMode;
+  /** Hur frågan spelas. */
+  format: QuestionFormat;
+  /** Lag eller spelare (enhet) som får svara: lagets tur, eller laget som buzzade. */
+  turn?: string;
+  /** Buzzerfråga: öppet att buzza just nu. */
+  buzzOpen?: boolean;
+  /** Buzzerfråga: enheter som buzzat och svarat fel (utlåsta). */
+  lockedOut?: string[];
+  /** Buzzerfråga: alternativ som redan prövats och var fel (stryks för alla). */
+  tried?: string[];
+  /** Buzzerfråga: deadline för laget som buzzade. */
+  answerDeadline?: number;
   startedAt: number;
   deadline: number;
   answered: string[];
@@ -132,7 +170,7 @@ export interface PublicState {
   players: PlayerPublic[];
   qIndex: number;
   qCount: number;
-  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode;
+  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode; difficulty?: number;
     /** De alternativ som visas på den här frågan, i visningsordning. */
     choices?: string[];
     /** För "order" skickas sakerna blandade och utan värden fram till reveal. */
@@ -166,7 +204,11 @@ export interface HostState extends PublicState {
 export type GameEvent =
   /** En fråga är rättad: poäng utdelade, svaren visas. Stjäl-twisten fyller i stolenFrom/stolen. */
   | { kind: "judged"; correct: string[]; fastestId?: string; at: number; stolenFrom?: string; stolen?: number; stealer?: string }
-  | { kind: "finished"; at: number };
+  | { kind: "finished"; at: number }
+  /** Ett lag buzzade (unit = lag-id eller spelar-id). */
+  | { kind: "buzzed"; unit: string; playerId: string; at: number }
+  /** Laget som buzzade svarade fel eller för långsamt: straff och utlåst. */
+  | { kind: "buzzWrong"; unit: string; delta: number; at: number };
 
 // Klient -> server
 export type ClientMsg =
@@ -175,6 +217,8 @@ export type ClientMsg =
   | { t: "answer"; text: string }
   /** Resultat i en skill-runda (en gång per spelare). order = etiketterna i vald ordning för "Ordna rätt". */
   | { t: "skill"; value?: number; ok?: boolean; order?: string[] }
+  /** Buzza på en buzzerfråga (laget som hinner först får svara). */
+  | { t: "buzz" }
   | { t: "host:start" }
   | { t: "host:next" }
   | { t: "host:adjust"; playerId: string; delta: number }

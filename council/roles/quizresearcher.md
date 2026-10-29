@@ -21,6 +21,7 @@ Du tar fram veckans frågor. Du är noggrann med fakta (Erik faktagranskar allt)
    - **varje fråga är svarsalternativ** (sedan 2026-10-29, inga muntliga svar): `"answer"` plus `"choices"` med rätt svar och **7 felalternativ**
      (Erik väljer på kvällen hur många som visas, upp till 8). Felalternativen ska vara rimliga och av samma sort som svaret
      (årtal nära varandra, karaktärer ur samma serie, items ur samma spel), aldrig något som också kan vara rätt. Håll svaret kort, utan parenteser med extrafakta.
+   - sätt `"difficulty"` 1–5 på varje fråga (1 = alla kan, 3 = medel, 5 = bara nördarna), och sprid svårigheterna så att reglaget har något att välja på
    - lägg gärna in en skill-utmaning ungefär var femte fråga (se `CLAUDE.md`)
    - kort frågetext, entydigt svar
    - **verifiera varje faktasvar mot minst en källa**; lägg källan i ett fält `"source"` per fråga

@@ -165,6 +165,8 @@ export const sfx = {
     chord(Bbmaj7.map((n) => n - 12), 0, 1.0, 0.05);
     epiano(62, 0.02, 0.6, 0.07); epiano(57, 0.22, 0.9, 0.07);
   },
+  /** Buzz: ett varmt, tydligt "dong" (kick + kort ackordstöt), inte en sirén. */
+  buzz: () => { kick(0, 0.2); chord(Dm9.map((n) => n + 12), 0, 0.5, 0.07, 0.008); kalimba(81, 0.02, 0.07); },
   /** Låst svar: en kort, rund "tock". */
   lock: () => { kalimba(67, 0, 0.07, 0.3); breath(0, 0.08, 1800, 900, 0.03, 2, 0); },
   /** Liten träklick (Flick-målen). */

@@ -5,6 +5,7 @@ import { haptic, sfx } from "../lib/sound";
 import { Podium, Scorebar } from "../components";
 import { CollectPlay, rememberAnswer } from "../collect";
 import { CHOICE_LETTERS } from "../../shared/types";
+import { unitOf } from "../../shared/teams";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { CoinToast, EffectTags, FiftyButton, PlayerShop, TeamBoard, TeamPodium } from "../teams";
 
@@ -54,6 +55,7 @@ export default function Play({ code }: { code: string }) {
     lastAt.current = ev?.at ?? -1;
     if (!ev || first) return;
     if (ev.kind === "finished") sfx.crown();
+    if (ev.kind === "buzzed" && unitOf(state.teams, playerId) === ev.unit) { sfx.buzz(); haptic.buzz(); }
     if (ev.kind === "judged") {
       const answered = state.collect?.answered.includes(playerId);
       if (ev.correct.includes(playerId)) { sfx.correct(); haptic.correct(); }
@@ -105,7 +107,14 @@ export default function Play({ code }: { code: string }) {
 
   let status = "";
   if (state.phase === "lobby") status = "Väntar på att hosten startar…";
-  else if (state.phase === "collect") status = skill ? "Skill-utmaning!" : "Välj rätt alternativ!";
+  else if (state.phase === "collect") {
+    const c = state.collect;
+    const mine = c?.turn === unitOf(state.teams, me.id);
+    status = skill ? "Skill-utmaning!"
+      : c?.format === "turn" ? (mine ? "Er tur!" : "Lyssna och vänta")
+      : c?.format === "buzz" ? (c.turn ? (mine ? "Ni buzzade först!" : "Någon buzzade!") : "Buzzerfråga!")
+      : "Välj rätt alternativ!";
+  }
   else if (state.phase === "judge") status = "Tiden är ute";
   else if (state.phase === "reveal") status = "Svaret visas";
 
@@ -142,6 +151,8 @@ export default function Play({ code }: { code: string }) {
           {state.phase !== "lobby" && (
             <p className="muted small" style={{ textAlign: "center" }}>
               {skill ? "Skill-utmaning: bäst får 3 p, tvåa 2 p, trea 1 p."
+                : state.collect?.format === "turn" ? "Lagens tur: rätt ger hela laget poäng, fel går bara vidare. På datorn funkar tangenterna A–H."
+                : state.collect?.format === "buzz" ? `Buzzerfråga: rätt ger hela laget poäng, fel kostar ${state.settings.penalty} p och laget låses ute.`
                 : `Rätt ger poäng och snabbaste rätt får +${state.settings.fastestBonus}. Fel kostar inget. På datorn funkar tangenterna A–H.`}
             </p>
           )}

@@ -16,6 +16,8 @@ function Dashboard() {
   const [choiceCount, setChoiceCount] = useState(DEFAULT_SETTINGS.choiceCount);
   const [collectSeconds, setCollectSeconds] = useState(DEFAULT_SETTINGS.collectSeconds);
   const [hostPlays, setHostPlays] = useState(DEFAULT_SETTINGS.hostPlays);
+  const [playMode, setPlayMode] = useState(DEFAULT_SETTINGS.playMode);
+  const [buzzEvery, setBuzzEvery] = useState(DEFAULT_SETTINGS.buzzEvery);
   const [shuffle, setShuffle] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -39,7 +41,7 @@ function Dashboard() {
     if (!set) return;
     setBusy(true); setErr("");
     try {
-      const { code } = await api.createRoom(set, { choiceCount, collectSeconds, hostPlays }, shuffle);
+      const { code } = await api.createRoom(set, { choiceCount, collectSeconds, hostPlays, playMode, buzzEvery }, shuffle);
       navigate("/host/" + code);
     } catch (e) { setErr((e as Error).message); setBusy(false); }
   }
@@ -70,6 +72,19 @@ function Dashboard() {
 
           <section className="panel stack">
             <h3>Regler</h3>
+            <label>Spelform
+              <select aria-label="Spelform" value={playMode} onChange={(e) => setPlayMode(e.target.value as typeof playMode)}>
+                <option value="turns">Lagens tur (lagen turas om, snacka högt)</option>
+                <option value="all">Alla svarar samtidigt</option>
+              </select>
+            </label>
+            <label>Buzzerfråga
+              <select aria-label="Buzzerfråga" value={buzzEvery} onChange={(e) => setBuzzEvery(+e.target.value)}>
+                <option value={0}>Aldrig</option>
+                {[2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>Var {n}:{n === 2 ? "a" : "e"} fråga</option>)}
+              </select>
+            </label>
+            <p className="muted small">Lagens tur: varje fråga går till ett lag (eller en spelare i alla mot alla) och lagen turas om. Buzzerfråga: först att buzza svarar, fel kostar poäng. Skill-utmaningar spelar alla samtidigt. Svårigheten styr du med ett reglage under kvällen.</p>
             <label>Antal svarsalternativ per fråga
               <select aria-label="Antal svarsalternativ" value={choiceCount} onChange={(e) => setChoiceCount(+e.target.value)}>
                 {Array.from({ length: MAX_SHOWN - MIN_SHOWN + 1 }, (_, i) => i + MIN_SHOWN).map((n) => <option key={n} value={n}>{n} alternativ</option>)}

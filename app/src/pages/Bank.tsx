@@ -69,6 +69,10 @@ function Editor({ initial, onSaved, onCancel }: { initial: QuestionSet; onSaved:
             <input className="a" aria-label={`Svar ${i + 1}`} value={q.answer} disabled={q.mode === "skill"}
               onChange={(e) => upd(i, { answer: e.target.value, ...(q.mode !== "skill" ? { choices: withChoices(e.target.value, wrongOf(q)) } : {}) })}
               placeholder={q.mode === "skill" ? "–" : "Rätt svar"} />
+            <select className="diff" aria-label={`Svårighet ${i + 1}`} value={q.difficulty ?? 3} disabled={q.mode === "skill"} title="Svårighet 1–5"
+              onChange={(e) => upd(i, { difficulty: +e.target.value })}>
+              {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{"●".repeat(n)}</option>)}
+            </select>
             <input type="number" aria-label={`Poäng ${i + 1}`} min={1} value={q.points ?? 1} onChange={(e) => upd(i, { points: +e.target.value })} />
             <button className="btn sm ghost" aria-label={`Ta bort fråga ${i + 1}`} onClick={() => setS({ ...s, questions: s.questions.filter((_, j) => j !== i) })}>✕</button>
             <label className="mode">Rundtyp

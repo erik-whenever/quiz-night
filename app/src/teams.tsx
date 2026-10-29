@@ -165,6 +165,7 @@ export function FiftyButton({ state, me, send }: { state: HostState; me: PlayerP
   const n = state.wallets?.[me.id]?.items.fifty ?? 0;
   const c = state.collect;
   if (!n || state.phase !== "collect" || c?.mode !== "choice" || c.answered.includes(me.id) || state.myRemoved?.length) return null;
+  if (c.format !== "all" && c.turn !== unitOf(state.teams, me.id)) return null;
   if ((state.question?.choices?.length ?? 0) < 3) return null;
   return <button className="btn ghost" onClick={() => send({ t: "use", item: "fifty" })}>Använd 50/50 ({n} kvar)</button>;
 }

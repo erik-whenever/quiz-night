@@ -2,7 +2,7 @@ import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings, WheelState,
 } from "../shared/types";
 import {
-  DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, validChoices,
+  DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, validChoices,
 } from "../shared/types";
 import {
   type CollectServer, collectEnd, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
@@ -70,10 +70,16 @@ interface Persisted {
   /** Fråga -> enheter (lag/spelare) med Dubbla poäng resp. Sabotage. */
   doubleFor: Record<number, string[]>;
   sabotageFor: Record<number, string[]>;
+  /** Omgång -> frågeindex. qIndex är omgången; frågan väljs när omgången startar (svårighetsreglaget). */
+  order: number[];
+  /** Vems tur det är (räknare över enheterna) och hur många alternativfrågor som spelats (för buzzEvery). */
+  turnIdx: number;
+  choiceRounds: number;
 }
 
-const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor"> => ({
+const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor" | "order" | "turnIdx" | "choiceRounds"> => ({
   teamMode: 0, teams: [], wallets: {}, coins: {}, coinLog: [], streak: {}, extraBuyers: [], doubleFor: {}, sabotageFor: {},
+  order: [], turnIdx: 0, choiceRounds: 0,
 });
 
 /**
@@ -98,11 +104,20 @@ function publicSkill(q: Question, seed: number, revealed: boolean) {
   return { ...sk, items: revealed ? correctOrder(sk.items!) : orderShuffle(sk.items!, seed).map((i) => ({ label: i.label })) };
 }
 
+const clamp = (v: unknown, lo: number, hi: number, dflt: number) => {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : dflt;
+};
 const clampSettings = (s: Settings): Settings => ({
-  collectSeconds: Math.max(5, Math.min(180, Math.round(s.collectSeconds))),
-  fastestBonus: Math.max(0, Math.min(5, Math.round(s.fastestBonus))),
-  choiceCount: Math.max(MIN_SHOWN, Math.min(MAX_SHOWN, Math.round(s.choiceCount))),
+  collectSeconds: clamp(s.collectSeconds, 5, 180, DEFAULT_SETTINGS.collectSeconds),
+  fastestBonus: clamp(s.fastestBonus, 0, 5, DEFAULT_SETTINGS.fastestBonus),
+  choiceCount: clamp(s.choiceCount, MIN_SHOWN, MAX_SHOWN, DEFAULT_SETTINGS.choiceCount),
   hostPlays: !!s.hostPlays,
+  playMode: s.playMode === "all" ? "all" : "turns",
+  buzzEvery: clamp(s.buzzEvery, 0, 10, DEFAULT_SETTINGS.buzzEvery),
+  penalty: clamp(s.penalty, 0, 5, DEFAULT_SETTINGS.penalty),
+  buzzAnswerSeconds: clamp(s.buzzAnswerSeconds, 3, 30, DEFAULT_SETTINGS.buzzAnswerSeconds),
+  difficulty: clamp(s.difficulty, 0, 5, DEFAULT_SETTINGS.difficulty),
 });
 
 export class Room implements DurableObject {
@@ -184,12 +199,13 @@ export class Room implements DurableObject {
 
   private view(c: Conn): PublicState | HostState {
     const s = this.s!;
-    const q = s.questions[s.qIndex];
+    const q = s.qIndex >= 0 ? this.cur() : undefined;
     const col = s.collect;
     const base: PublicState = {
       code: s.code, title: s.title, phase: s.phase, players: s.players, qIndex: s.qIndex, qCount: s.questions.length,
       question: q && s.phase !== "lobby"
         ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "choice",
+            ...(q.mode !== "skill" ? { difficulty: difficultyOf(q) } : {}),
             ...(q.mode === "choice" && col?.choices ? { choices: col.choices } : {}),
             ...(q.mode === "skill" && q.skill ? { skill: publicSkill(q, col?.seed ?? 0, s.phase === "reveal") } : {}) } : undefined,
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? (q?.answer || undefined) : undefined,
@@ -222,13 +238,56 @@ export class Room implements DurableObject {
     this.collectTimer = setTimeout(() => { void this.closeCollect(); }, Math.max(0, collectEnd(c) - Date.now()) + 50);
   }
 
+  /** Aktuell fråga (qIndex är omgången, order mappar till frågan). */
+  private cur(): Question {
+    const s = this.s!;
+    return s.questions[s.order[s.qIndex] ?? s.qIndex];
+  }
+
+  /**
+   * Nästa fråga med svårighetsreglaget. 0 = setets ordning. Annars: ligger en skill-utmaning näst på tur i
+   * setets ordning spelas den (så de håller sitt avstånd), annars den ospelade alternativfrågan vars
+   * svårighet ligger närmast målet (vid lika: tidigast i setet).
+   */
+  private pickNext(): number | null {
+    const s = this.s!;
+    const played = new Set(s.order.slice(0, s.qIndex + 1));
+    const left = s.questions.map((_, i) => i).filter((i) => !played.has(i));
+    if (!left.length) return null;
+    const target = s.settings.difficulty;
+    if (!target || s.questions[left[0]].mode === "skill") return left[0];
+    const choice = left.filter((i) => s.questions[i].mode !== "skill");
+    if (!choice.length) return left[0];
+    return choice.reduce((best, i) =>
+      Math.abs(difficultyOf(s.questions[i]) - target) < Math.abs(difficultyOf(s.questions[best]) - target) ? i : best, choice[0]);
+  }
+
+  /** Enheter som kan få turen: lag med någon ansluten spelare, eller anslutna spelare utan lag. */
+  private units(): string[] {
+    const s = this.s!;
+    const on = new Set(s.players.filter((p) => p.connected).map((p) => p.id));
+    if (s.teams.length) return s.teams.filter((t) => t.members.some((id) => on.has(id))).map((t) => t.id);
+    return s.players.filter((p) => p.connected).map((p) => p.id);
+  }
+  private members(unit: string) {
+    const s = this.s!;
+    const t = s.teams.find((x) => x.id === unit);
+    return t ? t.members : [unit];
+  }
+  private unitName(unit: string) {
+    const s = this.s!;
+    return s.teams.find((x) => x.id === unit)?.name ?? s.players.find((p) => p.id === unit)?.name ?? "?";
+  }
+
   /**
    * Öppna aktuell fråga. Alternativfrågor: rätt svar plus (choiceCount − 1) slumpade fel, i slumpad ordning
-   * (50/50-twisten tar bort hälften av felen, Blixt halverar tiden). Skill: slumpfrö och utmaningens egen tid.
+   * (50/50-twisten tar bort hälften av felen, Blixt halverar tiden). Spelformen avgör vem som svarar:
+   * alla samtidigt, ett lags tur (lagen roterar) eller buzzer (var buzzEvery:e alternativfråga).
+   * Skill: slumpfrö och utmaningens egen tid, alla spelar.
    */
   private startQuestion() {
     const s = this.s!;
-    const q = s.questions[s.qIndex];
+    const q = this.cur();
     const twist = activeTwist({ phase: "collect", qIndex: s.qIndex, wheel: s.wheel });
     if (q.mode === "skill" && q.skill) {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0];
@@ -238,8 +297,14 @@ export class Room implements DurableObject {
       let n = Math.min(s.settings.choiceCount - 1, wrong.length);
       if (twist === "fifty") n = Math.max(1, Math.ceil(n / 2));
       const secs = twist === "blitz" ? Math.max(MIN_COLLECT_MS / 1000, s.settings.collectSeconds / 2) : s.settings.collectSeconds;
-      s.collect = startCollect("choice", secs);
+      s.choiceRounds += 1;
+      const buzz = s.settings.buzzEvery > 0 && s.choiceRounds % s.settings.buzzEvery === 0;
+      const units = this.units();
+      const format = buzz && units.length > 1 ? "buzz" : s.settings.playMode === "turns" && units.length > 1 ? "turn" : "all";
+      s.collect = startCollect("choice", secs, Date.now(), undefined, format);
       s.collect.choices = shuffled([q.answer, ...wrong.slice(0, n)]);
+      if (format === "turn") { s.collect.turn = units[s.turnIdx % units.length]; s.turnIdx += 1; }
+      if (format === "buzz") { s.collect.buzzOpen = true; s.collect.lockedOut = []; s.collect.tried = []; }
     }
     // Extra tid och Sabotage: varje spelare får egen deadline.
     const base = s.collect.deadline - s.collect.startedAt;
@@ -249,11 +314,35 @@ export class Room implements DurableObject {
     this.armCollectTimer();
   }
 
+  /** Buzzerfråga: laget som svarat fel (eller för långsamt) får straff, låses ute och de andra kan buzza igen. */
+  private async buzzWrong(answerText?: string) {
+    const s = this.s!;
+    const c = s.collect!;
+    const unit = c.turn!;
+    const d = -s.settings.penalty;
+    for (const id of this.members(unit)) { const p = s.players.find((x) => x.id === id); if (p) p.score += d; this.streakReset(id); }
+    if (answerText && !c.tried!.includes(answerText)) c.tried!.push(answerText);
+    c.lockedOut = [...(c.lockedOut ?? []), unit];
+    c.turn = undefined; c.answerDeadline = undefined;
+    s.lastEvent = { kind: "buzzWrong", unit, delta: d, at: Date.now() };
+    const remaining = this.units().filter((u) => !c.lockedOut!.includes(u));
+    if (!remaining.length || Date.now() >= c.deadline) { this.judgeCollect(); await this.save(); return this.broadcast(); }
+    c.buzzOpen = true;
+    this.armCollectTimer();
+    await this.save();
+    this.broadcast();
+  }
+
   /** Tiden ute, alla har svarat eller hosten stänger. */
   private async closeCollect() {
     const s = this.s!;
     this.clearCollectTimer();
     if (s.phase !== "collect" || !s.collect) return;
+    const c = s.collect;
+    // Buzzer: laget som buzzade hann inte svara = fel. Ingen buzzade i tid = svaret visas.
+    if (c.format === "buzz" && c.turn) return this.buzzWrong();
+    // Lagens tur och buzzer behöver ingen rättning av värden: visa svaret direkt.
+    if (c.format === "turn" || c.format === "buzz") { this.judgeCollect(); await this.save(); return this.broadcast(); }
     s.collect.deadline = Math.min(s.collect.deadline, Date.now());
     s.phase = "judge";
     await this.save();
@@ -267,9 +356,29 @@ export class Room implements DurableObject {
     if (!c || (s.phase !== "collect" && s.phase !== "judge")) return false;
     this.clearCollectTimer();
     if (s.phase === "collect") c.deadline = Math.min(c.deadline, Date.now());
-    const q = s.questions[s.qIndex];
+    const q = this.cur();
     const twist = activeTwist(s);
     const mult = twist === "double" ? 2 : 1;
+    if (c.format === "turn" || c.format === "buzz") {
+      // Laget svarar tillsammans: rätt ger frågans poäng till alla i laget. Fel kostar inget i lagens tur
+      // (frågan går bara vidare); fel buzzersvar har redan dragits i buzzWrong.
+      const pts = (q?.points ?? 1) * mult;
+      c.results = c.answers.map((a) => {
+        const correct = a.text === q.answer;
+        return { ...a, correct, fastest: false, delta: correct ? pts : c.format === "buzz" ? -s.settings.penalty : 0 };
+      });
+      for (const r of c.results) {
+        if (!r.correct) continue;
+        for (const id of this.members(this.unit(r.playerId))) {
+          const p = s.players.find((x) => x.id === id);
+          if (p) p.score += pts * this.multFor(id);
+          this.onCorrect(id);
+        }
+      }
+      s.phase = "reveal";
+      s.lastEvent = { kind: "judged", correct: c.results.filter((r) => r.correct).flatMap((r) => this.members(this.unit(r.playerId))), at: Date.now() };
+      return true;
+    }
     c.results = c.mode === "skill" && q?.skill ? scoreSkill(c, q.skill, mult) : scoreAll(c, (q?.points ?? 1) * mult, s.settings);
     for (const r of c.results) {
       r.delta *= this.multFor(r.playerId);
@@ -398,7 +507,7 @@ export class Room implements DurableObject {
       if (s.phase !== "collect" || !col?.choices) return err("50/50 används under en fråga med alternativ");
       if (col.answers.some((a) => a.playerId === pid)) return err("Du har redan svarat");
       if (col.removed?.[pid]) return err("Du har redan använt 50/50 på den här frågan");
-      const q = s.questions[s.qIndex];
+      const q = this.cur();
       const wrong = col.choices.filter((x) => x !== q.answer);
       if (wrong.length < 2) return err("Det finns för få fel alternativ kvar");
       const r = await this.hubCall("/wallet/use", { name: p.name, item });
@@ -472,14 +581,45 @@ export class Room implements DurableObject {
       if (!s.players.some((x) => x.id === c.playerId)) return;
       const text = String(m.text ?? "").trim();
       if (!col.choices?.includes(text)) return this.send(c, { t: "error", message: "Välj ett av alternativen" });
+      const unit = this.unit(c.playerId);
+      if (col.format === "turn" && col.turn !== unit) return this.send(c, { t: "error", message: `Det är ${this.unitName(col.turn!)}s tur` });
+      if (col.format === "turn" && col.answers.length) return this.send(c, { t: "error", message: "Ditt lag har redan svarat" });
+      if (col.format === "buzz") {
+        if (col.turn !== unit) return this.send(c, { t: "error", message: col.turn ? `${this.unitName(col.turn)} svarar` : "Buzza först" });
+        if (col.answerDeadline && Date.now() > col.answerDeadline + 500) return this.send(c, { t: "error", message: "Tiden är ute" });
+        if (col.tried?.includes(text)) return this.send(c, { t: "error", message: "Det alternativet är redan prövat" });
+      }
       const err = submitAnswer(col, c.playerId, text);
       if (err) return this.send(c, { t: "error", message: err });
-      if (text === s.questions[s.qIndex].answer) markAnswer(col, c.playerId, true);
+      const right = text === this.cur().answer;
+      if (right) markAnswer(col, c.playerId, true);
+      if (col.format === "turn") { this.clearCollectTimer(); this.judgeCollect(); await this.save(); return this.broadcast(); }
+      if (col.format === "buzz") {
+        this.clearCollectTimer();
+        if (right) { this.judgeCollect(); await this.save(); return this.broadcast(); }
+        return this.buzzWrong(text);
+      }
       return this.afterAnswer();
     }
 
+    if (m.t === "buzz") {
+      const col = s.collect;
+      if (!c.playerId || !col || col.format !== "buzz" || s.phase !== "collect" || !col.buzzOpen) return;
+      if (!s.players.some((x) => x.id === c.playerId)) return;
+      const unit = this.unit(c.playerId);
+      if (col.lockedOut?.includes(unit)) return this.send(c, { t: "error", message: "Ert lag är utlåst på den här frågan" });
+      const now = Date.now();
+      const ms = this.timeFor(c.playerId, s.settings.buzzAnswerSeconds * 1000);
+      col.buzzOpen = false; col.turn = unit; col.answerDeadline = now + ms;
+      col.deadline = Math.max(col.deadline, now) + ms; // de andra får tillbaka tiden som gick åt
+      s.lastEvent = { kind: "buzzed", unit, playerId: c.playerId, at: now };
+      this.armCollectTimer();
+      await this.save();
+      return this.broadcast();
+    }
+
     if (m.t === "skill") {
-      const q = s.questions[s.qIndex];
+      const q = this.cur();
       if (!c.playerId || !s.collect || s.collect.mode !== "skill" || !q?.skill) return;
       if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
       if (!s.players.some((x) => x.id === c.playerId)) return;
@@ -497,8 +637,9 @@ export class Room implements DurableObject {
       case "host:next": {
         if (s.phase === "collect" || s.phase === "judge") return this.send(c, { t: "error", message: "Visa svaret först" });
         this.clearCollectTimer();
-        if (s.qIndex + 1 >= s.questions.length) { s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() }; }
-        else { s.qIndex += 1; s.lastEvent = undefined; }
+        const next = this.pickNext();
+        if (next === null) { s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() }; }
+        else { s.qIndex += 1; s.order[s.qIndex] = next; s.lastEvent = undefined; }
         // Twisten gäller bara frågan den snurrades för.
         if (s.wheel && (s.phase === "finished" || s.wheel.forQ < s.qIndex)) s.wheel = null;
         if (s.phase !== "finished") this.startQuestion();
@@ -533,7 +674,8 @@ export class Room implements DurableObject {
       case "host:spin": {
         if (s.phase !== "lobby" && s.phase !== "reveal") return this.send(c, { t: "error", message: "Hjulet kan bara snurras mellan frågorna" });
         if (s.qIndex + 1 >= s.questions.length) return this.send(c, { t: "error", message: "Det finns ingen nästa fråga att snurra för" });
-        const nextSkill = s.questions[s.qIndex + 1]?.mode === "skill";
+        const peek = this.pickNext();
+        const nextSkill = peek !== null && s.questions[peek].mode === "skill";
         s.wheel = spinWheel(s.wheel, s.qIndex + 1, Date.now(), nextSkill ? (t) => SKILL_TWISTS.includes(t) : undefined);
         break;
       }

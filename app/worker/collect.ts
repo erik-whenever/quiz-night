@@ -3,7 +3,7 @@
 // Kommande rundtyper (Kungasatsningen, Bluffrundan m.fl.) lägger till eget innehåll i svaret
 // och en egen poängfunktion, men insamling, sekretess och nedräkning är desamma.
 import type {
-  CollectAnswer, CollectHost, CollectPublic, CollectResult, QuestionMode, Settings,
+  CollectAnswer, CollectHost, CollectPublic, CollectResult, QuestionFormat, QuestionMode, Settings,
 } from "../shared/types";
 import { COLLECT_GRACE_MS, COLLECT_MAX_LEN } from "../shared/types";
 import type { SkillSpec } from "../shared/skill";
@@ -12,6 +12,14 @@ import { orderErrors, orderRight, rankSkill, skillText, validateSkill } from "..
 /** Serverns fulla tillstånd för en insamling (sparas i Durable Object-lagringen). */
 export interface CollectServer {
   mode: QuestionMode;
+  /** Hur frågan spelas: alla samtidigt, ett lags tur, eller buzzer. */
+  format: QuestionFormat;
+  /** Enheten (lag/spelare) som får svara: lagets tur, eller laget som buzzade. */
+  turn?: string;
+  buzzOpen?: boolean;
+  lockedOut?: string[];
+  tried?: string[];
+  answerDeadline?: number;
   /** Alternativ som visas på frågan (slumpat urval ur frågans alla alternativ), i visningsordning. */
   choices?: string[];
   /** 50/50: alternativ som tagits bort för en viss spelare. */
@@ -29,10 +37,11 @@ export interface CollectServer {
 /** Spelarens egen deadline med butikseffekter. */
 export const deadlineFor = (c: CollectServer, playerId: string) => c.deadline + (c.extra?.[playerId] ?? 0);
 /** När insamlingen senast ska stängas (den som har mest extra tid). */
-export const collectEnd = (c: CollectServer) => c.deadline + Math.max(0, ...Object.values(c.extra ?? {}));
+export const collectEnd = (c: CollectServer) =>
+  c.format === "buzz" && c.turn && c.answerDeadline ? c.answerDeadline : c.deadline + Math.max(0, ...Object.values(c.extra ?? {}));
 
-export function startCollect(mode: CollectServer["mode"], seconds: number, now = Date.now(), seed?: number): CollectServer {
-  return { mode, startedAt: now, deadline: now + seconds * 1000, answers: [], correct: [], ...(seed !== undefined ? { seed } : {}) };
+export function startCollect(mode: CollectServer["mode"], seconds: number, now = Date.now(), seed?: number, format: QuestionFormat = "all"): CollectServer {
+  return { mode, format, startedAt: now, deadline: now + seconds * 1000, answers: [], correct: [], ...(seed !== undefined ? { seed } : {}) };
 }
 
 /** Lämna ett skill-resultat. Ordna rätt räknas av servern; övriga typer valideras. */
@@ -96,7 +105,9 @@ export function scoreAll(c: CollectServer, points: number, settings: Settings): 
 /** Det spelare och TV får se. Svarstexter skickas aldrig före rättningen. */
 export function collectPublic(c: CollectServer, revealed: boolean): CollectPublic {
   return {
-    mode: c.mode, startedAt: c.startedAt, deadline: c.deadline,
+    mode: c.mode, format: c.format ?? "all", startedAt: c.startedAt, deadline: c.deadline,
+    ...(c.turn ? { turn: c.turn } : {}),
+    ...(c.format === "buzz" ? { buzzOpen: !!c.buzzOpen, lockedOut: c.lockedOut ?? [], tried: c.tried ?? [], answerDeadline: c.answerDeadline } : {}),
     answered: c.answers.map((a) => a.playerId),
     results: revealed ? c.results : undefined,
     ...(c.seed !== undefined ? { seed: c.seed } : {}),

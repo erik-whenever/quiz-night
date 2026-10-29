@@ -32,6 +32,8 @@ export default function Tv({ code }: { code: string }) {
     const ev = state?.lastEvent;
     if (!ev || ev.at === lastAt.current) return;
     lastAt.current = ev.at;
+    if (ev.kind === "buzzed") sfx.buzz();
+    if (ev.kind === "buzzWrong") sfx.wrong();
     if (ev.kind === "judged") {
       if (ev.correct.length) { sfx.correct(); confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); } else sfx.wrong();
     }
@@ -83,7 +85,8 @@ export default function Tv({ code }: { code: string }) {
         <div className="question-card">
           <TwistBadge state={state} />
           <EffectTags state={state} />
-          <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}</p>
+          <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}
+            {state.question.difficulty ? <span className="diff-pips" aria-label={`Svårighet ${state.question.difficulty} av 5`}> · {"●".repeat(state.question.difficulty)}{"○".repeat(5 - state.question.difficulty)}</span> : null}</p>
           {state.question.imageUrl && <img src={state.question.imageUrl} alt="" style={{ maxHeight: "35vh", borderRadius: 16 }} />}
           <p className="question-text">{state.question.text}</p>
           {state.revealedAnswer && state.question.mode !== "skill" && <div className="answer-reveal">{state.revealedAnswer}</div>}

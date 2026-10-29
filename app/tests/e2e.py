@@ -19,7 +19,9 @@ os.makedirs(SHOTS, exist_ok=True)
 LIB = """
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  // Rummen i testerna spelar "alla samtidigt" utan buzzer om testet inte säger annat.
   const mkRoom = async (body) => {
+    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, ...(body.settings ?? {}) } };
     const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: res.status, ...(await res.json()) };
   };
@@ -333,6 +335,121 @@ TEAMS_JS = js("""
   return out;
 """)
 
+# Lagens tur och buzzer: bara laget med turen svarar, fel buzz kostar poäng och låser ute, timeout = fel.
+MODES_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (i) => ({ id: 'm' + i, text: 'Fråga ' + i, answer: 'R', choices: ['R', 'F1', 'F2', 'F3'] });
+  const room = await mkRoom({ title: 'Tur', settings: { playMode: 'turns', buzzEvery: 3, penalty: 1, choiceCount: 4, buzzAnswerSeconds: 3, collectSeconds: 30 },
+    questions: [q(1), q(2), q(3), q(4), q(5), q(6)] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['A' + tag, 'B' + tag, 'C' + tag]);
+  const [A, B, C] = Object.values(ps);
+  await until(host, (s) => s.players.length === 3);
+  const out = {};
+  const sc = () => [A, B, C].map((p) => score(host.state, p.id));
+  const next = async () => { const i = host.state.qIndex; send(host, { t: 'host:next' }); return until(host, (s) => s.phase === 'collect' && s.qIndex === i + 1); };
+  const reveal = () => until(host, (s) => s.phase === 'reveal');
+  // Fråga 1: A:s tur. B får inte svara. A svarar fel: frågan går bara vidare, inga poäng.
+  send(host, { t: 'host:start' });
+  let st = await until(host, (s) => s.phase === 'collect');
+  out.f1 = { format: st.collect.format, turn: st.collect.turn === A.id };
+  send(B, { t: 'answer', text: 'R' }); await sleep(150);
+  out.notYourTurn = B.errors.slice();
+  send(A, { t: 'answer', text: 'F1' });
+  await reveal();
+  out.afterWrongTurn = sc();
+  // Fråga 2: B:s tur, rätt
+  st = await next();
+  out.f2turn = st.collect.turn === B.id;
+  send(B, { t: 'answer', text: 'R' });
+  await reveal();
+  // Fråga 3: buzzer. A buzzar först, C:s buzz räknas inte. A fel: −1, utlåst, F1 struken. C buzzar och svarar rätt.
+  st = await next();
+  out.f3 = { format: st.collect.format, open: st.collect.buzzOpen };
+  send(A, { t: 'buzz' }); await sleep(20); send(C, { t: 'buzz' });
+  st = await until(host, (s) => !!s.collect.turn);
+  out.firstBuzz = st.collect.turn === A.id;
+  await sleep(150);
+  send(C, { t: 'answer', text: 'R' }); await sleep(150);
+  out.otherAnswersDuringBuzz = C.errors.slice();
+  send(A, { t: 'answer', text: 'F1' });
+  st = await until(host, (s) => s.collect?.buzzOpen && s.collect.lockedOut.length === 1);
+  out.lockedA = st.collect.lockedOut[0] === A.id && st.collect.tried.includes('F1');
+  send(A, { t: 'buzz' }); await sleep(150);
+  out.lockedErr = A.errors.slice();
+  send(C, { t: 'buzz' });
+  await until(host, (s) => s.collect?.turn === C.id);
+  send(C, { t: 'answer', text: 'F1' }); await sleep(150);
+  out.triedErr = C.errors.slice(-1);
+  send(C, { t: 'answer', text: 'R' });
+  await reveal();
+  out.afterBuzz = sc();
+  // Fråga 4: C:s tur, ingen svarar, värden visar svaret
+  st = await next();
+  out.f4turn = st.collect.turn === C.id;
+  send(host, { t: 'host:judge' });
+  await reveal();
+  // Fråga 5 (A:s tur) och 6 (buzzer): B buzzar men hinner inte svara inom 3 s = fel
+  await next(); send(host, { t: 'host:judge' }); await reveal();
+  st = await next();
+  out.f6 = st.collect.format;
+  send(B, { t: 'buzz' });
+  await until(host, (s) => s.collect?.turn === B.id);
+  st = await until(host, (s) => s.collect?.lockedOut?.includes(B.id), 6000);
+  out.timeoutWrong = st.lastEvent.kind === 'buzzWrong' && st.collect.buzzOpen;
+  out.final = sc();
+  closeAll(host, A, B, C);
+  // Lag: hela laget får poängen när en i laget svarar rätt
+  const room2 = await mkRoom({ title: 'Lagtur', settings: { playMode: 'turns', buzzEvery: 0 }, questions: [q(1), q(2)] });
+  const h2 = await connect(room2.code, 'host', room2.hostKey);
+  const ps2 = await players(room2.code, ['P' + tag, 'Q' + tag, 'R' + tag, 'S' + tag]);
+  await until(h2, (s) => s.players.length === 4);
+  send(h2, { t: 'host:teams', mode: 2 });
+  await until(h2, (s) => s.teams.length === 2);
+  send(h2, { t: 'host:start' });
+  st = await until(h2, (s) => s.phase === 'collect');
+  const turnTeam = st.teams.find((t) => t.id === st.collect.turn);
+  const inTeam = Object.values(ps2).filter((p) => turnTeam.members.includes(p.id));
+  const outTeam = Object.values(ps2).filter((p) => !turnTeam.members.includes(p.id));
+  send(outTeam[0], { t: 'answer', text: 'R' }); await sleep(150);
+  out.teamNotTurn = outTeam[0].errors.length === 1;
+  send(inTeam[0], { t: 'answer', text: 'R' });
+  st = await until(h2, (s) => s.phase === 'reveal');
+  out.teamScores = { in: inTeam.map((p) => score(st, p.id)), out: outTeam.map((p) => score(st, p.id)) };
+  closeAll(h2, ...Object.values(ps2));
+  return out;
+""")
+
+# Svårighetsreglaget: nästa fråga väljs närmast målet, skill-utmaningar håller sin plats, ändras i realtid.
+DIFF_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (id, d) => ({ id, text: id, answer: 'R', choices: ['R', 'F'], difficulty: d });
+  const room = await mkRoom({ title: 'Svårt', settings: { difficulty: 5 }, questions: [
+    q('d1', 1), q('d5', 5), { id: 'sk', text: 'sk', answer: '', mode: 'skill', skill: { kind: 'aim' } }, q('d3', 3), q('d2', 2), q('d4', 4)] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['X' + tag]);
+  await until(host, (s) => s.players.length === 1);
+  const seen = [];
+  const step = async (diff) => {
+    if (diff !== undefined) { send(host, { t: 'host:settings', settings: { difficulty: diff } }); await until(host, (s) => s.settings.difficulty === diff); }
+    const i = host.state.qIndex;
+    send(host, { t: i < 0 ? 'host:start' : 'host:next' });
+    const st = await until(host, (s) => s.phase === 'collect' && s.qIndex === i + 1);
+    seen.push(st.question.text + (st.question.difficulty ? ':' + st.question.difficulty : ''));
+    send(host, { t: 'host:judge' });
+    await until(host, (s) => s.phase === 'reveal');
+  };
+  await step();     // mål 5 → d5
+  await step(1);    // mål 1 → d1
+  await step();     // skill-utmaningen står näst på tur i setet
+  await step(0);    // setets ordning → d3
+  await step(4);    // → d4
+  await step();     // → d2
+  closeAll(host, ...Object.values(ps));
+  return { seen };
+""")
+
+# Skill-rundor på protokollnivå: frö, validering, rankning och att ordningen inte läcker.
 SKILL_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -492,7 +609,7 @@ def create_room(host, title, questions, settings):
     return host.evaluate("""async ([pin, body]) => {
       const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""",
-        [PIN, {"title": title, "questions": questions, "settings": settings}])
+        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, **settings}}])
 
 
 def join(page, code, name):
@@ -529,6 +646,8 @@ def main():
         host.get_by_label("Host-PIN").fill(PIN)
         host.get_by_role("button", name="Lås upp").click()
         expect(host.get_by_role("heading", name="Starta kvällens quiz")).to_be_visible()
+        host.get_by_label("Spelform").select_option("all")
+        host.get_by_label("Buzzerfråga").select_option("0")
         host.get_by_label("Antal svarsalternativ").select_option("4")
         expect(host.get_by_label("Jag spelar själv (dölj facit för mig)")).to_be_checked()
         host.locator("label", has_text="Premiär: Blandat").get_by_role("radio").check()
@@ -745,6 +864,53 @@ def main():
         expect(p3.get_by_text("Rätt! +2 p")).to_be_visible()
         tv.wait_for_timeout(700)
         shot(tv, "16-tv-8-alternativ")
+        assert not page_errors, f"Sidfel: {page_errors}"
+
+        # Lagens tur och buzzer i webbläsaren (två spelare = två "lag"), plus svårighetsreglaget
+        bdata = create_room(host, "Tur och buzz", [
+            {"id": "t1", "text": "Vilken färg har en banan?", "answer": "Gul", "choices": ["Gul", "Blå", "Röd", "Lila"], "difficulty": 1},
+            {"id": "t2", "text": "Vilken planet är störst?", "answer": "Jupiter", "choices": ["Jupiter", "Mars", "Venus", "Saturnus"], "difficulty": 2},
+            {"id": "t3", "text": "Svår reservfråga", "answer": "X", "choices": ["X", "Y"], "difficulty": 5}],
+            {"playMode": "turns", "buzzEvery": 2, "penalty": 1, "hostPlays": True})
+        bcode = bdata["code"]
+        bt = bcode.lower()
+        host.goto(f"{BASE}/host/{bcode}")
+        tv.goto(f"{BASE}/tv/{bcode}")
+        join(p1, bcode, "Erik" + bt)
+        join(p2, bcode, "Tobbe" + bt)
+        host.get_by_role("button", name="Starta första frågan").click()
+        expect(tv.get_by_text("svarar, snacka högt")).to_be_visible()
+        expect(p2.get_by_text("har turen")).to_be_visible()
+        expect(choices_of(p1)).to_have_count(4)
+        shot(tv, "60-tv-lagens-tur")
+        shot(p2, "61-spelare-vantar")
+        shot(p1, "62-spelare-er-tur")
+        pick(p1, "Gul")
+        expect(tv.locator(".answer-reveal")).to_have_text("Gul")
+        # Värden drar reglaget mitt i kvällen
+        host.get_by_label("Svårighet").fill("5")
+        expect(host.locator(".difficulty strong")).to_have_text("Riktigt svår")
+        host.get_by_label("Svårighet").fill("0")
+        expect(host.locator(".difficulty strong")).to_have_text("Setets ordning")
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        # Fråga 2 är buzzer: båda kan buzza, Tobbe hinner först och svarar fel, Erik buzzar och tar den
+        expect(p1.get_by_role("button", name="Buzza")).to_be_visible()
+        expect(tv.get_by_text("Först att buzza får svara")).to_be_visible()
+        shot(tv, "63-tv-buzzer")
+        shot(p1, "64-spelare-buzzer")
+        p2.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
+        expect(choices_of(p2)).to_have_count(4)
+        expect(p1.get_by_text("svarar…")).to_be_visible()
+        shot(tv, "65-tv-buzzat")
+        pick_wrong(p2, "Jupiter")
+        expect(p2.get_by_text("utlåsta")).to_be_visible()
+        p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
+        expect(p1.locator(".choice-btn.gone")).to_have_count(1)
+        pick(p1, "Jupiter")
+        expect(tv.locator(".answer-reveal")).to_have_text("Jupiter")
+        expect(tv.locator(".chip", has_text="Tobbe" + bt)).to_contain_text("-1")
+        tv.wait_for_timeout(500)
+        shot(tv, "66-tv-buzz-facit")
         assert not page_errors, f"Sidfel: {page_errors}"
 
         # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
@@ -991,6 +1157,22 @@ def main():
         assert sorted(r[1] for r in tm["results"]) == [0, 0, 2, 2], f"Kvällens resultat ska vara lagets snitt (4/2 = 2): {tm['results']}"
         assert all(tm["paid"].values()), f"Mynten betalades inte ut exakt en gång: {tm['paid']}"
         assert tm["winnerBonus"] == 1 + 3, f"Vinnaren ska få 1 (rätt svar) + 3 (vinst): {tm['winnerBonus']}"
+
+        mo = raw.evaluate(MODES_JS, [PIN])
+        print("Lagens tur och buzzer:", mo)
+        assert mo["f1"] == {"format": "turn", "turn": True} and mo["f2turn"] and mo["f4turn"], f"Turordningen fungerar inte: {mo}"
+        assert mo["notYourTurn"] and "tur" in mo["notYourTurn"][0], f"Fel lag fick svara: {mo['notYourTurn']}"
+        assert mo["afterWrongTurn"] == [0, 0, 0], f"Fel svar på lagets tur ska bara gå vidare: {mo['afterWrongTurn']}"
+        assert mo["f3"] == {"format": "buzz", "open": True} and mo["firstBuzz"], f"Buzzerfrågan fungerar inte: {mo}"
+        assert mo["otherAnswersDuringBuzz"] and mo["lockedA"] and mo["lockedErr"] == ["Ert lag är utlåst på den här frågan"], f"Buzz-låsning fel: {mo}"
+        assert mo["triedErr"] == ["Det alternativet är redan prövat"], f"Prövat alternativ gick att välja igen: {mo['triedErr']}"
+        assert mo["afterBuzz"] == [-1, 1, 1], f"Poäng efter buzz fel (A −1, B 1, C 1): {mo['afterBuzz']}"
+        assert mo["f6"] == "buzz" and mo["timeoutWrong"] and mo["final"] == [-1, 0, 1], f"Buzz-timeout ska vara fel: {mo}"
+        assert mo["teamNotTurn"] and mo["teamScores"] == {"in": [1, 1], "out": [0, 0]}, f"Laget ska få poängen tillsammans: {mo}"
+
+        df = raw.evaluate(DIFF_JS, [PIN])
+        print("Svårighet:", df)
+        assert df["seen"] == ["d5:5", "d1:1", "sk", "d3:3", "d4:4", "d2:2"], f"Svårighetsreglaget väljer fel fråga: {df['seen']}"
 
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)
