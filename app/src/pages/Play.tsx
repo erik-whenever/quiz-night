@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Crown, Link } from "../App";
 import { useRoom } from "../lib/useRoom";
 import { haptic, sfx } from "../lib/sound";
-import { Podium, Scorebar } from "../components";
+import { NextBar, Podium, QuestionIntro, Scorebar } from "../components";
 import { CollectPlay, rememberAnswer } from "../collect";
 import { CHOICE_LETTERS } from "../../shared/types";
 import { unitOf } from "../../shared/teams";
@@ -120,6 +120,7 @@ export default function Play({ code }: { code: string }) {
 
   return (
     <main className={`narrow stack ${flash}`} key={ev?.at} style={{ minHeight: "100dvh" }}>
+      <QuestionIntro state={state} serverNow={serverNow} />
       <div className="spread">
         <span className="chip" style={{ "--c": me.color } as React.CSSProperties}>
           <span className="dot">{me.name.slice(0, 2).toUpperCase()}</span>{me.name}<span className="pts">{me.score}</span>
@@ -148,6 +149,7 @@ export default function Play({ code }: { code: string }) {
             <CollectPlay key={state.qIndex} state={withMyDeadline(state, me.id)} me={me} send={send} serverNow={serverNow} />
           )}
           <FiftyButton state={state} me={me} send={send} />
+          <NextBar state={state} serverNow={serverNow} />
           {state.phase !== "lobby" && (
             <p className="muted small" style={{ textAlign: "center" }}>
               {skill ? "Skill-utmaning: bäst får 3 p, tvåa 2 p, trea 1 p."

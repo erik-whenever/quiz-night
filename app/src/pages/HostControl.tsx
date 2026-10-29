@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, TopBar } from "../App";
 import { api, hostKeyFor } from "../lib/api";
 import { useRoom } from "../lib/useRoom";
-import { Podium } from "../components";
+import { NextBar, Podium } from "../components";
 import { CollectHost } from "../collect";
 import type { ClientMsg, HostState } from "../../shared/types";
 import { DIFFICULTY_LABELS, MAX_SHOWN, MIN_SHOWN, effectiveChoiceRules } from "../../shared/types";
@@ -43,6 +43,35 @@ export function DifficultySlider({ state, send }: { state: HostState; send: (m: 
   );
 }
 
+/**
+ * Autoplay i hostkontrollen: nedräkning till nästa steg, pausa/fortsätt och hoppa fram.
+ * Utan autoplay (avstängt i reglerna) blir "Nästa fråga" den stora knappen som förut.
+ */
+function AutoControls({ state, send, serverNow }: { state: HostState; send: (m: ClientMsg) => void; serverNow: () => number }) {
+  const auto = state.settings.autoplay;
+  const last = state.qIndex + 1 >= state.qCount;
+  const between = state.phase === "reveal";
+  const asking = state.phase === "collect" || state.phase === "judge";
+  return (
+    <div className="stack auto-controls" style={{ gap: 10 }}>
+      {auto && <NextBar state={state} serverNow={serverNow} />}
+      <div className="row">
+        {auto && (between || asking) && (
+          <button className={`btn ${state.paused ? "primary" : "ghost"}`} onClick={() => send({ t: "host:pause", paused: !state.paused })}>
+            {state.paused ? "▶ Fortsätt" : "⏸ Pausa"}
+          </button>
+        )}
+        {between && (
+          <button className={`btn ${auto && !state.paused ? "ghost" : "primary big"}`} onClick={() => send({ t: "host:next" })}>
+            {auto && !state.paused ? (last ? "Pallen direkt (N)" : "Nästa direkt (N)") : last ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
+          </button>
+        )}
+      </div>
+      {auto && asking && <p className="muted small">Svaret visas automatiskt när tiden är ute eller alla har svarat.</p>}
+    </div>
+  );
+}
+
 /** Kvällens regler. Kan ändras när som helst; antal alternativ och svarstid gäller från nästa fråga. */
 export function RuleSettings({ state, send }: { state: HostState; send: (m: ClientMsg) => void }) {
   const s = state.settings;
@@ -50,6 +79,16 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
   const set = (settings: Partial<HostState["settings"]>) => send({ t: "host:settings", settings });
   return (
     <div className="stack" style={{ gap: 10 }}>
+      <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <input type="checkbox" style={{ width: "auto" }} checked={s.autoplay} onChange={(e) => set({ autoplay: e.target.checked })} />
+        Kör automatiskt (svaret visas och nästa fråga startar av sig själv)
+      </label>
+      {s.autoplay && (
+        <label>Sekunder som svaret visas
+          <input type="number" aria-label="Sekunder som svaret visas" min={3} max={30} key={`rs${s.revealSeconds}`} defaultValue={s.revealSeconds}
+            onBlur={(e) => +e.target.value !== s.revealSeconds && set({ revealSeconds: +e.target.value })} />
+        </label>
+      )}
       <label>Spelform
         <select aria-label="Spelform" value={s.playMode} onChange={(e) => set({ playMode: e.target.value as HostState["settings"]["playMode"] })}>
           <option value="turns">Lagens tur (lagen turas om)</option>
@@ -168,11 +207,7 @@ function Control({ code }: { code: string }) {
                 <CollectHost state={state} send={send} serverNow={serverNow} />
                 <HostWheel state={state} send={send} serverNow={serverNow} />
                 <DifficultySlider state={state} send={send} />
-                {state.phase === "reveal" && (
-                  <button className="btn primary big" onClick={() => send({ t: "host:next" })}>
-                    {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
-                  </button>
-                )}
+                <AutoControls state={state} send={send} serverNow={serverNow} />
               </>
             )}
 

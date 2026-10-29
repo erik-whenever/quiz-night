@@ -407,7 +407,7 @@ function HostProgress({ state, send, serverNow }: { state: HostState; send: Send
       </div>
       {c.format === "all" ? <AnsweredGrid state={state} /> : <FormatBanner state={state} serverNow={serverNow} size={64} />}
       <p className="muted small">Du spelar själv, så du ser inte facit. Rättningen sker automatiskt.</p>
-      <button className="btn primary big" onClick={() => send({ t: "host:judge" })}>{skill ? "Visa resultaten (V)" : "Visa svaret (V)"}</button>
+      <button className={`btn ${state.settings.autoplay ? "ghost" : "primary big"}`} onClick={() => send({ t: "host:judge" })}>{skill ? "Visa resultaten nu (V)" : "Visa svaret nu (V)"}</button>
     </div>
   );
 }
@@ -464,7 +464,7 @@ export function CollectHost({ state, send, serverNow }: { state: HostState; send
       <p className="muted small">
         Rätt ger {state.question?.points ?? 1} p, snabbaste rätt får +{state.settings.fastestBonus} i bonus. Fel kostar inget.
       </p>
-      <button className="btn primary big" onClick={() => send({ t: "host:judge" })}>Visa svaret (V)</button>
+      <button className={`btn ${state.settings.autoplay ? "ghost" : "primary big"}`} onClick={() => send({ t: "host:judge" })}>Visa svaret nu (V)</button>
     </div>
   );
 }

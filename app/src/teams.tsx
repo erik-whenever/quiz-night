@@ -18,11 +18,11 @@ export function TeamBoard({ state, highlight, compact }: { state: HostState; hig
           <span className="team-members">
             {members.map((m) => (
               <span key={m.id} className={`mini${m.connected ? "" : " off"}${state.collect?.answered.includes(m.id) && state.phase === "collect" ? " active" : ""}`} style={{ "--p": m.color } as React.CSSProperties}>
-                <span className="dot">{initials(m.name)}</span>{m.name} <b>{m.score}</b>
+                <span className="dot">{initials(m.name)}</span>{m.name} <b className="bump" key={m.score}>{m.score}</b>
               </span>
             ))}
           </span>
-          <span className="team-score" aria-label="Lagets snitt">{score.toLocaleString("sv-SE")}</span>
+          <span className="team-score bump" key={score} aria-label="Lagets snitt">{score.toLocaleString("sv-SE")}</span>
         </li>
       ))}
     </ol>

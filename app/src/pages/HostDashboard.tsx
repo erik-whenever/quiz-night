@@ -18,6 +18,7 @@ function Dashboard() {
   const [hostPlays, setHostPlays] = useState(DEFAULT_SETTINGS.hostPlays);
   const [playMode, setPlayMode] = useState(DEFAULT_SETTINGS.playMode);
   const [buzzEvery, setBuzzEvery] = useState(DEFAULT_SETTINGS.buzzEvery);
+  const [autoplay, setAutoplay] = useState(DEFAULT_SETTINGS.autoplay);
   const [shuffle, setShuffle] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -41,7 +42,7 @@ function Dashboard() {
     if (!set) return;
     setBusy(true); setErr("");
     try {
-      const { code } = await api.createRoom(set, { choiceCount, collectSeconds, hostPlays, playMode, buzzEvery }, shuffle);
+      const { code } = await api.createRoom(set, { choiceCount, collectSeconds, hostPlays, playMode, buzzEvery, autoplay }, shuffle);
       navigate("/host/" + code);
     } catch (e) { setErr((e as Error).message); setBusy(false); }
   }
@@ -72,6 +73,10 @@ function Dashboard() {
 
           <section className="panel stack">
             <h3>Regler</h3>
+            <label style={{ flexDirection: "row", alignItems: "center" }}>
+              <input type="checkbox" checked={autoplay} onChange={(e) => setAutoplay(e.target.checked)} style={{ width: "auto" }} />
+              Kör automatiskt (du behöver inte klicka vidare)
+            </label>
             <label>Spelform
               <select aria-label="Spelform" value={playMode} onChange={(e) => setPlayMode(e.target.value as typeof playMode)}>
                 <option value="turns">Lagens tur (lagen turas om)</option>

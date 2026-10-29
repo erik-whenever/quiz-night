@@ -448,3 +448,41 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .diff-left li.empty { opacity: 0.4; }
 .diff-left .pips { color: var(--signal); font-size: 0.55rem; letter-spacing: 1px; }
 .diff-left .n { font: 800 1rem var(--display); }
+
+/* Autoplay: remsan som visar när nästa steg sker */
+.next-bar { display: grid; gap: 6px; justify-items: center; width: min(520px, 100%); margin: 6px auto 0; }
+.next-bar.paused { color: var(--signal); font-weight: 700; }
+.next-label { font: 700 0.95rem var(--display); color: var(--mist); letter-spacing: 0.01em; }
+.next-track { width: 100%; height: 6px; border-radius: 999px; background: rgba(170, 179, 255, 0.18); overflow: hidden; }
+.next-fill { display: block; height: 100%; border-radius: inherit; transform-origin: left center;
+  background: linear-gradient(90deg, var(--signal), #ffe9a3); box-shadow: 0 0 12px rgba(255, 210, 63, 0.6); }
+.next-bar.judge .next-fill { background: linear-gradient(90deg, var(--go), #b8ffe0); }
+
+/* Frågeintro: kortet glider in, håller en kort stund och tonar bort */
+.q-intro { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: auto;
+  background: radial-gradient(circle at 50% 45%, rgba(27, 40, 168, 0.55), rgba(7, 11, 58, 0.85));
+  animation: q-intro-bg 1.4s ease both; }
+.q-intro-card { display: grid; justify-items: center; gap: 8px; padding: 22px 34px; border-radius: 24px; background: var(--signal); color: var(--studio-ink);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45); animation: q-intro-card 1.4s cubic-bezier(.2, 1.4, .4, 1) both; }
+.q-intro-n { font: 800 clamp(2rem, 9vw, 3rem) var(--display); letter-spacing: -0.02em; }
+.q-intro.big .q-intro-n { font-size: clamp(3rem, 8vw, 6rem); }
+.q-intro-cat { font: 700 1.1rem var(--display); opacity: 0.8; }
+.q-intro-pips { letter-spacing: 3px; font-size: 1.1rem; }
+@keyframes q-intro-bg { 0% { opacity: 0; } 15%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes q-intro-card { 0% { transform: scale(0.6) rotate(-4deg); opacity: 0; } 22% { transform: scale(1.04) rotate(1deg); opacity: 1; }
+  32%, 78% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(1.12) translateY(-10px); opacity: 0; } }
+
+/* Poäng som ändras studsar till */
+.chip .pts, .bump { display: inline-block; animation: bump 520ms cubic-bezier(.2, 1.8, .4, 1); }
+@keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.45); color: var(--signal); } 100% { transform: scale(1); } }
+
+/* Svar och resultat glider in mjukt */
+.answer-reveal, .locked-card, .spectator, .collect-results li { animation-duration: 420ms; }
+.question-card { animation: card-in 420ms cubic-bezier(.2, 1.2, .4, 1) both; }
+@keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) {
+  .q-intro, .q-intro-card, .chip .pts, .bump, .question-card { animation: none; }
+}
+.tv .next-bar { width: min(720px, 100%); }
+.tv .next-label { font-size: 1.15rem; }
+.tv .next-track { height: 8px; }

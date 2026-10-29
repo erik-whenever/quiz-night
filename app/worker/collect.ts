@@ -30,6 +30,7 @@ export interface CollectServer {
   correct: string[]; // playerIds som hosten markerat som rätt
   results?: CollectResult[]; // sätts vid rättning
   seed?: number; // skill-rundor
+  introUntil?: number;
   /** Butikseffekter: ms till eller från deadline per spelare (Extra tid +, Sabotage −). */
   extra?: Record<string, number>;
 }
@@ -79,7 +80,7 @@ export function submitAnswer(c: CollectServer, playerId: string, raw: unknown, n
   if (c.answers.some((a) => a.playerId === playerId)) return "Du har redan låst ditt svar";
   const text = typeof raw === "string" ? raw.replace(/\s+/g, " ").trim().slice(0, COLLECT_MAX_LEN) : "";
   if (!text) return "Skriv ett svar först";
-  c.answers.push({ playerId, text, at: now, ms: now - c.startedAt });
+  c.answers.push({ playerId, text, at: now, ms: Math.max(0, now - (c.introUntil ?? c.startedAt)) });
   return null;
 }
 
@@ -106,6 +107,7 @@ export function scoreAll(c: CollectServer, points: number, settings: Settings): 
 export function collectPublic(c: CollectServer, revealed: boolean): CollectPublic {
   return {
     mode: c.mode, format: c.format ?? "all", startedAt: c.startedAt, deadline: c.deadline,
+    ...(c.introUntil ? { introUntil: c.introUntil } : {}),
     ...(c.turn ? { turn: c.turn } : {}),
     ...(c.format === "buzz" ? { buzzOpen: !!c.buzzOpen, lockedOut: c.lockedOut ?? [], tried: c.tried ?? [], answerDeadline: c.answerDeadline } : {}),
     answered: c.answers.map((a) => a.playerId),

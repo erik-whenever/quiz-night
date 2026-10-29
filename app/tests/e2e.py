@@ -21,7 +21,7 @@ LIB = """
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   // Rummen i testerna spelar "alla samtidigt" utan buzzer om testet inte säger annat.
   const mkRoom = async (body) => {
-    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, ...(body.settings ?? {}) } };
+    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, ...(body.settings ?? {}) } };
     const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: res.status, ...(await res.json()) };
   };
@@ -37,11 +37,18 @@ LIB = """
     };
     ws.onopen = () => resolve(c);
   });
-  const until = (c, pred, ms = 4000) => new Promise((resolve, reject) => {
+  const untilRaw = (c, pred, ms = 4000) => new Promise((resolve, reject) => {
     if (c.state && pred(c.state)) return resolve(c.state);
     const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
     c.waiters.push(() => (c.state && pred(c.state)) ? (clearTimeout(t), resolve(c.state), true) : false);
   });
+  // Svar och buzz under frågeintrot ignoreras av servern: när en fråga just öppnats väntar vi ut introt.
+  const until = async (c, pred, ms = 4000) => {
+    const st = await untilRaw(c, pred, ms);
+    const u = st?.phase === 'collect' ? st.collect?.introUntil : undefined;
+    if (u && u > Date.now() - 2000) await sleep(Math.max(0, u - Date.now()) + 60);
+    return st;
+  };
   const send = (c, m) => c.ws.send(JSON.stringify(m));
   const players = async (code, names) => {
     const ps = {};
@@ -217,7 +224,7 @@ WHEEL_JS = js("""
   // Blixt: halverad svarstid
   await spinFor('blitz');
   st = await next();
-  out.blitzMs = st.collect.deadline - st.collect.startedAt;
+  out.blitzMs = st.collect.deadline - st.collect.introUntil;
   await judge();
   // Stjäl: B svarar snabbast rätt och tar frågans poäng från ledaren A
   await spinFor('steal');
@@ -230,7 +237,7 @@ WHEEL_JS = js("""
   // Nit: inget särskilt, normal tid
   await spinFor('none');
   st = await next();
-  out.normalMs = st.collect.deadline - st.collect.startedAt;
+  out.normalMs = st.collect.deadline - st.collect.introUntil;
   out.noneShown = st.question.choices.length;
   await judge();
   // Före skill-utmaningen: bara Dubbla poäng, Stjäl eller Nit
@@ -420,6 +427,46 @@ MODES_JS = js("""
   return out;
 """)
 
+# Autoplay: svaret visas av sig själv när alla svarat, nästa fråga startar efter revealSeconds, paus stoppar, sista ger pallen.
+AUTO_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (i) => ({ id: 'a' + i, text: 'Fråga ' + i, answer: 'R', choices: ['R', 'F'] });
+  const room = await mkRoom({ title: 'Auto', settings: { autoplay: true, revealSeconds: 3, collectSeconds: 30 }, questions: [q(1), q(2), q(3)] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['A' + tag]);
+  const [A] = Object.values(ps);
+  const out = {};
+  send(host, { t: 'host:start' });
+  let st = await untilRaw(host, (s) => s.phase === 'collect');
+  out.intro = st.collect.introUntil - st.collect.startedAt;
+  send(A, { t: 'answer', text: 'R' }); await sleep(150);       // under introt: ignoreras
+  out.answeredDuringIntro = host.state.collect.answered.length;
+  await sleep(Math.max(0, st.collect.introUntil - Date.now()) + 60);
+  const t0 = Date.now();
+  send(A, { t: 'answer', text: 'R' });
+  st = await untilRaw(host, (s) => s.phase === 'reveal', 5000);
+  out.revealAfterMs = Date.now() - t0;                          // judge-paus ~1,3 s
+  out.nextAtSet = typeof st.nextAt === 'number';
+  st = await untilRaw(host, (s) => s.phase === 'collect' && s.qIndex === 1, 6000);
+  out.autoNext = Date.now() - t0;
+  // Paus under fråga 2: tiden går ut men svaret visas inte förrän värden fortsätter
+  send(host, { t: 'host:pause', paused: true });
+  await untilRaw(host, (s) => s.paused);
+  send(host, { t: 'host:close' });
+  await untilRaw(host, (s) => s.phase === 'judge');
+  await sleep(2000);
+  out.pausedPhase = host.state.phase;
+  out.pausedNextAt = host.state.nextAt ?? null;
+  send(host, { t: 'host:pause', paused: false });
+  await untilRaw(host, (s) => s.phase === 'reveal', 4000);
+  await untilRaw(host, (s) => s.phase === 'collect' && s.qIndex === 2, 6000);
+  send(host, { t: 'host:close' });
+  st = await untilRaw(host, (s) => s.phase === 'finished', 8000);
+  out.finished = st.phase;
+  closeAll(host, A);
+  return out;
+""")
+
 # Svårighetsreglaget: nästa fråga väljs närmast målet, skill-utmaningar håller sin plats, ändras i realtid.
 DIFF_JS = js("""
   const tag = Math.random().toString(36).slice(2, 6);
@@ -438,7 +485,7 @@ DIFF_JS = js("""
     send(host, { t: i < 0 ? 'host:start' : 'host:next' });
     const st = await until(host, (s) => s.phase === 'collect' && s.qIndex === i + 1);
     seen.push(st.question.text + (st.question.difficulty ? ':' + st.question.difficulty : ''));
-    if (st.question.mode !== 'skill') tuning.push([st.settings.difficulty, st.question.choices.length, Math.round((st.collect.deadline - st.collect.startedAt) / 1000)]);
+    if (st.question.mode !== 'skill') tuning.push([st.settings.difficulty, st.question.choices.length, Math.round((st.collect.deadline - (st.collect.introUntil ?? st.collect.startedAt)) / 1000)]);
     send(host, { t: 'host:judge' });
     await until(host, (s) => s.phase === 'reveal');
   };
@@ -478,7 +525,7 @@ SKILL_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false }, questions: [
+    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false }, questions: [
       { id: 'k1', text: 'Flick', answer: '', mode: 'skill', skill: { kind: 'aim' } },
       { id: 'k2', text: 'Ordna', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'Z', value: 3 }, { label: 'X', value: 1 }, { label: 'Y', value: 2 }] } },
       { id: 'k3', text: 'Trasig', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'A', value: 1 }] } } ] }) });
@@ -633,7 +680,7 @@ def create_room(host, title, questions, settings):
     return host.evaluate("""async ([pin, body]) => {
       const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""",
-        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, **settings}}])
+        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, **settings}}])
 
 
 def join(page, code, name):
@@ -670,6 +717,7 @@ def main():
         host.get_by_label("Host-PIN").fill(PIN)
         host.get_by_role("button", name="Lås upp").click()
         expect(host.get_by_role("heading", name="Starta kvällens quiz")).to_be_visible()
+        host.get_by_label("Kör automatiskt (du behöver inte klicka vidare)").uncheck()
         host.get_by_label("Spelform").select_option("all")
         host.get_by_label("Buzzerfråga").select_option("0")
         host.get_by_label("Antal svarsalternativ").select_option("4")
@@ -713,7 +761,7 @@ def main():
         pick(p1, "2010")
         expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
         expect(tv.get_by_text("Tiden är ute")).to_be_visible()   # alla har svarat: frågan stängs direkt
-        host.get_by_role("button", name="Visa svaret (V)").click()
+        host.get_by_role("button", name="Visa svaret nu (V)").click()
         expect(tv.locator(".answer-reveal")).to_have_text("2010")
         expect(tv.locator(".choice-tile.right")).to_contain_text("2010")
         expect(p1.get_by_text("Rätt! +2 p")).to_be_visible()
@@ -768,7 +816,7 @@ def main():
         expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
         expect(p1.locator(".locked-text")).to_have_text("”Guld”")
         shot(p1, "10-spelare-last")
-        host.get_by_role("button", name="Visa svaret (V)").click()   # stänger frågan i förtid
+        host.get_by_role("button", name="Visa svaret nu (V)").click()   # stänger frågan i förtid
         expect(tv.locator(".answer-reveal")).to_have_text("Guld")
         expect(p2.get_by_text("Du hann inte svara")).to_be_visible()
         # Erik laddar om: senaste händelsen är gammal och ska inte vibrera igen
@@ -882,7 +930,7 @@ def main():
         expect(host.get_by_label(f"Tobbe{at} svarade rätt")).not_to_be_checked()
         assert tv.locator(".choice-tile.right").count() == 0, "TV:n markerar rätt alternativ under rättningen!"
         shot(host, "15-host-med-facit")
-        host.get_by_role("button", name="Visa svaret (V)").click()
+        host.get_by_role("button", name="Visa svaret nu (V)").click()
         expect(tv.locator(".choice-tile.right .picks")).to_have_text("2")
         expect(p1.get_by_text("Rätt! +3 p")).to_be_visible()
         expect(p3.get_by_text("Rätt! +2 p")).to_be_visible()
@@ -895,7 +943,7 @@ def main():
             {"id": "t1", "text": "Vilken färg har en banan?", "answer": "Gul", "choices": ["Gul", "Blå", "Röd", "Lila"], "difficulty": 1},
             {"id": "t2", "text": "Vilken planet är störst?", "answer": "Jupiter", "choices": ["Jupiter", "Mars", "Venus", "Saturnus"], "difficulty": 2},
             {"id": "t3", "text": "Svår reservfråga", "answer": "X", "choices": ["X", "Y"], "difficulty": 5}],
-            {"playMode": "turns", "buzzEvery": 2, "penalty": 1, "hostPlays": True})
+            {"playMode": "turns", "buzzEvery": 2, "penalty": 1, "hostPlays": True, "autoplay": True, "revealSeconds": 30})
         bcode = bdata["code"]
         bt = bcode.lower()
         host.goto(f"{BASE}/host/{bcode}")
@@ -903,6 +951,11 @@ def main():
         join(p1, bcode, "Erik" + bt)
         join(p2, bcode, "Tobbe" + bt)
         host.get_by_role("button", name="Starta första frågan").click()
+        # Frågeintrot syns först på TV:n och i mobilen, sedan öppnas svaren
+        expect(tv.locator(".q-intro")).to_be_visible()
+        expect(p1.locator(".q-intro")).to_contain_text("Fråga 1")
+        shot(tv, "59-tv-intro")
+        expect(tv.locator(".q-intro")).to_have_count(0, timeout=4000)
         expect(tv.locator(".turn-banner")).to_contain_text("har turen")
         assert "snacka" not in host.inner_text("body").lower(), "Hostkontrollen säger åt värden att snacka högt"
         # Åskådaren ser lagets kort med pratande medlemmar, nedräkning och skuggtips
@@ -920,6 +973,10 @@ def main():
         shot(p1, "62-spelare-er-tur")
         pick(p1, "Gul")
         expect(tv.locator(".answer-reveal")).to_have_text("Gul")
+        # Autoplay: nedräkningen till nästa fråga syns överallt, värden kan pausa
+        expect(tv.locator(".next-bar")).to_contain_text("Nästa fråga om")
+        expect(host.get_by_role("button", name="⏸ Pausa")).to_be_visible()
+        shot(tv, "59b-tv-nasta-om")
         # Den som inte hade turen ser lagets resultat, inte "Du hann inte svara"
         expect(p2.get_by_text("tog den")).to_be_visible()
         expect(p2.get_by_text("Ditt skuggtips var rätt")).to_be_visible()
@@ -933,11 +990,12 @@ def main():
         shot(host, "60b-host-svarighet")
         host.get_by_role("slider", name="Svårighet").fill("0")
         expect(host.locator(".difficulty strong").first).to_have_text("Setets ordning")
-        host.get_by_role("button", name="Nästa fråga (N)").click()
+        host.get_by_role("button", name="Nästa direkt (N)").click()
         # Fråga 2 är buzzer: båda kan buzza, Tobbe hinner först och svarar fel, Erik buzzar och tar den
         expect(p1.get_by_role("button", name="Buzza")).to_be_visible()
         expect(tv.get_by_text("Först att buzza får svara")).to_be_visible()
         shot(tv, "63-tv-buzzer")
+        expect(p2.locator(".q-intro")).to_have_count(0, timeout=4000)
         shot(p1, "64-spelare-buzzer")
         p2.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(choices_of(p2)).to_have_count(4)
@@ -959,7 +1017,7 @@ def main():
         # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
         sdata = host.evaluate("""async ([pin]) => {
           const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false }, questions: [
+            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false }, questions: [
               { id: 'k1', text: 'Last hit!', answer: '', mode: 'skill', skill: { kind: 'lasthit' } },
               { id: 'k2', text: 'Flick!', answer: '', mode: 'skill', skill: { kind: 'aim' } },
               { id: 'k3', text: 'Stoppa klockan!', answer: '', mode: 'skill', skill: { kind: 'stopwatch', target: 3 } },
@@ -1123,7 +1181,7 @@ def main():
         expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
         pick_wrong(p2, "Kongor")
         pick_wrong(p3, "Kongor")
-        host.get_by_role("button", name="Visa svaret (V)").click()
+        host.get_by_role("button", name="Visa svaret nu (V)").click()
         expect(p1.locator(".coin-toast")).to_contain_text("rätt svar")
         shot(tv, "54-tv-lag-fraga")
         host.get_by_role("button", name="Avsluta och visa pallen (N)").click()
@@ -1213,6 +1271,14 @@ def main():
         assert mo["f6"] == "buzz" and mo["timeoutWrong"] and mo["final"] == [-1, 0, 1], f"Buzz-timeout ska vara fel: {mo}"
         assert mo["teamNotTurn"] and mo["teamScores"] == {"in": [1, 1], "out": [0, 0]}, f"Laget ska få poängen tillsammans: {mo}"
 
+        au = raw.evaluate(AUTO_JS, [PIN])
+        print("Autoplay:", au)
+        assert au["intro"] == 1400 and au["answeredDuringIntro"] == 0, f"Introt fungerar inte: {au}"
+        assert 1000 <= au["revealAfterMs"] <= 2600 and au["nextAtSet"], f"Svaret visades inte automatiskt: {au}"
+        assert 3800 <= au["autoNext"] <= 6500, f"Nästa fråga startade inte automatiskt efter ~3 s: {au['autoNext']}"
+        assert au["pausedPhase"] == "judge" and au["pausedNextAt"] is None, f"Pausen stoppade inte autoplay: {au}"
+        assert au["finished"] == "finished", f"Sista frågan gick inte vidare till pallen: {au}"
+
         df = raw.evaluate(DIFF_JS, [PIN])
         print("Svårighet:", df)
         assert df["seen"] == ["d5:5", "d1:1", "sk", "d3:3", "d4:4", "d2:2"], f"Svårighetsreglaget väljer fel fråga: {df['seen']}"
@@ -1244,5 +1310,8 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("E2E MISSLYCKADES:", e)
+        import traceback
+        tb = traceback.extract_tb(e.__traceback__)
+        where = next((f"rad {f.lineno}" for f in reversed(tb) if f.filename.endswith("e2e.py")), "")
+        print("E2E MISSLYCKADES:", where, e)
         sys.exit(1)

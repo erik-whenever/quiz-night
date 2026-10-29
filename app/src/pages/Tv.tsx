@@ -3,7 +3,7 @@ import confetti from "canvas-confetti";
 import { Crown } from "../App";
 import { useRoom } from "../lib/useRoom";
 import { music, sfx } from "../lib/sound";
-import { Podium, Scorebar } from "../components";
+import { NextBar, Podium, QuestionIntro, Scorebar } from "../components";
 import { CollectTv } from "../collect";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { EffectTags, TeamBoard, TeamPodium } from "../teams";
@@ -63,6 +63,7 @@ export default function Tv({ code }: { code: string }) {
       <button className="btn sm ghost music-toggle" aria-pressed={musicOn} onClick={(e) => { e.stopPropagation(); sfx.unlock(); setUnlocked(true); toggleMusic(); }}>
         {musicOn ? (unlocked ? "♪ Musik på" : "♪ Klicka för ljud") : "♪ Musik av"}
       </button>
+      <QuestionIntro state={state} serverNow={serverNow} big />
       <div className="tv-head">
         <div className="row"><div style={{ width: 44 }}><Crown /></div><h2>{state.title}</h2></div>
         <div style={{ textAlign: "right" }}>
@@ -82,7 +83,8 @@ export default function Tv({ code }: { code: string }) {
       )}
 
       {(state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
-        <div className="question-card">
+        <div className="question-card" key={state.qIndex}
+          style={{ animationDelay: `${Math.max(0, (state.phase === "collect" && state.collect?.introUntil ? state.collect.introUntil - serverNow() : 0) - 250)}ms` }}>
           <TwistBadge state={state} />
           <EffectTags state={state} />
           <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}
@@ -92,6 +94,7 @@ export default function Tv({ code }: { code: string }) {
           {state.revealedAnswer && state.question.mode !== "skill" && <div className="answer-reveal">{state.revealedAnswer}</div>}
           {state.collect && <CollectTv state={state} serverNow={serverNow} />}
           <StealNote state={state} />
+          <NextBar state={state} serverNow={serverNow} />
         </div>
       )}
       {wheel && <WheelPanel wheel={wheel} serverNow={serverNow} size={Math.min(420, Math.round(window.innerHeight * 0.5), window.innerWidth - 64)} onLanded={sfx.next} />}

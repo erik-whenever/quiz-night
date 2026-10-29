@@ -2,7 +2,7 @@ import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings, WheelState,
 } from "../shared/types";
 import {
-  DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, effectiveChoiceRules, validChoices,
+  DEFAULT_SETTINGS, INTRO_MS, JUDGE_PAUSE_MS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, effectiveChoiceRules, validChoices,
 } from "../shared/types";
 import {
   type CollectServer, collectEnd, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
@@ -75,6 +75,10 @@ interface Persisted {
   /** Vems tur det är (räknare över enheterna) och hur många alternativfrågor som spelats (för buzzEvery). */
   turnIdx: number;
   choiceRounds: number;
+  /** Autoplay: när nuvarande fas började, och om värden pausat. */
+  phaseAt?: number;
+  lastPhase?: Phase;
+  paused?: boolean;
 }
 
 const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor" | "order" | "turnIdx" | "choiceRounds"> => ({
@@ -118,6 +122,8 @@ const clampSettings = (s: Settings): Settings => ({
   penalty: clamp(s.penalty, 0, 5, DEFAULT_SETTINGS.penalty),
   buzzAnswerSeconds: clamp(s.buzzAnswerSeconds, 3, 30, DEFAULT_SETTINGS.buzzAnswerSeconds),
   difficulty: clamp(s.difficulty, 0, 5, DEFAULT_SETTINGS.difficulty),
+  autoplay: s.autoplay === undefined ? DEFAULT_SETTINGS.autoplay : !!s.autoplay,
+  revealSeconds: clamp(s.revealSeconds, 3, 30, DEFAULT_SETTINGS.revealSeconds),
 });
 
 export class Room implements DurableObject {
@@ -125,6 +131,8 @@ export class Room implements DurableObject {
   private conns = new Set<Conn>();
   /** Stänger frågan när tiden gått ut. */
   private collectTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Autoplay: visar svaret / startar nästa fråga. */
+  private autoTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private ctx: DurableObjectState, private env: Env) {
     ctx.blockConcurrencyWhile(async () => {
@@ -133,6 +141,7 @@ export class Room implements DurableObject {
         this.s = { ...TEAM_DEFAULTS(), ...s, settings: clampSettings({ ...DEFAULT_SETTINGS, ...s.settings }) };
         // Fråga som pågick när objektet sövdes: stäng den direkt eller vid deadline.
         if (this.s.phase === "collect" && this.s.collect) this.armCollectTimer();
+        this.reschedule();
       }
     });
   }
@@ -209,6 +218,7 @@ export class Room implements DurableObject {
             ...(q.mode === "choice" && col?.choices ? { choices: col.choices } : {}),
             ...(q.mode === "skill" && q.skill ? { skill: publicSkill(q, col?.seed ?? 0, s.phase === "reveal") } : {}) } : undefined,
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? (q?.answer || undefined) : undefined,
+      nextAt: this.nextAt(), paused: !!s.paused,
       lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
       collect: col && s.phase !== "finished" ? collectPublic(col, s.phase === "reveal") : undefined,
       wheel: s.wheel ?? null,
@@ -224,7 +234,63 @@ export class Room implements DurableObject {
     return base;
   }
 
+  // ===== Autoplay =====
+
+  /** När nästa automatiska steg ska ske, eller undefined om det väntar på värden. */
+  private nextAt(): number | undefined {
+    const s = this.s!;
+    if (!s.settings.autoplay || s.paused) return undefined;
+    const at = s.phaseAt ?? Date.now();
+    if (s.phase === "judge") return at + JUDGE_PAUSE_MS;
+    if (s.phase === "reveal") {
+      let t = at + s.settings.revealSeconds * 1000;
+      // Ett lyckohjul som snurrar får landa och synas en stund först.
+      if (s.wheel && s.wheel.forQ === s.qIndex + 1) t = Math.max(t, s.wheel.startedAt + s.wheel.spinMs + 3000);
+      return t;
+    }
+    return undefined;
+  }
+
+  private clearAuto() { if (this.autoTimer) { clearTimeout(this.autoTimer); this.autoTimer = null; } }
+
+  /** Körs efter varje ändring: håll reda på när fasen bytte och armera nästa automatiska steg. */
+  private reschedule() {
+    const s = this.s;
+    if (!s) return;
+    if (s.phase !== s.lastPhase) { s.lastPhase = s.phase; s.phaseAt = Date.now(); }
+    this.clearAuto();
+    const at = this.nextAt();
+    if (at === undefined) return;
+    this.autoTimer = setTimeout(() => { void this.autoStep(); }, Math.max(0, at - Date.now()) + 30);
+  }
+
+  private async autoStep() {
+    const s = this.s!;
+    this.autoTimer = null;
+    const at = this.nextAt();
+    if (at === undefined) return;
+    if (Date.now() < at) return this.reschedule();
+    if (s.phase === "judge") { if (!this.judgeCollect()) return; }
+    else if (s.phase === "reveal") this.nextQuestion();
+    else return;
+    await this.save();
+    this.broadcast();
+  }
+
+  /** Nästa fråga (eller pallen efter sista). Används av host:next och autoplay. */
+  private nextQuestion() {
+    const s = this.s!;
+    this.clearCollectTimer();
+    const next = this.pickNext();
+    if (next === null) { s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() }; }
+    else { s.qIndex += 1; s.order[s.qIndex] = next; s.lastEvent = undefined; }
+    // Twisten gäller bara frågan den snurrades för.
+    if (s.wheel && (s.phase === "finished" || s.wheel.forQ < s.qIndex)) s.wheel = null;
+    if (s.phase !== "finished") this.startQuestion();
+  }
+
   private broadcast() {
+    this.reschedule();
     for (const c of this.conns) this.send(c, { t: "state", state: this.view(c) });
   }
 
@@ -321,6 +387,8 @@ export class Room implements DurableObject {
     const base = s.collect.deadline - s.collect.startedAt;
     const extra = Object.fromEntries(s.players.map((p) => [p.id, Math.round(this.timeFor(p.id, base) - base)]).filter(([, ms]) => ms !== 0));
     if (Object.keys(extra).length) s.collect.extra = extra;
+    // Alternativfrågor: kort intro med frågekortet innan svaren öppnas (tiden läggs på).
+    if (s.collect.mode === "choice") { s.collect.introUntil = s.collect.startedAt + INTRO_MS; s.collect.deadline += INTRO_MS; }
     s.phase = "collect";
     this.armCollectTimer();
   }
@@ -592,6 +660,7 @@ export class Room implements DurableObject {
       if (!s.players.some((x) => x.id === c.playerId)) return;
       const text = String(m.text ?? "").trim();
       if (!col.choices?.includes(text)) return this.send(c, { t: "error", message: "Välj ett av alternativen" });
+      if (col.introUntil && Date.now() < col.introUntil - 150) return; // introt visas fortfarande
       const unit = this.unit(c.playerId);
       if (col.format === "turn" && col.turn !== unit) return this.send(c, { t: "error", message: `Det är ${this.unitName(col.turn!)}s tur` });
       if (col.format === "turn" && col.answers.length) return this.send(c, { t: "error", message: "Ditt lag har redan svarat" });
@@ -616,6 +685,7 @@ export class Room implements DurableObject {
     if (m.t === "buzz") {
       const col = s.collect;
       if (!c.playerId || !col || col.format !== "buzz" || s.phase !== "collect" || !col.buzzOpen) return;
+      if (col.introUntil && Date.now() < col.introUntil - 150) return;
       if (!s.players.some((x) => x.id === c.playerId)) return;
       const unit = this.unit(c.playerId);
       if (col.lockedOut?.includes(unit)) return this.send(c, { t: "error", message: "Ert lag är utlåst på den här frågan" });
@@ -647,16 +717,11 @@ export class Room implements DurableObject {
       case "host:start":
       case "host:next": {
         if (s.phase === "collect" || s.phase === "judge") return this.send(c, { t: "error", message: "Visa svaret först" });
-        this.clearCollectTimer();
-        const next = this.pickNext();
-        if (next === null) { s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() }; }
-        else { s.qIndex += 1; s.order[s.qIndex] = next; s.lastEvent = undefined; }
-        // Twisten gäller bara frågan den snurrades för.
-        if (s.wheel && (s.phase === "finished" || s.wheel.forQ < s.qIndex)) s.wheel = null;
-        if (s.phase !== "finished") this.startQuestion();
+        this.nextQuestion();
         break;
       }
       case "host:judge": { if (!this.judgeCollect()) return; break; }
+      case "host:pause": { s.paused = !!m.paused; break; }
       case "host:close": return this.closeCollect();
       case "host:adjust": {
         const p = s.players.find((x) => x.id === m.playerId); if (p) p.score += m.delta; break;

@@ -112,12 +112,21 @@ export interface Settings {
   buzzAnswerSeconds: number;
   /** Målsvårighet för nästa fråga: 0 = setets ordning, annars 1–5 (närmast först). Ändras i realtid. */
   difficulty: number;
+  /** Kvällen sköter sig själv: svaret visas och nästa fråga startar automatiskt. */
+  autoplay: boolean;
+  /** Sekunder som svaret visas innan nästa fråga (autoplay). */
+  revealSeconds: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
   playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
+  autoplay: true, revealSeconds: 8,
 };
+/** Hur länge frågans intro visas innan svarsknapparna öppnas (läggs på svarstiden). */
+export const INTRO_MS = 1400;
+/** Paus mellan "tiden är ute" och att svaret visas (autoplay). */
+export const JUDGE_PAUSE_MS = 1300;
 
 /** collect = alla väljer (servern äger nedräkningen), judge = tiden ute, reveal = svaret visas. */
 export type Phase = "lobby" | "collect" | "judge" | "reveal" | "finished";
@@ -171,6 +180,8 @@ export interface CollectPublic {
   startedAt: number;
   deadline: number;
   answered: string[];
+  /** Introt (frågekortet) visas till denna tidpunkt, sedan öppnas svaren. */
+  introUntil?: number;
   results?: CollectResult[];
   /** Skill-rundor: slumpfrö så att alla får samma bana. */
   seed?: number;
@@ -213,6 +224,10 @@ export interface PublicState {
   coinLog: CoinNote[];
   /** Butikseffekter för pågående fråga, eller nästa mellan frågorna. */
   effects: Effects;
+  /** Autoplay: när servern tar nästa steg (visar svaret eller startar nästa fråga). Saknas = väntar på värden. */
+  nextAt?: number;
+  /** Värden har pausat autoplay. */
+  paused: boolean;
   /** Ospelade alternativfrågor per svårighet 1–5 (index 0 = nivå 1), för värdens reglage. Visar inget innehåll. */
   diffLeft: number[];
   /** Bara till spelaren själv: alternativ som 50/50 har tagit bort för hen på pågående fråga. */
@@ -255,6 +270,8 @@ export type ClientMsg =
   | { t: "host:close" }
   /** Visa svaret: stänger frågan om den är öppen, delar ut poäng och visar facit. */
   | { t: "host:judge" }
+  /** Pausa eller återuppta autoplay. */
+  | { t: "host:pause"; paused: boolean }
   /** Snurra lyckohjulet (bara i lobbyn eller när svaret visas). Servern slumpar utfallet. */
   | { t: "host:spin" }
   /** Lagläge: 0 = alla mot alla, annars lagstorlek. Slumpar nya lag (bara i lobbyn). */
