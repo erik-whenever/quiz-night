@@ -1,11 +1,20 @@
 # En sida per rad. Hämtas av .github/workflows/hamta-wiki.yml till council/data/wiki/.
 # wikiwiki.jp/hon = japansk wiki som följer HoN Reborn (version anges per sida).
 # fandom: = hon.fandom.com (original-HoN, MediaWiki-API, wikitext).
-wikiwiki:Midas
-wikiwiki:Pyromancer
-wikiwiki:MenuBar
-wikiwiki:FrontPage
-fandom:Fluffylumps
-fandom:Items
-fandom:Boots
-fandom:Category:Boots
+#wikiwiki:Midas (hämtad)
+#wikiwiki:Pyromancer (hämtad)
+#wikiwiki:MenuBar (hämtad)
+#wikiwiki:FrontPage (hämtad)
+#fandom:Fluffylumps
+#fandom:Items
+#fandom:Boots
+#fandom:Category:Boots
+wikiwiki:合成アイテム
+wikiwiki:Kongor
+wikiwiki:MidWarsについて
+wikiwiki:豆知識
+wikiwiki:Rune
+wikiwiki:Goblinstore
+wikiwiki:Hero
+fandom:Kongor
+fandom:Mid Wars
