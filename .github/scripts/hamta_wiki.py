@@ -26,7 +26,7 @@ def get(url):
     except Exception as e:
         return 0, str(e)
     finally:
-        time.sleep(6)
+        time.sleep(12)
 
 
 def to_text(page):

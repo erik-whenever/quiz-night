@@ -14,20 +14,29 @@
 #wikiwiki:MidWarsについて (hämtad)
 #wikiwiki:豆知識 (hämtad)
 #wikiwiki:Rune (hämtad)
-wikiwiki:Goblinstore
-wikiwiki:Hero
+#wikiwiki:Goblinstore (hämtad)
+#wikiwiki:Hero (hämtad)
 #fandom:Kongor (hämtad)
 #fandom:Mid Wars (hämtad)
-wikiwiki:Fluffy's Fletching Arrows
-wikiwiki:Golden Reach
-wikiwiki:Chaosbrand
+#wikiwiki:Fluffy's Fletching Arrows (hämtad)
+#wikiwiki:Golden Reach (hämtad)
+#wikiwiki:Chaosbrand (hämtad)
 wikiwiki:Post Haste
 wikiwiki:Steamboots
-wikiwiki:Pegasus Boots
+#wikiwiki:Pegasus Boots (hämtad)
 wikiwiki:Shrunken Head
-wikiwiki:Sacrificial Stone
+#wikiwiki:Sacrificial Stone (hämtad)
 wikiwiki:Ghost Marchers
-wikiwiki:Marchers
+#wikiwiki:Marchers (hämtad)
 wikiwiki:Crown Greaves
-wikiwiki:Token of Life
-wikiwiki:Staff of the Master
+#wikiwiki:Token of Life (hämtad)
+#wikiwiki:Staff of the Master (hämtad)
+fandom:Heroes of Newerth: Reborn
+fandom:Fluffy's Fletching Arrows
+fandom:Golden Reach
+wikiwiki:Striders
+wikiwiki:Plated Greaves
+wikiwiki:Sorcery Boots
+wikiwiki:Starscribe Boots
+wikiwiki:Phantasmal Treads
+wikiwiki:Warsteam Boots
