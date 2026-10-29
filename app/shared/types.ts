@@ -33,6 +33,28 @@ export interface Question {
 export const DIFFICULTY_LABELS = ["Setets ordning", "Lätt", "Ganska lätt", "Medel", "Svår", "Riktigt svår"];
 export const difficultyOf = (q: Pick<Question, "difficulty">) => Math.max(1, Math.min(5, Math.round(q.difficulty ?? 3)));
 
+/**
+ * Svårighetsreglaget gör också själva frågan svårare: fler svarsalternativ och kortare tid.
+ * Nivå 0 (setets ordning) använder värdens egna inställningar oförändrade.
+ */
+export const DIFFICULTY_TUNING: { choices: number; time: number }[] = [
+  { choices: 0, time: 1 },     // 0: värdens inställningar
+  { choices: 3, time: 1.25 },  // 1 Lätt
+  { choices: 4, time: 1.1 },   // 2 Ganska lätt
+  { choices: 5, time: 1 },     // 3 Medel
+  { choices: 6, time: 0.85 },  // 4 Svår
+  { choices: 8, time: 0.7 },   // 5 Riktigt svår
+];
+
+/** Antal alternativ och sekunder som gäller för nästa alternativfråga med nuvarande inställningar. */
+export function effectiveChoiceRules(s: Pick<Settings, "difficulty" | "choiceCount" | "collectSeconds">) {
+  const t = DIFFICULTY_TUNING[s.difficulty] ?? DIFFICULTY_TUNING[0];
+  return {
+    choices: t.choices || s.choiceCount,
+    seconds: Math.max(5, Math.round(s.collectSeconds * t.time)),
+  };
+}
+
 export type QuestionMode = "choice" | "skill";
 export const QUESTION_MODES: { value: QuestionMode; label: string }[] = [
   { value: "choice", label: "Svarsalternativ" },
@@ -191,6 +213,8 @@ export interface PublicState {
   coinLog: CoinNote[];
   /** Butikseffekter för pågående fråga, eller nästa mellan frågorna. */
   effects: Effects;
+  /** Ospelade alternativfrågor per svårighet 1–5 (index 0 = nivå 1), för värdens reglage. Visar inget innehåll. */
+  diffLeft: number[];
   /** Bara till spelaren själv: alternativ som 50/50 har tagit bort för hen på pågående fråga. */
   myRemoved?: string[];
 }

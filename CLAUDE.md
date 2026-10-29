@@ -41,7 +41,7 @@ Titta på skärmdumparna i `e2e-shots/` efter UI-ändringar. Det är så rådet 
 - Frågor utan giltiga alternativ hoppas över när rummet skapas. Muntliga svar och fritextsvar ska inte tillbaka: buzzern finns, men svaret väljs alltid bland alternativen så att allt rättas automatiskt.
 - **Spelande värd** (`hostPlays`, standard på): hostkontrollen får aldrig facit eller andras val, och läget kan bara stängas av i lobbyn. E2E kontrollerar detta.
 - **Spelform** (`playMode`, standard "turns"): *Lagens tur* = varje alternativfråga går till ett lag (eller en spelare i alla mot alla), lagen roterar, laget snackar högt i Discord och vem som helst i laget låser svaret; rätt ger hela laget poäng, fel går bara vidare. *Buzzerfråga* var `buzzEvery`:e alternativfråga: först att buzza svarar, fel eller för långsamt kostar `penalty` för hela laget och låser ute, sedan kan andra buzza. "all" = alla svarar samtidigt. Skill-utmaningar spelar alltid alla.
-- **Svårighet** `"difficulty"`: 1–5 per fråga (sätt alltid). Värden drar ett reglage under kvällen; nästa fråga väljs närmast målet (0 = setets ordning), skill-utmaningar håller sin plats.
+- **Svårighet** `"difficulty"`: 1–5 per fråga (sätt alltid, och se till att varje set har frågor på alla nivåer, även 4–5). Värden drar ett reglage under kvällen: nästa fråga väljs närmast målet (0 = setets ordning, skill-utmaningar håller sin plats), och reglaget gör också frågan svårare med fler alternativ och kortare tid (`DIFFICULTY_TUNING` i shared/types.ts).
 - Blanda gärna: ungefär en skill-utmaning per fem frågor.
 
 ## Lag och mynt

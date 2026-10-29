@@ -2,7 +2,7 @@ import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings, WheelState,
 } from "../shared/types";
 import {
-  DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, validChoices,
+  DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, effectiveChoiceRules, validChoices,
 } from "../shared/types";
 import {
   type CollectServer, collectEnd, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
@@ -214,6 +214,7 @@ export class Room implements DurableObject {
       wheel: s.wheel ?? null,
       teamMode: s.teamMode, teams: s.teams, wallets: s.wallets, coinsTonight: s.coins, coinLog: s.coinLog.slice(-12),
       effects: this.effects(),
+      diffLeft: this.diffLeft(),
       ...(c.playerId && col?.removed?.[c.playerId] ? { myRemoved: col.removed[c.playerId] } : {}),
     };
     // Spelande värd: hostkontrollen får exakt samma som alla andra, inget facit och inga svar.
@@ -262,6 +263,14 @@ export class Room implements DurableObject {
       Math.abs(difficultyOf(s.questions[i]) - target) < Math.abs(difficultyOf(s.questions[best]) - target) ? i : best, choice[0]);
   }
 
+  private diffLeft(): number[] {
+    const s = this.s!;
+    const played = new Set(s.order.slice(0, s.qIndex + 1));
+    const out = [0, 0, 0, 0, 0];
+    s.questions.forEach((q, i) => { if (!played.has(i) && q.mode !== "skill") out[difficultyOf(q) - 1] += 1; });
+    return out;
+  }
+
   /** Enheter som kan få turen: lag med någon ansluten spelare, eller anslutna spelare utan lag. */
   private units(): string[] {
     const s = this.s!;
@@ -294,9 +303,11 @@ export class Room implements DurableObject {
       s.collect = startCollect("skill", q.skill.seconds ?? SKILLS[q.skill.kind].seconds, Date.now(), seed);
     } else {
       const wrong = shuffled(q.choices!.filter((x) => x !== q.answer));
-      let n = Math.min(s.settings.choiceCount - 1, wrong.length);
+      // Svårighetsreglaget styr också antal alternativ och tid (nivå 0 = värdens egna inställningar).
+      const rules = effectiveChoiceRules(s.settings);
+      let n = Math.min(rules.choices - 1, wrong.length);
       if (twist === "fifty") n = Math.max(1, Math.ceil(n / 2));
-      const secs = twist === "blitz" ? Math.max(MIN_COLLECT_MS / 1000, s.settings.collectSeconds / 2) : s.settings.collectSeconds;
+      const secs = twist === "blitz" ? Math.max(MIN_COLLECT_MS / 1000, rules.seconds / 2) : rules.seconds;
       s.choiceRounds += 1;
       const buzz = s.settings.buzzEvery > 0 && s.choiceRounds % s.settings.buzzEvery === 0;
       const units = this.units();

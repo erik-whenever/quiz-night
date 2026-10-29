@@ -5,21 +5,41 @@ import { useRoom } from "../lib/useRoom";
 import { Podium } from "../components";
 import { CollectHost } from "../collect";
 import type { ClientMsg, HostState } from "../../shared/types";
-import { DIFFICULTY_LABELS, MAX_SHOWN, MIN_SHOWN } from "../../shared/types";
+import { DIFFICULTY_LABELS, MAX_SHOWN, MIN_SHOWN, effectiveChoiceRules } from "../../shared/types";
 import { HostWheel } from "../wheel";
 import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
 
-/** Svårighetsreglaget: styr vilken fråga som kommer härnäst, går att dra mitt i kvällen. */
+/**
+ * Svårighetsreglaget: väljer nästa fråga närmast vald nivå och gör den svårare (fler alternativ, kortare tid).
+ * Visar hur många frågor som finns kvar per nivå, så värden ser när setet tar slut på svåra frågor.
+ */
 export function DifficultySlider({ state, send }: { state: HostState; send: (m: ClientMsg) => void }) {
   const d = state.settings.difficulty;
+  const rules = effectiveChoiceRules(state.settings);
+  const left = state.diffLeft ?? [0, 0, 0, 0, 0];
+  const nearest = d ? [0, 1, 2, 3, 4].filter((i) => left[i] > 0).sort((a, b) => Math.abs(a + 1 - d) - Math.abs(b + 1 - d))[0] : undefined;
   return (
-    <label className="difficulty">
-      <span className="spread"><span>Svårighet på nästa fråga</span><strong aria-live="polite">{DIFFICULTY_LABELS[d]}</strong></span>
-      <input type="range" aria-label="Svårighet" min={0} max={5} step={1} value={d}
-        onChange={(e) => send({ t: "host:settings", settings: { difficulty: +e.target.value } })} />
-      <span className="spread muted small"><span>Setets ordning</span><span>Lätt</span><span>Svår</span></span>
-    </label>
+    <div className="difficulty">
+      <label className="stack" style={{ gap: 6 }}>
+        <span className="spread"><span>Svårighet</span><strong aria-live="polite">{DIFFICULTY_LABELS[d]}</strong></span>
+        <input type="range" aria-label="Svårighet" min={0} max={5} step={1} value={d}
+          onChange={(e) => send({ t: "host:settings", settings: { difficulty: +e.target.value } })} />
+        <span className="spread muted small"><span>Setets ordning</span><span>Lätt → Riktigt svår</span></span>
+      </label>
+      <p className="small diff-rules" aria-live="polite">
+        Nästa fråga: <strong>{rules.choices} alternativ</strong> · <strong>{rules.seconds} s</strong>
+        {nearest !== undefined && <> · svårighet <strong>{nearest + 1}</strong></>}
+        {nearest !== undefined && nearest + 1 < d && <span className="err"> (setet har inga svårare kvar)</span>}
+      </p>
+      <ol className="diff-left" aria-label="Frågor kvar per svårighet">
+        {left.map((n, i) => (
+          <li key={i} className={`${n ? "" : "empty"}${d === i + 1 ? " on" : ""}`} title={`${n} frågor kvar på nivå ${i + 1}`}>
+            <span className="pips">{"●".repeat(i + 1)}</span><span className="n">{n}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -66,6 +86,7 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
           onChange={(e) => set({ hostPlays: e.target.checked })} />
         Jag spelar själv (dölj facit och andras svar för mig)
       </label>
+      {s.difficulty > 0 && <p className="muted small">Svårighetsreglaget styr antal alternativ och tid just nu. Dra det till "Setets ordning" för att använda inställningarna här.</p>}
       {started && <p className="muted small">Ändringar av spelform, antal alternativ och tid gäller från nästa fråga.{s.hostPlays ? " Facit kan inte visas för dig förrän kvällen är slut." : ""}</p>}
     </div>
   );

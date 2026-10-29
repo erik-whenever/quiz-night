@@ -423,19 +423,22 @@ MODES_JS = js("""
 # Svårighetsreglaget: nästa fråga väljs närmast målet, skill-utmaningar håller sin plats, ändras i realtid.
 DIFF_JS = js("""
   const tag = Math.random().toString(36).slice(2, 6);
-  const q = (id, d) => ({ id, text: id, answer: 'R', choices: ['R', 'F'], difficulty: d });
-  const room = await mkRoom({ title: 'Svårt', settings: { difficulty: 5 }, questions: [
+  const q = (id, d) => ({ id, text: id, answer: 'R', choices: ['R', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7'], difficulty: d });
+  const room = await mkRoom({ title: 'Svårt', settings: { difficulty: 5, choiceCount: 4, collectSeconds: 20 }, questions: [
     q('d1', 1), q('d5', 5), { id: 'sk', text: 'sk', answer: '', mode: 'skill', skill: { kind: 'aim' } }, q('d3', 3), q('d2', 2), q('d4', 4)] });
   const host = await connect(room.code, 'host', room.hostKey);
   const ps = await players(room.code, ['X' + tag]);
   await until(host, (s) => s.players.length === 1);
   const seen = [];
+  const tuning = [];
+  const diffLeft0 = host.state.diffLeft;
   const step = async (diff) => {
     if (diff !== undefined) { send(host, { t: 'host:settings', settings: { difficulty: diff } }); await until(host, (s) => s.settings.difficulty === diff); }
     const i = host.state.qIndex;
     send(host, { t: i < 0 ? 'host:start' : 'host:next' });
     const st = await until(host, (s) => s.phase === 'collect' && s.qIndex === i + 1);
     seen.push(st.question.text + (st.question.difficulty ? ':' + st.question.difficulty : ''));
+    if (st.question.mode !== 'skill') tuning.push([st.settings.difficulty, st.question.choices.length, Math.round((st.collect.deadline - st.collect.startedAt) / 1000)]);
     send(host, { t: 'host:judge' });
     await until(host, (s) => s.phase === 'reveal');
   };
@@ -446,7 +449,7 @@ DIFF_JS = js("""
   await step(4);    // → d4
   await step();     // → d2
   closeAll(host, ...Object.values(ps));
-  return { seen };
+  return { seen, tuning, diffLeft0, diffLeftEnd: host.state.diffLeft };
 """)
 
 # Last hit där alla tre creeps missas ska godtas (bugg 2026-10-29: avvisades och gick att spela om), och bara en gång.
@@ -924,10 +927,12 @@ def main():
         expect(p1.get_by_text("Rätt! +1 p")).to_be_visible()
         shot(p2, "61b-spelare-lagresultat")
         # Värden drar reglaget mitt i kvällen
-        host.get_by_label("Svårighet").fill("5")
-        expect(host.locator(".difficulty strong")).to_have_text("Riktigt svår")
-        host.get_by_label("Svårighet").fill("0")
-        expect(host.locator(".difficulty strong")).to_have_text("Setets ordning")
+        host.get_by_role("slider", name="Svårighet").fill("5")
+        expect(host.locator(".difficulty strong").first).to_have_text("Riktigt svår")
+        expect(host.locator(".diff-rules")).to_contain_text("8 alternativ")
+        shot(host, "60b-host-svarighet")
+        host.get_by_role("slider", name="Svårighet").fill("0")
+        expect(host.locator(".difficulty strong").first).to_have_text("Setets ordning")
         host.get_by_role("button", name="Nästa fråga (N)").click()
         # Fråga 2 är buzzer: båda kan buzza, Tobbe hinner först och svarar fel, Erik buzzar och tar den
         expect(p1.get_by_role("button", name="Buzza")).to_be_visible()
@@ -1211,6 +1216,9 @@ def main():
         df = raw.evaluate(DIFF_JS, [PIN])
         print("Svårighet:", df)
         assert df["seen"] == ["d5:5", "d1:1", "sk", "d3:3", "d4:4", "d2:2"], f"Svårighetsreglaget väljer fel fråga: {df['seen']}"
+        # Nivå 5: 8 alternativ och 14 s, nivå 1: 3 alt och 25 s, setets ordning: värdens 4 alt och 20 s, nivå 4: 6 alt och 17 s
+        assert df["tuning"] == [[5, 8, 14], [1, 3, 25], [0, 4, 20], [4, 6, 17], [4, 6, 17]], f"Reglaget gör inte frågan svårare: {df['tuning']}"
+        assert df["diffLeft0"] == [1, 1, 1, 1, 1] and df["diffLeftEnd"] == [0, 0, 0, 0, 0], f"Fel antal kvar per nivå: {df}"
 
         lh = raw.evaluate(LASTHIT_JS, [PIN])
         print("Last hit:", lh)
