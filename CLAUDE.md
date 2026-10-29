@@ -35,10 +35,10 @@ Titta på skärmdumparna i `e2e-shots/` efter UI-ändringar. Det är så rådet 
 - `/host` starta rum (PIN), `/host/KOD` hostkontroll (facit bara om värden inte spelar), `/bank` frågebank, `/tabell` säsong
 - **TV-vyn får aldrig visa svaret innan reveal.** E2E-testet kontrollerar detta.
 
-## Frågor (sedan 2026-10-29: bara svarsalternativ, inga muntliga svar)
+## Frågor (sedan 2026-10-29: alltid svarsalternativ, inga muntliga svar)
 - Standard är **svarsalternativ**: `"answer"` + `"choices"` (rätt svar och gärna 7 fel, högst 12 totalt). Erik väljer i rummet hur många som visas (2–8, `choiceCount`), servern slumpar rätt + så många fel per fråga och rättar automatiskt.
 - `"mode": "skill"` + `"skill": { "kind": "lasthit" | "aim" | "stopwatch" | "pour" | "order" }`: minispel i mobilen, 3/2/1 p efter placering. `stopwatch` tar `target` (s), `order` tar `items: [{label, value, show?}]` och `prompt` ("Äldst först"). Se `shared/skill.ts`.
-- Frågor utan giltiga alternativ hoppas över när rummet skapas. Bygg inte tillbaka buzz eller fritextsvar.
+- Frågor utan giltiga alternativ hoppas över när rummet skapas. Muntliga svar och fritextsvar ska inte tillbaka: buzzern finns, men svaret väljs alltid bland alternativen så att allt rättas automatiskt.
 - **Spelande värd** (`hostPlays`, standard på): hostkontrollen får aldrig facit eller andras val, och läget kan bara stängas av i lobbyn. E2E kontrollerar detta.
 - **Spelform** (`playMode`, standard "turns"): *Lagens tur* = varje alternativfråga går till ett lag (eller en spelare i alla mot alla), lagen roterar, laget snackar högt i Discord och vem som helst i laget låser svaret; rätt ger hela laget poäng, fel går bara vidare. *Buzzerfråga* var `buzzEvery`:e alternativfråga: först att buzza svarar, fel eller för långsamt kostar `penalty` för hela laget och låser ute, sedan kan andra buzza. "all" = alla svarar samtidigt. Skill-utmaningar spelar alltid alla.
 - **Svårighet** `"difficulty"`: 1–5 per fråga (sätt alltid). Värden drar ett reglage under kvällen; nästa fråga väljs närmast målet (0 = setets ordning), skill-utmaningar håller sin plats.
