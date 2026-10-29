@@ -67,6 +67,8 @@ def steam(ids):
         time.sleep(2)
         status, body = get(f"https://steamcommunity.com/profiles/{sid}/games?tab=all&xml=1")
         p["gamesStatus"] = status
+        RAW.mkdir(parents=True, exist_ok=True)
+        (RAW / f"steam-games-{sid}.txt").write_text(body[:4000])
         if status == 200 and body.lstrip().startswith("<?xml"):
             try:
                 root = ET.fromstring(body)
@@ -96,6 +98,14 @@ def wardup(names):
         # Skript- och API-adresser i sidan, för att hitta ett JSON-API nästa gång
         result["scripts"] = sorted(set(re.findall(r'src="([^"]+\.js)"', body)))[:30]
         result["apiHints"] = sorted(set(re.findall(r'["\'](/api/[^"\']+|https?://[^"\']*api[^"\']*)["\']', body)))[:30]
+        # SPA: API-adresserna finns i JS-paketet
+        for src in result["scripts"][:3]:
+            st, js = get(urllib.parse.urljoin("https://ward-up.com/", src))
+            if js:
+                (RAW / ("wardup-" + src.rsplit("/", 1)[-1] + ".txt")).write_text(js[:3_000_000])
+                result["apiHints"] += sorted(set(
+                    re.findall(r'["\'`]((?:https?://[^"\'`\s]*)?/api/[^"\'`\s]*)["\'`]', js)
+                    + re.findall(r'["\'`](https?://[^"\'`\s]*(?:api|supabase|firebase)[^"\'`\s]*)["\'`]', js)))[:60]
     for name in names:
         q = urllib.parse.quote(name)
         for pattern in ("https://ward-up.com/player/{}", "https://ward-up.com/players/{}",
