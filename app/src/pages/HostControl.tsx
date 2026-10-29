@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, TopBar } from "../App";
 import { api, hostKeyFor } from "../lib/api";
 import { useCountdown, useRoom } from "../lib/useRoom";
@@ -13,10 +13,16 @@ function Control({ code }: { code: string }) {
   const [crowned, setCrowned] = useState("");
   const [copied, setCopied] = useState("");
 
+  // Under insamling/rättning skulle N kasta allas svar och V stänga insamlingen i förtid: bara knapparna gäller då.
+  const collecting = state?.phase === "collect" || state?.phase === "judge";
+  const collectingRef = useRef(collecting);
+  collectingRef.current = collecting;
+
   // Tangentbord: R = rätt, F = fel, N = nästa, V = visa svar
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
+      if (collectingRef.current) return;
       const k = e.key.toLowerCase();
       if (k === "r") send({ t: "host:correct" });
       if (k === "f") send({ t: "host:wrong" });
@@ -91,9 +97,11 @@ function Control({ code }: { code: string }) {
 
                 <div className="row">
                   {(state.phase === "question" || state.phase === "buzzed") && <button className="btn ghost" onClick={() => send({ t: "host:reveal" })}>Visa svaret (V)</button>}
-                  <button className={`btn ${state.phase === "reveal" ? "primary big" : "ghost"}`} onClick={() => send({ t: "host:next" })}>
-                    {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
-                  </button>
+                  {!collecting && (
+                    <button className={`btn ${state.phase === "reveal" ? "primary big" : "ghost"}`} onClick={() => send({ t: "host:next" })}>
+                      {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
+                    </button>
+                  )}
                 </div>
               </>
             )}

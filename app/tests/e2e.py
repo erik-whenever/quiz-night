@@ -488,6 +488,14 @@ def main():
         expect(host.get_by_label("Sanna svarade rätt")).not_to_be_checked()
         expect(mark.locator("li", has_text="Erik")).to_contain_text("Bonus")
         shot(host, "16-host-ratta")
+        # Under rättningen får varken knapp eller N/V-tangent hoppa vidare och kasta allas svar
+        assert host.get_by_role("button", name="Nästa fråga (N)").count() == 0, "Nästa fråga visas under rättningen"
+        host.locator("h1, h2").first.click()
+        host.keyboard.press("n")
+        host.keyboard.press("v")
+        host.wait_for_timeout(400)
+        expect(host.get_by_text("Insamlingen är stängd")).to_be_visible()
+        expect(host.get_by_label("Erik svarade rätt")).to_be_checked()
         host.get_by_role("button", name="Bekräfta och visa svaren").click()
         expect(tv.locator(".answer-reveal")).to_have_text("Vänern")
         results = tv.get_by_label("Allas svar").locator("li")
