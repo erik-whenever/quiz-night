@@ -5,3 +5,5 @@
 **Varför vi:** Ger vinnaren något att göra mellan quizkvällarna och skapar snack under veckan. Frågorna blir personliga på ett sätt rådet aldrig kan hitta på själv, och det är gratis innehåll till frågebanken.
 **Insats:** S (formulär på startsidan för regerande kung, spärrat för andra; `Hub` lagrar frågan; hostkontrollen visar den som en fråga bland de andra; spärra kungens buzz på den frågan)
 **Kostnad:** gratis
+
+**PO:** In i backlog som P3, sammanslagen med "regerande kung"-raden som den bygger på.

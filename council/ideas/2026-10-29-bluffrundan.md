@@ -5,3 +5,5 @@
 **Varför vi:** Ingen ping-fördel alls och det belönar personkännedom och humor, inte bara kunskap. Avslöjandet ("VEM skrev 'surströmming'?!") är exakt det som får Discord att skratta. Mat- och tv-seriefrågor passar perfekt: "Vad heter Walter Whites ____?". Bygger vidare på den hemliga svarsinsamlingen från "Alla svarar".
 **Insats:** M (`"mode": "bluff"` i fråge-JSON; två faser i `Room`: skriv → rösta; servern blandar svaren, slår ihop dubbletter och spärrar röst på sitt eget svar; TV-vyn visar svaren anonymt tills reveal)
 **Kostnad:** gratis
+
+**PO:** In i backlog som P2 (M), byggs efter "Alla svarar" som den återanvänder. Ingen ping-fördel och skratt i Discord, precis rätt.

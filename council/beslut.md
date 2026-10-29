@@ -2,6 +2,8 @@
 
 Rådets egna beslut, nyast överst. Eriks svar flyttas hit från BEHOVER-ERIK.md.
 
+- **2026-10-29: Kungasatsningen P1 före Bluffrundan.** Den passar kvällens mål (kröna en kung) och håller spänningen till sista frågan. Båda bygger på den hemliga svarsinsamlingen från "Alla svarar", som därför byggs först. Bildfrågor och "Dubbla poäng"-joker parkeras (jokern överlappar Lyckohjulet och satsningen).
+
 - **2026-10-28 (Erik):** Gänget spelar främst HoN Reborn, en del CS2. Vill ha allmänna frågor, mycket mat, mycket tv-serier och citat (Breaking Bad, GoT, HIMYM m.fl.). Sparat i `council/gänget.md`. Quizresearchern bygger nu ett lager av temaset även när inget quiz är beställt, och "Vem sa det?" lades in som P1.
 - **2026-10-28 (Erik):** Cloudflare-hemligheterna (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `HOST_PIN`) ligger i GitHub. Varje push till `main` publicerar appen.
 - **2026-10-28 (Erik):** Gav HoN Reborn-namn och Steam-id för fem spelare, se `council/gänget.md`. Quizresearchern ska undersöka gratis statistikkällor för båda spelen.

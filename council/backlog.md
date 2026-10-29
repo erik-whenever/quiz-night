@@ -15,9 +15,13 @@ Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 - [ ] P1 | M | Rundtyp "Närmast på skalan": `"mode": "closest"` med `min`/`max`/`answer` i fråge-JSON (och valbar i frågebanken). Alla drar ett reglage på mobilen och låser sin gissning före tidens slut; TV:n visar allas nålar på en tallinje en i taget och sist rätt svar. Närmast 3 p, tvåa 1 p, prick rätt +2 bonus. Servern räknar avstånd. Klart när e2e låter tre spelare gissa olika tal, rätt spelare får 3 p och TV-vyn inte visar svaret före reveal.
 - [ ] P2 | S | Kvällens pris: efter sista frågan röstar alla på mobilen i två kategorier (standard "Kvällens fail" och "Modigaste chansningen", hosten kan byta namn). En röst per spelare och kategori, inte på sig själv. TV-vyn visar vinnarna som prisutdelning och utmärkelsen sparas i `Hub` och syns vid namnet i `/tabell`. Klart när e2e röstar med fyra spelare och priset syns i tabellen.
 - [ ] P2 | M | Fallande poäng (På spåret): `"clues": [...]` i fråge-JSON med poängtrappa (standard 10/8/6/4/2). Hosten släpper nästa ledtråd med en knapp, TV-vyn visar ledtrådarna och aktuell poäng. Varje spelare får bara ett försök per fråga, servern låser den som gissat fel. Klart när e2e visar att en spelare som buzzar på ledtråd 2 får 8 p och en som gissat fel inte kan buzza igen.
-- [ ] P2 | M | Bildfrågor: ladda upp en bild i frågebanken (lagras i Durable Object-storage eller R2:s gratisnivå) och visa den stort på TV-vyn.
-- [ ] P2 | S | "Dubbla poäng"-joker: varje spelare kan använda en gång per kväll innan de buzzar.
-- [ ] P3 | M | Vinnarens krona syns vid namnet på startsidan och i rummet nästa vecka (regerande kung).
+- [ ] P1 | S | Kungasatsningen (idé 2026-10-29): fråga med `"final": true` får fasen "satsa" före frågan. TV-vyn visar bara kategorin, varje spelare satsar i hemlighet 0–sin poäng med ett reglage på mobilen, sedan svarar alla samtidigt (återanvänd insamlingen från "Alla svarar"), hosten markerar rätt och servern räknar ±insats. TV-vyn avslöjar insats och utfall en spelare i taget från sista plats och uppåt. Insatser syns aldrig på TV:n före avslöjandet. Klart när e2e låter tre spelare satsa olika, en rätt och två fel, och tabellen stämmer efteråt. Byggs efter "Alla svarar".
+- [ ] P2 | M | Bluffrundan (idé 2026-10-29, à la Fibbage): `"mode": "bluff"` med `question` och `answer`. Fas 1: alla skriver i hemlighet ett falskt svar på mobilen. Fas 2: TV-vyn visar alla svar plus det riktiga blandat och anonymt, alla röstar på mobilen (inte på sitt eget, dubbletter av rätt svar slås ihop med det rätta). Rätt röst 2 p, 1 p per kompis som gick på ens lögn. Reveal visar vem som skrev vad. Klart när e2e kör en bluffråga med fyra spelare och poängen blir rätt. Byggs efter "Alla svarar".
+- [ ] P3 | M | Regerande kung + Kungens fråga (idé 2026-10-29): vinnarens krona syns vid namnet på startsidan, i rummet och i `/tabell` till nästa quiz. Den regerande kungen (spelarnamn som vann senaste kvällen i `Hub`, identifieras med namnet som skrivs vid inloggning) får knappen "Skriv kungens fråga" på startsidan; frågan sparas i `Hub`, visas i hostkontrollen märkt med krona och TV-vyn visar "Kungens fråga från <namn>". Kungen kan inte buzza på den; svarar ingen rätt får kungen 2 p. Klart när e2e skriver en kungens fråga, kör den och kungens buzz spärras.
+
+## Parkerat
+- P2 | M | Bildfrågor (kräver lagring, tas upp när rundtyperna är klara).
+- P2 | S | "Dubbla poäng"-joker (överlappar Lyckohjulets twistar och Kungasatsningen; tas upp om hjulet inte täcker det).
 
 ## Research (Quizresearchern)
 - [ ] P1 | M | Undersök statistikkällor för gänget: (1) HoN Reborn, finns ett publikt API eller en sajt med matchhistorik per användarnamn? (2) CS2, Steam Web API `GetUserStatsForGame` (appid 730, kräver gratis Steam-nyckel → be Erik skaffa via steamcommunity.com/dev/apikey) samt t.ex. Leetify/csstats. Dokumentera i `council/statistik.md`: vad går att hämta, hur, vad det kostar. Gör sedan ett set "Gänget i siffror" med 5–8 personliga frågor.
@@ -26,7 +30,7 @@ Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 - [ ] P2 | S | Rate-limit för buzz per anslutning (max ~5/s) så ingen kan spamma servern.
 
 ## Till PO
-- 2026-10-28 Utvecklingsansvarig: "Testa gärna" för Erik (välj en): (a) hur buzzen känns i Discord nu när servern väntar ~150 ms för att välja rättvist, (b) vibrationen vid buzz/rätt/fel på en riktig Android-mobil och att inget krånglar på iPhone, (c) lägga Kronan på hemskärmen.
+- ~~2026-10-28 Utvecklingsansvarig: "Testa gärna" (buzz-känsla, vibration, hemskärm)~~ → 2026-10-29 PO: lagt som frågor i `feedback.md` under Fredagsquiz 30 okt, testas på riktigt på quizkvällen.
 
 ## Klart
 - [x] 2026-10-28 | Rättvis buzz över Discord: mät varje spelares ping (finns redan i `useRoom` som klockoffset) och låt servern vänta ~150 ms efter första buzz och välja den med lägst *justerad* tid. Klart när e2e simulerar två nästan samtidiga buzzar och rätt spelare vinner.

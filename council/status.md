@@ -2,12 +2,16 @@
 
 *Skrivs om av Produktägaren varje körning.*
 
-**Prod-url:** https://kronan.swing-check.workers.dev (publiceras automatiskt vid push till main, röktestas efter varje publicering)
+**Prod-url:** https://kronan.swing-check.workers.dev (publiceras automatiskt vid push till main, röktestas efter varje publicering). CI grönt på main.
 
-**Senast (2026-10-28):** Idéspanaren kom med tre idéer och alla tre gick in i backloggen: rundtypen "Närmast på skalan" (P1), "Kvällens pris" där gänget röstar fram kvällens fail (P2) och "Fallande poäng" à la På spåret (P2).
+**Senast (2026-10-29):**
+- Idéspanaren kom med tre idéer, alla tre in i backloggen: **Kungasatsningen** (P1, satsa poäng inför sista frågan), **Bluffrundan** (P2, à la Fibbage) och **Kungens fråga** (P3, sammanslagen med "regerande kung").
+- Bildfrågor och "Dubbla poäng"-joker parkerade för att hålla Redo till 9 rader.
+- Utvecklingsansvarigs testfrågor (buzz-känsla, vibration, hemskärm) ligger nu i `feedback.md` under Fredagsquiz 30 okt.
+- Morgonsynken av `hub.json` gick inte av sig själv i dag (GitHubs schemaläggning startar ibland sent för nya workflows), så PO körde den manuellt. Inget nytt: inget datum satt i appen och inga spelade kvällar ännu.
 
-**Härnäst:** rättvis buzz över Discord-ping, vibration på mobilen, rundtypen "Alla svarar" och därefter "Närmast på skalan".
+**Härnäst:** Lyckohjul, "Vem sa det?" och "Alla svarar" (P1), därefter Kungasatsningen och "Närmast på skalan". Kodfrys på main fredag 2026-10-30.
 
-**Väntar på Erik:** Cloudflare-konto + hemligheter (för att publicera), info om gänget (för personliga frågor). Inga nya frågor idag.
+**Quiz:** Setet "Fredagsquiz 30 okt" (20 frågor) ligger klart i appen och kan väljas i hostkontrollen. Demosetet Allmänbildning finns också.
 
-**Nästa quiz:** okänt tills appen är publicerad och Erik satt ett datum.
+**Väntar på Erik:** en valfri fråga (vem är vem i gänget). Inga nya frågor i dag.

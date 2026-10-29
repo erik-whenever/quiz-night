@@ -5,3 +5,5 @@
 **Varför vi:** Hela poängen med kvällen är att kröna en kung, och nu kan den som ligger trea fortfarande vinna. Det ger spänning till slutet även när någon leder stort, och taktiksnacket i Discord innan ("han satsar allt, jag vet det") blir halva nöjet.
 **Insats:** S–M (en flagga `"final": true` på sista frågan; fas "satsa" i `Room` med hemlig insats; svaret samlas in som i "Alla svarar"; servern räknar ±insats; dramatisk avslöjandeordning i TV-vyn)
 **Kostnad:** gratis
+
+**PO:** In i backlog som P1 (S), byggs direkt efter "Alla svarar". Ger spänning till sista frågan och passar kvällens mål att kröna en kung.
