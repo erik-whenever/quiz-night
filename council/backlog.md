@@ -4,7 +4,7 @@ Format: `- [ ] P1 | S/M/L | Titel: vad + acceptanskriterie`. `[~]` = pågår (da
 Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 
 ## Quiz
-- [x] 2026-10-28 | QUIZ: Fredagsquiz till 2026-10-30. Set `app/quizzes/2026-10-30-fredagsquiz.json` (20 frågor) klart. Quizresearchern: lägg gärna till 3–5 personliga "Gänget i siffror"-frågor sist om statistik hittas senast torsdag, annars rör inte setet.
+- [x] 2026-10-28 | QUIZ: Fredagsquiz till 2026-10-30. Set `app/quizzes/2026-10-30-fredagsquiz.json` (20 frågor) klart. 2026-10-29: 3 personliga frågor (f21–f23) tillagda. Quizresearchern: lägg gärna till 3–5 personliga "Gänget i siffror"-frågor sist om statistik hittas senast torsdag, annars rör inte setet.
 - KODFRYS: 2026-10-30 (quizdag). Utvecklingsansvarig mergar inget till `main` den dagen.
 - [x] 2026-10-28 | DEMO: `app/quizzes/2026-10-demo-allmanbildning.json` (20 lätta–medel allmänfrågor) för en testkväll med gänget så snart som möjligt. Feedbacken hamnar i `council/feedback.md`.
 
@@ -24,7 +24,7 @@ Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 - P2 | S | "Dubbla poäng"-joker (överlappar Lyckohjulets twistar och Kungasatsningen; tas upp om hjulet inte täcker det).
 
 ## Research (Quizresearchern)
-- [~] 2026-10-29 P1 | M | Undersök statistikkällor för gänget (kartlagt i `council/statistik.md`, data hämtas av `sync-stats.yml`, setet återstår): (1) HoN Reborn, finns ett publikt API eller en sajt med matchhistorik per användarnamn? (2) CS2, Steam Web API `GetUserStatsForGame` (appid 730, kräver gratis Steam-nyckel → be Erik skaffa via steamcommunity.com/dev/apikey) samt t.ex. Leetify/csstats. Dokumentera i `council/statistik.md`: vad går att hämta, hur, vad det kostar. Gör sedan ett set "Gänget i siffror" med 5–8 personliga frågor.
+- [~] 2026-10-29 P1 | M | Undersök statistikkällor för gänget (kartlagt i `council/statistik.md`, Steam-profiler hämtas av `sync-stats.yml`, 3 frågor i fredagsquizet; väntar på Steam-nyckel/HoN-svar för setet): (1) HoN Reborn, finns ett publikt API eller en sajt med matchhistorik per användarnamn? (2) CS2, Steam Web API `GetUserStatsForGame` (appid 730, kräver gratis Steam-nyckel → be Erik skaffa via steamcommunity.com/dev/apikey) samt t.ex. Leetify/csstats. Dokumentera i `council/statistik.md`: vad går att hämta, hur, vad det kostar. Gör sedan ett set "Gänget i siffror" med 5–8 personliga frågor.
 
 ## Teknik
 - [ ] P2 | S | Rate-limit för buzz per anslutning (max ~5/s) så ingen kan spamma servern.

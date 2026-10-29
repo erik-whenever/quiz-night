@@ -7,3 +7,10 @@ Spelarnamn och Steam-id finns nu i `council/gänget.md`. Skriv gärna en rad per
 Utan det skriver Quizresearchern frågorna med spelarnamnen.
 
 **Svar:**
+
+## 2026-10-29: Statistik till "Gänget i siffror" (valfritt)
+Steam-profilerna fungerar redan (fredagsquizet har 3 frågor om era Steam-konton). För riktiga spelfrågor behövs:
+1. **Steam Web API-nyckel (gratis):** logga in på https://steamcommunity.com/dev/apikey, ange domän `kronan.swing-check.workers.dev`, kopiera nyckeln och lägg den som repo-secret `STEAM_API_KEY` (GitHub → Settings → Secrets and variables → Actions → New repository secret). Klistra **inte** in nyckeln här. Ger CS2-timmar, kills och headshots.
+2. **HoN Reborn:** WardUp (ward-up.com) har statistik per spelare men inget dokumenterat publikt API. A) Hör med WardUp (deras Discord) om rådet får hämta data för era fem namn B) Strunta i det, bara allmänna HoN-frågor.
+
+**Svar:**

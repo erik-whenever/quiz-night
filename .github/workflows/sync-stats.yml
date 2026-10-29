@@ -3,7 +3,7 @@ name: Hämta gängets spelstatistik
 # Agenternas sandlåda når inte Steam eller HoN-statistiksajter, så GitHub hämtar
 # publik data för gängets konton (council/gänget.md) och checkar in den under
 # council/data/. Används av Quizresearchern till "Gänget i siffror"-frågor.
-# Ingen API-nyckel behövs: Steam-profilernas publika XML och WardUps publika sidor.
+# Ingen API-nyckel behövs: Steam-profilernas publika XML.
 on:
   schedule:
     - cron: "41 4 * * 4"   # torsdagar, inför fredagsquizet
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Hämta Steam (profil + speltimmar) och WardUp (HoN Reborn)
+      - name: Hämta publika Steam-profiler
         run: python3 .github/scripts/hamta_statistik.py
       - name: Checka in om ändrat
         run: |

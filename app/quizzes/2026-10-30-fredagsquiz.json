@@ -1,7 +1,7 @@
 {
   "id": "2026-10-30-fredagsquiz",
   "title": "Fredagsquiz 30 okt",
-  "theme": "Mat, tv-citat, HoN, CS2 och allmänt",
+  "theme": "Mat, tv-citat, HoN, CS2, allmänt och gänget i siffror",
   "updatedAt": "2026-10-30",
   "questions": [
     { "id": "f1", "text": "Från vilket land kommer kimchi?", "answer": "Korea", "category": "Mat" },
@@ -23,6 +23,9 @@
     { "id": "f17", "text": "Vilket spelföretag utvecklade det ursprungliga Heroes of Newerth?", "answer": "S2 Games", "category": "HoN", "points": 2, "source": "https://en.wikipedia.org/wiki/Heroes_of_Newerth" },
     { "id": "f18", "text": "Vad kostar en AWP i CS2?", "answer": "4 750 dollar", "category": "CS2", "points": 2, "source": "https://csdb.gg/weapon/awp" },
     { "id": "f19", "text": "Vilket land räknas som hemlandet för ceviche?", "answer": "Peru", "category": "Mat", "points": 2 },
-    { "id": "f20", "text": "Vilken studio står bakom Heroes of Newerth: Reborn? Tips: den delar namn med spelets boss.", "answer": "Kongor Studios", "category": "HoN", "points": 2, "source": "https://www.gosugamers.net/entertainment/news/74223-kongor-studios-and-garena-announce-classic-moba-revival-heroes-of-newerth-reborn" }
+    { "id": "f20", "text": "Vilken studio står bakom Heroes of Newerth: Reborn? Tips: den delar namn med spelets boss.", "answer": "Kongor Studios", "category": "HoN", "points": 2, "source": "https://www.gosugamers.net/entertainment/news/74223-kongor-studios-and-garena-announce-classic-moba-revival-heroes-of-newerth-reborn" },
+    { "id": "f21", "text": "Gänget i siffror: Vem i gänget har det äldsta Steam-kontot, skapat i februari 2005? Svara med Steam-namnet.", "answer": "Högerback", "category": "Gänget i siffror", "source": "https://steamcommunity.com/profiles/76561197974162678 (publik profil, hämtad 2026-10-29, council/data/steam.json)" },
+    { "id": "f22", "text": "Gänget i siffror: Vilket år skapade Junkyard Dog sitt Steam-konto?", "answer": "2008 (21 november)", "category": "Gänget i siffror", "points": 2, "source": "https://steamcommunity.com/profiles/76561198003058171 (publik profil, hämtad 2026-10-29, council/data/steam.json)" },
+    { "id": "f23", "text": "Gänget i siffror: Gängets nyaste Steam-konto skapades i maj 2014. Vems är det? Svara med Steam-namnet.", "answer": "Opportunisten", "category": "Gänget i siffror", "points": 2, "source": "https://steamcommunity.com/profiles/76561198138571294 (publik profil, hämtad 2026-10-29, council/data/steam.json)" }
   ]
 }
