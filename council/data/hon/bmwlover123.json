@@ -91,6 +91,15 @@
   }
  },
  "accountId": "019c103b-7dbf-7ede-83aa-212259902517",
+ "pages": [
+  {
+   "offset": 0,
+   "status": 200,
+   "got": 50,
+   "new": 0,
+   "has_more": true
+  }
+ ],
  "historyStatus": 200,
  "historyKeys": [
   "matches",
@@ -1899,5 +1908,5 @@
    "assists": 20
   }
  ],
- "fetchedAt": "2026-10-29T11:48Z"
+ "fetchedAt": "2026-10-29T11:49Z"
 }
