@@ -38,7 +38,13 @@ jobs:
           printf 'HOST_PIN=1234\n' > .dev.vars
           npx wrangler dev --port 8787 --ip 127.0.0.1 > wrangler.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://127.0.0.1:8787/api/hub/public && break; sleep 1; done
-          python tests/e2e.py http://127.0.0.1:8787 e2e-shots
+          set -o pipefail
+          # Felet blir en annotation, så det går att läsa via API:t utan att ladda ner loggen.
+          python tests/e2e.py http://127.0.0.1:8787 e2e-shots 2>&1 | tee e2e.log || {
+            msg=$(grep -A4 "E2E MISSLYCKADES" e2e.log | tr '\n' ' ' | cut -c1-900)
+            echo "::error title=E2E misslyckades::${msg:-se loggen}"
+            exit 1
+          }
       - name: Skärmdumpar
         if: always()
         uses: actions/upload-artifact@v4
