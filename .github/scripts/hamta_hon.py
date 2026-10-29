@@ -17,7 +17,7 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 API = "https://ward-up.com/api"
 OUT = Path("council/data/hon")
 MAX_PAGES = 60          # tak per spelare
-KEEP = ("game_id", "played_at", "hero", "hero_name", "hero_id", "kills", "deaths", "assists",
+KEEP = ("game_id", "played_at", "date", "hero_name", "kda", "map", "is_ranked", "level", "hero", "hero_name", "hero_id", "kills", "deaths", "assists",
         "win", "won", "result", "duration", "mode", "game_mode", "gpm", "kda", "team")
 
 
@@ -84,35 +84,45 @@ def slim(m):
 def player(name):
     q = urllib.parse.quote(name)
     res = {"name": name}
-    st, prof = get(f"{API}/players/profile?id={q}")
-    res["profileStatus"] = st
-    res["profile"] = prof
-    acc = find(prof, ("account_id", "accountId", "accountID"))
-    if not acc:
-        st, look = get(f"{API}/players/quick-lookup?q={q}")
-        res["lookupStatus"] = st
-        res["lookup"] = look
-        acc = find(look, ("account_id", "accountId", "accountID"))
+    st, look = get(f"{API}/players/quick-lookup?q={q}")
+    res["lookupStatus"] = st
+    prof = look.get("profile") if isinstance(look, dict) else None
+    if isinstance(prof, dict):
+        res["profile"] = {k: v for k, v in prof.items()
+                          if k not in ("match_history", "teammate_rival_game_ids")}
+    acc = prof.get("id") if isinstance(prof, dict) else None
     res["accountId"] = acc
     matches, seen, offset = [], set(), 0
+
+    def add(lst):
+        n = 0
+        for m in lst:
+            if m.get("game_id") in seen:
+                continue
+            seen.add(m.get("game_id"))
+            matches.append(slim(m))
+            n += 1
+        return n
+
+    if isinstance(prof, dict):
+        add(prof.get("match_history") or [])
     if acc:
         for page in range(MAX_PAGES):
             st, data = get(f"{API}/players/match-history?account_id={acc}&offset={offset}")
             if page == 0:
                 res["historyStatus"] = st
-                res["historySample"] = data if not isinstance(data, (dict, list)) else None
                 if isinstance(data, dict):
                     res["historyKeys"] = list(data.keys())
+                elif not isinstance(data, list):
+                    res["historySample"] = data
             lst = match_list(data) if st == 200 else None
-            if not lst:
+            if not lst or not add(lst):
                 break
-            new = [m for m in lst if m.get("game_id") not in seen]
-            if not new:
-                break
-            for m in new:
-                seen.add(m.get("game_id"))
-                matches.append(slim(m))
             offset += len(lst)
+    for m in matches:  # "kda": "3/1/5" -> kills/deaths/assists
+        parts = str(m.get("kda", "")).split("/")
+        if len(parts) == 3 and all(x.strip().isdigit() for x in parts):
+            m["kills"], m["deaths"], m["assists"] = (int(x) for x in parts)
     res["matchCount"] = len(matches)
     res["matches"] = matches
     return res
@@ -129,7 +139,7 @@ def main():
         p["fetchedAt"] = stamp
         slug = re.sub(r"[^a-z0-9]+", "-", name.lower().replace("ö", "o").replace("ä", "a").replace("å", "a"))
         (OUT / f"{slug}.json").write_text(json.dumps(p, ensure_ascii=False, indent=1))
-        print(name, p.get("profileStatus"), p.get("accountId"), p["matchCount"])
+        print(name, p.get("lookupStatus"), p.get("accountId"), p.get("historyStatus"), p["matchCount"])
 
 
 if __name__ == "__main__":
