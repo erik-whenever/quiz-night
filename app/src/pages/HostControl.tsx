@@ -4,8 +4,9 @@ import { api, hostKeyFor } from "../lib/api";
 import { useCountdown, useRoom } from "../lib/useRoom";
 import { Countdown, Podium } from "../components";
 import { CollectHost } from "../collect";
-import { answerSecondsFor } from "../../shared/types";
+import { buzzTotalMs } from "../../shared/types";
 import { HostWheel } from "../wheel";
+import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
 
 function Control({ code }: { code: string }) {
@@ -70,6 +71,8 @@ function Control({ code }: { code: string }) {
               <>
                 <h3>Väntar på spelare</h3>
                 <p className="muted">{state.players.length} inne. Starta när alla är med.</p>
+                <HostTeams state={state} send={send} />
+                <EffectTags state={state} />
                 <button className="btn primary big" onClick={() => send({ t: "host:start" })} disabled={!state.players.length}>Starta första frågan</button>
                 <HostWheel state={state} send={send} serverNow={serverNow} />
               </>
@@ -79,6 +82,7 @@ function Control({ code }: { code: string }) {
               <>
                 <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{state.question.text}</p>
                 {state.answer && <div className="answer-box">Svar: {state.answer}</div>}
+                <EffectTags state={state} />
                 {state.collect && <CollectHost state={state} send={send} serverNow={serverNow} />}
                 <HostWheel state={state} send={send} serverNow={serverNow} />
 
@@ -87,7 +91,7 @@ function Control({ code }: { code: string }) {
                 {state.phase === "buzzed" && buzzer && (
                   <div className="stack" style={{ alignItems: "center" }}>
                     <div className="row" style={{ justifyContent: "center" }}>
-                      <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={96} />
+                      <Countdown ms={left} total={buzzTotalMs(state)} size={96} />
                       <div>
                         <p className="display" style={{ fontSize: "1.8rem", color: buzzer.color }}>{buzzer.name}</p>
                         <p className="muted small" aria-live="polite">{left > 0 ? "har ordet och svarar i Discord" : "Riktmärket har gått ut, du avgör"}</p>
@@ -115,10 +119,13 @@ function Control({ code }: { code: string }) {
             {state.phase === "finished" && (
               <>
                 <h3>Klart!</h3>
-                <Podium players={state.players} />
-                {crowned ? <p role="status">Sparat i tabellen. Grattis {crowned}!</p> : (
+                {state.teams.length ? <TeamPodium state={state} /> : <Podium players={state.players} />}
+                {crowned ? <p role="status">Sparat i tabellen och mynten utbetalda. Grattis {crowned}!</p> : (
                   <button className="btn primary big" onClick={async () => {
-                    await api.crown(code); setCrowned(sorted[0]?.name ?? "");
+                    await api.crown(code);
+                    const lead = [...state.teams].map((t) => ({ t, s: t.members.map((id) => state.players.find((p) => p.id === id)?.score ?? 0) }))
+                      .map((x) => ({ name: x.t.name, avg: x.s.reduce((a, b) => a + b, 0) / Math.max(1, x.s.length) })).sort((a, b) => b.avg - a.avg)[0];
+                    setCrowned(lead?.name ?? sorted[0]?.name ?? "");
                   }}>Kröna vinnaren och spara i tabellen</button>
                 )}
               </>
@@ -127,12 +134,14 @@ function Control({ code }: { code: string }) {
 
           <section className="panel stack">
             <h3>Spelare</h3>
+            {state.teams.length > 0 && state.phase !== "lobby" && <TeamBoard state={state} compact />}
             {sorted.length === 0 && <p className="muted">Ingen här än. Dela koden {code}.</p>}
             <table>
               <tbody>
                 {sorted.map((p) => (
                   <tr key={p.id} style={{ opacity: p.connected ? 1 : 0.5 }}>
-                    <td><span style={{ color: p.color }}>●</span> {p.name}{state.lockedOut.includes(p.id) && <span className="tag" style={{ marginLeft: 6 }}>utlåst</span>}</td>
+                    <td><span style={{ color: p.color }}>●</span> {p.name}
+                      {state.wallets?.[p.id] && <span className="muted small"> · 🪙 {state.wallets[p.id].coins}{state.coinsTonight?.[p.id] ? ` +${state.coinsTonight[p.id]}` : ""}</span>}{state.lockedOut.includes(p.id) && <span className="tag" style={{ marginLeft: 6 }}>utlåst</span>}</td>
                     <td className="num display">{p.score}</td>
                     <td className="num" style={{ whiteSpace: "nowrap" }}>
                       <button className="btn sm ghost" aria-label={`Ge ${p.name} en poäng`} onClick={() => send({ t: "host:adjust", playerId: p.id, delta: 1 })}>+1</button>{" "}

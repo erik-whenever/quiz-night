@@ -35,6 +35,16 @@ Titta på skärmdumparna i `e2e-shots/` efter UI-ändringar. Det är så rådet 
 - `/host` starta rum (PIN), `/host/KOD` hostkontroll med svaren, `/bank` frågebank, `/tabell` säsong
 - **TV-vyn får aldrig visa svaret innan reveal.** E2E-testet kontrollerar detta.
 
+## Rundtyper i fråge-JSON (`"mode"`)
+- utelämnad = **buzz**: först att buzza får ordet och svarar muntligt i Discord. Ingen automatisk timeout, hosten dömer Rätt/Fel/För långsam.
+- `"all"`: alla skriver ett hemligt svar, hosten bockar rätt.
+- `"choice"` + `"choices": [...]` (2–6, `answer` exakt ett av dem): svarsalternativ i mobilen, rättas automatiskt.
+- `"skill"` + `"skill": { "kind": "lasthit" | "aim" | "stopwatch" | "pour" | "order" }`: minispel i mobilen, 3/2/1 p efter placering. `stopwatch` tar `target` (s), `order` tar `items: [{label, value, show?}]` och `prompt` ("Äldst först"). Se `shared/skill.ts`.
+- Blanda gärna: ungefär en skill-utmaning och ett par alternativfrågor per fem frågor.
+
+## Lag och mynt
+Hosten väljer i lobbyn alla mot alla eller lag om 2/3 (slumpas). Egna poäng samlas, men kvällens resultat är lagets **snitt**. Mynt (`shared/teams.ts`) tjänas på rätt svar, skill-vinster, tre rätt i rad och vinst. De sparas per spelarnamn i `Hub` och betalas ut vid kröningen. Butiken (Extra tid, Pass, Dubbla poäng, Sabotage, Veto) är öppen i lobbyn.
+
 ## Design
 Tv-studio-känsla: ultramarin (`--studio`), signalgult (`--signal`) för primära handlingar, röd buzzer.
 Typsnitt: Bricolage Grotesque (rubriker/siffror) och Familjen Grotesk (brödtext). Tokens finns i `app/src/index.css`.

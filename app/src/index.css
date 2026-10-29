@@ -333,3 +333,29 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .order-reveal .txt { flex: 1; }
 .order-reveal .val { color: var(--mist); }
 .mark.nobox { grid-template-columns: 28px minmax(70px, auto) 1fr auto; cursor: default; }
+
+/* Lag, butik och mynt */
+.team-board { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; width: min(1000px, 100%); margin-inline: auto; }
+.team-row { display: grid; grid-template-columns: minmax(8em, auto) 1fr auto; gap: 12px; align-items: center; padding: 10px 16px; border-radius: 14px; background: var(--studio-deep); border-left: 8px solid var(--c); text-align: left; }
+.team-row.mine { box-shadow: inset 0 0 0 2px var(--c); }
+.team-name { font: 800 1.15rem var(--display); color: var(--c); }
+.team-members { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.team-members .mini { display: inline-flex; align-items: center; gap: 6px; font-size: 0.95rem; }
+.team-members .mini.off { opacity: 0.5; }
+.team-members .mini.active { color: var(--signal); }
+.team-members .dot { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--p); color: var(--studio-ink); font: 800 0.7rem var(--display); }
+.team-score { font: 800 1.6rem var(--display); font-variant-numeric: tabular-nums; }
+.team-board.compact .team-row { padding: 8px 12px; grid-template-columns: 1fr auto; }
+.team-board.compact .team-members { grid-column: 1 / -1; grid-row: 2; }
+.team-board.compact .team-score { font-size: 1.3rem; }
+.effect-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; }
+.effect-tag { padding: 3px 10px; border-radius: 999px; font: 700 0.85rem var(--display); background: var(--studio-ink); box-shadow: inset 0 0 0 2px var(--line); }
+.effect-tag.double { box-shadow: inset 0 0 0 2px var(--signal); color: var(--signal); }
+.effect-tag.sabotage { box-shadow: inset 0 0 0 2px var(--buzz); color: #ffb3b8; }
+.effect-tag.extra { box-shadow: inset 0 0 0 2px var(--go); color: var(--go); }
+.shop .coins { font: 800 1.2rem var(--display); }
+.shop-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.shop-list li { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 12px; background: var(--studio-ink); }
+.shop-list li > div { text-align: left; line-height: 1.3; }
+.shop-list .btn { flex: none; }
+.coin-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 10px 18px; border-radius: 999px; background: var(--signal); color: var(--studio-ink); font: 800 1.05rem var(--display); box-shadow: 0 8px 24px rgba(0,0,0,.35); animation: drop 380ms cubic-bezier(.2,1.6,.4,1); z-index: 20; }

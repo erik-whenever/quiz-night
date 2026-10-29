@@ -1,4 +1,7 @@
 import type { HubPublic, LeagueEntry, QuestionSet } from "../shared/types";
+import { COINS, SHOP, type ShopItem, type TokenItem, type Wallet, nameKey } from "../shared/teams";
+
+type Wallets = Record<string, Wallet>;
 
 /**
  * En global instans ("global"): frågebanken som skapas i appen, säsongstabellen och nästa quizdatum.
@@ -16,6 +19,7 @@ export class Hub implements DurableObject {
       const out: HubPublic = {
         nextQuiz: await st.get("nextQuiz"),
         league: (await st.get<LeagueEntry[]>("league")) ?? [],
+        wallets: Object.values((await st.get<Wallets>("wallets")) ?? {}).sort((a, b) => b.coins - a.coins),
       };
       return Response.json(out);
     }
@@ -53,6 +57,50 @@ export class Hub implements DurableObject {
     if (path.startsWith("/league/") && req.method === "DELETE") {
       const id = decodeURIComponent(path.slice(8));
       await st.put("league", ((await st.get<LeagueEntry[]>("league")) ?? []).filter((x) => x.id !== id));
+      return Response.json({ ok: true });
+    }
+    // ===== Plånböcker (anropas av Room direkt, inte via den publika routern) =====
+    const wallets = async () => (await st.get<Wallets>("wallets")) ?? {};
+    const getOrCreate = (ws: Wallets, name: string) =>
+      (ws[nameKey(name)] ??= { name: name.trim(), coins: COINS.welcome, items: {} });
+
+    if (path === "/wallet/get" && req.method === "POST") {
+      const { name } = await req.json<{ name: string }>();
+      const ws = await wallets();
+      const w = getOrCreate(ws, name);
+      await st.put("wallets", ws);
+      return Response.json(w);
+    }
+    if (path === "/wallet/buy" && req.method === "POST") {
+      const { name, item } = await req.json<{ name: string; item: ShopItem }>();
+      const ws = await wallets();
+      const w = getOrCreate(ws, name);
+      const it = SHOP[item];
+      if (!it) return Response.json({ error: "Okänd vara" }, { status: 400 });
+      if (w.coins < it.price) return Response.json({ error: `Du har ${w.coins} mynt, ${it.name} kostar ${it.price}` }, { status: 400 });
+      w.coins -= it.price;
+      if (it.token) w.items[item as TokenItem] = (w.items[item as TokenItem] ?? 0) + 1;
+      await st.put("wallets", ws);
+      return Response.json(w);
+    }
+    if (path === "/wallet/use" && req.method === "POST") {
+      const { name, item } = await req.json<{ name: string; item: TokenItem }>();
+      const ws = await wallets();
+      const w = getOrCreate(ws, name);
+      if (!w.items[item]) return Response.json({ error: `Du har inget ${SHOP[item]?.name ?? item}` }, { status: 400 });
+      w.items[item]! -= 1;
+      await st.put("wallets", ws);
+      return Response.json(w);
+    }
+    /** Kvällens mynt, en gång per kväll (id = ligaraden). */
+    if (path === "/payout" && req.method === "POST") {
+      const { id, coins } = await req.json<{ id: string; coins: Record<string, number> }>();
+      const paid = (await st.get<string[]>("paid")) ?? [];
+      if (paid.includes(id)) return Response.json({ ok: true, already: true });
+      const ws = await wallets();
+      for (const [name, n] of Object.entries(coins)) getOrCreate(ws, name).coins += Math.max(0, Math.round(n));
+      await st.put("wallets", ws);
+      await st.put("paid", [...paid, id].slice(-200));
       return Response.json({ ok: true });
     }
     return new Response("not found", { status: 404 });

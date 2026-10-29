@@ -1,6 +1,8 @@
 // Delade typer mellan klient (src/) och server (worker/).
 import type { OrderItem, SkillSpec } from "./skill";
 export type { SkillSpec, SkillKind, OrderItem } from "./skill";
+import type { CoinNote, Effects, ShopItem, Team, TeamMode, TokenItem, Wallet } from "./teams";
+export type { CoinNote, Effects, ShopItem, Team, TeamMode, TokenItem, Wallet } from "./teams";
 
 export interface Question {
   id: string;
@@ -108,6 +110,8 @@ export interface CollectPublic {
   results?: CollectResult[];
   /** Skill-rundor: slumpfrö så att alla får samma bana. */
   seed?: number;
+  /** Butikseffekter: ms till (+) eller från (−) deadline per spelare. */
+  extra?: Record<string, number>;
 }
 
 /** Hostens del: alla svar i inlämningsordning och vilka som hittills är markerade som rätt. */
@@ -136,6 +140,15 @@ export interface PublicState {
   collect?: CollectPublic;
   /** Lyckohjulet: senaste snurret och twisten det gav (null = ingen). */
   wheel?: WheelState | null;
+  /** Lag för kvällen (tomt = alla mot alla). */
+  teamMode: TeamMode;
+  teams: Team[];
+  /** Spelarnas plånböcker (laddas från Hub när de går med) och mynt intjänade i kväll. */
+  wallets: Record<string, Wallet>;
+  coinsTonight: Record<string, number>;
+  coinLog: CoinNote[];
+  /** Butikseffekter för pågående fråga, eller nästa mellan frågorna. */
+  effects: Effects;
 }
 
 /** Hosten ser dessutom rätt svar. */
@@ -149,6 +162,8 @@ export type GameEvent =
   | { kind: "correct"; playerId: string; delta: number; at: number; stolenFrom?: string; stolen?: number }
   | { kind: "wrong"; playerId: string; delta: number; at: number }
   | { kind: "timeout"; playerId: string; delta: number; at: number }
+  /** Spelaren som hade ordet använde ett Pass: inget straff, utlåst från frågan. */
+  | { kind: "pass"; playerId: string; delta: number; at: number }
   | { kind: "reveal"; at: number }
   /** En insamlingsrunda är rättad: poäng utdelade, svaren visas. */
   | { kind: "judged"; correct: string[]; fastestId?: string; at: number }
@@ -183,6 +198,14 @@ export type ClientMsg =
   | { t: "host:judge" }
   /** Snurra lyckohjulet (bara i lobbyn eller när svaret visas). Servern slumpar utfallet. */
   | { t: "host:spin" }
+  /** Lagläge: 0 = alla mot alla, annars lagstorlek. Slumpar nya lag (bara i lobbyn). */
+  | { t: "host:teams"; mode: TeamMode }
+  /** Köp i butiken (lobbyn). */
+  | { t: "buy"; item: ShopItem }
+  /** Aktivera en vara mellan frågorna för nästa fråga. target = lag/spelare att sabotera. */
+  | { t: "use"; item: Exclude<TokenItem, "pass">; target?: string }
+  /** Passa när man har ordet (kräver ett Pass). */
+  | { t: "pass" }
   | { t: "ping"; c: number }
   /** Svar på serverns sping, ekar s oförändrat så servern själv kan mäta RTT. */
   | { t: "spong"; s: number };
@@ -200,12 +223,17 @@ export interface LeagueEntry {
   id: string;
   date: string;
   title: string;
-  results: { name: string; score: number }[];
+  /** score = kvällens resultat (lagets snitt i lagläge). team = lagnamnet om det var lag. */
+  results: { name: string; score: number; team?: string }[];
+  /** Mynt som delades ut den kvällen. */
+  coins?: Record<string, number>;
 }
 
 export interface HubPublic {
   nextQuiz?: { date: string; theme?: string };
   league: LeagueEntry[];
+  /** Plånböcker (namn, mynt, varor) för tabellen. */
+  wallets?: Wallet[];
 }
 
 /** Rättvis buzz: hur länge servern samlar buzzar efter den första innan vinnaren väljs. */
@@ -268,4 +296,10 @@ export function activeTwist(st: { phase: Phase; qIndex: number; wheel?: WheelSta
 export function answerSecondsFor(st: { phase: Phase; qIndex: number; wheel?: WheelState | null; settings: Settings }): number {
   const s = st.settings.answerSeconds;
   return activeTwist(st) === "blitz" ? Math.max(2, Math.ceil(s / 2)) : s;
+}
+
+/** Hela svarstiden för pågående buzz (med Blixt, Extra tid och Sabotage), för nedräkningsringen. */
+export function buzzTotalMs(st: { phase: Phase; qIndex: number; wheel?: WheelState | null; settings: Settings; buzz: BuzzState | null; lastEvent?: GameEvent }): number {
+  if (st.buzz && st.lastEvent?.kind === "buzz") return Math.max(1000, st.buzz.deadline - st.lastEvent.at);
+  return answerSecondsFor(st) * 1000;
 }

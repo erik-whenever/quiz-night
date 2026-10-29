@@ -306,6 +306,131 @@ async ([pin]) => {
 }
 """
 
+# Lag, mynt och butik på protokollnivå. Unika namn per körning, eftersom plånböckerna sparas i Hub.
+TEAMS_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const tag = Math.random().toString(36).slice(2, 6);
+  const N = (n) => n + tag;
+  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Lag', settings: { answerSeconds: 10, penalty: 1, collectSeconds: 20 }, questions: [
+      { id: 'q1', text: 'Ett', answer: '1' }, { id: 'q2', text: 'Två', answer: '2' },
+      { id: 'q3', text: 'Tre', answer: '3', mode: 'all' }, { id: 'q4', text: 'Fyra', answer: '4' } ] }) });
+  const { code, hostKey } = await res.json();
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const connect = (role, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [], errors: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'error') c.errors.push(m.message);
+      if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const host = await connect('host', hostKey);
+  const ps = {};
+  for (const n of ['A', 'B', 'C', 'D']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: N(n) }); }
+  await until(host, (s) => s && Object.keys(s.wallets).length === 4);
+  const st = () => host.state;
+  const id = (n) => ps[n].id;
+  const w = (n) => st().wallets[id(n)];
+  const teamOf = (n) => st().teams.find((t) => t.members.includes(id(n)));
+  const mate = (n) => teamOf(n).members.find((x) => x !== id(n));
+  const out = {};
+  out.welcome = ['A', 'B', 'C', 'D'].map((n) => w(n).coins);
+
+  send(host, { t: 'host:teams', mode: 3 });
+  await until(host, (s) => s.teams.length > 0);
+  out.split3 = st().teams.map((t) => t.members.length).sort();
+  send(host, { t: 'host:teams', mode: 2 });
+  await until(host, (s) => s.teamMode === 2);
+  out.split2 = st().teams.map((t) => t.members.length).sort();
+
+  // Butiken
+  send(ps.A, { t: 'buy', item: 'extra' });
+  await until(host, (s) => s.wallets[id('A')].coins === 4);
+  send(ps.A, { t: 'buy', item: 'extra' }); await sleep(150);   // laget har redan
+  send(ps.A, { t: 'buy', item: 'pass' });
+  await until(host, (s) => s.wallets[id('A')].items.pass === 1);
+  send(ps.A, { t: 'buy', item: 'double' }); await sleep(150);  // 1 mynt kvar: för dyrt
+  out.errorsA = ps.A.errors.slice();
+  // Veto: D slumpar om och hamnar inte med samma lagkamrat
+  const oldMate = mate('D');
+  send(ps.D, { t: 'buy', item: 'veto' });
+  await until(host, (s) => s.wallets[id('D')].coins === 5);
+  out.vetoNewMate = mate('D') !== oldMate;
+  // B köper och aktiverar Dubbla poäng för fråga 1; C köper Sabotage
+  send(ps.B, { t: 'buy', item: 'double' });
+  await until(host, (s) => s.wallets[id('B')].items.double === 1);
+  send(ps.B, { t: 'use', item: 'double' });
+  await until(host, (s) => s.effects.double.length === 1);
+  out.doubleUnit = st().effects.double[0] === teamOf('B').id;
+  send(ps.C, { t: 'buy', item: 'sabotage' });
+  await until(host, (s) => s.wallets[id('C')].items.sabotage === 1);
+  const pub = await (await fetch('/api/hub/public')).json();
+  out.hubWallet = pub.wallets.find((x) => x.name === N('A'))?.coins;
+
+  // Fråga 1: B:s lagkamrat svarar rätt med dubbla poäng
+  const bm = Object.keys(ps).find((n) => id(n) === mate('B'));
+  send(host, { t: 'host:start' });
+  await until(host, (s) => s.phase === 'question');
+  send(ps[bm], { t: 'buzz' });
+  await until(host, (s) => s.phase === 'buzzed');
+  send(host, { t: 'host:correct' });
+  await until(host, (s) => s.phase === 'reveal');
+  out.doubleScore = st().players.find((p) => p.id === id(bm)).score;
+  out.coinCorrect = st().coinsTonight[id(bm)];
+
+  // Mellan frågorna: C saboterar A:s lag inför fråga 2. A har Extra tid: (10 + 5) / 2 = 7,5 s.
+  send(ps.C, { t: 'use', item: 'sabotage', target: teamOf('C').id }); await sleep(150);  // eget lag: nej
+  out.errorsC = ps.C.errors.slice();
+  const aTeam = teamOf('A').id;
+  if (aTeam !== teamOf('C').id) {
+    send(ps.C, { t: 'use', item: 'sabotage', target: aTeam });
+    await until(host, (s) => s.effects.sabotage.includes(aTeam));
+  }
+  out.sameTeamAC = aTeam === teamOf('C').id;
+  send(host, { t: 'host:next' });
+  await until(host, (s) => s.phase === 'question' && s.qIndex === 1);
+  send(ps.A, { t: 'buzz' });
+  const b2 = await until(host, (s) => s.phase === 'buzzed');
+  out.buzzMs = b2.buzz.deadline - b2.lastEvent.at;
+  const scoreA = b2.players.find((p) => p.id === id('A')).score;
+  send(ps.A, { t: 'pass' });
+  const p2 = await until(host, (s) => s.lastEvent?.kind === 'pass');
+  out.pass = { delta: p2.players.find((p) => p.id === id('A')).score - scoreA, locked: p2.lockedOut.includes(id('A')), left: p2.wallets[id('A')].items.pass };
+
+  // Fråga 3 (Alla svarar): A:s lag har +5 s egen deadline, sabotaget gällde bara fråga 2
+  send(host, { t: 'host:next' });
+  const c3 = await until(host, (s) => s.phase === 'collect');
+  out.extraCollect = c3.collect.extra?.[id('A')] ?? 0;
+  out.extraOther = c3.collect.extra?.[id('C')] ?? 0;
+  send(host, { t: 'host:finish' });
+  await until(host, (s) => s.phase === 'finished');
+
+  // Kröning: lagets snitt som resultat, mynt betalas ut en gång
+  const before = Object.fromEntries((await (await fetch('/api/hub/public')).json()).wallets.map((x) => [x.name, x.coins]));
+  const entry = await (await fetch(`/api/rooms/${code}/crown`, { method: 'POST', headers: { 'x-host-pin': pin } })).json();
+  await fetch(`/api/rooms/${code}/crown`, { method: 'POST', headers: { 'x-host-pin': pin } }); // dubbelklick
+  const after = Object.fromEntries((await (await fetch('/api/hub/public')).json()).wallets.map((x) => [x.name, x.coins]));
+  out.results = entry.results.map((r) => [r.name.replace(tag, ''), r.score, !!r.team]);
+  out.paid = Object.fromEntries(Object.keys(entry.coins).map((n) => [n.replace(tag, ''), after[n] - before[n] === entry.coins[n]]));
+  out.winnerBonus = entry.coins[N(bm)];
+  for (const c of [host, ...Object.values(ps)]) c.ws.close();
+  return out;
+}
+"""
+
 # Skill-rundor på protokollnivå: frö, validering, rankning och att ordningen inte läcker.
 SKILL_JS = """
 async ([pin]) => {
@@ -1133,6 +1258,54 @@ def main():
         shot(tv, "41-tv-ordna-facit")
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
 
+        # Lag och butik i webbläsaren: hosten slumpar lag, spelarna ser sitt lag och handlar
+        tdata = host.evaluate("""async ([pin]) => {
+          const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+            body: JSON.stringify({ title: 'Lagkväll', questions: [ { id: 'l1', text: 'Vad heter Kongors studio?', answer: 'Kongor Studios' } ] }) });
+          const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""", [PIN])
+        tcode = tdata["code"]
+        tag = tcode.lower()
+        host.goto(f"{BASE}/host/{tcode}")
+        tv.goto(f"{BASE}/tv/{tcode}")
+        for page, name in [(p1, "Erik"), (p2, "Tobbe"), (p3, "Sanna")]:
+            page.goto(f"{BASE}/play/{tcode}")
+            page.get_by_label("Ditt namn").fill(name + tag)
+            page.get_by_role("button", name="Hoppa in").click()
+            expect(page.get_by_label("Butik")).to_be_visible()
+        expect(p1.get_by_label("Mynt", exact=True)).to_contain_text("10")
+        host.get_by_label("Lagläge").select_option("2")
+        host.get_by_role("button", name="Slumpa lag").click()
+        expect(tv.get_by_label("Lagställning").locator("li")).to_have_count(2)  # 3 spelare → 2+1
+        expect(p1.get_by_text("Du är i")).to_be_visible()
+        shot(host, "50-host-lag")
+        shot(tv, "51-tv-lag-lobby")
+        # Sanna köper Dubbla poäng och aktiverar det för första frågan; Erik köper ett Pass
+        p3.get_by_role("button", name="Köp Dubbla poäng för 4 mynt").click()
+        expect(p3.get_by_label("Mynt", exact=True)).to_contain_text("6")
+        p3.get_by_role("button", name="Dubbla poäng nästa fråga").click()
+        expect(tv.locator(".effect-tag.double")).to_be_visible()
+        p1.get_by_role("button", name="Köp Pass för 3 mynt").click()
+        expect(p1.get_by_text("Pass ×1")).to_be_visible()
+        shot(p1, "52-spelare-butik")
+        host.get_by_role("button", name="Starta första frågan").click()
+        expect(tv.locator(".effect-tag.double")).to_be_visible()
+        p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
+        expect(p1.get_by_role("button", name="Använd pass (1 kvar), inget straff")).to_be_visible()
+        shot(p1, "53-spelare-pass")
+        host.get_by_role("button", name="Rätt (R)").click()
+        expect(p1.locator(".coin-toast")).to_contain_text("rätt svar")
+        shot(tv, "54-tv-lag-fraga")
+        host.get_by_role("button", name="Avsluta och visa pallen (N)").click()
+        expect(tv.get_by_role("heading", name="Kvällens kungar")).to_be_visible()
+        host.get_by_role("button", name="Kröna vinnaren och spara i tabellen").click()
+        expect(host.get_by_text("mynten utbetalda")).to_be_visible()
+        tv.wait_for_timeout(600)
+        shot(tv, "55-tv-lag-pallen")
+        p1.goto(BASE + "/tabell")
+        expect(p1.get_by_role("columnheader", name="Mynt")).to_be_visible()
+        shot(p1, "56-tabell-mynt")
+        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+
         # Rättvis buzz: direkta websocket-klienter med simulerad ping
         raw = b.new_page()
         raw.goto(BASE + "/")
@@ -1187,6 +1360,24 @@ def main():
         assert cp["scores"] == {"A": 1, "B": 2}, f"Fel poäng efter hostens ändring: {cp['scores']}"
         assert cp["noAutoTimeout"] == "buzzed", f"Servern dömde timeout själv: {cp['noAutoTimeout']}"
         assert cp["slow"] == {"kind": "timeout", "delta": -1, "locked": True}, f"För långsam fungerar inte: {cp['slow']}"
+        tm = raw.evaluate(TEAMS_JS, [PIN])
+        print("Lag och butik:", tm)
+        assert tm["welcome"] == [10, 10, 10, 10], f"Välkomstbonusen blev fel: {tm['welcome']}"
+        assert tm["split3"] == [2, 2] and tm["split2"] == [2, 2], f"Fel lagindelning: {tm}"
+        assert tm["errorsA"] == ["Ditt lag har redan Extra tid i kväll", "Du har 1 mynt, Dubbla poäng kostar 4"], f"Butiken släppte igenom fel köp: {tm['errorsA']}"
+        assert tm["vetoNewMate"], "Veto gav samma lagkamrat igen"
+        assert tm["doubleUnit"] and tm["doubleScore"] == 2 and tm["coinCorrect"] == 1, f"Dubbla poäng/mynt fungerar inte: {tm}"
+        assert tm["hubWallet"] == 1, f"Plånboken sparades inte i Hub: {tm['hubWallet']}"
+        assert tm["errorsC"] == ["Välj ett annat lag att sabotera"], f"Gick att sabotera eget lag: {tm['errorsC']}"
+        want_ms = 15000 if tm["sameTeamAC"] else 7500
+        assert abs(tm["buzzMs"] - want_ms) < 5, f"Extra tid/Sabotage gav fel svarstid: {tm['buzzMs']} (väntade {want_ms})"
+        assert tm["pass"] == {"delta": 0, "locked": True, "left": 0}, f"Pass fungerar inte: {tm['pass']}"
+        assert tm["extraCollect"] == 5000 and tm["extraOther"] in (0, 5000), f"Extra tid i insamling fel: {tm}"
+        assert all(t for _, _, t in tm["results"]), "Lagnamn saknas i tabellen"
+        scores = sorted(r[1] for r in tm["results"])
+        assert scores == [0, 0, 1, 1], f"Kvällens resultat ska vara lagets snitt (2/2 = 1 för vinnarlaget): {tm['results']}"
+        assert all(tm["paid"].values()), f"Mynten betalades inte ut exakt en gång: {tm['paid']}"
+        assert tm["winnerBonus"] == 1 + 3, f"Vinnaren ska få 1 (rätt svar) + 3 (vinst): {tm['winnerBonus']}"
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)
         assert sk["mode"] == "skill" and sk["seedSame"], f"Spelarna fick inte samma frö: {sk}"

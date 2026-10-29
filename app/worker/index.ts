@@ -1,6 +1,7 @@
 import { Room } from "./room";
 import { Hub } from "./hub";
-import type { LeagueEntry, PlayerPublic, Question, Settings } from "../shared/types";
+import type { LeagueEntry, PlayerPublic, Question, Settings, Team } from "../shared/types";
+import { COINS, nightScore } from "../shared/teams";
 
 export { Room, Hub };
 
@@ -60,14 +61,28 @@ export default {
         if (!isHost) return json({ error: "Kräver host-PIN" }, 401);
         const r = await stub.fetch(new Request("https://room/results"));
         if (!r.ok) return json({ error: "Rummet finns inte" }, 404);
-        const { title, players } = await r.json<{ title: string; players: PlayerPublic[] }>();
+        const { title, players, teams, coins } = await r.json<{ title: string; players: PlayerPublic[]; teams?: Team[]; coins?: Record<string, number> }>();
+        const ts = teams ?? [];
+        const results = players
+          .map((x) => ({ name: x.name, score: nightScore(ts, players, x), ...(ts.length ? { team: ts.find((t) => t.members.includes(x.id))?.name } : {}) }))
+          .sort((a, b) => b.score - a.score);
+        // Mynt: kvällens intjänade plus vinstbonus till alla med bästa resultatet (hela vinnarlaget).
+        const top = results[0]?.score;
+        const payout: Record<string, number> = {};
+        for (const x of players) {
+          const won = results.length > 0 && nightScore(ts, players, x) === top && top > 0;
+          const n = (coins?.[x.id] ?? 0) + (won ? COINS.winner : 0);
+          if (n > 0) payout[x.name] = n;
+        }
         const entry: LeagueEntry = {
           id: code + "-" + new Date().toISOString().slice(0, 10),
           date: new Date().toISOString(),
           title,
-          results: players.map((x) => ({ name: x.name, score: x.score })).sort((a, b) => b.score - a.score),
+          results,
+          coins: payout,
         };
         await hub.fetch(new Request("https://hub/hub/league", { method: "POST", body: JSON.stringify(entry) }));
+        await hub.fetch(new Request("https://hub/hub/payout", { method: "POST", body: JSON.stringify({ id: entry.id, coins: payout }) }));
         return json(entry);
       }
     }

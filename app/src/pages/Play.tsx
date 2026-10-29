@@ -4,13 +4,20 @@ import { useCountdown, useRoom } from "../lib/useRoom";
 import { haptic, sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
 import { CollectPlay } from "../collect";
-import { answerSecondsFor, isCollectMode } from "../../shared/types";
+import { buzzTotalMs, isCollectMode } from "../../shared/types";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
+import { CoinToast, EffectTags, PassButton, PlayerShop, TeamBoard } from "../teams";
 
 const idKey = (code: string) => "kronan.player." + code;
 const NAME_KEY = "kronan.name";
 const read = (k: string) => { try { return localStorage.getItem(k) ?? ""; } catch { return ""; } };
 const write = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* */ } };
+
+/** Insamlingens nedräkning för just mig: Extra tid eller Sabotage flyttar min deadline. */
+function withMyDeadline<S extends { collect?: { deadline: number; extra?: Record<string, number> } }>(state: S, me: string): S {
+  const ms = state.collect?.extra?.[me];
+  return ms && state.collect ? { ...state, collect: { ...state.collect, deadline: state.collect.deadline + ms } } : state;
+}
 
 export default function Play({ code }: { code: string }) {
   const [playerId, setPlayerId] = useState(read(idKey(code)));
@@ -127,6 +134,7 @@ export default function Play({ code }: { code: string }) {
         <>
           <p className="display" style={{ fontSize: "1.5rem", textAlign: "center", minHeight: "2em" }} aria-live="polite">{status}</p>
           {state.phase !== "lobby" && <div style={{ textAlign: "center" }}><TwistBadge state={state} /></div>}
+          <EffectTags state={state} />
           {state.question && state.phase !== "lobby" && (
             <p style={{ textAlign: "center", fontSize: "1.15rem" }}>{state.question.text}</p>
           )}
@@ -135,11 +143,12 @@ export default function Play({ code }: { code: string }) {
           {pendingWheel(state) && <div className="panel"><WheelPanel wheel={pendingWheel(state)!} serverNow={serverNow} size={140} compact /></div>}
 
           {collecting ? (
-            <CollectPlay key={state.qIndex} state={state} me={me} send={send} serverNow={serverNow} />
+            <CollectPlay key={state.qIndex} state={withMyDeadline(state, me.id)} me={me} send={send} serverNow={serverNow} />
           ) : myBuzz ? (
             <div className="stack" style={{ alignItems: "center" }}>
-              <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={160} />
+              <Countdown ms={left} total={buzzTotalMs(state)} size={160} />
               <p className="muted small" style={{ textAlign: "center" }}>Hosten dömer rätt, fel eller för långsam.</p>
+              <PassButton state={state} me={me} send={send} />
             </div>
           ) : (
             <div className="buzzer-zone">
@@ -157,7 +166,9 @@ export default function Play({ code }: { code: string }) {
           </p>
         </>
       )}
-      <Scorebar state={state} highlight={me.id} />
+      <CoinToast state={state} me={me} />
+      {state.phase !== "finished" && (state.phase === "lobby" || state.phase === "reveal") && <PlayerShop state={state} me={me} send={send} />}
+      {state.teams.length ? <TeamBoard state={state} highlight={me.id} compact /> : <Scorebar state={state} highlight={me.id} />}
       {!connected && <p className="err small">Tappade anslutningen, försöker igen…</p>}
     </main>
   );

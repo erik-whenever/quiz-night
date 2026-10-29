@@ -5,8 +5,9 @@ import { useCountdown, useRoom } from "../lib/useRoom";
 import { sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
 import { CollectTv } from "../collect";
-import { answerSecondsFor } from "../../shared/types";
+import { buzzTotalMs } from "../../shared/types";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
+import { EffectTags, TeamBoard, TeamPodium } from "../teams";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
@@ -56,19 +57,22 @@ export default function Tv({ code }: { code: string }) {
         <div className="question-card">
           <p className="question-text">Gå in på {location.host} och skriv koden</p>
           <p className="qmeta">{state.players.length} spelare inne, {state.qCount} frågor väntar</p>
+          {state.teams.length > 0 && <TeamBoard state={state} />}
+          <EffectTags state={state} />
         </div>
       )}
 
       {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
         <div className="question-card">
           <TwistBadge state={state} />
+          <EffectTags state={state} />
           <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}</p>
           {state.question.imageUrl && <img src={state.question.imageUrl} alt="" style={{ maxHeight: "35vh", borderRadius: 16 }} />}
           <p className="question-text">{state.question.text}</p>
           {state.phase === "buzzed" && buzzer && (
             <div className="buzz-banner" style={{ "--player": buzzer.color } as React.CSSProperties}>
               <span>{buzzer.name}</span>
-              <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={90} />
+              <Countdown ms={left} total={buzzTotalMs(state)} size={90} />
             </div>
           )}
           {state.phase === "buzzed" && <p className="qmeta">{left > 0 ? "har ordet, svara i Discord" : "Tiden är ute, hosten avgör"}</p>}
@@ -82,12 +86,12 @@ export default function Tv({ code }: { code: string }) {
 
       {state.phase === "finished" && (
         <div className="question-card">
-          <h1>Kvällens kung</h1>
-          <Podium players={state.players} />
+          <h1>{state.teams.length ? "Kvällens kungar" : "Kvällens kung"}</h1>
+          {state.teams.length ? <TeamPodium state={state} /> : <Podium players={state.players} />}
         </div>
       )}
 
-      <Scorebar state={state} />
+      {state.teams.length ? (state.phase !== "lobby" && <TeamBoard state={state} compact />) : <Scorebar state={state} />}
     </main>
   );
 }

@@ -11,6 +11,19 @@ import {
 import { SKILLS, correctOrder, orderShuffle, validSkill } from "../shared/skill";
 import type { WheelState } from "../shared/types";
 import { spinWheel, stealTarget } from "./wheel";
+import { collectEnd } from "./collect";
+import {
+  COINS, EXTRA_TIME_MS, SHOP, TEAM_COLORS, TEAM_NAMES, type CoinNote, type Effects, type ShopItem, type Team,
+  type TeamMode, type TokenItem, type Wallet, splitTeams, unitOf,
+} from "../shared/teams";
+
+interface Env { HUB: DurableObjectNamespace }
+const shuffled = <T,>(xs: T[]) => {
+  const a = [...xs];
+  const r = crypto.getRandomValues(new Uint32Array(a.length));
+  for (let i = a.length - 1; i > 0; i--) { const j = r[i] % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+};
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
 
@@ -64,7 +77,23 @@ interface Persisted {
   /** Pågående/senaste insamlingsrunda för aktuell fråga (null för buzz-frågor). */
   collect?: CollectServer | null;
   wheel?: WheelState | null;
+  // Lag och mynt (rum skapade före lagen fylls på i konstruktorn).
+  teamMode: TeamMode;
+  teams: Team[];
+  wallets: Record<string, Wallet>;
+  coins: Record<string, number>;
+  coinLog: CoinNote[];
+  streak: Record<string, number>;
+  /** Spelare som köpt Extra tid i kväll; effekten gäller deras lag. */
+  extraBuyers: string[];
+  /** Fråga -> enheter (lag/spelare) med Dubbla poäng resp. Sabotage. */
+  doubleFor: Record<number, string[]>;
+  sabotageFor: Record<number, string[]>;
 }
+
+const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor"> => ({
+  teamMode: 0, teams: [], wallets: {}, coins: {}, coinLog: [], streak: {}, extraBuyers: [], doubleFor: {}, sabotageFor: {},
+});
 
 /** Okänd mode blir buzz. En choice-fråga utan giltiga alternativ blir också buzz (muntligt). */
 export function normalizeQuestion(q: Question): Question {
@@ -99,11 +128,12 @@ export class Room implements DurableObject {
   /** Stänger insamlingen när tiden gått ut. */
   private collectTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private ctx: DurableObjectState, private env: unknown) {
+  constructor(private ctx: DurableObjectState, private env: Env) {
     ctx.blockConcurrencyWhile(async () => {
       this.s = (await ctx.storage.get<Persisted>("s")) ?? null;
       if (this.s) {
         this.s.settings = { ...DEFAULT_SETTINGS, ...this.s.settings }; // rum skapade före nya inställningar
+        this.s = { ...TEAM_DEFAULTS(), ...this.s };
         // Insamling som pågick när objektet sövdes: stäng den direkt eller vid deadline.
         if (this.s.phase === "collect" && this.s.collect) this.armCollectTimer();
       }
@@ -121,6 +151,7 @@ export class Room implements DurableObject {
         code: body.code, title: body.title, phase: "lobby", players: [],
         questions: body.questions.map(normalizeQuestion),
         qIndex: -1, buzz: null, lockedOut: [], settings: { ...DEFAULT_SETTINGS, ...body.settings }, hostKey: body.hostKey,
+        ...TEAM_DEFAULTS(),
       };
       await this.save();
       return Response.json({ ok: true });
@@ -128,7 +159,7 @@ export class Room implements DurableObject {
 
     if (url.pathname.endsWith("/results")) {
       if (!this.s) return new Response("not found", { status: 404 });
-      return Response.json({ title: this.s.title, players: this.s.players });
+      return Response.json({ title: this.s.title, players: this.s.players, teams: this.s.teams, coins: this.s.coins });
     }
 
     if (req.headers.get("Upgrade") !== "websocket") return new Response("expected websocket", { status: 426 });
@@ -183,6 +214,8 @@ export class Room implements DurableObject {
       buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
       collect: s.collect && s.phase !== "finished" ? collectPublic(s.collect, s.phase === "reveal") : undefined,
       wheel: s.wheel ?? null,
+      teamMode: s.teamMode, teams: s.teams, wallets: s.wallets, coinsTonight: s.coins, coinLog: s.coinLog.slice(-12),
+      effects: this.effects(),
     };
     if (role === "host") return { ...base, answer: q?.answer, collectHost: s.collect ? collectHost(s.collect) : undefined };
     return base;
@@ -216,7 +249,7 @@ export class Room implements DurableObject {
     }
     if (!winner) return;
     const secs = answerSecondsFor(s);
-    const deadline = Date.now() + secs * 1000;
+    const deadline = Date.now() + this.timeFor(winner, secs * 1000);
     s.buzz = { playerId: winner, deadline };
     s.phase = "buzzed";
     s.lastEvent = { kind: "buzz", playerId: winner, at: Date.now() };
@@ -236,7 +269,7 @@ export class Room implements DurableObject {
     this.clearCollectTimer();
     const c = this.s?.collect;
     if (!c) return;
-    this.collectTimer = setTimeout(() => { void this.closeCollect(); }, Math.max(0, c.deadline - Date.now()) + 50);
+    this.collectTimer = setTimeout(() => { void this.closeCollect(); }, Math.max(0, collectEnd(c) - Date.now()) + 50);
   }
 
   /** Aktuell fråga är en insamlingsrunda: öppna insamlingen. Returnerar false för vanliga buzz-frågor. */
@@ -248,6 +281,10 @@ export class Room implements DurableObject {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0];
       s.collect = startCollect("skill", q.skill.seconds ?? SKILLS[q.skill.kind].seconds, Date.now(), seed);
     } else s.collect = startCollect(q.mode, s.settings.collectSeconds);
+    // Extra tid och Sabotage: varje spelare får egen deadline.
+    const base = s.collect.deadline - s.collect.startedAt;
+    const extra = Object.fromEntries(s.players.map((p) => [p.id, Math.round(this.timeFor(p.id, base) - base)]).filter(([, ms]) => ms !== 0));
+    if (Object.keys(extra).length) s.collect.extra = extra;
     s.phase = "collect";
     this.armCollectTimer();
     return true;
@@ -275,8 +312,11 @@ export class Room implements DurableObject {
     const mult = activeTwist(s) === "double" ? 2 : 1;
     c.results = c.mode === "skill" && q?.skill ? scoreSkill(c, q.skill, mult) : scoreAll(c, (q?.points ?? 1) * mult, s.settings);
     for (const r of c.results) {
+      r.delta *= this.multFor(r.playerId);
       const p = s.players.find((x) => x.id === r.playerId);
       if (p) p.score += r.delta;
+      if (c.mode === "skill") { if (r.place === 1) this.award(r.playerId, COINS.skillWin, "vann utmaningen"); }
+      else if (r.correct) this.onCorrect(r.playerId); else this.streakReset(r.playerId);
     }
     s.phase = "reveal";
     s.lastEvent = { kind: "judged", correct: c.results.filter((r) => r.correct).map((r) => r.playerId),
@@ -291,13 +331,90 @@ export class Room implements DurableObject {
     return twist === "safe" ? 0 : -this.s!.settings.penalty;
   }
 
-  /** Fel eller timeout: dra poäng, lås ute spelaren, öppna för andra att buzza. */
-  private async punish(kind: "wrong" | "timeout") {
+  // ===== Lag, mynt och butik =====
+
+  private hub() { return this.env.HUB.get(this.env.HUB.idFromName("global")); }
+  private async hubCall(path: string, body: unknown): Promise<{ wallet?: Wallet; error?: string }> {
+    try {
+      const r = await this.hub().fetch(new Request("https://hub/hub" + path, { method: "POST", body: JSON.stringify(body) }));
+      const data = await r.json<Wallet & { error?: string }>();
+      return r.ok ? { wallet: data } : { error: data.error ?? "Butiken svarar inte" };
+    } catch { return { error: "Butiken svarar inte" }; }
+  }
+
+  private unit(pid: string) { return unitOf(this.s!.teams, pid); }
+
+  /** Vilken fråga butikseffekter gäller nu: pågående fråga, eller nästa mellan frågorna. */
+  private effectQ() {
+    const s = this.s!;
+    return s.phase === "lobby" || s.phase === "reveal" ? s.qIndex + 1 : s.qIndex;
+  }
+
+  private effects(): Effects {
+    const s = this.s!;
+    const q = this.effectQ();
+    return { forQ: q, extra: [...new Set(s.extraBuyers.filter((id) => s.players.some((p) => p.id === id)).map((id) => this.unit(id)))],
+      double: s.doubleFor[q] ?? [], sabotage: s.sabotageFor[q] ?? [] };
+  }
+
+  /** Tid för en spelare på aktuell fråga: +5 s med Extra tid, halverad om laget saboteras. */
+  private timeFor(pid: string, baseMs: number) {
+    const s = this.s!;
+    const u = this.unit(pid);
+    let ms = baseMs;
+    if (s.extraBuyers.some((id) => this.unit(id) === u)) ms += EXTRA_TIME_MS;
+    if ((s.sabotageFor[s.qIndex] ?? []).includes(u)) ms /= 2;
+    return ms;
+  }
+
+  private multFor(pid: string) { return (this.s!.doubleFor[this.s!.qIndex] ?? []).includes(this.unit(pid)) ? 2 : 1; }
+
+  private award(pid: string, n: number, why: string) {
+    const s = this.s!;
+    s.coins[pid] = (s.coins[pid] ?? 0) + n;
+    s.coinLog.push({ playerId: pid, n, why, at: Date.now() });
+    if (s.coinLog.length > 40) s.coinLog.splice(0, s.coinLog.length - 40);
+  }
+  private onCorrect(pid: string) {
+    const s = this.s!;
+    this.award(pid, COINS.correct, "rätt svar");
+    s.streak[pid] = (s.streak[pid] ?? 0) + 1;
+    if (s.streak[pid] >= COINS.streakLen) { this.award(pid, COINS.streak, `${COINS.streakLen} rätt i rad`); s.streak[pid] = 0; }
+  }
+  private streakReset(pid: string) { this.s!.streak[pid] = 0; }
+
+  /** Slumpa lag. avoid: spelaren som lade veto ska inte hamna med samma lagkamrater. */
+  private drawTeams(avoid?: { pid: string; mates: string[] }) {
+    const s = this.s!;
+    if (!s.teamMode) { s.teams = []; return; }
+    let groups: string[][] = [];
+    for (let i = 0; i < 80; i++) {
+      groups = splitTeams(shuffled(s.players.map((p) => p.id)), s.teamMode);
+      if (!avoid) break;
+      const mine = groups.find((g) => g.includes(avoid.pid)) ?? [];
+      if (!mine.some((id) => avoid.mates.includes(id))) break;
+    }
+    const names = shuffled(TEAM_NAMES);
+    s.teams = groups.map((members, i) => ({ id: "t" + i + "-" + Date.now().toString(36), name: names[i % names.length], color: TEAM_COLORS[i % TEAM_COLORS.length], members }));
+    // Effekter för kommande frågor siktade på gamla lag-id gäller inte längre.
+    s.doubleFor = {}; s.sabotageFor = {};
+  }
+
+  /** Ny spelare när lagen redan är slumpade: in i minsta laget. */
+  private placeInTeam(pid: string) {
+    const s = this.s!;
+    if (!s.teamMode || !s.teams.length || s.teams.some((t) => t.members.includes(pid))) return;
+    [...s.teams].sort((a, b) => a.members.length - b.members.length)[0].members.push(pid);
+  }
+
+  /** Fel, för långsam eller pass: dra poäng (inte vid pass), lås ute spelaren, öppna för andra att buzza. */
+  private async punish(kind: "wrong" | "timeout" | "pass") {
     const s = this.s!;
     if (s.phase !== "buzzed" || !s.buzz) return;
     this.clearTimer();
     const pid = s.buzz.playerId;
-    const d = this.delta(-1);
+    const d = kind === "pass" ? 0 : this.delta(-1);
+    if (kind !== "pass") this.streakReset(pid);
     const p = s.players.find((x) => x.id === pid);
     if (p) p.score += d;
     s.lockedOut.push(pid);
@@ -305,6 +422,57 @@ export class Room implements DurableObject {
     s.lastEvent = { kind, playerId: pid, delta: d, at: Date.now() };
     const eligible = s.players.filter((x) => x.connected && !s.lockedOut.includes(x.id));
     s.phase = eligible.length === 0 ? "reveal" : "question";
+    await this.save();
+    this.broadcast();
+  }
+
+  private async shop(c: Conn, m: Extract<ClientMsg, { t: "buy" | "use" | "pass" }>) {
+    const s = this.s!;
+    const pid = c.playerId;
+    const p = pid ? s.players.find((x) => x.id === pid) : undefined;
+    if (!pid || !p) return;
+    const err = (message: string) => this.send(c, { t: "error", message });
+
+    if (m.t === "pass") {
+      if (s.phase !== "buzzed" || s.buzz?.playerId !== pid) return err("Du har inte ordet");
+      const r = await this.hubCall("/wallet/use", { name: p.name, item: "pass" });
+      if (r.error) return err(r.error);
+      s.wallets[pid] = r.wallet!;
+      return this.punish("pass");
+    }
+
+    if (m.t === "buy") {
+      const item = m.item as ShopItem;
+      if (!SHOP[item]) return err("Okänd vara");
+      if (s.phase !== "lobby") return err("Butiken är bara öppen i lobbyn");
+      if (item === "extra" && s.extraBuyers.some((id) => this.unit(id) === this.unit(pid))) return err("Ditt lag har redan Extra tid i kväll");
+      if (item === "veto" && !s.teams.length) return err("Det finns inga lag att lägga veto mot än");
+      const mates = s.teams.find((t) => t.members.includes(pid))?.members.filter((id) => id !== pid) ?? [];
+      const r = await this.hubCall("/wallet/buy", { name: p.name, item });
+      if (r.error) return err(r.error);
+      s.wallets[pid] = r.wallet!;
+      if (item === "extra") s.extraBuyers.push(pid);
+      if (item === "veto") this.drawTeams({ pid, mates });
+    } else {
+      const item = m.item as TokenItem;
+      if (item !== "double" && item !== "sabotage") return err("Okänd vara");
+      if (s.phase !== "lobby" && s.phase !== "reveal") return err("Aktivera mellan frågorna");
+      const q = this.effectQ();
+      if (q >= s.questions.length) return err("Det finns ingen nästa fråga");
+      const own = this.unit(pid);
+      if (item === "double") {
+        if ((s.doubleFor[q] ?? []).includes(own)) return err("Dubbla poäng är redan aktiverat för nästa fråga");
+      } else {
+        const units = s.teams.length ? s.teams.map((t) => t.id) : s.players.map((x) => x.id);
+        if (!m.target || !units.includes(m.target) || m.target === own) return err("Välj ett annat lag att sabotera");
+        if ((s.sabotageFor[q] ?? []).includes(m.target)) return err("De är redan saboterade på nästa fråga");
+      }
+      const r = await this.hubCall("/wallet/use", { name: p.name, item });
+      if (r.error) return err(r.error);
+      s.wallets[pid] = r.wallet!;
+      if (item === "double") s.doubleFor[q] = [...(s.doubleFor[q] ?? []), own];
+      else s.sabotageFor[q] = [...(s.sabotageFor[q] ?? []), m.target!];
+    }
     await this.save();
     this.broadcast();
   }
@@ -334,8 +502,11 @@ export class Room implements DurableObject {
       }
       p.connected = true;
       c.role = "player"; c.playerId = p.id;
+      this.placeInTeam(p.id);
       this.send(c, { t: "joined", playerId: p.id });
       this.sping(c);
+      const w = await this.hubCall("/wallet/get", { name: p.name });
+      if (w.wallet) s.wallets[p.id] = w.wallet;
       await this.save();
       return this.broadcast();
     }
@@ -382,6 +553,8 @@ export class Room implements DurableObject {
       return this.broadcast();
     }
 
+    if (m.t === "buy" || m.t === "use" || m.t === "pass") return this.shop(c, m);
+
     if (m.t === "type") {
       if (s.buzz && s.buzz.playerId === c.playerId) { s.buzz.typedAnswer = m.text.slice(0, 120); this.broadcast(); }
       return;
@@ -403,7 +576,8 @@ export class Room implements DurableObject {
       case "host:correct": {
         if (s.phase !== "buzzed" || !s.buzz) return;
         this.clearTimer();
-        const d = this.delta(1);
+        const d = this.delta(1) * this.multFor(s.buzz.playerId);
+        this.onCorrect(s.buzz.playerId);
         const steal = activeTwist(s) === "steal" ? stealTarget(s.players, s.buzz.playerId, d) : null;
         const p = s.players.find((x) => x.id === s.buzz!.playerId);
         if (p) p.score += d;
@@ -425,8 +599,15 @@ export class Room implements DurableObject {
       case "host:adjust": {
         const p = s.players.find((x) => x.id === m.playerId); if (p) p.score += m.delta; break;
       }
+      case "host:teams": {
+        if (s.phase !== "lobby") return this.send(c, { t: "error", message: "Lagen slumpas i lobbyn" });
+        s.teamMode = m.mode === 2 || m.mode === 3 ? m.mode : 0;
+        this.drawTeams();
+        break;
+      }
       case "host:kick": {
         s.players = s.players.filter((x) => x.id !== m.playerId);
+        for (const t of s.teams) t.members = t.members.filter((id) => id !== m.playerId);
         for (const cc of this.conns) if (cc.playerId === m.playerId) { try { cc.ws.close(4000, "kicked"); } catch {} }
         break;
       }

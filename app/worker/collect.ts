@@ -18,7 +18,14 @@ export interface CollectServer {
   correct: string[]; // playerIds som hosten markerat som rätt
   results?: CollectResult[]; // sätts vid rättning
   seed?: number; // skill-rundor
+  /** Butikseffekter: ms till eller från deadline per spelare (Extra tid +, Sabotage −). */
+  extra?: Record<string, number>;
 }
+
+/** Spelarens egen deadline med butikseffekter. */
+export const deadlineFor = (c: CollectServer, playerId: string) => c.deadline + (c.extra?.[playerId] ?? 0);
+/** När insamlingen senast ska stängas (den som har mest extra tid). */
+export const collectEnd = (c: CollectServer) => c.deadline + Math.max(0, ...Object.values(c.extra ?? {}));
 
 export function startCollect(mode: CollectServer["mode"], seconds: number, now = Date.now(), seed?: number): CollectServer {
   return { mode, startedAt: now, deadline: now + seconds * 1000, answers: [], correct: [], ...(seed !== undefined ? { seed } : {}) };
@@ -27,7 +34,7 @@ export function startCollect(mode: CollectServer["mode"], seconds: number, now =
 /** Lämna ett skill-resultat. Ordna rätt räknas av servern; övriga typer valideras. */
 export function submitSkill(c: CollectServer, spec: SkillSpec, playerId: string,
   msg: { value?: unknown; ok?: unknown; order?: unknown }, now = Date.now()): string | null {
-  if (now > c.deadline + COLLECT_GRACE_MS) return "Tiden är ute";
+  if (now > deadlineFor(c, playerId) + COLLECT_GRACE_MS) return "Tiden är ute";
   if (c.answers.some((a) => a.playerId === playerId)) return "Du har redan lämnat ditt resultat";
   let value: number, ok: boolean;
   if (spec.kind === "order") {
@@ -55,7 +62,7 @@ export function scoreSkill(c: CollectServer, spec: SkillSpec, mult: number): Col
 
 /** Lämna ett svar. Returnerar felmeddelande, eller null om svaret togs emot. Ett svar per spelare (låst). */
 export function submitAnswer(c: CollectServer, playerId: string, raw: unknown, now = Date.now()): string | null {
-  if (now > c.deadline + COLLECT_GRACE_MS) return "Tiden är ute";
+  if (now > deadlineFor(c, playerId) + COLLECT_GRACE_MS) return "Tiden är ute";
   if (c.answers.some((a) => a.playerId === playerId)) return "Du har redan låst ditt svar";
   const text = typeof raw === "string" ? raw.replace(/\s+/g, " ").trim().slice(0, COLLECT_MAX_LEN) : "";
   if (!text) return "Skriv ett svar först";
@@ -89,6 +96,7 @@ export function collectPublic(c: CollectServer, revealed: boolean): CollectPubli
     answered: c.answers.map((a) => a.playerId),
     results: revealed ? c.results : undefined,
     ...(c.seed !== undefined ? { seed: c.seed } : {}),
+    ...(c.extra && Object.keys(c.extra).length ? { extra: c.extra } : {}),
   };
 }
 

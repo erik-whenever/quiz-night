@@ -22,6 +22,8 @@ Set: "Fredagsquiz 30 okt"
 - Kändes buzzen rättvis i Discord (servern väntar ~150 ms och väljer med hänsyn till ping)?
 - Vibrerade mobilen vid buzz/rätt/fel på Android? Krånglade något på iPhone?
 - La någon Kronan på hemskärmen (Dela → Lägg till på hemskärmen)? Funkade det?
+- Skill-utmaningarna: vilken var roligast, och var någon för svår eller orättvis?
+- Lag och mynt: kändes priserna i butiken rimliga? Vad mer vill ni kunna köpa?
 
 ## Demo (datum: ____)
 Set: "Demo: Allmänbildning"
