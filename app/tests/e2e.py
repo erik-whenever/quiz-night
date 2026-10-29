@@ -905,6 +905,7 @@ def main():
         # Åskådaren ser lagets kort med pratande medlemmar, nedräkning och skuggtips
         spec = p2.locator(".spectator")
         expect(spec).to_contain_text("har turen")
+        expect(spec.get_by_role("note")).to_have_text("You wait, I have a shit with me")
         expect(spec.get_by_label("Svarar nu").locator("li")).to_have_count(1)
         expect(spec.get_by_role("timer")).to_be_visible()
         expect(p2.get_by_role("group", name="Skuggtips").get_by_role("button")).to_have_count(4)

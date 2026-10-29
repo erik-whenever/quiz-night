@@ -175,6 +175,35 @@ function unitMembers(state: HostState, unit?: string) {
   return t ? state.players.filter((p) => t.members.includes(p.id)) : state.players.filter((p) => p.id === unit);
 }
 
+/** Gängets internskämt på väntskärmen. En kompis klassiska replik (Eriks önskemål 2026-10-29). */
+const WAIT_LINES = ["You wait, I have a shit with me"];
+
+/** Tecknad kompis med headset som pratar (munnen rör sig) och en pratbubbla. Ren SVG + CSS-animation. */
+function Talker({ line }: { line: string }) {
+  return (
+    <div className="talker">
+      <div className="talker-bubble" role="note">{line}</div>
+      <svg className="talker-guy" viewBox="0 0 120 120" aria-hidden="true">
+        <g className="talker-head">
+          <ellipse cx="60" cy="112" rx="34" ry="14" fill="#0e1563" />
+          <path d="M28 112 Q30 84 60 84 Q90 84 92 112 Z" fill="#3d4bd6" />
+          <circle cx="60" cy="56" r="28" fill="#c98b5b" />
+          <path d="M33 50 Q34 24 60 24 Q86 24 87 50 Q80 36 60 36 Q40 36 33 50 Z" fill="#1d1a2e" />
+          <path d="M28 56 Q28 22 60 22 Q92 22 92 56" stroke="#070b3a" strokeWidth="6" fill="none" />
+          <rect x="22" y="50" width="12" height="18" rx="5" fill="#ffd23f" />
+          <rect x="86" y="50" width="12" height="18" rx="5" fill="#ffd23f" />
+          <path d="M28 66 Q30 80 46 78" stroke="#070b3a" strokeWidth="3" fill="none" />
+          <circle cx="47" cy="77" r="3.5" fill="#070b3a" />
+          <ellipse className="talker-eye" cx="50" cy="54" rx="3.5" ry="4.5" fill="#070b3a" />
+          <ellipse className="talker-eye" cx="70" cy="54" rx="3.5" ry="4.5" fill="#070b3a" />
+          <path d="M44 46 Q50 42 55 45 M65 45 Q70 42 76 46" stroke="#1d1a2e" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <ellipse className="talker-mouth" cx="60" cy="70" rx="8" ry="5" fill="#5a1620" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 /**
  * Åskådarkortet när ett annat lag har turen (eller har buzzat): lagets färg, medlemmarna med en pratande
  * ljudvåg, stor nedräkning och alternativen. Ett tryck på ett alternativ är ett hemligt skuggtips som bara
@@ -199,6 +228,7 @@ function Spectator({ state, serverNow, title, sub, deadline, total }: {
         </div>
         {deadline ? <Countdown ms={left} total={total} size={84} /> : null}
       </div>
+      <Talker line={WAIT_LINES[state.qIndex % WAIT_LINES.length]} />
       {members.length > 0 && (
         <ul className="spectator-members" aria-label="Svarar nu">
           {members.map((p) => (

@@ -423,3 +423,20 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .shadow-btn.gone { opacity: 0.3; text-decoration: line-through; }
 .shadow-result { margin: 6px 0 0; font-weight: 700; color: var(--signal); }
 @media (prefers-reduced-motion: reduce) { .spectator, .talk i { animation: none; } }
+
+/* Väntskärmens pratande kompis och pratbubbla */
+.talker { display: grid; grid-template-columns: 96px 1fr; align-items: end; gap: 6px; }
+.talker-guy { grid-column: 1; grid-row: 1; width: 96px; height: 96px; overflow: visible; }
+.talker-bubble { grid-column: 2; grid-row: 1; align-self: start; position: relative; padding: 10px 14px; border-radius: 16px 16px 16px 4px;
+  background: var(--chalk); color: var(--studio-ink); font: 800 1.05rem/1.2 var(--display); box-shadow: 0 6px 18px rgba(0,0,0,.3);
+  animation: bubble-in 420ms cubic-bezier(.2,1.6,.4,1) both, bubble-bob 3s ease-in-out 420ms infinite; transform-origin: 0 100%; }
+.talker-bubble::before { content: ""; position: absolute; left: -9px; bottom: 6px; border: 8px solid transparent; border-right-color: var(--chalk); border-left: 0; }
+.talker-head { transform-origin: 60px 100px; animation: head-bob 0.9s ease-in-out infinite; }
+.talker-mouth { transform-box: fill-box; transform-origin: center; animation: mouth 0.22s steps(2, jump-none) infinite alternate; }
+.talker-eye { transform-box: fill-box; transform-origin: center; animation: blink 3.6s infinite; }
+@keyframes mouth { from { transform: scaleY(0.25); } to { transform: scaleY(1.25); } }
+@keyframes head-bob { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg) translateY(-1px); } }
+@keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes bubble-in { from { transform: scale(0.4); opacity: 0; } }
+@keyframes bubble-bob { 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .talker-head, .talker-mouth, .talker-eye, .talker-bubble { animation: none; } }
