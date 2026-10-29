@@ -6,6 +6,7 @@
   "questions": [
     { "id": "q1", "text": "Vilket år släpptes det första Heroes of Newerth i full version?", "answer": "2010", "category": "Spel" },
     { "id": "q2", "text": "Vilket grundämne har kemiska beteckningen Au?", "answer": "Guld", "category": "Vetenskap" },
+    { "id": "q2b", "text": "Vad heter Sveriges största sjö?", "answer": "Vänern", "category": "Geografi", "mode": "all" },
     { "id": "q3", "text": "Vad heter Sveriges högsta berg?", "answer": "Kebnekaise", "category": "Geografi" },
     { "id": "q4", "text": "Vilket företag utvecklade ursprungligen Minecraft?", "answer": "Mojang", "category": "Spel" },
     { "id": "q5", "text": "Hur många spelare har ett lag på planen i en vanlig Dota 2- eller HoN-match?", "answer": "5", "category": "Spel" },

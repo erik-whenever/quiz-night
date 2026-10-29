@@ -179,6 +179,101 @@ async ([pin]) => {
 }
 """
 
+# "Alla svarar" på protokollnivå: sekretess, låsning, deadline och poäng. TV-klientens råa meddelanden granskas.
+COLLECT_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Alla svarar', settings: { collectSeconds: 5 }, questions: [
+      { id: 'a1', text: 'Hemlig fråga', answer: 'FACIT-XYZ', points: 2, mode: 'all' },
+      { id: 'a2', text: 'Vanlig fråga', answer: 'Buzzsvar' },
+      { id: 'a3', text: 'Bluff-mode', answer: 'X', mode: 'nonsens' } ] }) });
+  const { code, hostKey } = await res.json();
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const connect = (role, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [], raw: [], errors: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'error') c.errors.push(m.message);
+      if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const host = await connect('host', hostKey);
+  const tv = await connect('tv');
+  const ps = {};
+  for (const n of ['A', 'B', 'C', 'D']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
+  await sleep(300);
+  const id = (n) => ps[n].id;
+  const score = (st, n) => st.players.find((p) => p.name === n).score;
+  const out = {};
+
+  send(host, { t: 'host:start' });
+  const st0 = await until(tv, (st) => st?.phase === 'collect');
+  out.startPhase = st0.phase; out.mode = st0.question.mode;
+  out.countdown = st0.collect.deadline - st0.collect.startedAt;
+  send(ps.A, { t: 'buzz' }); await sleep(250);
+  out.buzzIgnored = host.state.phase === 'collect' && host.state.buzz === null;
+
+  send(ps.B, { t: 'answer', text: '   ' });           // tomt: avvisas
+  send(ps.B, { t: 'answer', text: 'Fel-svar-B' });    // först, men fel
+  await sleep(80);
+  send(ps.A, { t: 'answer', text: 'Ratt-svar-A' });   // rätt, näst först
+  await sleep(80);
+  send(ps.A, { t: 'answer', text: 'Byter-svar-A' });  // låst: avvisas
+  await until(host, (st) => st?.collectHost?.answers.length === 2);
+  await sleep(200); // låt felsvaren hinna fram
+  out.order = host.state.collectHost.answers.map((a) => a.text);
+  out.timesIncreasing = host.state.collectHost.answers[0].at <= host.state.collectHost.answers[1].at;
+  out.publicAnswered = tv.state.collect.answered.length;
+  out.errorsB = ps.B.errors.slice(); out.errorsA = ps.A.errors.slice();
+
+  // C och D svarar inte: servern stänger själv vid deadline. C:s sena svar avvisas.
+  await until(tv, (st) => st?.phase === 'judge', 7000);
+  send(ps.C, { t: 'answer', text: 'For-sent-C' }); await sleep(200);
+  out.lateRejected = ps.C.errors.includes('Tiden är ute') && host.state.collectHost.answers.length === 2;
+
+  // Hosten markerar B rätt, ångrar sig, markerar A rätt. Sedan bekräftelse.
+  send(host, { t: 'host:mark', playerId: id('B'), correct: true });
+  send(host, { t: 'host:mark', playerId: id('A'), correct: true });
+  send(host, { t: 'host:mark', playerId: id('B'), correct: false });
+  send(host, { t: 'host:mark', playerId: id('C'), correct: true }); // har inget svar: ignoreras
+  await until(host, (st) => st?.collectHost?.correct.length === 1 && st.collectHost.correct[0] === id('A'));
+  const secret = ['FACIT-XYZ', 'Fel-svar-B', 'Ratt-svar-A', 'Byter-svar-A', 'For-sent-C'];
+  out.leakBeforeReveal = [tv, ps.A, ps.B, ps.C, ps.D].flatMap((c) => c.raw).filter((r) => secret.some((x) => r.includes(x))).length;
+  send(host, { t: 'host:judge' });
+  const st1 = await until(tv, (st) => st?.phase === 'reveal');
+  out.scores = { A: score(st1, 'A'), B: score(st1, 'B'), C: score(st1, 'C'), D: score(st1, 'D') };
+  out.results = st1.collect.results.map((r) => [r.text, r.correct, r.fastest, r.delta]);
+  out.revealed = st1.revealedAnswer;
+  send(host, { t: 'host:mark', playerId: id('B'), correct: true }); await sleep(200); // efter rättning: ingen effekt
+  out.afterJudge = score(tv.state, 'B');
+
+  // Nästa fråga är en vanlig buzz-fråga och fungerar som förut.
+  send(host, { t: 'host:next' });
+  const st2 = await until(tv, (st) => st?.phase === 'question' && st.qIndex === 1);
+  out.buzzMode = st2.question.mode; out.buzzCollect = st2.collect ?? null;
+  send(ps.C, { t: 'answer', text: 'ignoreras' });
+  send(ps.C, { t: 'buzz' });
+  out.buzzWinner = (await until(host, (st) => st?.phase === 'buzzed')).buzz.playerId === id('C');
+  // Okänd mode behandlas som buzz.
+  send(host, { t: 'host:next' });
+  out.unknownMode = (await until(tv, (st) => st?.qIndex === 2)).phase;
+  for (const c of [host, tv, ...Object.values(ps)]) c.ws.close();
+  return out;
+}
+"""
+
 
 def shot(page, name):
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
@@ -347,6 +442,70 @@ def main():
         p1.wait_for_timeout(1000)
         assert vib(p1) == [], f"Vibrerade för gammal händelse efter omladdning: {vib(p1)}"
 
+        # Fråga 3: Alla svarar. En tredje spelare hoppar in mitt i quizet.
+        p3 = b.new_page(viewport={"width": 390, "height": 844})
+        p3.on("pageerror", lambda e: page_errors.append(str(e)))
+        p3.goto(f"{BASE}/play/{code}")
+        p3.get_by_label("Ditt namn").fill("Sanna")
+        p3.get_by_role("button", name="Hoppa in").click()
+        expect(tv.locator(".chip", has_text="Sanna")).to_be_visible()
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        for pg in (p1, p2, p3):
+            expect(pg.get_by_label("Ditt svar")).to_be_visible()
+            assert pg.get_by_role("button", name="Buzza").count() == 0, "Buzzern visas i Alla svarar"
+        expect(tv.get_by_text("Skriv ditt svar i mobilen")).to_be_visible()
+        expect(tv.get_by_role("timer")).to_be_visible()
+        shot(p1, "13-spelare-alla-svarar")
+        p1.get_by_label("Ditt svar").fill("Vänern")
+        p1.get_by_role("button", name="Lås svar").click()
+        expect(p1.get_by_text("Ditt svar är låst")).to_be_visible()
+        expect(p1.locator(".locked-text")).to_have_text("”Vänern”")
+        p3.get_by_label("Ditt svar").fill("Vättern")
+        p3.get_by_role("button", name="Lås svar").click()
+        expect(p3.get_by_text("Ditt svar är låst")).to_be_visible()
+        expect(tv.locator(".answered.done")).to_have_count(2)
+        expect(host.get_by_label("Inlämnade svar").locator("li")).to_have_count(2)
+        shot(tv, "14-tv-alla-svarar")
+        shot(p1, "15-spelare-svar-last")
+        for secret in ("Vänern", "Vättern"):
+            assert secret not in tv.inner_text("body"), f"TV-vyn läcker {secret} under insamlingen!"
+        p2.wait_for_timeout(700)  # Tobbe är långsammast
+        p2.get_by_label("Ditt svar").fill("vänern")
+        p2.get_by_role("button", name="Lås svar").click()
+        # Alla har svarat: insamlingen stängs direkt och hosten rättar
+        expect(tv.get_by_text("Hosten rättar")).to_be_visible()
+        expect(p2.get_by_text("Hosten rättar").first).to_be_visible()
+        for secret in ("Vänern", "Vättern", "vänern"):
+            assert secret not in tv.inner_text("body"), f"TV-vyn läcker {secret} före reveal!"
+        mark = host.get_by_label("Inlämnade svar")
+        assert [t.split("”")[1] for t in mark.locator("li").all_inner_texts()] == ["Vänern", "Vättern", "vänern"], "Fel inlämningsordning hos hosten"
+        host.get_by_label("Sanna svarade rätt").check()
+        expect(host.get_by_label("Sanna svarade rätt")).to_be_checked()
+        host.get_by_label("Sanna svarade rätt").uncheck()  # hosten ångrar sig
+        host.get_by_label("Erik svarade rätt").check()
+        host.get_by_label("Tobbe svarade rätt").check()
+        expect(host.get_by_label("Tobbe svarade rätt")).to_be_checked()
+        expect(host.get_by_label("Sanna svarade rätt")).not_to_be_checked()
+        expect(mark.locator("li", has_text="Erik")).to_contain_text("Bonus")
+        shot(host, "16-host-ratta")
+        host.get_by_role("button", name="Bekräfta och visa svaren").click()
+        expect(tv.locator(".answer-reveal")).to_have_text("Vänern")
+        results = tv.get_by_label("Allas svar").locator("li")
+        expect(results).to_have_count(3)
+        expect(results.nth(0)).to_contain_text("Snabbast")
+        expect(results.nth(0)).to_contain_text("Rätt +2")
+        expect(results.nth(1)).to_contain_text("Fel")
+        expect(results.nth(2)).to_contain_text("Rätt +1")
+        expect(p1.get_by_text("Rätt! +2 p")).to_be_visible()
+        expect(p2.get_by_text("Rätt! +1 p")).to_be_visible()
+        expect(p3.get_by_text("Fel den här gången")).to_be_visible()
+        wait_vib(p1, [VIB_RIGHT])
+        tv.wait_for_timeout(800)
+        shot(tv, "17-tv-alla-svarar-facit")
+        shot(p1, "18-spelare-alla-svarar-ratt")
+        shot(p3, "19-spelare-alla-svarar-fel")
+        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+
         before = len(json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"])
 
         # Avsluta och kröna
@@ -361,7 +520,8 @@ def main():
         league = json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"]
         assert len(league) == before + 1, "Kröningen sparades inte i tabellen"
         res = {r["name"]: r["score"] for r in league[0]["results"]}
-        assert res == {"Erik": 0, "Tobbe": -1}, f"Fel slutpoäng: {res}"
+        # Erik: +1 -1 +1 +1 bonus, Tobbe: -1 +1, Sanna: fel kostar inget i Alla svarar
+        assert res == {"Erik": 2, "Tobbe": 0, "Sanna": 0}, f"Fel slutpoäng: {res}"
         p1.goto(BASE + "/tabell")
         expect(p1.get_by_role("heading", name="Säsongen")).to_be_visible()
         shot(p1, "11-tabell")
@@ -371,11 +531,30 @@ def main():
         host.get_by_role("button", name="Nytt set").click()
         host.get_by_label("Titel").fill("Test-set")
         host.get_by_text("Klistra in många på en gång").click()
-        host.get_by_placeholder("Vilket år kom HoN ut?").fill("Fråga A | Svar A\nFråga B | Svar B | 2")
+        host.get_by_placeholder("Vilket år kom HoN ut?").fill("Fråga A | Svar A\nFråga B | Svar B | 2\nFråga C | Svar C | 1 | alla")
         host.get_by_role("button", name="Lägg till raderna").click()
+        expect(host.get_by_label("Rundtyp 3")).to_have_value("all")
+        expect(host.get_by_label("Rundtyp 1")).to_have_value("buzz")
+        host.get_by_label("Rundtyp 1").select_option("all")
         shot(host, "12-bank-editor")
         host.get_by_role("button", name="Spara set").click()
         expect(host.get_by_text("Test-set").first).to_be_visible()
+        expect(host.get_by_text("3 frågor · 2 Alla svarar").first).to_be_visible()
+        saved = host.locator(".panel", has_text="Test-set").first
+        saved.get_by_role("button", name="Redigera").click()
+        expect(host.get_by_label("Rundtyp 1")).to_have_value("all")
+        expect(host.get_by_label("Rundtyp 2")).to_have_value("buzz")
+        expect(host.get_by_label("Rundtyp 3")).to_have_value("all")
+        host.get_by_role("button", name="Stäng").click()
+        # JSON-import läser "mode": "all"
+        imp = os.path.join(SHOTS, "import-test.json")
+        with open(imp, "w") as f:
+            json.dump({"title": "Importerat", "questions": [
+                {"text": "Importerad 1", "answer": "X", "mode": "all"}, {"text": "Importerad 2", "answer": "Y"}]}, f)
+        host.locator('input[type="file"]').set_input_files(imp)
+        expect(host.get_by_label("Rundtyp 1")).to_have_value("all")
+        expect(host.get_by_label("Rundtyp 2")).to_have_value("buzz")
+        os.remove(imp)
 
         # Rättvis buzz: direkta websocket-klienter med simulerad ping
         raw = b.new_page()
@@ -397,6 +576,21 @@ def main():
         assert edge["lockedOut"] == "Kvar", f"Utlåst spelare fick buzza: {edge['lockedOut']}"
         assert edge["spam"] == "Lugn" and edge["spamBuzzed"] == 1, f"Spam-buzz skrev över första buzzen: {edge}"
         assert edge["reload"] == "Ladd", f"Buzz försvann vid omladdning mitt i fönstret: {edge['reload']}"
+        coll = raw.evaluate(COLLECT_JS, [PIN])
+        print("Alla svarar:", coll)
+        assert coll["startPhase"] == "collect" and coll["mode"] == "all", f"Insamlingen startade inte: {coll}"
+        assert 4900 <= coll["countdown"] <= 5100, f"Servern satte fel nedräkning: {coll['countdown']}"
+        assert coll["buzzIgnored"], "Buzz godtogs under insamlingen"
+        assert coll["order"] == ["Fel-svar-B", "Ratt-svar-A"] and coll["timesIncreasing"], f"Fel ordning/låsning: {coll['order']}"
+        assert coll["errorsA"] == ["Du har redan låst ditt svar"] and coll["errorsB"] == ["Skriv ett svar först"], f"Fel felmeddelanden: {coll}"
+        assert coll["publicAnswered"] == 2, "Publikt state visar inte vilka som svarat"
+        assert coll["lateRejected"], "Svar efter deadline godtogs eller insamlingen stängdes inte"
+        assert coll["leakBeforeReveal"] == 0, f"Svar eller facit läckte i publikt state före reveal ({coll['leakBeforeReveal']} meddelanden)"
+        assert coll["scores"] == {"A": 3, "B": 0, "C": 0, "D": 0}, f"Fel poäng (2 p + 1 bonus till A, inget straff): {coll['scores']}"
+        assert coll["results"] == [["Fel-svar-B", False, False, 0], ["Ratt-svar-A", True, True, 3]], f"Fel resultat: {coll['results']}"
+        assert coll["revealed"] == "FACIT-XYZ" and coll["afterJudge"] == 0, f"Fel efter rättning: {coll}"
+        assert coll["buzzMode"] == "buzz" and coll["buzzCollect"] is None and coll["buzzWinner"], f"Buzz-fråga efter Alla svarar trasig: {coll}"
+        assert coll["unknownMode"] == "question", f"Okänd mode ska bli buzz: {coll['unknownMode']}"
         raw.close()
 
         b.close()
