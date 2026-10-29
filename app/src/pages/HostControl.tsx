@@ -3,6 +3,7 @@ import { Link, TopBar } from "../App";
 import { api, hostKeyFor } from "../lib/api";
 import { useCountdown, useRoom } from "../lib/useRoom";
 import { Countdown, Podium } from "../components";
+import { CollectHost } from "../collect";
 import PinGate from "./PinGate";
 
 function Control({ code }: { code: string }) {
@@ -64,10 +65,11 @@ function Control({ code }: { code: string }) {
               </>
             )}
 
-            {(state.phase === "question" || state.phase === "buzzed" || state.phase === "reveal") && state.question && (
+            {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
               <>
                 <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{state.question.text}</p>
                 <div className="answer-box">Svar: {state.answer}</div>
+                {state.collect && <CollectHost state={state} send={send} serverNow={serverNow} />}
 
                 {state.phase === "question" && <p className="muted" aria-live="polite">Fritt fram att buzza… {state.lockedOut.length > 0 && `(${state.lockedOut.length} utlåsta)`}</p>}
 
@@ -88,7 +90,7 @@ function Control({ code }: { code: string }) {
                 )}
 
                 <div className="row">
-                  {state.phase !== "reveal" && <button className="btn ghost" onClick={() => send({ t: "host:reveal" })}>Visa svaret (V)</button>}
+                  {(state.phase === "question" || state.phase === "buzzed") && <button className="btn ghost" onClick={() => send({ t: "host:reveal" })}>Visa svaret (V)</button>}
                   <button className={`btn ${state.phase === "reveal" ? "primary big" : "ghost"}`} onClick={() => send({ t: "host:next" })}>
                     {state.qIndex + 1 >= state.qCount ? "Avsluta och visa pallen (N)" : "Nästa fråga (N)"}
                   </button>
@@ -137,6 +139,14 @@ function Control({ code }: { code: string }) {
                 <label>Straff
                   <input type="number" min={0} max={10} defaultValue={state.settings.penalty}
                     onBlur={(e) => send({ t: "host:settings", settings: { penalty: +e.target.value } })} />
+                </label>
+                <label>Sekunder för Alla svarar
+                  <input type="number" min={5} max={180} defaultValue={state.settings.collectSeconds}
+                    onBlur={(e) => send({ t: "host:settings", settings: { collectSeconds: +e.target.value } })} />
+                </label>
+                <label>Bonus till snabbaste rätt
+                  <input type="number" min={0} max={5} defaultValue={state.settings.fastestBonus}
+                    onBlur={(e) => send({ t: "host:settings", settings: { fastestBonus: +e.target.value } })} />
                 </label>
               </div>
             </details>
