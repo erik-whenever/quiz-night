@@ -1,4 +1,204 @@
 Källa: https://wikiwiki.jp/hon/Hero
 Hämtad: 2026-10-29
 
-
+Agility [/hon/::cmd/edit?page=Hero&id=u87f90d9] 
+Agility Heroes
+ | 
+[/hon/Andromeda] 
+[/hon/Andromeda] Andromeda | [/hon/Arachna] 
+[/hon/Arachna] Arachna | [/hon/Blood%20Hunter] 
+[/hon/Blood%20Hunter] Blood Hunter | [/hon/Bushwack] 
+[/hon/Bushwack] Bushwack | [/hon/Chronos] 
+[/hon/Chronos] Chronos | [/hon/Corrupted%20Disciple] 
+[/hon/Corrupted%20Disciple] Corrupted Disciple | 
+[/hon/Dampeer] 
+[/hon/Dampeer] Dampeer | [/hon/The%20Dark%20Lady] 
+[/hon/The%20Dark%20Lady] The Dark Lady | [/hon/Emerald%20Warden] 
+[/hon/Emerald%20Warden] Emerald Warden | [/hon/Engineer] 
+[/hon/Engineer] Engineer | [/hon/Flint%20Beastwood] 
+[/hon/Flint%20Beastwood] Flint Beastwood | [/hon/Forsaken%20Archer] 
+[/hon/Forsaken%20Archer] Forsaken Archer | 
+[/hon/Gemini] 
+[/hon/Gemini] Gemini | [/hon/Gunblade] 
+[/hon/Gunblade] Gunblade | [/hon/The%20Madman] 
+[/hon/The%20Madman] The Madman | [/hon/Master%20of%20Arms] 
+[/hon/Master%20of%20Arms] Master of Arms | [/hon/Monkey%20King] 
+[/hon/Monkey%20King] Monkey King | [/hon/Moon%20Queen] 
+[/hon/Moon%20Queen] Moon Queen | 
+[/hon/Night%20Hound] 
+[/hon/Night%20Hound] Night Hound | [/hon/Nomad] 
+[/hon/Nomad] Nomad | [/hon/Riptide] 
+[/hon/Riptide] Riptide | [/hon/Sand%20Wraith] 
+[/hon/Sand%20Wraith] Sand Wraith | [/hon/Scout] 
+[/hon/Scout] Scout | [/hon/Shadowblade] 
+[/hon/Shadowblade] Shadowblade | 
+[/hon/Silhouette] 
+[/hon/Silhouette] Silhouette | [/hon/Sir%20Benzington] 
+[/hon/Sir%20Benzington] Sir Benzington | [/hon/Slither] 
+[/hon/Slither] Slither | [/hon/Soulstealer] 
+[/hon/Soulstealer] Soulstealer | [/hon/SwiftBlade] 
+[/hon/SwiftBlade] SwiftBlade | [/hon/Tarot] 
+[/hon/Tarot] Tarot | 
+[/hon/Valkyrie] 
+[/hon/Valkyrie] Valkyrie | [/hon/Zephyr] 
+[/hon/Zephyr] Zephyr | | | | | 
+Intelligence [/hon/::cmd/edit?page=Hero&id=r6ecd546] 
+Intelligence Heroes
+ | 
+[/hon/Aluna] 
+[/hon/Aluna] Aluna | [/hon/Blacksmith] 
+[/hon/Blacksmith] Blacksmith | [/hon/Bombardier] 
+[/hon/Bombardier] Bombardier | [/hon/Bubbles] 
+[/hon/Bubbles] Bubbles | [/hon/The%20Chipper] 
+[/hon/The%20Chipper] The Chipper | [/hon/Defiler] 
+[/hon/Defiler] Defiler | 
+[/hon/Demented%20Shaman] 
+[/hon/Demented%20Shaman] Demented Shaman | [/hon/Doctor%20Repulsor] 
+[/hon/Doctor%20Repulsor] Doctor Repulsor | [/hon/Ellonia] 
+[/hon/Ellonia] Ellonia | [/hon/Empath] 
+[/hon/Empath] Empath | [/hon/Fayde] 
+[/hon/Fayde] Fayde | [/hon/Geomancer] 
+[/hon/Geomancer] Geomancer | 
+[/hon/Glacius] 
+[/hon/Glacius] Glacius | [/hon/Gravekeeper] 
+[/hon/Gravekeeper] Gravekeeper | [/hon/Hellbringer] 
+[/hon/Hellbringer] Hellbringer | [/hon/Kinesis] 
+[/hon/Kinesis] Kinesis | [/hon/Martyr] 
+[/hon/Martyr] Martyr | [/hon/Midas] 
+[/hon/Midas] Midas | 
+[/hon/Monarch] 
+[/hon/Monarch] Monarch | [/hon/Myrmidon] 
+[/hon/Myrmidon] Myrmidon | [/hon/Nymphora] 
+[/hon/Nymphora] Nymphora | [/hon/Ophelia] 
+[/hon/Ophelia] Ophelia | [/hon/Parasite] 
+[/hon/Parasite] Parasite | [/hon/Pearl] 
+[/hon/Pearl] Pearl | 
+[/hon/Plague%20Rider] 
+[/hon/Plague%20Rider] Plague Rider | [/hon/Pollywog%20Priest] 
+[/hon/Pollywog%20Priest] Pollywog Priest | [/hon/Prophet] 
+[/hon/Prophet] Prophet | [/hon/Puppet%20Master] 
+[/hon/Puppet%20Master] Puppet Master | [/hon/Pyromancer] 
+[/hon/Pyromancer] Pyromancer | [/hon/Revenant] 
+[/hon/Revenant] Revenant | 
+[/hon/Rhapsody] 
+[/hon/Rhapsody] Rhapsody | [/hon/Riftwalker] 
+[/hon/Riftwalker] Riftwalker | [/hon/Soul%20Reaper] 
+[/hon/Soul%20Reaper] Soul Reaper | [/hon/Succubus] 
+[/hon/Succubus] Succubus | [/hon/Tempest] 
+[/hon/Tempest] Tempest | [/hon/Thunderbringer] 
+[/hon/Thunderbringer] Thunderbringer | 
+[/hon/Torturer] 
+[/hon/Torturer] Torturer | [/hon/Vindicator] 
+[/hon/Vindicator] Vindicator | [/hon/Voodoo%20Jester] 
+[/hon/Voodoo%20Jester] Voodoo Jester | [/hon/Witch%20Slayer] 
+[/hon/Witch%20Slayer] Witch Slayer | [/hon/Wretched%20Hag] 
+[/hon/Wretched%20Hag] Wretched Hag | | 
+Strength [/hon/::cmd/edit?page=Hero&id=x880c310] 
+Strength Heroes
+ | 
+[/hon/Accursed] 
+[/hon/Accursed] Accursed | [/hon/Amun-Ra] 
+[/hon/Amun-Ra] Amun-Ra | [/hon/Armadon] 
+[/hon/Armadon] Armadon | [/hon/Behemoth] 
+[/hon/Behemoth] Behemoth | [/hon/Berzerker] 
+[/hon/Berzerker] Berzerker | [/hon/Cthulhuphant] 
+[/hon/Cthulhuphant] Cthulhuphant | 
+[/hon/Deadwood] 
+[/hon/Deadwood] Deadwood | [/hon/Devourer] 
+[/hon/Devourer] Devourer | [/hon/Drunken%20Master] 
+[/hon/Drunken%20Master] Drunken Master | [/hon/Electrician] 
+[/hon/Electrician] Electrician | [/hon/Flux] 
+[/hon/Flux] Flux | [/hon/Gauntlet] 
+[/hon/Gauntlet] Gauntlet | 
+[/hon/The%20Gladiator] 
+[/hon/The%20Gladiator] The Gladiator | [/hon/Hammerstorm] 
+[/hon/Hammerstorm] Hammerstorm | [/hon/Jeraziah] 
+[/hon/Jeraziah] Jeraziah | [/hon/Kane] 
+[/hon/Kane] Kane | [/hon/Keeper%20of%20the%20Forest] 
+[/hon/Keeper%20of%20the%20Forest] Keeper of the Forest | [/hon/King%20Klout] 
+[/hon/King%20Klout] King Klout | 
+[/hon/Kraken] 
+[/hon/Kraken] Kraken | [/hon/Legionnaire] 
+[/hon/Legionnaire] Legionnaire | [/hon/Lodestone] 
+[/hon/Lodestone] Lodestone | [/hon/Lord%20Salforis] 
+[/hon/Lord%20Salforis] Lord Salforis | [/hon/Magebane] 
+[/hon/Magebane] Magebane | [/hon/Magmus] 
+[/hon/Magmus] Magmus | 
+[/hon/Maliken] 
+[/hon/Maliken] Maliken | [/hon/Moraxus] 
+[/hon/Moraxus] Moraxus | [/hon/Pandamonium] 
+[/hon/Pandamonium] Pandamonium | [/hon/Pebbles] 
+[/hon/Pebbles] Pebbles | [/hon/Pestilence] 
+[/hon/Pestilence] Pestilence | [/hon/Pharaoh] 
+[/hon/Pharaoh] Pharaoh | 
+[/hon/Predator] 
+[/hon/Predator] Predator | [/hon/Prisoner%20945] 
+[/hon/Prisoner%20945] Prisoner 945 | [/hon/Rampage] 
+[/hon/Rampage] Rampage | [/hon/Ravenor] 
+[/hon/Ravenor] Ravenor | [/hon/Solstice] 
+[/hon/Solstice] Solstice | [/hon/Tundra] 
+[/hon/Tundra] Tundra | 
+[/hon/War%20Beast] 
+[/hon/War%20Beast] War Beast | | | | | | 
+コメント [/hon/::cmd/edit?page=Hero&id=mb85dd87] 
+ HoNR Ver.0.7.8新レイアウトへ更新。旧データなどを見たい方はバックアップまたは･旧ヒーロー一覧からどうぞ。 -- saibaiman 2025-11-15 (土) 17:11:05
+プログラミングとか編集なんか1mmもやった事ないけど、何とかレベナント追加 -- 2026-02-08 (日) 20:17:50
+HoNR Ver 0.10.0　Dampeer追加 -- 2026-03-22 (日) 12:08:45
+AGI/STRヒーローはほぼ現行のverに更新 -- 2026-05-31 (日) 16:21:54
+ 初めての方へ
+[/hon/%E5%88%9D%E5%BF%83%E8%80%85%E5%90%91%E3%81%91%E3%82%AC%E3%82%A4%E3%83%89] 初心者向けガイド
+[/hon/1%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8BHoN] 1から始めるHoN
+[/hon/Goblinstore] ゲーム内ショップ解説
+[/hon/%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%9E%E3%83%8A%E3%83%BC] ルールとマナー
+[/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MidWarsについて
+[/hon/%E7%94%A8%E8%AA%9E%E9%9B%86] 用語集
+[/hon/%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A] 環境設定
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+HEROの紹介
+[/hon/%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E7%B4%B9%E4%BB%8B] ヒーロー紹介
+[/hon/Hero] HoNRヒーロー一覧
+[/hon/Hero#u87f90d9] Agility
+[/hon/Hero#r6ecd546] Intelligence
+[/hon/Hero#x880c310] Strength
+･[/hon/OldHero] 旧ヒーロー一覧
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方
+アイテム
+[/hon/%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] HoNRアイテム一覧
+･[/hon/%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧ベースアイテム一覧
+･[/hon/%E6%97%A7%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧アイテム一覧
+データ
+[/hon/Hero%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9] ステータスの効果
+[/hon/Modifier] Modifier
+[/hon/Rune] Rune
+[/hon/%E5%90%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E8%A9%B3%E7%B4%B0] Creep詳細
+[/hon/Kongor] Kongor
+[/hon/Illusion] Illusion
+[/hon/Range%E8%A1%A8] Range表
+Tips
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合
+[/hon/%E8%84%B1%E5%88%9D%E5%BF%83%E8%80%85%E3%82%AC%E3%82%A4%E3%83%89] 脱初心者ガイド
+[/hon/%E5%A5%B4%E9%9A%B7%E3%81%AE%E3%81%99%E3%82%9D%E3%82%81] 奴隷のすゝめ
+[/hon/%E7%8A%B6%E6%85%8B%E7%95%B0%E5%B8%B8%E8%A7%A3%E8%AA%AC] 状態異常解説
+[/hon/%E3%83%AF%E3%83%BC%E3%83%89%E3%83%BB%E3%83%9E%E3%83%83%E3%83%97%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ワード・マップについて
+[/hon/Monkey%20Courier] Monkey Courier
+[/hon/MagicImmunity] MagicImmunity
+[/hon/%E8%B1%86%E7%9F%A5%E8%AD%98] 豆知識
+[/hon/%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89] チャットコマンド
+[/hon/MOD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MODについて
+[/hon/SpilitReason%E3%81%A7%E3%81%AE%E8%B3%BC%E5%85%A5] 公式グッズを買う
+その他
+[/hon/%E3%83%AA%E3%83%B3%E3%82%AF] リンク
+[/hon/%E9%9B%91%E8%AB%87%E6%8E%B2%E7%A4%BA%E6%9D%BF] 雑談掲示板
+[/hon/?cmd=edit&page=MenuBar] MenuBar
+[/hon/hero%E5%90%8D%E5%89%8D%EF%BC%8B%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3] hero名前＋アイコン
+[/hon/image] 画像のアップロード
+[/hon/%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC] テンプレ
+[/hon/%E6%95%B4%E5%BD%A2%E3%83%AB%E3%83%BC%E3%83%AB] 整形ルール
+[/hon/%E7%B7%B4%E7%BF%92%E3%83%9A%E3%83%BC%E3%82%B8] 練習ページ
+T.?　Y.?
+NOW.?　TOTAL.?
+[http://wikiwiki.jp/hon/?cmd=edit&page=MenuBar] 編集
+ レンタルWIKI by [https://wikiwiki.jp/] WIKIWIKI.jp* / 
+ [https://wikiwiki.jp/pp/aboutad] 広告について /
+ 無料レンタル掲示板 [https://z.wikiwiki.jp/] zawazawa
+ [/hon/::cmd/mixirss]

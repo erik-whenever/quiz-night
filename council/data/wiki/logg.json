@@ -1,47 +1,77 @@
 {
- "wikiwiki:合成アイテム": {
-  "status": 200,
-  "file": "wikiwiki-E5-90-88-E6-88-90-E3-82-A2-E3-82-A4-E3-83-86-E3-83-A0.txt",
-  "chars": 14420
- },
- "wikiwiki:Kongor": {
-  "status": 200,
-  "file": "wikiwiki-Kongor.txt",
-  "chars": 5296
- },
- "wikiwiki:MidWarsについて": {
-  "status": 200,
-  "file": "wikiwiki-MidWars-E3-81-AB-E3-81-A4-E3-81-84-E3-81-A6.txt",
-  "chars": 54097
- },
- "wikiwiki:豆知識": {
-  "status": 200,
-  "file": "wikiwiki-E8-B1-86-E7-9F-A5-E8-AD-98.txt",
-  "chars": 13452
- },
- "wikiwiki:Rune": {
-  "status": 200,
-  "file": "wikiwiki-Rune.txt",
-  "chars": 4384
- },
  "wikiwiki:Goblinstore": {
-  "status": 429,
+  "status": 200,
   "file": "wikiwiki-Goblinstore.txt",
-  "chars": 0
+  "chars": 4366
  },
  "wikiwiki:Hero": {
-  "status": 429,
+  "status": 200,
   "file": "wikiwiki-Hero.txt",
+  "chars": 8645
+ },
+ "wikiwiki:Fluffy's Fletching Arrows": {
+  "status": 200,
+  "file": "wikiwiki-Fluffy-27s-20Fletching-20Arrows.txt",
+  "chars": 3421
+ },
+ "wikiwiki:Golden Reach": {
+  "status": 200,
+  "file": "wikiwiki-Golden-20Reach.txt",
+  "chars": 3040
+ },
+ "wikiwiki:Chaosbrand": {
+  "status": 200,
+  "file": "wikiwiki-Chaosbrand.txt",
+  "chars": 4337
+ },
+ "wikiwiki:Post Haste": {
+  "status": 429,
+  "file": "wikiwiki-Post-20Haste.txt",
   "chars": 0
  },
- "fandom:Kongor": {
-  "status": 200,
-  "file": "fandom-Kongor.txt",
-  "chars": 14168
+ "wikiwiki:Steamboots": {
+  "status": 429,
+  "file": "wikiwiki-Steamboots.txt",
+  "chars": 0
  },
- "fandom:Mid Wars": {
+ "wikiwiki:Pegasus Boots": {
   "status": 200,
-  "file": "fandom-Mid-20Wars.txt",
-  "chars": 3643
+  "file": "wikiwiki-Pegasus-20Boots.txt",
+  "chars": 4166
+ },
+ "wikiwiki:Shrunken Head": {
+  "status": 429,
+  "file": "wikiwiki-Shrunken-20Head.txt",
+  "chars": 0
+ },
+ "wikiwiki:Sacrificial Stone": {
+  "status": 200,
+  "file": "wikiwiki-Sacrificial-20Stone.txt",
+  "chars": 6620
+ },
+ "wikiwiki:Ghost Marchers": {
+  "status": 429,
+  "file": "wikiwiki-Ghost-20Marchers.txt",
+  "chars": 0
+ },
+ "wikiwiki:Marchers": {
+  "status": 200,
+  "file": "wikiwiki-Marchers.txt",
+  "chars": 3130
+ },
+ "wikiwiki:Crown Greaves": {
+  "status": 429,
+  "file": "wikiwiki-Crown-20Greaves.txt",
+  "chars": 0
+ },
+ "wikiwiki:Token of Life": {
+  "status": 404,
+  "file": "wikiwiki-Token-20of-20Life.txt",
+  "chars": 0
+ },
+ "wikiwiki:Staff of the Master": {
+  "status": 200,
+  "file": "wikiwiki-Staff-20of-20the-20Master.txt",
+  "chars": 14447
  }
 }

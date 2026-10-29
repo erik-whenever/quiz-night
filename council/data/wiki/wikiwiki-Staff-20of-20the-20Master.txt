@@ -1,0 +1,271 @@
+Källa: https://wikiwiki.jp/hon/Staff%20of%20the%20Master
+Hämtad: 2026-10-29
+
+HoNR Ver.0.10.2
+Staff of the Master | 合計:4200 | 派生アイテム | 
+ | [/hon/Glowstone] 
+[/hon/Glowstone] Glowstone
+(1200) | + | [/hon/MightBlade] 
+[/hon/MightBlade] MightBlade
+(1000) | + | [/hon/Quickblade] 
+[/hon/Quickblade] Quickblade
+(1000) | + | [/hon/Neophyte%27s%20Book] 
+[/hon/Neophyte%27s%20Book] Neophyte's Book
+(1000) | [/hon/Master%27s%20Legacy] 
+[/hon/Master%27s%20Legacy] Master's Legacy | 
+所持効果 [/hon/::cmd/edit?page=Staff+of+the+Master&id=f047ec87] 
++10 Str
++10 Agi
++10 Int
++200 Max Health
++150 Max Mana
+特殊効果 [/hon/::cmd/edit?page=Staff+of+the+Master&id=n9c1620a] 
+特定のヒーローのUltimateが強化される(Passive)
+強化されるヒーロー
+STR
+[/hon/Accursed] Accursed Ultの効果時間が2秒長くなり、Stun、Silence状態でも使用可能になる
+[/hon/Berzerker] Berzerker Disable状態でも使用可能になり、使用時に全てのDisable、Debuffを解除する。また被ダメージ増加が無くなり、ベースダメージが増加する
+[/hon/Devourer] Devourer UltのダメージにDevourerのStr値に応じてダメージが増え、ダメージ分回復
+[/hon/Gauntlet] Gauntlet CD減少、効果範囲・ダメージ増加、拳とともに自身も対象に飛びつくようになる
+[/hon/Legionnaire] Legionnaire Ultで止めを刺すと全てのスキル（アイテムは除く）のCDが解消される
+[/hon/Magmus] Magmus UltのCDが短くなり、ダメージ波が1回増える
+[/hon/Moraxus] Moraxus ult中・ult起爆時にダメージを与えた敵ユニットにMore Axesを付与する
+[/hon/Pebbles] Pebbles Group Chuck(3体の対象を投げる)のスキルが追加される　
+[/hon/Pharaoh] Pharaoh UltのCDが減り、味方ヒーローにも飛びつけるように（味方の場合ダメージ＋スタンは無し）
+[/hon/Rally] Rally 射程とダメージが増加する
+AGI
+[/hon/Andromeda] Andromeda UltのCDが短くなる
+[/hon/Blitz] Blitz Ultの効果時間が増加し、攻撃速度低下のDebuffが付与され、ダメージが増加する
+[/hon/Calamity] Calamity UltのCDが短くなり、射程が無限になる
+[/hon/Chronos] Chronos UltのCDが短くなり効果時間が1秒長くなり、範囲内の味方にかかるスロー効果が軽減される
+[/hon/Corrupted%20Disciple] Corrupted Disciple Ultの電撃の間隔が短くなり、2体まで反射するようになる
+[/hon/Moon%20Queen] Moon Queen UltのCDが短くなり発動するMoon Beamの数も増える
+[/hon/Nitro] Nitro Ultの追加ダメージ発動時に、さらに周囲に追加ダメージを与える
+[/hon/Sand%20Wraith] Sand Wraith Ultのイリュージョンと入れ替わった先にいる敵HeroにFearとSlowを付与する
+[/hon/Shadowblade] Shadowblade UltのCDが短くなり、自身のPrimary Attributeによって特殊効果を得る
+[/hon/Sir%20Benzington] Sir Benzington Ultの射程が∞になりダメージが増える
+[/hon/Slither] Slither UltのCDが短くなり秒間毒ダメージが増え、Ultで止めを刺せるようになる
+[/hon/SwiftBlade] SwiftBlade UltのCDが短くなり斬りつける回数が2回増える
+[/hon/The%20Madman] The Madman Ultの攻撃速度、移動速度が増加し、Ult中に死亡してもUltの終了時または5秒間通常攻撃が可能になる
+INT
+[/hon/Artesia] Artesia 射程が5000に増加する
+[/hon/Bombardier] Bombardier Ultに範囲DoTダメージがつく
+[/hon/Blacksmith] Blacksmith 通常攻撃に他の全スキルの発動チャンス（10%）が付与される
+[/hon/Defiler] Defiler 敵対象指定攻撃、味方対象指定回復ができるようになる
+[/hon/Demented%20Shaman] Demented Shaman Ultの効果時間が延び、効果範囲も広がる
+[/hon/Ellonia] Ellonia Ult終了後にFlash Freezeの効果を持つ吹雪が追加される
+[/hon/Empath] Empath UltのCDが30秒に(効果時間と同じ)
+[/hon/Geomancer] Geomancer Ultに範囲600のダメージ+slowのAoEを追加
+[/hon/Glacius] Glacius 自身と3回命中した敵ユニットにIce Imprisonmentの効果
+[/hon/Kinesis] Kinesis Ultで持ち上げるUnit数が+3される
+[/hon/Martyr] Martyr Ultで自身と対象のHealthを全回復させる
+[/hon/Monarch] Monarch Ultの範囲が拡大し、3秒後にUltが再度発動する
+[/hon/Myrmidon] Myrmidon　Ultの威力が上がりスプラッシュダメージが追加される
+[/hon/Nymphora] Nymphora 自分のいる場所に指定した味方ヒーローを呼び寄せるスキルを覚える
+[/hon/Ophelia] Ophelia UltのCDが短くなる
+[/hon/Parallax] Parallax UltのCDが半分になり、Superior Magic Damageになる
+[/hon/Plague%20Rider] Plague Rider Ultのダメージが増える
+[/hon/Pollywog%20Priest] Pollywog Priest UltのWardの数が増える
+[/hon/Pyromancer] Pyromancer Ultの威力が上がり、キル時に対象の周囲に50%のダメージを与える
+[/hon/Revenant] Revenant　各スキルの対象数が2増える
+[/hon/Rhapsody] Rhapsody Ultの効果時間が延び、チャネリング中に移動のみ可能になる（ただし攻撃・スキルを使用した場合チャネリングは解除される）
+[/hon/Riftwalker] Riftwalker Ultの射程が伸び、テレポート後に再度使用することで自身と敵ユニットを最初の詠唱位置にワープさせる
+[/hon/Soul%20Reaper] Soul Reaper Ultの減っているHPに対するダメージの割合が増える
+[/hon/Succubus] Succubus Ultのダメージが増加し射程が伸びる
+[/hon/The%20Chipper] The Chipper Ultの射程が伸びSuperiorMagic属性の徐々に減衰する90%Slowがつく
+[/hon/Thunderbringer] Thunderbringer Ultの威力が上がる
+[/hon/Torturer] Torturer Ultの秒間ダメージが増える
+[/hon/Voodoo%20Jester] Voodoo Jester UltのWardが３体同時攻撃(反射はなくなる)に変わりダメージも増加する
+[/hon/Witch%20Slayer] Witch Slayer Ultのダメージが増加しSuperiorMagic属性になる
+[/hon/Wretched%20Hag] Wretched Hag UltのCDが短くなりダメージが増加する
+Ultimateスキル名称の変化 [/hon/::cmd/edit?page=Staff+of+the+Master&id=i8c7e3a1] 
+STR
+[/hon/Accursed] Accursed　Flame Consumption→Burning Consumption
+[/hon/Berzerker] Berzerker　Carnage→Total Carnage
+[/hon/Devourer] Devourer　Devour→Om Nom Nom
+[/hon/Gauntlet] Gauntlet Gauntlet Blast→Gauntlet Punch!
+[/hon/Legionnaire] Legionnaire Decapitate→Decapitate All
+[/hon/Magmus] Magmus　Eruption→Cataclysmic Eruption
+[/hon/Moraxus] Moraxus Matraxe→Infinite-Bladed Matraxe
+[/hon/Pebbles] Pebbles　Enlarge→Group Chuck
+[/hon/Pharaoh] Pharaoh　Wrath of the Pharaoh→Return of the Pharaoh
+[/hon/Rally] Rally　Seismic Slam→Tectonic Slam
+AGI
+[/hon/Andromeda] Andromeda　Void Rip→Nether Rip
+[/hon/Blitz] Blitz Lightning Shackles→Lightning Bind
+[/hon/Calamity] Calamity Sunder's Vault→Sunder's Hoard
+[/hon/Chronos] Chronos　Chronofield→Chronofield Deluxe
+[/hon/Corrupted%20Disciple] Corrupted Disciple Overload→Super Charged
+[/hon/Moon%20Queen] Moon Queen　Moon Finale→Lunar Finale
+[/hon/Sand%20Wraith] Sand Wraith Mirage→Delusional Mirage
+[/hon/Shadowblade] Shadowblade Essence Shift→Quintessence Shift
+[/hon/Sir%20Benzington] Sir Benzington　Knightfall→Kingsfall
+[/hon/Slither] Slither　Poison Burst→Toxic Burst
+[/hon/SwiftBlade] SwiftBlade　Swift Slashes→Switfer Slashes
+[/hon/The%20Madman] The Madman Berserk→Insainty
+INT
+[/hon/Artesia] Artesia Essence Projection→Arcane Projection
+[/hon/Blacksmith] Blacksmith Chaotic Flames→M-M-M-Multi Cast!
+[/hon/Bombardier] Bombardier Air Strike!→Napalm Strike!
+[/hon/Defiler] Defiler Unholy Expulsion→Unholy Expatriation
+[/hon/Demented%20Shaman] Demented Shaman　Storm Cloud→Thunderstorm Cloud
+[/hon/Empath] Empath　As One→Together As One
+[/hon/Geomancer] Geomancer　Crystal Field→Crystal Eruption
+[/hon/Glacius] Glacius　Glacial Downpour→Glacial Torrent
+[/hon/Kinesis] Kinesis Mass Control→Mass Dominance
+[/hon/Martyr] Martyr Hand in Hand→Hand in Faith
+[/hon/Monarch] Monarch Cleansing Wind→Purifying Wind
+[/hon/Myrmidon] Myrmidon　Forced Evolution→Mutant Evolution
+[/hon/Nymphora] Nymphora　Teleport→Nymph's Call
+[/hon/Ophelia] Ophelia　Ophelia’s Touch→Ophelia's Gift
+[/hon/Parallax] Parallax Earthshatter→Planet Cracker
+[/hon/Plague%20Rider] Plague Rider　Plague Carrier→Epidemic
+[/hon/Pollywog%20Priest] Pollywog Priest　Voodoo Wards→Mass Voodoo Wards
+[/hon/Pyromancer] Pyromancer　Blazing Strike→Inferno Strike
+[/hon/Revenant] Revenant　Manifestation→Materialization
+[/hon/Rhapsody] Rhapsody Protective Melody→Protective Groove
+[/hon/Riftwalker] Riftwalker Wormhole→Bidirectional Wormhole
+[/hon/Soul%20Reaper] Soul Reaper　Demonic Execution→Hellbourne Execution
+[/hon/Succubus] Succubus　Succubus' Hold→Cursed Grip
+[/hon/The%20Chipper] The Chipper Sawblade Showdown→Sawblade Massacre
+[/hon/Thunderbringer] Thunderbringer　Lightning Storm→Thunder Storm
+[/hon/Torturer] Torturer Torment→Painful Torment
+[/hon/Voodoo%20Jester] Voodoo Jester　Spirit Ward→Greater Spirit Ward
+[/hon/Witch%20Slayer] Witch Slayer　Silver Bullet→Heavenly Blast
+[/hon/Wretched%20Hag] Wretched Hag　Bat Blast→Bat Swarm
+見た目の変化 [/hon/::cmd/edit?page=Staff+of+the+Master&id=f27b3bc4] 
+周囲にエフェクト等をまとう
+[/hon/Electrician] Electrician、[/hon/Pebbles] Pebbles、[/hon/Rally] Rally、[/hon/Andromeda] Andromeda、[/hon/Corrupted%20Disciple] Corrupted Disciple、[/hon/Sand%20Wraith] Sand Wraith、[/hon/Slither] Slither、[/hon/The%20Madman] The Madman
+[/hon/Empath] Empath、[/hon/Glacius] Glacius、[/hon/Martyr] Martyr、[/hon/Monarch] Monarch、[/hon/Rhapsody] Rhapsody、[/hon/Torturer] Torturer
+自身の体の一部や武器が光る等
+[/hon/Sir%20Benzington] Sir Benzington、[/hon/SwiftBlade] SwiftBlade 、[/hon/Bombardier] Bombardier、[/hon/Myrmidon] Myrmidon、[/hon/Pyromancer] Pyromancer、[/hon/Riftwalker] Riftwalker、
+[/hon/The%20Chipper] The Chipper、[/hon/Thunderbringer] Thunderbringer、[/hon/Witch%20Slayer] Witch Slayer、[/hon/Wretched%20Hag] Wretched Hag
+特徴的
+[/hon/Accursed] Accursed（羽が生える）、[/hon/Legionnaire] Legionnaire（斧を複数背負う）、[/hon/Blitz] Blitz（残像が出るようになる）
+[/hon/Chronos] Chronos（足元で歯車が回る）、[/hon/Nymphora] Nymphora（足元に常時花が生える）、[/hon/Plague%20Rider] Plague Rider （竜の目が光り竜が硬そうになる）
+分かりにくい
+[/hon/Devourer] Devourer（左手から血が出る）,[/hon/Moon%20Queen] Moon Queen(頭上に月のマークがでる）
+ult使用時のみ変化
+[/hon/Geomancer] Geomancer（結晶が三つでる）
+変化なしor不明
+[/hon/Berzerker] Berzerker、[/hon/Magmus] Magmus、[/hon/Pharaoh] Pharaoh、[/hon/Demented%20Shaman] Demented Shaman、[/hon/Kinesis] Kinesis、[/hon/Ophelia] Ophelia、[/hon/Pollywog%20Priest] Pollywog Priest
+[/hon/Revenant] Revenant、[/hon/Soul%20Reaper] Soul Reaper、[/hon/Succubus] Succubus、[/hon/Voodoo%20Jester] Voodoo Jester
+変更履歴 [/hon/::cmd/edit?page=Staff+of+the+Master&id=z5244c55] 
+ Version 3.5
+ 3体のHEROにSotM効果が追加された
+[/hon/Gauntlet] Gauntlet
+CD減少、効果範囲・ダメージ増加、拳とともに自身も対象に飛びつくようになる
+[/hon/Blacksmith] Blacksmith
+通常攻撃に他の全スキルの発動チャンス（10%）が付与される
+[/hon/Ellonia] Ellonia
+Ult終了後にFlash Freezeの効果を持つ吹雪が追加される
+ Version 3.3 (2013/12/8)
+ [/hon/Rally] Rally
+射程が250から500に、ダメージが200増加
+[/hon/Pyromancer] Pyromancer
+これまでの強化に加えて、敵ユニットをBlazing Strikeでキルしたとき、その敵ユニットの周囲600の範囲に50%のダメージを与える
+[/hon/Succubus] Succubus
+これまでの強化に加えて、射程が900に増加
+ Version 3.2.3 (2013/9/11)
+ Accursed
+Flame Consumption: In addition to increasing the duration by 2 seconds and letting you activate the ability while Silenced, you can now activate the ability while Stunned
+Berzerker
+Carnage: Now activatable while disabled and when activated, removes all debuffs and disables from yourself
+Carnage: Reduces the incoming Damage Multiplier from 15% to 0%
+Carnage: Increases the Bonus Damage based on your Maximum Health from 6/7/8% to 8/9/10%
+Blitz
+Lightning Shackles: Slow duration increased from 3 to 4 Seconds
+Lightning Shackles: Now also applies -100 Attack Speed Slow for the duration
+Lightning Shackles: Increases damage from 225/325/425 to 325/425/525
+Corrupted Disciple
+Overload: Increased the frequency of the bolts from from every 0.8/0.7/0.6 seconds to every 0.7/0.6/0.5 seconds
+Overload: Each bolt will bounce twice to new targets
+Legionnaire
+Decapitate: Instantly refreshes all of your Abilities (not Items) when you sucessfully Execute a target
+Madman
+Berserk: Attack Speed increased from 40/80/120 to 80/120/160
+Berserk: Movement Speed increased from 5/7/9% to 10/14/18%
+Berserk: While active and if Madman's health reaches 0, he will not die immediately and will instead die in 5 seconds. During this time, he can still act and attack normally.
+Martyr
+Hand in Hand: Heals both yourself and the target to full life
+Monarch
+Cleansing Wind: Radius increased from 225 to 900
+Cleansing Wind: After a 3 second delay, fires a second Clensing Wind backwards
+Rhapsody
+Protective Melody: Duration increased from 4/5/6 to 5/6/7
+Protective Melody: You can now move at 150 Movespeed while channeling, but attacking, being disabled, casting another spell, or activating an item will end the spell
+Riftwalker
+Wormhole: Range increased from 1200 to 1400
+Wormhole: Can now activate the ability again within 2/2.25/2.5 seconds of using it to teleport yourself and all enemies hit back to where you started casting it
+Sand Wraith
+Mirage: When using the secondary activation and teleporting to one of your illusions, all enemies within 400 units of there are feared for 2 seconds then slowed by 15% for an additional 4 seconds
+Slither
+Poison Burst: In addition increasing the Damage done and reducing the cooldown, the Damage is now lethal
+コメント [/hon/::cmd/edit?page=Staff+of+the+Master&id=m8dd10aa] 
+ 今回の変更ですらそこまで大きな影響がないとなると、過去heroの効果はマジでふざけてるな -- 2013-09-27 (金) 01:40:27
+バーサーカーがエルパラとコレを持つだけで止まらないわけだが、コレは十分滅茶苦茶やで -- 2013-09-27 (金) 01:54:25
+SotMって、パブで遊んでて持ちたければ持てば？でも別にいらねーよなって位置付けが丁度いいと思うんだ。でもlegioは常軌を逸してると思う。バーサーカーは確かにガチで強いかもしれんけど、どっちかっつーと無茶苦茶なのはエルパラのほうじゃない？ -- 2013-09-27 (金) 07:37:56
+何故かサポやらされることが多いから作りにくいっていうだけでRWとかも普通にガチれると思うけどね。作りにくさでいうとEmpathとかもそうだけどクッソつえーし -- 2013-09-28 (土) 16:18:13
+RW、Chipper、Geo、Bombでは普通に作ります。 -- 2013-09-28 (土) 17:33:11
+Slitherも今なら普通に作るんじゃないかな？どうだろう。 -- 2013-09-28 (土) 19:03:28
+なんで単純にダメ増加だけの奴とダメ＋disable付くやついるんだろ。全員にdisableなりの効果つけたらいいのに。slitherが持つとslowとか・・・あ・・・ -- 2013-10-01 (火) 00:00:51
+disableついたらゴリラがimbaになってしまう -- 2013-10-01 (火) 02:45:58
+ゴリラの場合はbkb貫通がせいぜいじゃなかろうか -- 2014-05-14 (水) 18:38:32
+ultの変化についてはまだ編集中 -- 2026-05-23 (土) 18:20:09
+ 初めての方へ
+[/hon/%E5%88%9D%E5%BF%83%E8%80%85%E5%90%91%E3%81%91%E3%82%AC%E3%82%A4%E3%83%89] 初心者向けガイド
+[/hon/1%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8BHoN] 1から始めるHoN
+[/hon/Goblinstore] ゲーム内ショップ解説
+[/hon/%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%9E%E3%83%8A%E3%83%BC] ルールとマナー
+[/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MidWarsについて
+[/hon/%E7%94%A8%E8%AA%9E%E9%9B%86] 用語集
+[/hon/%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A] 環境設定
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+HEROの紹介
+[/hon/%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E7%B4%B9%E4%BB%8B] ヒーロー紹介
+[/hon/Hero] HoNRヒーロー一覧
+[/hon/Hero#u87f90d9] Agility
+[/hon/Hero#r6ecd546] Intelligence
+[/hon/Hero#x880c310] Strength
+･[/hon/OldHero] 旧ヒーロー一覧
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方
+アイテム
+[/hon/%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] HoNRアイテム一覧
+･[/hon/%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧ベースアイテム一覧
+･[/hon/%E6%97%A7%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧アイテム一覧
+データ
+[/hon/Hero%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9] ステータスの効果
+[/hon/Modifier] Modifier
+[/hon/Rune] Rune
+[/hon/%E5%90%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E8%A9%B3%E7%B4%B0] Creep詳細
+[/hon/Kongor] Kongor
+[/hon/Illusion] Illusion
+[/hon/Range%E8%A1%A8] Range表
+Tips
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合
+[/hon/%E8%84%B1%E5%88%9D%E5%BF%83%E8%80%85%E3%82%AC%E3%82%A4%E3%83%89] 脱初心者ガイド
+[/hon/%E5%A5%B4%E9%9A%B7%E3%81%AE%E3%81%99%E3%82%9D%E3%82%81] 奴隷のすゝめ
+[/hon/%E7%8A%B6%E6%85%8B%E7%95%B0%E5%B8%B8%E8%A7%A3%E8%AA%AC] 状態異常解説
+[/hon/%E3%83%AF%E3%83%BC%E3%83%89%E3%83%BB%E3%83%9E%E3%83%83%E3%83%97%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ワード・マップについて
+[/hon/Monkey%20Courier] Monkey Courier
+[/hon/MagicImmunity] MagicImmunity
+[/hon/%E8%B1%86%E7%9F%A5%E8%AD%98] 豆知識
+[/hon/%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89] チャットコマンド
+[/hon/MOD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MODについて
+[/hon/SpilitReason%E3%81%A7%E3%81%AE%E8%B3%BC%E5%85%A5] 公式グッズを買う
+その他
+[/hon/%E3%83%AA%E3%83%B3%E3%82%AF] リンク
+[/hon/%E9%9B%91%E8%AB%87%E6%8E%B2%E7%A4%BA%E6%9D%BF] 雑談掲示板
+[/hon/?cmd=edit&page=MenuBar] MenuBar
+[/hon/hero%E5%90%8D%E5%89%8D%EF%BC%8B%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3] hero名前＋アイコン
+[/hon/image] 画像のアップロード
+[/hon/%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC] テンプレ
+[/hon/%E6%95%B4%E5%BD%A2%E3%83%AB%E3%83%BC%E3%83%AB] 整形ルール
+[/hon/%E7%B7%B4%E7%BF%92%E3%83%9A%E3%83%BC%E3%82%B8] 練習ページ
+T.?　Y.?
+NOW.?　TOTAL.?
+[http://wikiwiki.jp/hon/?cmd=edit&page=MenuBar] 編集
+ レンタルWIKI by [https://wikiwiki.jp/] WIKIWIKI.jp* / 
+ [https://wikiwiki.jp/pp/aboutad] 広告について /
+ 無料レンタル掲示板 [https://z.wikiwiki.jp/] zawazawa
+ [/hon/::cmd/mixirss]
