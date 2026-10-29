@@ -5,6 +5,8 @@ import { useCountdown, useRoom } from "../lib/useRoom";
 import { sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
 import { CollectTv } from "../collect";
+import { answerSecondsFor } from "../../shared/types";
+import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
@@ -37,6 +39,7 @@ export default function Tv({ code }: { code: string }) {
 
   const buzzer = state.players.find((p) => p.id === state.buzz?.playerId);
   const joinUrl = `${location.host}/play/${code}`;
+  const wheel = pendingWheel(state);
 
   return (
     <main className="tv" onClick={sfx.unlock}>
@@ -48,6 +51,7 @@ export default function Tv({ code }: { code: string }) {
         </div>
       </div>
 
+      <div className={`tv-stage${wheel ? " with-wheel" : ""}`}>
       {state.phase === "lobby" && (
         <div className="question-card">
           <p className="question-text">Gå in på {location.host} och skriv koden</p>
@@ -57,20 +61,24 @@ export default function Tv({ code }: { code: string }) {
 
       {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
         <div className="question-card">
+          <TwistBadge state={state} />
           <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}</p>
           {state.question.imageUrl && <img src={state.question.imageUrl} alt="" style={{ maxHeight: "35vh", borderRadius: 16 }} />}
           <p className="question-text">{state.question.text}</p>
           {state.phase === "buzzed" && buzzer && (
             <div className="buzz-banner" style={{ "--player": buzzer.color } as React.CSSProperties}>
               <span>{buzzer.name}</span>
-              <Countdown ms={left} total={state.settings.answerSeconds * 1000} size={90} />
+              <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={90} />
             </div>
           )}
           {state.phase === "buzzed" && state.buzz?.typedAnswer && <p className="qmeta">”{state.buzz.typedAnswer}”</p>}
           {state.revealedAnswer && <div className="answer-reveal">{state.revealedAnswer}</div>}
           {state.collect && <CollectTv state={state} serverNow={serverNow} />}
+          <StealNote state={state} />
         </div>
       )}
+      {wheel && <WheelPanel wheel={wheel} serverNow={serverNow} size={Math.min(420, Math.round(window.innerHeight * 0.5), window.innerWidth - 64)} onLanded={sfx.next} />}
+      </div>
 
       {state.phase === "finished" && (
         <div className="question-card">

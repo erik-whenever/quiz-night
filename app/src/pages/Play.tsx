@@ -4,6 +4,8 @@ import { useCountdown, useRoom } from "../lib/useRoom";
 import { haptic, sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
 import { CollectPlay } from "../collect";
+import { answerSecondsFor } from "../../shared/types";
+import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 
 const idKey = (code: string) => "kronan.player." + code;
 const NAME_KEY = "kronan.name";
@@ -124,16 +126,19 @@ export default function Play({ code }: { code: string }) {
       ) : (
         <>
           <p className="display" style={{ fontSize: "1.5rem", textAlign: "center", minHeight: "2em" }} aria-live="polite">{status}</p>
+          {state.phase !== "lobby" && <div style={{ textAlign: "center" }}><TwistBadge state={state} /></div>}
           {state.question && state.phase !== "lobby" && (
             <p style={{ textAlign: "center", fontSize: "1.15rem" }}>{state.question.text}</p>
           )}
           {state.revealedAnswer && <p className="answer-reveal" style={{ textAlign: "center", fontSize: "1.6rem" }}>{state.revealedAnswer}</p>}
+          <StealNote state={state} />
+          {pendingWheel(state) && <div className="panel"><WheelPanel wheel={pendingWheel(state)!} serverNow={serverNow} size={140} compact /></div>}
 
           {collecting ? (
             <CollectPlay key={state.qIndex} state={state} me={me} send={send} serverNow={serverNow} />
           ) : myBuzz ? (
             <div className="stack" style={{ alignItems: "center" }}>
-              <Countdown ms={left} total={state.settings.answerSeconds * 1000} size={160} />
+              <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={160} />
               <input placeholder="…eller skriv svaret här" value={typed} maxLength={120} autoFocus
                 onChange={(e) => { setTyped(e.target.value); send({ t: "type", text: e.target.value }); }} />
             </div>

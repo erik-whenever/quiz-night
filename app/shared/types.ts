@@ -104,6 +104,8 @@ export interface PublicState {
   settings: Settings;
   serverNow: number;
   collect?: CollectPublic;
+  /** Lyckohjulet: senaste snurret och twisten det gav (null = ingen). */
+  wheel?: WheelState | null;
 }
 
 /** Hosten ser dessutom rätt svar. */
@@ -114,7 +116,7 @@ export interface HostState extends PublicState {
 
 export type GameEvent =
   | { kind: "buzz"; playerId: string; at: number }
-  | { kind: "correct"; playerId: string; delta: number; at: number }
+  | { kind: "correct"; playerId: string; delta: number; at: number; stolenFrom?: string; stolen?: number }
   | { kind: "wrong"; playerId: string; delta: number; at: number }
   | { kind: "timeout"; playerId: string; delta: number; at: number }
   | { kind: "reveal"; at: number }
@@ -145,6 +147,8 @@ export type ClientMsg =
   | { t: "host:close" }
   /** Bekräfta rättningen: servern delar ut poäng och visar svaren. */
   | { t: "host:judge" }
+  /** Snurra lyckohjulet (bara i lobbyn eller när svaret visas). Servern slumpar utfallet. */
+  | { t: "host:spin" }
   | { t: "ping"; c: number }
   /** Svar på serverns sping, ekar s oförändrat så servern själv kan mäta RTT. */
   | { t: "spong"; s: number };
@@ -188,3 +192,46 @@ export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1, colle
 export const COLLECT_MAX_LEN = 80;
 /** Nätfördröjning som tillåts efter deadline innan ett svar avvisas. */
 export const COLLECT_GRACE_MS = 500;
+
+// ===== Lyckohjulet =====
+
+/** Twistar som hjulet kan ge nästa fråga. */
+export type TwistId = "double" | "safe" | "steal" | "blitz" | "none";
+
+export interface WheelState {
+  /** Ökar för varje snurr, så klienterna vet när ett nytt snurr börjar. */
+  spinId: number;
+  /** Index i WHEEL_SEGMENTS som hjulet landar på (servern slumpar). */
+  segment: number;
+  result: TwistId;
+  /** Servertid när snurret startade. */
+  startedAt: number;
+  spinMs: number;
+  /** Frågeindex som twisten gäller för. */
+  forQ: number;
+}
+
+export const TWISTS: Record<TwistId, { label: string; short: string; info: string }> = {
+  double: { label: "Dubbla poäng", short: "Dubbelt", info: "Rätt svar ger dubbla poäng." },
+  safe: { label: "Ingen straffavgift", short: "Inget straff", info: "Fel svar eller för långsam kostar inget." },
+  steal: { label: "Stjäl", short: "Stjäl", info: "Den som svarar rätt tar poängen från ledaren." },
+  blitz: { label: "Blixt", short: "Blixt", info: "Halverad svarstid efter buzz." },
+  none: { label: "Nit", short: "Nit", info: "Ingen twist den här gången." },
+};
+
+/** Hjulets fält medsols från toppen. Varje twist två gånger, så alla utfall är lika troliga. */
+export const WHEEL_SEGMENTS: TwistId[] = ["double", "safe", "steal", "blitz", "none", "double", "safe", "steal", "blitz", "none"];
+export const WHEEL_SPIN_MS = 4500;
+
+/** Twisten som gäller för den fråga som pågår just nu, annars null. */
+export function activeTwist(st: { phase: Phase; qIndex: number; wheel?: WheelState | null }): TwistId | null {
+  const w = st.wheel;
+  if (!w || w.forQ !== st.qIndex || w.result === "none") return null;
+  return ["question", "buzzed", "collect", "judge", "reveal"].includes(st.phase) ? w.result : null;
+}
+
+/** Svarstid i sekunder efter buzz, med hänsyn till Blixt. */
+export function answerSecondsFor(st: { phase: Phase; qIndex: number; wheel?: WheelState | null; settings: Settings }): number {
+  const s = st.settings.answerSeconds;
+  return activeTwist(st) === "blitz" ? Math.max(2, Math.ceil(s / 2)) : s;
+}

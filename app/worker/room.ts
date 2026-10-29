@@ -3,11 +3,13 @@ import type {
 } from "../shared/types";
 import {
   BUZZ_BURST, BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, BUZZ_RATE_PER_S, DEFAULT_SETTINGS, BUZZ_WINDOW_MS, MSG_BURST, MSG_RATE_PER_S,
-  isCollectMode,
+  isCollectMode, activeTwist, answerSecondsFor,
 } from "../shared/types";
 import {
   type CollectServer, collectHost, collectPublic, markAnswer, scoreAll, startCollect, submitAnswer,
 } from "./collect";
+import type { WheelState } from "../shared/types";
+import { spinWheel, stealTarget } from "./wheel";
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
 
@@ -60,6 +62,7 @@ interface Persisted {
   hostKey: string;
   /** Pågående/senaste insamlingsrunda för aktuell fråga (null för buzz-frågor). */
   collect?: CollectServer | null;
+  wheel?: WheelState | null;
 }
 
 export class Room implements DurableObject {
@@ -152,6 +155,7 @@ export class Room implements DurableObject {
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? q?.answer : undefined,
       buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
       collect: s.collect && s.phase !== "finished" ? collectPublic(s.collect, s.phase === "reveal") : undefined,
+      wheel: s.wheel ?? null,
     };
     if (role === "host") return { ...base, answer: q?.answer, collectHost: s.collect ? collectHost(s.collect) : undefined };
     return base;
@@ -184,12 +188,13 @@ export class Room implements DurableObject {
       if (t < best) { best = t; winner = pid; }
     }
     if (!winner) return;
-    const deadline = Date.now() + s.settings.answerSeconds * 1000;
+    const secs = answerSecondsFor(s);
+    const deadline = Date.now() + secs * 1000;
     s.buzz = { playerId: winner, deadline };
     s.phase = "buzzed";
     s.lastEvent = { kind: "buzz", playerId: winner, at: Date.now() };
     this.clearTimer();
-    this.timer = setTimeout(() => { this.punish("timeout"); }, s.settings.answerSeconds * 1000 + 150);
+    this.timer = setTimeout(() => { this.punish("timeout"); }, secs * 1000 + 150);
     await this.save();
     this.broadcast();
   }
@@ -237,7 +242,7 @@ export class Room implements DurableObject {
     this.clearCollectTimer();
     if (s.phase === "collect") c.deadline = Math.min(c.deadline, Date.now());
     const q = s.questions[s.qIndex];
-    c.results = scoreAll(c, q?.points ?? 1, s.settings);
+    c.results = scoreAll(c, (q?.points ?? 1) * (activeTwist(s) === "double" ? 2 : 1), s.settings);
     for (const r of c.results) {
       const p = s.players.find((x) => x.id === r.playerId);
       if (p) p.score += r.delta;
@@ -250,7 +255,9 @@ export class Room implements DurableObject {
 
   private delta(sign: 1 | -1) {
     const q = this.s!.questions[this.s!.qIndex];
-    return sign === 1 ? (q?.points ?? 1) : -this.s!.settings.penalty;
+    const twist = activeTwist(this.s!);
+    if (sign === 1) return (q?.points ?? 1) * (twist === "double" ? 2 : 1);
+    return twist === "safe" ? 0 : -this.s!.settings.penalty;
   }
 
   /** Fel eller timeout: dra poäng, lås ute spelaren, öppna för andra att buzza. */
@@ -339,6 +346,8 @@ export class Room implements DurableObject {
         this.clearTimer(); this.clearPending(); this.clearCollectTimer();
         if (s.qIndex + 1 >= s.questions.length) { s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() }; }
         else { s.qIndex += 1; s.phase = "question"; s.buzz = null; s.lockedOut = []; s.lastEvent = undefined; }
+        // Twisten gäller bara frågan den snurrades för.
+        if (s.wheel && (s.phase === "finished" || s.wheel.forQ < s.qIndex)) s.wheel = null;
         if (s.phase !== "finished") this.maybeStartCollect();
         break;
       }
@@ -346,9 +355,12 @@ export class Room implements DurableObject {
         if (s.phase !== "buzzed" || !s.buzz) return;
         this.clearTimer();
         const d = this.delta(1);
+        const steal = activeTwist(s) === "steal" ? stealTarget(s.players, s.buzz.playerId, d) : null;
         const p = s.players.find((x) => x.id === s.buzz!.playerId);
         if (p) p.score += d;
-        s.lastEvent = { kind: "correct", playerId: s.buzz.playerId, delta: d, at: Date.now() };
+        if (steal) steal.from.score -= steal.amount;
+        s.lastEvent = { kind: "correct", playerId: s.buzz.playerId, delta: d, at: Date.now(),
+          ...(steal ? { stolenFrom: steal.from.id, stolen: steal.amount } : {}) };
         s.phase = "reveal";
         break;
       }
@@ -376,8 +388,15 @@ export class Room implements DurableObject {
         if (n.fastestBonus !== undefined) s.settings.fastestBonus = Math.max(0, Math.min(5, Math.round(n.fastestBonus)));
         break;
       }
+      case "host:spin": {
+        if (s.phase !== "lobby" && s.phase !== "reveal") return this.send(c, { t: "error", message: "Hjulet kan bara snurras mellan frågorna" });
+        if (s.qIndex + 1 >= s.questions.length) return this.send(c, { t: "error", message: "Det finns ingen nästa fråga att snurra för" });
+        const nextCollect = isCollectMode(s.questions[s.qIndex + 1]?.mode);
+        s.wheel = spinWheel(s.wheel, s.qIndex + 1, Date.now(), nextCollect ? (t) => t === "double" || t === "none" : undefined);
+        break;
+      }
       case "host:finish": {
-        this.clearTimer(); this.clearPending(); this.clearCollectTimer(); s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
+        this.clearTimer(); this.clearPending(); this.clearCollectTimer(); s.wheel = null; s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
         break;
       }
       case "host:mark": {

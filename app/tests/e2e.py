@@ -193,6 +193,13 @@ async ([pin]) => {
       await sleep(1100);
       const t0 = performance.now();
       for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
+      // Olika anslutningar har ingen inbördes ordning på servern: vänta på en pong på Flods anslutning
+      // så att hela floden är behandlad innan host:next, annars kan en flod-buzz med token kvar landa i nya frågan.
+      await new Promise((resolve) => {
+        const c = -100 - q;
+        const h = (ev) => { const m = JSON.parse(ev.data); if (m.t === 'pong' && m.c === c) { flod.ws.removeEventListener('message', h); resolve(); } };
+        flod.ws.addEventListener('message', h); send(flod, { t: 'ping', c });
+      });
       send(r.host, { t: 'host:next' }); await until(flod, (st) => st?.phase === 'question' && st.qIndex === q);
       send(flod, { t: 'buzz', at: Date.now() });
       out.throttleGapMs = Math.round(performance.now() - t0);
@@ -202,6 +209,7 @@ async ([pin]) => {
       if (out.throttleGapMs < 150) break;
     }
     await sleep(2500);
+    pongs = 0;
     for (let i = 0; i < 200; i++) send(flod, { t: 'ping', c: i });
     await sleep(500);
     out.floodPongs = pongs;
@@ -238,7 +246,8 @@ async ([pin]) => {
     body: JSON.stringify({ title: 'Alla svarar', settings: { collectSeconds: 5 }, questions: [
       { id: 'a1', text: 'Hemlig fråga', answer: 'FACIT-XYZ', points: 2, mode: 'all' },
       { id: 'a2', text: 'Vanlig fråga', answer: 'Buzzsvar' },
-      { id: 'a3', text: 'Bluff-mode', answer: 'X', mode: 'nonsens' } ] }) });
+      { id: 'a3', text: 'Bluff-mode', answer: 'X', mode: 'nonsens' },
+      { id: 'a4', text: 'Hjul och alla svarar', answer: 'Y', mode: 'all' } ] }) });
   const { code, hostKey } = await res.json();
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const connect = (role, key) => new Promise((resolve) => {
@@ -320,7 +329,150 @@ async ([pin]) => {
   // Okänd mode behandlas som buzz.
   send(host, { t: 'host:next' });
   out.unknownMode = (await until(tv, (st) => st?.qIndex === 2)).phase;
+  // Lyckohjulet före en Alla svarar-fråga: bara Dubbla poäng eller Nit, och Dubbla poäng dubblar frågans poäng.
+  send(host, { t: 'host:reveal' }); await until(host, (st) => st?.phase === 'reveal');
+  const seen = new Set();
+  for (let i = 0; i < 40; i++) {
+    const before = host.state.wheel?.spinId ?? 0;
+    send(host, { t: 'host:spin' });
+    const w = (await until(host, (st) => (st?.wheel?.spinId ?? 0) > before)).wheel;
+    seen.add(w.result);
+    if (seen.size >= 2 && w.result === 'double') break;
+  }
+  out.wheelBeforeAll = [...seen].sort();
+  const a0 = score(host.state, 'A');
+  send(host, { t: 'host:next' });
+  await until(host, (st) => st?.phase === 'collect' && st.qIndex === 3);
+  send(ps.A, { t: 'answer', text: 'Y' });
+  await until(host, (st) => st?.collectHost?.answers.length === 1);
+  send(host, { t: 'host:close' }); await until(host, (st) => st?.phase === 'judge');
+  send(host, { t: 'host:mark', playerId: id('A'), correct: true });
+  await until(host, (st) => st?.collectHost?.correct.length === 1);
+  send(host, { t: 'host:judge' });
+  out.doubleAll = score(await until(host, (st) => st?.phase === 'reveal'), 'A') - a0;
   for (const c of [host, tv, ...Object.values(ps)]) c.ws.close();
+  return out;
+}
+"""
+
+# Lyckohjulet via direkta websocket-klienter. Servern slumpar, så testet snurrar tills varje twist
+# kommit upp (läser utfallet ur state) och kontrollerar sedan just den twistens effekt på nästa fråga.
+WHEEL_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Hjul', settings: { answerSeconds: 10, penalty: 1 },
+      questions: [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ id: 'q' + i, text: 'Fråga ' + i, answer: 'Svar ' + i })) }) });
+  const { code, hostKey } = await res.json();
+  const connect = (role, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [], errors: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'error') c.errors.push(m.message);
+      if (m.t === 'state') { c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state')), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const host = await connect('host', hostKey);
+  const ps = {};
+  for (const n of ['A', 'B', 'C']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
+  await until(host, (st) => st?.players.length === 3);
+  const score = (n) => host.state.players.find((p) => p.name === n).score;
+  const scores = () => Object.fromEntries(host.state.players.map((p) => [p.name, p.score]));
+  const out = { seen: {}, spins: 0 };
+
+  // Snurra tills hjulet ger twisten (servern slumpar; max 120 försök).
+  const spinFor = async (twist) => {
+    for (let i = 0; i < 120; i++) {
+      const before = host.state.wheel?.spinId ?? 0;
+      send(host, { t: 'host:spin' });
+      const st = await until(host, (s) => (s.wheel?.spinId ?? 0) > before);
+      out.spins++;
+      out.seen[st.wheel.result] = (out.seen[st.wheel.result] ?? 0) + 1;
+      if (st.wheel.forQ !== st.qIndex + 1) throw new Error('snurret gäller inte nästa fråga');
+      if (st.wheel.result === twist) return st.wheel;
+    }
+    throw new Error('hjulet gav aldrig ' + twist);
+  };
+  const next = async () => {
+    const q = host.state.qIndex;
+    send(host, { t: host.state.phase === 'lobby' ? 'host:start' : 'host:next' });
+    await until(host, (s) => s.qIndex === q + 1 && s.phase === 'question');
+    for (const n of ['A', 'B', 'C']) await until(ps[n], (s) => s.qIndex === q + 1 && s.phase === 'question');
+  };
+  const buzz = async (n) => { send(ps[n], { t: 'buzz' }); return until(host, (s) => s.phase === 'buzzed'); };
+  const judge = async (kind) => { const q = host.state.qIndex; send(host, { t: kind }); await until(host, (s) => s.qIndex === q && s.phase !== 'buzzed'); };
+
+  // Spelare får inte snurra; snurr under pågående fråga nekas.
+  send(ps.A, { t: 'host:spin' }); await sleep(200);
+  out.playerSpin = { errors: ps.A.errors.slice(), wheel: host.state.wheel ?? null };
+
+  // 1) Dubbla poäng (snurras i lobbyn): rätt svar ger 2 p, och spelarna ser twisten.
+  let w = await spinFor('double');
+  out.playerSeesWheel = (await until(ps.B, (s) => s.wheel?.spinId === w.spinId)).wheel.result;
+  await next();
+  out.duringQuestion = { ...host.state.wheel, playerWheel: ps.C.state.wheel?.result };
+  send(host, { t: 'host:spin' }); await sleep(200);
+  out.spinDuringQuestion = { errors: host.errors.slice(), spinId: host.state.wheel?.spinId };
+  await buzz('A'); await judge('host:correct');
+  out.double = score('A');
+
+  // 2) Utan nytt snurr: twisten är förbrukad, vanlig poäng igen.
+  await next();
+  out.afterDouble = { wheel: host.state.wheel ?? null };
+  await buzz('A'); await judge('host:correct');
+  out.plain = score('A');
+
+  // 3) Ingen straffavgift: fel svar kostar inget.
+  await spinFor('safe'); await next();
+  const b0 = score('B');
+  await buzz('B'); await judge('host:wrong');
+  out.safe = { delta: score('B') - b0, event: host.state.lastEvent.delta };
+  send(host, { t: 'host:reveal' }); await until(host, (s) => s.phase === 'reveal');
+
+  // 4) Stjäl: C tar poängen från ledaren A (A leder med 3).
+  await spinFor('steal'); await next();
+  const s0 = scores();
+  await buzz('C'); await judge('host:correct');
+  const s1 = scores();
+  out.steal = { A: s1.A - s0.A, C: s1.C - s0.C, B: s1.B - s0.B, stolenFrom: host.state.players.find((p) => p.id === host.state.lastEvent.stolenFrom)?.name };
+
+  // 5) Blixt: halverad svarstid (10 s -> 5 s).
+  await spinFor('blitz'); await next();
+  const st = await buzz('B');
+  out.blitzMs = st.buzz.deadline - st.serverNow;
+  await judge('host:correct');
+
+  // 6) Nit: ingen effekt.
+  await spinFor('none'); await next();
+  const a0 = score('A');
+  await buzz('A'); await judge('host:wrong');
+  out.none = score('A') - a0;
+
+  // 7) Vanlig fråga efter Nit: full svarstid igen.
+  await next();
+  const st2 = await buzz('C');
+  out.normalMs = st2.buzz.deadline - st2.serverNow;
+  await judge('host:correct');
+
+  // Sista frågan: det finns ingen nästa fråga att snurra för.
+  await next();
+  await buzz('A'); await judge('host:correct');
+  const errs = host.errors.length;
+  send(host, { t: 'host:spin' }); await sleep(200);
+  out.lastSpinRejected = host.errors.length > errs;
+  for (const c of [host, ...Object.values(ps)]) c.ws.close();
   return out;
 }
 """
@@ -471,8 +623,47 @@ def main():
         expect(p1.locator(".chip").first).to_contain_text("1")
         wait_vib(p1, [VIB_BUZZ, VIB_RIGHT])
 
+        # Lyckohjulet: hosten snurrar mellan frågorna, TV och spelare ser samma utfall
+        host.get_by_role("button", name="Snurra hjulet").click()
+        expect(tv.locator(".wheel")).to_be_visible()
+        expect(tv.get_by_text("Lyckohjulet snurrar")).to_be_visible()
+        expect(p1.get_by_text("Lyckohjulet snurrar")).to_be_visible()
+        tv.wait_for_timeout(1200)
+        shot(tv, "08b-tv-hjul-snurrar")
+        # Omladdning mitt i snurret (TV och en spelare): hjulet ska fortsätta och landa på serverns fält
+        tv.reload(); p2.reload()
+        expect(tv.get_by_text("Lyckohjulet snurrar")).to_be_visible()
+        tv_twist = tv.locator(".wheel-caption[data-twist]")
+        expect(tv_twist).to_be_visible(timeout=8000)
+        twist = tv_twist.get_attribute("data-twist")
+        label = tv.locator(".wheel-result").inner_text()
+        print("Lyckohjulet gav:", twist, label)
+        expect(p1.locator(".wheel-result")).to_have_text(label)
+        expect(p2.locator(".wheel-result")).to_have_text(label)
+        expect(host.get_by_text("Nästa fråga: " + label)).to_be_visible()
+        expect(tv.locator(".wheel-seg.hit")).to_have_count(1)
+        tv.wait_for_timeout(500)
+        under_pointer = tv.evaluate("""() => {
+          const m = new DOMMatrix(getComputedStyle(document.querySelector('.wheel-disc')).transform);
+          const deg = ((Math.atan2(m.b, m.a) * 180 / Math.PI) % 360 + 360) % 360;
+          const segs = [...document.querySelectorAll('.wheel-seg')];
+          return [Math.floor(((360 - deg) % 360) / (360 / segs.length)), segs.findIndex((e) => e.classList.contains('hit'))];
+        }""")
+        assert under_pointer[0] == under_pointer[1], f"Hjulet på TV:n stannade på fel fält efter omladdning: {under_pointer}"
+        shot(tv, "08c-tv-hjul-landat")
+        shot(p1, "08d-spelare-hjul")
+        shot(host, "08e-host-hjul")
+
         # Fråga 2: Tobbe buzzar och svarar fel, låses ute; Erik låter tiden gå ut
         host.get_by_role("button", name="Nästa fråga (N)").click()
+        expect(p2.get_by_role("button", name="Buzza")).to_be_enabled()
+        if twist != "none":
+            expect(tv.locator(f'.twist-badge[data-twist="{twist}"]')).to_be_visible()
+            expect(p1.locator(f'.twist-badge[data-twist="{twist}"]')).to_be_visible()
+            shot(tv, "08f-tv-fraga-med-twist")
+            shot(p1, "08g-spelare-twist")
+        expect(tv.locator(".wheel")).to_have_count(0)
+        assert "Guld" not in tv.inner_text("body"), "TV-vyn läcker svaret innan reveal (fråga 2)!"
         p2.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(host.get_by_role("button", name="Fel (F)")).to_be_visible()
         host.get_by_role("button", name="Fel (F)").click()
@@ -579,8 +770,10 @@ def main():
         league = json.loads(urllib.request.urlopen(BASE + "/api/hub/public").read())["league"]
         assert len(league) == before + 1, "Kröningen sparades inte i tabellen"
         res = {r["name"]: r["score"] for r in league[0]["results"]}
-        # Erik: +1 -1 +1 +1 bonus, Tobbe: -1 +1, Sanna: fel kostar inget i Alla svarar
-        assert res == {"Erik": 2, "Tobbe": 0, "Sanna": 0}, f"Fel slutpoäng: {res}"
+        # Erik: +1 -1 +1 +1 bonus, Tobbe: -1 +1, Sanna: fel kostar inget i Alla svarar.
+        # Ingen straffavgift (hjulet) gör fråga 2:s fel och timeout gratis; övriga twistar påverkar inte fel svar.
+        expected = {"Erik": 3, "Tobbe": 1, "Sanna": 0} if twist == "safe" else {"Erik": 2, "Tobbe": 0, "Sanna": 0}
+        assert res == expected, f"Fel slutpoäng med twisten {twist}: {res}, väntade {expected}"
         p1.goto(BASE + "/tabell")
         expect(p1.get_by_role("heading", name="Säsongen")).to_be_visible()
         shot(p1, "11-tabell")
@@ -659,6 +852,23 @@ def main():
         assert coll["revealed"] == "FACIT-XYZ" and coll["afterJudge"] == 0, f"Fel efter rättning: {coll}"
         assert coll["buzzMode"] == "buzz" and coll["buzzCollect"] is None and coll["buzzWinner"], f"Buzz-fråga efter Alla svarar trasig: {coll}"
         assert coll["unknownMode"] == "question", f"Okänd mode ska bli buzz: {coll['unknownMode']}"
+        assert coll["wheelBeforeAll"] == ["double", "none"], f"Hjulet gav twist som inte passar Alla svarar: {coll['wheelBeforeAll']}"
+        assert coll["doubleAll"] == 3, f"Dubbla poäng i Alla svarar ska ge 2×1 + 1 bonus: {coll['doubleAll']}"
+
+        wheel = raw.evaluate(WHEEL_JS, [PIN])
+        print("Lyckohjulet:", wheel)
+        assert wheel["playerSpin"]["errors"] and wheel["playerSpin"]["wheel"] is None, f"Spelare kunde snurra hjulet: {wheel['playerSpin']}"
+        assert wheel["playerSeesWheel"] == "double", "Spelarna fick inte hjulets utfall"
+        assert wheel["duringQuestion"]["forQ"] == 0 and wheel["duringQuestion"]["playerWheel"] == "double", f"Twisten gäller inte första frågan: {wheel['duringQuestion']}"
+        assert wheel["spinDuringQuestion"]["errors"] and wheel["spinDuringQuestion"]["spinId"] == wheel["duringQuestion"]["spinId"], "Hjulet gick att snurra under en fråga"
+        assert wheel["double"] == 2, f"Dubbla poäng gav {wheel['double']}"
+        assert wheel["afterDouble"]["wheel"] is None and wheel["plain"] == 3, f"Twisten nollställdes inte: {wheel}"
+        assert wheel["safe"] == {"delta": 0, "event": 0}, f"Ingen straffavgift drog ändå poäng: {wheel['safe']}"
+        assert wheel["steal"] == {"A": -1, "C": 1, "B": 0, "stolenFrom": "A"}, f"Stjäl fungerade inte: {wheel['steal']}"
+        assert 4000 < wheel["blitzMs"] <= 5100, f"Blixt halverade inte svarstiden: {wheel['blitzMs']} ms"
+        assert wheel["none"] == -1, f"Nit ska inte ändra något: {wheel['none']}"
+        assert wheel["normalMs"] > 9000, f"Svarstiden återställdes inte efter Blixt: {wheel['normalMs']} ms"
+        assert wheel["lastSpinRejected"], "Hjulet gick att snurra efter sista frågan"
         raw.close()
 
         b.close()
