@@ -1,0 +1,55 @@
+{
+  "fetchedAt": "2026-10-29T07:55Z",
+  "players": [
+    {
+      "steamid": "76561198138571294",
+      "profileStatus": 200,
+      "name": "Opportunisten",
+      "privacy": "public",
+      "memberSince": "May 30, 2014",
+      "hoursPlayed2Wk": 0.0,
+      "mostPlayed": [],
+      "gamesStatus": 200
+    },
+    {
+      "steamid": "76561197974162678",
+      "profileStatus": 200,
+      "name": "Högerback",
+      "privacy": "public",
+      "memberSince": "February 13, 2005",
+      "hoursPlayed2Wk": 0.0,
+      "mostPlayed": [],
+      "gamesStatus": 200
+    },
+    {
+      "steamid": "76561198033168963",
+      "profileStatus": 200,
+      "name": "Skbdipapap♕",
+      "privacy": "public",
+      "memberSince": "November 9, 2010",
+      "hoursPlayed2Wk": 0.0,
+      "mostPlayed": [],
+      "gamesStatus": 200
+    },
+    {
+      "steamid": "76561198003058171",
+      "profileStatus": 200,
+      "name": "Junkyard Dog",
+      "privacy": "public",
+      "memberSince": "November 21, 2008",
+      "hoursPlayed2Wk": 0.0,
+      "mostPlayed": [],
+      "gamesStatus": 200
+    },
+    {
+      "steamid": "76561198076869665",
+      "profileStatus": 200,
+      "name": "ORU Gudrun Avschyman",
+      "privacy": "public",
+      "memberSince": "November 27, 2012",
+      "hoursPlayed2Wk": 0.0,
+      "mostPlayed": [],
+      "gamesStatus": 200
+    }
+  ]
+}
