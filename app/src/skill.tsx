@@ -265,11 +265,16 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
   const left = useCountdown(state.phase === "collect" ? c?.deadline : undefined, serverNow);
   const locked = !!c?.answered.includes(me.id);
 
-  // Laddade om mitt i ett tidsspel: försöket är förbrukat.
+  // Laddade om mitt i ett tidsspel: försöket är förbrukat. Skickas om vid varje nytt state tills servern
+  // har låst resultatet, eftersom första försöket kan komma innan anslutningen hunnit gå med igen.
+  const reloaded = useRef<boolean | null>(null);
+  if (reloaded.current === null) reloaded.current = readFlag(key);
+  const failSent = useRef(0);
   useEffect(() => {
-    if (spec && spec.kind !== "order" && !locked && state.phase === "collect" && readFlag(key) && !playing) send({ t: "skill", ...FAIL[spec.kind] });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!reloaded.current || !spec || spec.kind === "order" || locked || state.phase !== "collect" || playing || mine) return;
+    if (failSent.current++ > 20) return;
+    send({ t: "skill", ...FAIL[spec.kind] });
+  }, [state, locked]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!spec || !c) return null;
   const info = SKILLS[spec.kind];
   const done: Done = (r) => { setMine(r); setPlaying(false); send({ t: "skill", ...r }); };
@@ -298,6 +303,9 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
   }
   if (state.phase !== "collect") return <div className="locked-card" role="status"><p className="display big-verdict">Tiden är ute</p></div>;
 
+  if (!playing && reloaded.current && spec.kind !== "order") {
+    return <div className="locked-card" role="status"><p className="display big-verdict">Försöket är förbrukat</p><p className="muted">Du laddade om mitt i utmaningen.</p></div>;
+  }
   if (!playing) {
     return (
       <div className="stack skill-intro" style={{ alignItems: "center", textAlign: "center" }}>
@@ -305,7 +313,7 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
         <h3>{info.name}</h3>
         <p>{info.info}</p>
         <p className="muted small">Ett försök. Bäst får 3 p, tvåa 2 p, trea 1 p.</p>
-        <button className="btn primary big" onClick={() => { sfx.unlock(); setFlag(key); setPlaying(true); }}>Starta</button>
+        <button className="btn primary big" onClick={() => { sfx.unlock(); setFlag(key); reloaded.current = false; setPlaying(true); }}>Starta</button>
       </div>
     );
   }
