@@ -111,6 +111,7 @@ def player(name):
         res["pages"] = []
         mode = "count"
         page_no = 0
+        offset = len(matches)  # profilen innehåller redan de senaste matcherna
         for page in range(MAX_PAGES):
             st, data = get(f"{API}/players/match-history?account_id={acc}&offset={offset}")
             if page == 0:
