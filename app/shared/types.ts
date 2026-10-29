@@ -7,17 +7,33 @@ export interface Question {
   points?: number; // standard 1
   category?: string;
   imageUrl?: string;
-  /** Rundtyp. "buzz" (standard): först att buzza svarar. "all": alla svarar i hemlighet, se Collect*. */
+  /** Rundtyp. "buzz" (standard): först att buzza får ordet och svarar muntligt, hosten dömer.
+   * "all": alla skriver ett hemligt svar. "choice": alla väljer bland `choices` i mobilen. Se Collect*. */
   mode?: QuestionMode;
+  /** Svarsalternativ för "choice" (2–6 st). `answer` måste vara exakt ett av dem. */
+  choices?: string[];
 }
 
-export type QuestionMode = "buzz" | "all";
+export type QuestionMode = "buzz" | "all" | "choice";
 export const QUESTION_MODES: { value: QuestionMode; label: string }[] = [
-  { value: "buzz", label: "Buzz" },
+  { value: "buzz", label: "Buzz (muntligt)" },
   { value: "all", label: "Alla svarar" },
+  { value: "choice", label: "Svarsalternativ" },
 ];
 /** Rundtyper som samlar in hemliga svar från alla spelare (fas "collect"). */
-export const isCollectMode = (m: QuestionMode | undefined): m is Exclude<QuestionMode, "buzz"> => m === "all";
+export const isCollectMode = (m: QuestionMode | undefined): m is Exclude<QuestionMode, "buzz"> => m === "all" || m === "choice";
+export const MODE_LABEL: Record<QuestionMode, string> = { buzz: "Buzz", all: "Alla svarar", choice: "Svarsalternativ" };
+/** Bokstäver för svarsalternativen (A–F). */
+export const CHOICE_LETTERS = ["A", "B", "C", "D", "E", "F"];
+export const MAX_CHOICES = CHOICE_LETTERS.length;
+
+/** Giltiga alternativ för en choice-fråga (trimmade, unika, 2–6 st och innehåller svaret), annars null. */
+export function validChoices(q: Pick<Question, "choices" | "answer">): string[] | null {
+  if (!Array.isArray(q.choices)) return null;
+  const c = [...new Set(q.choices.map((x) => String(x ?? "").trim()).filter(Boolean))];
+  if (c.length < 2 || c.length > MAX_CHOICES || !c.includes(String(q.answer ?? "").trim())) return null;
+  return c;
+}
 
 export interface QuestionSet {
   id: string;
@@ -29,7 +45,7 @@ export interface QuestionSet {
 }
 
 export interface Settings {
-  answerSeconds: number; // tid att svara efter buzz
+  answerSeconds: number; // riktmärke för svarstid efter buzz (hosten dömer, ingen automatisk timeout)
   penalty: number; // poäng som dras vid fel/timeout
   collectSeconds: number; // tid att lämna svar i insamlingsrundor ("Alla svarar")
   fastestBonus: number; // extra poäng till snabbaste rätt svar i "Alla svarar"
@@ -51,7 +67,7 @@ export interface PlayerPublic {
 
 export interface BuzzState {
   playerId: string;
-  deadline: number; // epoch ms
+  deadline: number; // epoch ms, bara riktmärke: hosten avgör "för långsam"
   typedAnswer?: string;
 }
 
@@ -96,7 +112,7 @@ export interface PublicState {
   players: PlayerPublic[];
   qIndex: number;
   qCount: number;
-  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode };
+  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode; choices?: string[] };
   revealedAnswer?: string;
   buzz: BuzzState | null;
   lockedOut: string[];
@@ -136,6 +152,8 @@ export type ClientMsg =
   | { t: "host:next" }
   | { t: "host:correct" }
   | { t: "host:wrong" }
+  /** Spelaren som har ordet tog för lång tid på sig (räknas som fel, men visas som "För långsam"). */
+  | { t: "host:slow" }
   | { t: "host:reveal" }
   | { t: "host:adjust"; playerId: string; delta: number }
   | { t: "host:kick"; playerId: string }

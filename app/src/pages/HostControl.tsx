@@ -20,7 +20,7 @@ function Control({ code }: { code: string }) {
   const collectingRef = useRef(collecting);
   collectingRef.current = collecting;
 
-  // Tangentbord: R = rätt, F = fel, N = nästa, V = visa svar
+  // Tangentbord: R = rätt, F = fel, T = för långsam, N = nästa, V = visa svar
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
@@ -28,6 +28,7 @@ function Control({ code }: { code: string }) {
       const k = e.key.toLowerCase();
       if (k === "r") send({ t: "host:correct" });
       if (k === "f") send({ t: "host:wrong" });
+      if (k === "t") send({ t: "host:slow" });
       if (k === "n") send({ t: "host:next" });
       if (k === "v") send({ t: "host:reveal" });
     };
@@ -89,12 +90,13 @@ function Control({ code }: { code: string }) {
                       <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={96} />
                       <div>
                         <p className="display" style={{ fontSize: "1.8rem", color: buzzer.color }}>{buzzer.name}</p>
-                        {state.buzz?.typedAnswer && <p>Skrev: ”{state.buzz.typedAnswer}”</p>}
+                        <p className="muted small" aria-live="polite">{left > 0 ? "har ordet och svarar i Discord" : "Riktmärket har gått ut, du avgör"}</p>
                       </div>
                     </div>
                     <div className="judge" style={{ width: "100%" }}>
                       <button className="btn go big" onClick={() => send({ t: "host:correct" })}>Rätt (R)</button>
                       <button className="btn bad big" onClick={() => send({ t: "host:wrong" })}>Fel (F)</button>
+                      <button className={`btn big ${left > 0 ? "ghost" : "bad"}`} onClick={() => send({ t: "host:slow" })}>För långsam (T)</button>
                     </div>
                   </div>
                 )}
@@ -144,7 +146,7 @@ function Control({ code }: { code: string }) {
             <details>
               <summary className="muted">Regler just nu</summary>
               <div className="stack" style={{ marginTop: 12 }}>
-                <label>Sekunder att svara
+                <label>Sekunder att svara (riktmärke, du dömer)
                   <input type="number" min={3} max={60} defaultValue={state.settings.answerSeconds}
                     onBlur={(e) => send({ t: "host:settings", settings: { answerSeconds: +e.target.value } })} />
                 </label>
@@ -152,7 +154,7 @@ function Control({ code }: { code: string }) {
                   <input type="number" min={0} max={10} defaultValue={state.settings.penalty}
                     onBlur={(e) => send({ t: "host:settings", settings: { penalty: +e.target.value } })} />
                 </label>
-                <label>Sekunder för Alla svarar
+                <label>Sekunder för Alla svarar och alternativ
                   <input type="number" min={5} max={180} defaultValue={state.settings.collectSeconds}
                     onBlur={(e) => send({ t: "host:settings", settings: { collectSeconds: +e.target.value } })} />
                 </label>

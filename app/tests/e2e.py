@@ -238,6 +238,74 @@ async ([pin]) => {
 }
 """
 
+# Svarsalternativ och "för långsam" på protokollnivå.
+CHOICE_JS = """
+async ([pin]) => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Alt', settings: { collectSeconds: 10, answerSeconds: 3 }, questions: [
+      { id: 'c1', text: 'Välj', answer: 'B1', mode: 'choice', choices: ['A1', 'B1', 'C1'] },
+      { id: 'c2', text: 'Muntlig', answer: 'Hemligt' } ] }) });
+  const { code, hostKey } = await res.json();
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const connect = (role, key) => new Promise((resolve) => {
+    const q = new URLSearchParams({ role, ...(key ? { key } : {}) });
+    const ws = new WebSocket(`${proto}://${location.host}/api/rooms/${code}/ws?${q}`);
+    const c = { ws, state: null, id: null, waiters: [], raw: [], errors: [] };
+    ws.onmessage = (ev) => {
+      const m = JSON.parse(ev.data);
+      if (m.t === 'sping') ws.send(JSON.stringify({ t: 'spong', s: m.s }));
+      if (m.t === 'joined') c.id = m.playerId;
+      if (m.t === 'error') c.errors.push(m.message);
+      if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+    };
+    ws.onopen = () => resolve(c);
+  });
+  const until = (c, pred, ms = 3000) => new Promise((resolve, reject) => {
+    if (pred(c.state)) return resolve(c.state);
+    const t = setTimeout(() => reject(new Error('timeout i väntan på state: ' + JSON.stringify(c.state?.phase))), ms);
+    c.waiters.push(() => pred(c.state) ? (clearTimeout(t), resolve(c.state), true) : false);
+  });
+  const send = (c, m) => c.ws.send(JSON.stringify(m));
+  const host = await connect('host', hostKey);
+  const tv = await connect('tv');
+  const ps = {};
+  for (const n of ['A', 'B']) { ps[n] = await connect('player'); send(ps[n], { t: 'join', name: n }); }
+  await sleep(300);
+  const out = {};
+  send(host, { t: 'host:start' });
+  const st = await until(tv, (s) => s?.phase === 'collect');
+  out.mode = st.question.mode; out.choices = st.question.choices;
+  send(ps.A, { t: 'answer', text: 'Påhittat' }); await sleep(150);
+  out.invalidRejected = ps.A.errors.slice();
+  send(ps.B, { t: 'answer', text: 'B1' }); await sleep(80);
+  send(ps.A, { t: 'answer', text: 'C1' });
+  await until(host, (s) => s?.phase === 'judge');
+  const name = (id) => host.state.players.find((p) => p.id === id).name;
+  out.autoMarked = host.state.collectHost.correct.map(name);
+  out.leak = tv.raw.filter((r) => /"revealedAnswer"|"results"|"collectHost"|"answer":/.test(r)).length;
+  // Hosten ändrar: A:s val räknas också som rätt
+  send(host, { t: 'host:mark', playerId: ps.A.id, correct: true });
+  await sleep(100);
+  send(host, { t: 'host:judge' });
+  await until(tv, (s) => s?.phase === 'reveal');
+  out.scores = Object.fromEntries(tv.state.players.map((p) => [p.name, p.score]));
+  // Muntlig buzz: ingen automatisk timeout, hosten säger "för långsam"
+  send(host, { t: 'host:next' });
+  await until(tv, (s) => s?.phase === 'question');
+  send(ps.A, { t: 'buzz' });
+  await until(tv, (s) => s?.phase === 'buzzed');
+  await sleep(3600);
+  out.noAutoTimeout = tv.state.phase;
+  const before = tv.state.players.find((p) => p.name === 'A').score;
+  send(host, { t: 'host:slow' });
+  const after = await until(tv, (s) => s?.lastEvent?.kind === 'timeout');
+  out.slow = { kind: after.lastEvent.kind, delta: after.players.find((p) => p.name === 'A').score - before, locked: after.lockedOut.includes(ps.A.id) };
+  for (const c of [host, tv, ps.A, ps.B]) c.ws.close();
+  return out;
+}
+"""
+
 # "Alla svarar" på protokollnivå: sekretess, låsning, deadline och poäng. TV-klientens råa meddelanden granskas.
 COLLECT_JS = """
 async ([pin]) => {
@@ -574,7 +642,7 @@ def main():
         host.get_by_role("button", name="Lås upp").click()
         expect(host.get_by_role("heading", name="Starta kvällens quiz")).to_be_visible()
         host.get_by_label("Sekunder att svara efter buzz").fill("3")
-        host.get_by_label("Straff vid fel eller timeout (poäng)").fill("1")
+        host.get_by_label("Straff vid fel eller för långsam (poäng)").fill("1")
         shot(host, "02-host-dashboard")
         # Välj alltid premiärsetet uttryckligen: nyare set hamnar överst och testet förväntar sig dess svar.
         host.locator("label", has_text="Premiär: Blandat").get_by_role("radio").check()
@@ -609,7 +677,7 @@ def main():
         shot(tv, "05-tv-fraga")
         shot(p1, "06-spelare-buzzer")
         p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
-        expect(p2.get_by_text("Erik svarar")).to_be_visible()
+        expect(p2.get_by_text("Erik har ordet")).to_be_visible()
         expect(p2.get_by_role("button", name="Buzza")).to_be_disabled()
         wait_vib(p1, [VIB_BUZZ])
         assert p2.evaluate("'vibrate' in navigator") is False, "iOS-stubben fungerar inte"
@@ -673,8 +741,19 @@ def main():
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
         p1.get_by_role("button", name="Buzza").dispatch_event("pointerdown")
         expect(p1.get_by_role("timer")).to_be_visible()
+        expect(p1.get_by_text("Du har ordet")).to_be_visible()
+        assert p1.locator("input").count() == 0, "Buzz ska vara muntligt, inget svarsfält i mobilen"
         shot(p1, "09-spelare-nedrakning")
-        # Timeout efter 3 s => straff, alla utlåsta => svaret visas automatiskt
+        # Ingen automatisk timeout: efter 3 s har Erik fortfarande ordet tills hosten dömer
+        expect(tv.get_by_text("Tiden är ute, hosten avgör")).to_be_visible(timeout=6000)
+        expect(p1.get_by_text("Tiden är ute, hosten avgör")).to_be_visible()
+        host.wait_for_timeout(500)
+        expect(host.get_by_role("button", name="För långsam (T)")).to_be_visible()
+        assert tv.locator(".answer-reveal").count() == 0, "Servern dömde timeout själv"
+        shot(host, "09b-host-for-langsam")
+        shot(tv, "09c-tv-tiden-ute")
+        host.get_by_role("button", name="För långsam (T)").click()
+        # För långsam => straff, alla utlåsta => svaret visas automatiskt
         expect(tv.locator(".answer-reveal")).to_be_visible(timeout=6000)
         wait_vib(p1, [VIB_BUZZ, VIB_RIGHT, VIB_BUZZ, VIB_WRONG])
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
@@ -808,6 +887,70 @@ def main():
         expect(host.get_by_label("Rundtyp 2")).to_have_value("buzz")
         os.remove(imp)
 
+        # Snabbinklistring med svarsalternativ och felkontroll
+        host.get_by_role("button", name="Nytt set").click()
+        host.get_by_label("Titel").fill("Alt-set")
+        host.get_by_text("Klistra in många på en gång").click()
+        host.get_by_placeholder("Vilket år kom HoN ut?").fill("Fråga X | Rätt | 1 | alt | Fel 1; Rätt; Fel 2\nFråga Y | Saknas | 1 | alt | A; B")
+        host.get_by_role("button", name="Lägg till raderna").click()
+        expect(host.get_by_label("Rundtyp 1")).to_have_value("choice")
+        expect(host.get_by_label("Alternativ 1")).to_have_value("Fel 1; Rätt; Fel 2")
+        host.get_by_role("button", name="Spara set").click()
+        expect(host.get_by_text("Fråga 2: Svarsalternativ behöver")).to_be_visible()
+        host.get_by_label("Alternativ 2").fill("A; B; Saknas")
+        host.get_by_role("button", name="Spara set").click()
+        expect(host.get_by_text("2 frågor · 2 Svarsalternativ").first).to_be_visible()
+
+        # Svarsalternativ i mobilen: TV visar alternativen men inte vilket som är rätt, hosten bekräftar
+        cdata = host.evaluate("""async ([pin]) => {
+          const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
+            body: JSON.stringify({ title: 'Alternativ', settings: { collectSeconds: 20 }, questions: [
+              { id: 'c1', text: 'Vilken krydda är dyrast per kilo?', answer: 'Saffran', points: 2, mode: 'choice', choices: ['Kardemumma', 'Saffran', 'Vanilj', 'Svartpeppar'] },
+              { id: 'c2', text: 'Trasig alternativfråga', answer: 'Z', mode: 'choice', choices: ['X', 'Y'] } ] }) });
+          const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""", [PIN])
+        ccode = cdata["code"]
+        host.goto(f"{BASE}/host/{ccode}")
+        tv.goto(f"{BASE}/tv/{ccode}")
+        for page, name in [(p1, "Erik"), (p2, "Tobbe"), (p3, "Sanna")]:
+            page.goto(f"{BASE}/play/{ccode}")
+            page.get_by_label("Ditt namn").fill(name)
+            page.get_by_role("button", name="Hoppa in").click()
+            expect(page.get_by_text("Väntar på att hosten startar")).to_be_visible()
+        host.get_by_role("button", name="Starta första frågan").click()
+        choices = tv.get_by_label("Svarsalternativ").locator("li")
+        expect(choices).to_have_count(4)
+        expect(tv.get_by_text("Välj i mobilen")).to_be_visible()
+        assert tv.locator(".choice-tile.right").count() == 0, "TV:n markerar rätt alternativ före reveal!"
+        for pg in (p1, p2, p3):
+            expect(pg.get_by_role("group", name="Välj svar").get_by_role("button")).to_have_count(4)
+            assert pg.get_by_role("button", name="Buzza").count() == 0, "Buzzern visas vid svarsalternativ"
+        shot(tv, "20-tv-alternativ")
+        shot(p1, "21-spelare-alternativ")
+        p2.get_by_role("button", name="Vanilj").click()
+        expect(p2.get_by_text("Ditt val är låst")).to_be_visible()
+        p1.get_by_role("button", name="Saffran").click()
+        expect(p1.get_by_text("Ditt val är låst")).to_be_visible()
+        p3.wait_for_timeout(300)
+        p3.get_by_role("button", name="Saffran").click()
+        expect(tv.get_by_text("Hosten rättar")).to_be_visible()
+        assert tv.locator(".choice-tile.right").count() == 0, "TV:n markerar rätt alternativ under rättningen!"
+        expect(host.get_by_label("Erik svarade rätt")).to_be_checked()
+        expect(host.get_by_label("Sanna svarade rätt")).to_be_checked()
+        expect(host.get_by_label("Tobbe svarade rätt")).not_to_be_checked()
+        shot(host, "22-host-alternativ")
+        host.get_by_role("button", name="Bekräfta och visa svaren").click()
+        expect(tv.locator(".choice-tile.right")).to_contain_text("Saffran")
+        expect(tv.locator(".choice-tile.right .picks")).to_have_text("2")
+        expect(p1.get_by_text("Rätt! +3 p")).to_be_visible()
+        expect(p3.get_by_text("Rätt! +2 p")).to_be_visible()
+        expect(p2.get_by_text("Fel den här gången")).to_be_visible()
+        tv.wait_for_timeout(600)
+        shot(tv, "23-tv-alternativ-facit")
+        # Ogiltiga alternativ (svaret saknas) blir en vanlig muntlig buzz-fråga
+        host.get_by_role("button", name="Nästa fråga (N)").click()
+        expect(p1.get_by_role("button", name="Buzza")).to_be_enabled()
+        assert not page_errors, f"Sidfel hos spelare: {page_errors}"
+
         # Rättvis buzz: direkta websocket-klienter med simulerad ping
         raw = b.new_page()
         raw.goto(BASE + "/")
@@ -853,6 +996,15 @@ def main():
         assert coll["buzzMode"] == "buzz" and coll["buzzCollect"] is None and coll["buzzWinner"], f"Buzz-fråga efter Alla svarar trasig: {coll}"
         assert coll["unknownMode"] == "question", f"Okänd mode ska bli buzz: {coll['unknownMode']}"
         assert coll["wheelBeforeAll"] == ["double", "none"], f"Hjulet gav twist som inte passar Alla svarar: {coll['wheelBeforeAll']}"
+        cp = raw.evaluate(CHOICE_JS, [PIN])
+        print("Svarsalternativ:", cp)
+        assert cp["mode"] == "choice" and cp["choices"] == ["A1", "B1", "C1"], f"Alternativen kom inte fram: {cp}"
+        assert cp["invalidRejected"] == ["Välj ett av alternativen"], f"Svar utanför alternativen godtogs: {cp['invalidRejected']}"
+        assert cp["autoMarked"] == ["B"], f"Rätt alternativ förbockades inte: {cp['autoMarked']}"
+        assert cp["leak"] == 0, f"Facit eller val läckte före reveal ({cp['leak']} meddelanden)"
+        assert cp["scores"] == {"A": 1, "B": 2}, f"Fel poäng efter hostens ändring: {cp['scores']}"
+        assert cp["noAutoTimeout"] == "buzzed", f"Servern dömde timeout själv: {cp['noAutoTimeout']}"
+        assert cp["slow"] == {"kind": "timeout", "delta": -1, "locked": True}, f"För långsam fungerar inte: {cp['slow']}"
         assert coll["doubleAll"] == 3, f"Dubbla poäng i Alla svarar ska ge 2×1 + 1 bonus: {coll['doubleAll']}"
 
         wheel = raw.evaluate(WHEEL_JS, [PIN])

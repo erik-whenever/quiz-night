@@ -4,7 +4,7 @@ import { useCountdown, useRoom } from "../lib/useRoom";
 import { haptic, sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
 import { CollectPlay } from "../collect";
-import { answerSecondsFor } from "../../shared/types";
+import { answerSecondsFor, isCollectMode } from "../../shared/types";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 
 const idKey = (code: string) => "kronan.player." + code;
@@ -28,9 +28,8 @@ export default function Play({ code }: { code: string }) {
   }, [connected, playerId, name, send]);
 
   const me = state?.players.find((p) => p.id === playerId);
-  const myBuzz = state?.buzz?.playerId === playerId;
+  const myBuzz = state?.phase === "buzzed" && state?.buzz?.playerId === playerId;
   const left = useCountdown(state?.buzz?.deadline, serverNow);
-  const [typed, setTyped] = useState("");
 
   // Lås upp ljud på första trycket var som helst (iOS kräver en gest)
   useEffect(() => {
@@ -58,7 +57,6 @@ export default function Play({ code }: { code: string }) {
       const right = ev.correct.includes(playerId);
       if (right) { sfx.correct(); haptic.correct(); } else sfx.wrong();
     }
-    if (ev.kind !== "buzz") setTyped("");
   }, [!!state, state?.lastEvent, playerId]);
 
   // Mellanslag = buzz på dator
@@ -97,15 +95,16 @@ export default function Play({ code }: { code: string }) {
   const flash = ev && "playerId" in ev && ev.playerId === me.id
     ? (ev.kind === "correct" ? "flash-good" : ev.kind === "wrong" || ev.kind === "timeout" ? "flash-bad" : "")
     : ev?.kind === "judged" && ev.correct.includes(me.id) ? "flash-good" : "";
-  const collecting = !!state.collect && state.question?.mode === "all";
+  const collecting = !!state.collect && isCollectMode(state.question?.mode);
+  const choice = state.question?.mode === "choice";
 
   let status = "";
   if (state.phase === "lobby") status = "Väntar på att hosten startar…";
   else if (state.phase === "question") status = locked ? "Du är utlåst på den här frågan" : "Buzza om du kan svaret!";
   else if (state.phase === "buzzed") {
     const who = state.players.find((p) => p.id === state.buzz?.playerId);
-    status = myBuzz ? "Svara nu, säg det i Discord!" : `${who?.name ?? "Någon"} svarar…`;
-  } else if (state.phase === "collect") status = "Alla svarar! Skriv ditt svar";
+    status = myBuzz ? (left > 0 ? "Du har ordet! Säg svaret i Discord" : "Tiden är ute, hosten avgör") : `${who?.name ?? "Någon"} har ordet…`;
+  } else if (state.phase === "collect") status = choice ? "Välj rätt alternativ!" : "Alla svarar! Skriv ditt svar";
   else if (state.phase === "judge") status = "Hosten rättar…";
   else if (state.phase === "reveal") status = "Svaret visas";
 
@@ -139,8 +138,7 @@ export default function Play({ code }: { code: string }) {
           ) : myBuzz ? (
             <div className="stack" style={{ alignItems: "center" }}>
               <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={160} />
-              <input placeholder="…eller skriv svaret här" value={typed} maxLength={120} autoFocus
-                onChange={(e) => { setTyped(e.target.value); send({ t: "type", text: e.target.value }); }} />
+              <p className="muted small" style={{ textAlign: "center" }}>Hosten dömer rätt, fel eller för långsam.</p>
             </div>
           ) : (
             <div className="buzzer-zone">
@@ -152,7 +150,7 @@ export default function Play({ code }: { code: string }) {
           )}
           <p className="muted small" style={{ textAlign: "center" }}>
             {collecting
-              ? `Alla svarar: rätt ger poäng och snabbaste rätt får +${state.settings.fastestBonus}. Fel kostar inget.`
+              ? `${choice ? "Svarsalternativ" : "Alla svarar"}: rätt ger poäng och snabbaste rätt får +${state.settings.fastestBonus}. Fel kostar inget.`
               : `Rätt ger poäng. Fel eller för långsam kostar ${state.settings.penalty} p. Mellanslag funkar också.`}
           </p>
         </>

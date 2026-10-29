@@ -63,10 +63,10 @@ function Dashboard() {
 
           <section className="panel stack">
             <h3>Regler</h3>
-            <label>Sekunder att svara efter buzz
+            <label>Sekunder att svara efter buzz (riktmärke)
               <input type="number" min={3} max={60} value={answerSeconds} onChange={(e) => setAnswerSeconds(+e.target.value)} />
             </label>
-            <label>Straff vid fel eller timeout (poäng)
+            <label>Straff vid fel eller för långsam (poäng)
               <input type="number" min={0} max={10} value={penalty} onChange={(e) => setPenalty(+e.target.value)} />
             </label>
             <label style={{ flexDirection: "row", alignItems: "center" }}>

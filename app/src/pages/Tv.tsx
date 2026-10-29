@@ -71,7 +71,7 @@ export default function Tv({ code }: { code: string }) {
               <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={90} />
             </div>
           )}
-          {state.phase === "buzzed" && state.buzz?.typedAnswer && <p className="qmeta">”{state.buzz.typedAnswer}”</p>}
+          {state.phase === "buzzed" && <p className="qmeta">{left > 0 ? "har ordet, svara i Discord" : "Tiden är ute, hosten avgör"}</p>}
           {state.revealedAnswer && <div className="answer-reveal">{state.revealedAnswer}</div>}
           {state.collect && <CollectTv state={state} serverNow={serverNow} />}
           <StealNote state={state} />

@@ -173,13 +173,14 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* Editor */
 .qrow { display: grid; grid-template-columns: 28px 1fr 1fr 64px 36px; gap: 8px; align-items: start; }
 .qrow .mode { grid-column: 2 / 4; display: flex; gap: 8px; align-items: center; flex-direction: row; font-weight: 600; color: var(--mist); font-size: 0.9rem; }
+.qrow .choices { grid-column: 2 / 6; font-weight: 600; color: var(--mist); font-size: 0.9rem; }
 .qrow .mode select { width: auto; padding: 6px 10px; font-size: 0.9rem; }
 .qrow .n { color: var(--mist); font-weight: 700; padding-top: 12px; text-align: right; }
 @media (max-width: 640px) {
   .qrow { grid-template-columns: 1fr 64px 36px; }
   .qrow .n { display: none; }
   .qrow .a { grid-column: 1 / 2; }
-  .qrow .mode { grid-column: 1 / -1; }
+  .qrow .mode, .qrow .choices { grid-column: 1 / -1; }
 }
 .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.1); color: var(--mist); }
 .tag.repo { background: rgba(255, 210, 63, 0.18); color: var(--signal); }
@@ -188,7 +189,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .host-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
 @media (max-width: 820px) { .host-grid { grid-template-columns: 1fr; } }
 .answer-box { background: var(--signal); color: var(--studio-ink); border-radius: 12px; padding: 12px 16px; font-weight: 700; }
-.judge { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.judge { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .judge { grid-template-columns: 1fr 1fr; } .judge > :last-child { grid-column: 1 / -1; } }
 
 /* ===== Alla svarar (hemlig insamling) ===== */
 .mode-tag { display: inline-block; background: var(--signal); color: var(--studio-ink); font: 800 0.8em var(--display); padding: 4px 12px; border-radius: 999px; letter-spacing: 0.02em; }
@@ -278,3 +280,19 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 .twist-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--signal); }
 .steal-note { color: var(--signal); }
+
+/* Svarsalternativ: rutnät på TV:n, stora knappar i mobilen. Lugna ytor, bokstaven i signalgult. */
+.choice-grid { list-style: none; padding: 0; margin: 0; width: min(1000px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.choice-tile { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 16px; background: var(--studio-deep); box-shadow: inset 0 0 0 2px var(--line); text-align: left; font: 700 clamp(1.1rem, 2.2vw, 1.6rem) var(--display); transition: opacity 300ms, transform 300ms; }
+.choice-tile .letter, .choice-btn .letter { flex: none; display: grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 10px; background: var(--signal); color: var(--studio-ink); font: 800 1em var(--display); }
+.choice-tile .txt, .choice-btn .txt { flex: 1; overflow-wrap: anywhere; }
+.choice-tile .picks { font: 800 1em var(--display); color: var(--mist); font-variant-numeric: tabular-nums; }
+.choice-tile.right { background: var(--go); color: var(--studio-ink); box-shadow: none; transform: scale(1.03); animation: drop 380ms cubic-bezier(.2,1.6,.4,1); }
+.choice-tile.right .letter { background: var(--studio-ink); color: var(--go); }
+.choice-tile.right .picks { color: var(--studio-ink); }
+.choice-tile.dim { opacity: 0.45; }
+.choice-buttons { display: grid; gap: 12px; }
+.choice-btn { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 12px 16px; border: 0; border-radius: 16px; background: var(--studio-deep); box-shadow: inset 0 0 0 2px var(--line); color: var(--chalk); font: 700 1.2rem var(--display); text-align: left; cursor: pointer; touch-action: manipulation; }
+.choice-btn:active:not(:disabled) { transform: scale(0.98); box-shadow: inset 0 0 0 3px var(--signal); }
+.choice-btn:disabled { opacity: 0.6; }
+@media (max-width: 700px) { .choice-grid { grid-template-columns: 1fr; } }

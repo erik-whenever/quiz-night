@@ -3,7 +3,7 @@ import type {
 } from "../shared/types";
 import {
   BUZZ_BURST, BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, BUZZ_RATE_PER_S, DEFAULT_SETTINGS, BUZZ_WINDOW_MS, MSG_BURST, MSG_RATE_PER_S,
-  isCollectMode, activeTwist, answerSecondsFor,
+  isCollectMode, activeTwist, answerSecondsFor, validChoices,
 } from "../shared/types";
 import {
   type CollectServer, collectHost, collectPublic, markAnswer, scoreAll, startCollect, submitAnswer,
@@ -65,6 +65,15 @@ interface Persisted {
   wheel?: WheelState | null;
 }
 
+/** Okänd mode blir buzz. En choice-fråga utan giltiga alternativ blir också buzz (muntligt). */
+export function normalizeQuestion(q: Question): Question {
+  if (q.mode === "choice") {
+    const choices = validChoices(q);
+    return choices ? { ...q, answer: q.answer.trim(), choices } : { ...q, mode: undefined, choices: undefined };
+  }
+  return { ...q, mode: isCollectMode(q.mode) ? q.mode : undefined, choices: undefined };
+}
+
 export class Room implements DurableObject {
   private s: Persisted | null = null;
   private conns = new Set<Conn>();
@@ -94,7 +103,7 @@ export class Room implements DurableObject {
       const body = await req.json<{ code: string; title: string; questions: Question[]; hostKey: string; settings?: Partial<Settings> }>();
       this.s = {
         code: body.code, title: body.title, phase: "lobby", players: [],
-        questions: body.questions.map((q) => ({ ...q, mode: isCollectMode(q.mode) ? q.mode : undefined })),
+        questions: body.questions.map(normalizeQuestion),
         qIndex: -1, buzz: null, lockedOut: [], settings: { ...DEFAULT_SETTINGS, ...body.settings }, hostKey: body.hostKey,
       };
       await this.save();
@@ -151,7 +160,8 @@ export class Room implements DurableObject {
     const base: PublicState = {
       code: s.code, title: s.title, phase: s.phase, players: s.players, qIndex: s.qIndex, qCount: s.questions.length,
       question: q && s.phase !== "lobby"
-        ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "buzz" } : undefined,
+        ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "buzz",
+            ...(q.mode === "choice" ? { choices: q.choices } : {}) } : undefined,
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? q?.answer : undefined,
       buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
       collect: s.collect && s.phase !== "finished" ? collectPublic(s.collect, s.phase === "reveal") : undefined,
@@ -193,8 +203,8 @@ export class Room implements DurableObject {
     s.buzz = { playerId: winner, deadline };
     s.phase = "buzzed";
     s.lastEvent = { kind: "buzz", playerId: winner, at: Date.now() };
+    // Ingen automatisk timeout: spelaren har ordet tills hosten dömer rätt, fel eller för långsam.
     this.clearTimer();
-    this.timer = setTimeout(() => { this.punish("timeout"); }, secs * 1000 + 150);
     await this.save();
     this.broadcast();
   }
@@ -325,8 +335,13 @@ export class Room implements DurableObject {
       if (!c.playerId || !s.collect) return;
       if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
       if (!s.players.some((x) => x.id === c.playerId)) return;
+      const q = s.questions[s.qIndex];
+      const choices = s.collect.mode === "choice" ? q?.choices : undefined;
+      if (choices && !choices.includes(String(m.text ?? "").trim())) return this.send(c, { t: "error", message: "Välj ett av alternativen" });
       const err = submitAnswer(s.collect, c.playerId, m.text);
       if (err) return this.send(c, { t: "error", message: err });
+      // Svarsalternativ rättas automatiskt; hosten kan ändra innan hen bekräftar.
+      if (choices && String(m.text).trim() === q!.answer) markAnswer(s.collect, c.playerId, true);
       const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
       if (waiting.length === 0) return this.closeCollect();
       await this.save();
@@ -365,6 +380,7 @@ export class Room implements DurableObject {
         break;
       }
       case "host:wrong": return this.punish("wrong");
+      case "host:slow": return this.punish("timeout");
       case "host:reveal": {
         // I insamlingsrundor betyder "visa svaret" nästa steg: stäng insamlingen, sedan bekräfta rättningen.
         if (s.phase === "collect") return this.closeCollect();

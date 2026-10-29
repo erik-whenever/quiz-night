@@ -2,7 +2,7 @@
 // Samma byggstenar ska återanvändas av kommande rundtyper med hemliga svar.
 import { useEffect, useState } from "react";
 import type { ClientMsg, CollectResult, HostState, PlayerPublic } from "../shared/types";
-import { COLLECT_MAX_LEN } from "../shared/types";
+import { CHOICE_LETTERS, COLLECT_MAX_LEN, MODE_LABEL } from "../shared/types";
 import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
 
@@ -61,17 +61,49 @@ function ResultList({ state, results, highlight }: { state: HostState; results: 
   );
 }
 
+/**
+ * Svarsalternativen som rutnät. På TV:n syns de under hela frågan, men rätt alternativ markeras
+ * först när state.revealedAnswer finns (dvs. vid reveal). picks = hur många som valde varje alternativ.
+ */
+export function ChoiceGrid({ state, picks }: { state: HostState; picks?: Record<string, number> }) {
+  const choices = state.question?.choices ?? [];
+  const right = state.revealedAnswer;
+  return (
+    <ol className="choice-grid" aria-label="Svarsalternativ">
+      {choices.map((ch, i) => (
+        <li key={ch} className={`choice-tile${right ? (ch === right ? " right" : " dim") : ""}`} data-letter={CHOICE_LETTERS[i]}>
+          <span className="letter">{CHOICE_LETTERS[i]}</span>
+          <span className="txt">{ch}</span>
+          {picks && <span className="picks">{picks[ch] ?? 0}</span>}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+const countPicks = (results: CollectResult[]) =>
+  results.reduce<Record<string, number>>((m, r) => ({ ...m, [r.text]: (m[r.text] ?? 0) + 1 }), {});
+
 /** TV: nedräkning och vilka som svarat, sedan allas svar vid reveal. */
 export function CollectTv({ state, serverNow }: { state: HostState; serverNow: () => number }) {
   const c = state.collect;
   if (!c) return null;
-  if (state.phase === "reveal" && c.results) return <ResultList state={state} results={c.results} />;
+  const choice = c.mode === "choice";
+  if (state.phase === "reveal" && c.results) {
+    return (
+      <div className="stack" style={{ alignItems: "center", width: "100%" }}>
+        {choice && <ChoiceGrid state={state} picks={countPicks(c.results)} />}
+        <ResultList state={state} results={c.results} />
+      </div>
+    );
+  }
   return (
-    <div className="stack" style={{ alignItems: "center" }}>
+    <div className="stack" style={{ alignItems: "center", width: "100%" }}>
+      {choice && <ChoiceGrid state={state} />}
       <div className="collect-banner">
-        <span className="mode-tag">Alla svarar</span>
+        <span className="mode-tag">{MODE_LABEL[c.mode]}</span>
         {state.phase === "collect"
-          ? <><span>Skriv ditt svar i mobilen</span><CollectClock state={state} serverNow={serverNow} size={90} /></>
+          ? <><span>{choice ? "Välj i mobilen" : "Skriv ditt svar i mobilen"}</span><CollectClock state={state} serverNow={serverNow} size={90} /></>
           : <span>Hosten rättar…</span>}
       </div>
       <AnsweredGrid state={state} />
@@ -93,6 +125,24 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
   const locked = c.answered.includes(me.id);
   const pending = sentKey === key && !locked;
   const mine = c.results?.find((r) => r.playerId === me.id);
+
+  if (state.phase === "collect" && !locked && c.mode === "choice") {
+    const choices = state.question?.choices ?? [];
+    return (
+      <div className="stack collect-form">
+        <div className="row" style={{ justifyContent: "center" }}><CollectClock state={state} serverNow={serverNow} size={110} /></div>
+        <p className="muted small" style={{ textAlign: "center" }}>Ett tryck låser ditt val.</p>
+        <div className="choice-buttons" role="group" aria-label="Välj svar">
+          {choices.map((ch, i) => (
+            <button key={ch} className="choice-btn" disabled={pending} data-letter={CHOICE_LETTERS[i]}
+              onClick={() => { if (pending) return; writeDraft(key, ch); setSentKey(key); send({ t: "answer", text: ch }); }}>
+              <span className="letter">{CHOICE_LETTERS[i]}</span><span className="txt">{ch}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (state.phase === "collect" && !locked) {
     return (
@@ -129,7 +179,7 @@ export function CollectPlay({ state, me, send, serverNow }: { state: HostState; 
     <div className="locked-card" role="status">
       {locked ? (
         <>
-          <p className="display big-verdict"><span aria-hidden>🔒</span> Ditt svar är låst</p>
+          <p className="display big-verdict"><span aria-hidden>🔒</span> {c.mode === "choice" ? "Ditt val är låst" : "Ditt svar är låst"}</p>
           {draft && <p className="locked-text">”{draft}”</p>}
           <p className="muted">{state.phase === "collect"
             ? `${c.answered.length} av ${state.players.length} har svarat`
@@ -162,7 +212,9 @@ export function CollectHost({ state, send, serverNow }: { state: HostState; send
       <div className="row">
         <CollectClock state={state} serverNow={serverNow} size={72} />
         <p className="muted" aria-live="polite">
-          {state.phase === "collect" ? `Alla svarar: ${h.answers.length} av ${state.players.length} har låst sitt svar.` : "Insamlingen är stängd. Bocka för rätt svar."}
+          {state.phase === "collect"
+            ? `${MODE_LABEL[c.mode]}: ${h.answers.length} av ${state.players.length} har låst sitt svar.`
+            : c.mode === "choice" ? "Insamlingen är stängd. Rätt alternativ är förbockat, ändra om du vill." : "Insamlingen är stängd. Bocka för rätt svar."}
         </p>
       </div>
       {h.answers.length === 0 ? <p className="muted">Inga svar än.</p> : (
