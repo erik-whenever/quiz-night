@@ -3,6 +3,7 @@ import { Crown, Link } from "../App";
 import { useCountdown, useRoom } from "../lib/useRoom";
 import { haptic, sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
+import { CollectPlay } from "../collect";
 
 const idKey = (code: string) => "kronan.player." + code;
 const NAME_KEY = "kronan.name";
@@ -51,6 +52,10 @@ export default function Play({ code }: { code: string }) {
     if (ev.kind === "correct") { sfx.correct(); if (mine) haptic.correct(); }
     if (ev.kind === "wrong" || ev.kind === "timeout") { sfx.wrong(); if (mine) haptic.wrong(); }
     if (ev.kind === "finished") sfx.crown();
+    if (ev.kind === "judged") {
+      const right = ev.correct.includes(playerId);
+      if (right) { sfx.correct(); haptic.correct(); } else sfx.wrong();
+    }
     if (ev.kind !== "buzz") setTyped("");
   }, [!!state, state?.lastEvent, playerId]);
 
@@ -88,7 +93,9 @@ export default function Play({ code }: { code: string }) {
   const canBuzz = state.phase === "question" && !locked;
   const ev = state.lastEvent;
   const flash = ev && "playerId" in ev && ev.playerId === me.id
-    ? (ev.kind === "correct" ? "flash-good" : ev.kind === "wrong" || ev.kind === "timeout" ? "flash-bad" : "") : "";
+    ? (ev.kind === "correct" ? "flash-good" : ev.kind === "wrong" || ev.kind === "timeout" ? "flash-bad" : "")
+    : ev?.kind === "judged" && ev.correct.includes(me.id) ? "flash-good" : "";
+  const collecting = !!state.collect && state.question?.mode === "all";
 
   let status = "";
   if (state.phase === "lobby") status = "Väntar på att hosten startar…";
@@ -96,7 +103,9 @@ export default function Play({ code }: { code: string }) {
   else if (state.phase === "buzzed") {
     const who = state.players.find((p) => p.id === state.buzz?.playerId);
     status = myBuzz ? "Svara nu, säg det i Discord!" : `${who?.name ?? "Någon"} svarar…`;
-  } else if (state.phase === "reveal") status = "Svaret visas";
+  } else if (state.phase === "collect") status = "Alla svarar! Skriv ditt svar";
+  else if (state.phase === "judge") status = "Hosten rättar…";
+  else if (state.phase === "reveal") status = "Svaret visas";
 
   return (
     <main className={`narrow stack ${flash}`} key={ev?.at} style={{ minHeight: "100dvh" }}>
@@ -120,7 +129,9 @@ export default function Play({ code }: { code: string }) {
           )}
           {state.revealedAnswer && <p className="answer-reveal" style={{ textAlign: "center", fontSize: "1.6rem" }}>{state.revealedAnswer}</p>}
 
-          {myBuzz ? (
+          {collecting ? (
+            <CollectPlay key={state.qIndex} state={state} me={me} send={send} serverNow={serverNow} />
+          ) : myBuzz ? (
             <div className="stack" style={{ alignItems: "center" }}>
               <Countdown ms={left} total={state.settings.answerSeconds * 1000} size={160} />
               <input placeholder="…eller skriv svaret här" value={typed} maxLength={120} autoFocus
@@ -135,7 +146,9 @@ export default function Play({ code }: { code: string }) {
             </div>
           )}
           <p className="muted small" style={{ textAlign: "center" }}>
-            Rätt ger poäng. Fel eller för långsam kostar {state.settings.penalty} p. Mellanslag funkar också.
+            {collecting
+              ? `Alla svarar: rätt ger poäng och snabbaste rätt får +${state.settings.fastestBonus}. Fel kostar inget.`
+              : `Rätt ger poäng. Fel eller för långsam kostar ${state.settings.penalty} p. Mellanslag funkar också.`}
           </p>
         </>
       )}

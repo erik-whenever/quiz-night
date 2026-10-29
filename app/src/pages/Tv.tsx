@@ -4,6 +4,7 @@ import { Crown } from "../App";
 import { useCountdown, useRoom } from "../lib/useRoom";
 import { sfx } from "../lib/sound";
 import { Countdown, Podium, Scorebar } from "../components";
+import { CollectTv } from "../collect";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
@@ -18,6 +19,9 @@ export default function Tv({ code }: { code: string }) {
     if (ev.kind === "buzz") sfx.buzz();
     if (ev.kind === "correct") { sfx.correct(); confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); }
     if (ev.kind === "wrong" || ev.kind === "timeout") sfx.wrong();
+    if (ev.kind === "judged") {
+      if (ev.correct.length) { sfx.correct(); confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); } else sfx.wrong();
+    }
     if (ev.kind === "finished") {
       sfx.crown();
       const end = Date.now() + 2500;
@@ -51,7 +55,7 @@ export default function Tv({ code }: { code: string }) {
         </div>
       )}
 
-      {(state.phase === "question" || state.phase === "buzzed" || state.phase === "reveal") && state.question && (
+      {(state.phase === "question" || state.phase === "buzzed" || state.phase === "collect" || state.phase === "judge" || state.phase === "reveal") && state.question && (
         <div className="question-card">
           <p className="qmeta">Fråga {state.qIndex + 1} av {state.qCount}{state.question.category ? ` · ${state.question.category}` : ""}{state.question.points !== 1 ? ` · ${state.question.points} p` : ""}</p>
           {state.question.imageUrl && <img src={state.question.imageUrl} alt="" style={{ maxHeight: "35vh", borderRadius: 16 }} />}
@@ -64,6 +68,7 @@ export default function Tv({ code }: { code: string }) {
           )}
           {state.phase === "buzzed" && state.buzz?.typedAnswer && <p className="qmeta">”{state.buzz.typedAnswer}”</p>}
           {state.revealedAnswer && <div className="answer-reveal">{state.revealedAnswer}</div>}
+          {state.collect && <CollectTv state={state} serverNow={serverNow} />}
         </div>
       )}
 

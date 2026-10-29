@@ -3,7 +3,11 @@ import type {
 } from "../shared/types";
 import {
   BUZZ_BURST, BUZZ_JITTER_MS, BUZZ_MAX_COMP_MS, BUZZ_RATE_PER_S, DEFAULT_SETTINGS, BUZZ_WINDOW_MS, MSG_BURST, MSG_RATE_PER_S,
+  isCollectMode,
 } from "../shared/types";
+import {
+  type CollectServer, collectHost, collectPublic, markAnswer, scoreAll, startCollect, submitAnswer,
+} from "./collect";
 
 const COLORS = ["#FF5D73", "#FFD23F", "#3DDC97", "#4CC9F0", "#B388FF", "#FF9F45", "#F15BB5", "#9EF01A"];
 
@@ -54,6 +58,8 @@ interface Persisted {
   settings: Settings;
   lastEvent?: GameEvent;
   hostKey: string;
+  /** Pågående/senaste insamlingsrunda för aktuell fråga (null för buzz-frågor). */
+  collect?: CollectServer | null;
 }
 
 export class Room implements DurableObject {
@@ -62,10 +68,17 @@ export class Room implements DurableObject {
   private timer: ReturnType<typeof setTimeout> | null = null;
   /** Buzzar som samlas under fönstret efter första buzz: playerId -> justerad tid. */
   private pending: { cands: Map<string, number>; timer: ReturnType<typeof setTimeout> } | null = null;
+  /** Stänger insamlingen när tiden gått ut. */
+  private collectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private ctx: DurableObjectState, private env: unknown) {
     ctx.blockConcurrencyWhile(async () => {
       this.s = (await ctx.storage.get<Persisted>("s")) ?? null;
+      if (this.s) {
+        this.s.settings = { ...DEFAULT_SETTINGS, ...this.s.settings }; // rum skapade före nya inställningar
+        // Insamling som pågick när objektet sövdes: stäng den direkt eller vid deadline.
+        if (this.s.phase === "collect" && this.s.collect) this.armCollectTimer();
+      }
     });
   }
 
@@ -77,7 +90,8 @@ export class Room implements DurableObject {
     if (url.pathname.endsWith("/init") && req.method === "POST") {
       const body = await req.json<{ code: string; title: string; questions: Question[]; hostKey: string; settings?: Partial<Settings> }>();
       this.s = {
-        code: body.code, title: body.title, phase: "lobby", players: [], questions: body.questions,
+        code: body.code, title: body.title, phase: "lobby", players: [],
+        questions: body.questions.map((q) => ({ ...q, mode: isCollectMode(q.mode) ? q.mode : undefined })),
         qIndex: -1, buzz: null, lockedOut: [], settings: { ...DEFAULT_SETTINGS, ...body.settings }, hostKey: body.hostKey,
       };
       await this.save();
@@ -133,11 +147,13 @@ export class Room implements DurableObject {
     const q = s.questions[s.qIndex];
     const base: PublicState = {
       code: s.code, title: s.title, phase: s.phase, players: s.players, qIndex: s.qIndex, qCount: s.questions.length,
-      question: q && s.phase !== "lobby" ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl } : undefined,
+      question: q && s.phase !== "lobby"
+        ? { text: q.text, points: q.points ?? 1, category: q.category, imageUrl: q.imageUrl, mode: q.mode ?? "buzz" } : undefined,
       revealedAnswer: s.phase === "reveal" || s.phase === "finished" ? q?.answer : undefined,
       buzz: s.buzz, lockedOut: s.lockedOut, lastEvent: s.lastEvent, settings: s.settings, serverNow: Date.now(),
+      collect: s.collect && s.phase !== "finished" ? collectPublic(s.collect, s.phase === "reveal") : undefined,
     };
-    if (role === "host") return { ...base, answer: q?.answer };
+    if (role === "host") return { ...base, answer: q?.answer, collectHost: s.collect ? collectHost(s.collect) : undefined };
     return base;
   }
 
@@ -179,6 +195,58 @@ export class Room implements DurableObject {
   }
 
   private clearTimer() { if (this.timer) { clearTimeout(this.timer); this.timer = null; } }
+
+  // ===== Hemlig svarsinsamling (Alla svarar m.fl.) =====
+
+  private clearCollectTimer() { if (this.collectTimer) { clearTimeout(this.collectTimer); this.collectTimer = null; } }
+
+  private armCollectTimer() {
+    this.clearCollectTimer();
+    const c = this.s?.collect;
+    if (!c) return;
+    this.collectTimer = setTimeout(() => { void this.closeCollect(); }, Math.max(0, c.deadline - Date.now()) + 50);
+  }
+
+  /** Aktuell fråga är en insamlingsrunda: öppna insamlingen. Returnerar false för vanliga buzz-frågor. */
+  private maybeStartCollect(): boolean {
+    const s = this.s!;
+    const q = s.questions[s.qIndex];
+    if (!q || !isCollectMode(q.mode)) { s.collect = null; return false; }
+    s.collect = startCollect(q.mode, s.settings.collectSeconds);
+    s.phase = "collect";
+    this.armCollectTimer();
+    return true;
+  }
+
+  /** Tiden ute, alla har svarat eller hosten stänger: gå till rättning. */
+  private async closeCollect() {
+    const s = this.s!;
+    this.clearCollectTimer();
+    if (s.phase !== "collect" || !s.collect) return;
+    s.collect.deadline = Math.min(s.collect.deadline, Date.now());
+    s.phase = "judge";
+    await this.save();
+    this.broadcast();
+  }
+
+  /** Hosten bekräftar rättningen: dela ut poäng och visa svaren. */
+  private judgeCollect() {
+    const s = this.s!;
+    const c = s.collect;
+    if (!c || (s.phase !== "collect" && s.phase !== "judge")) return false;
+    this.clearCollectTimer();
+    if (s.phase === "collect") c.deadline = Math.min(c.deadline, Date.now());
+    const q = s.questions[s.qIndex];
+    c.results = scoreAll(c, q?.points ?? 1, s.settings);
+    for (const r of c.results) {
+      const p = s.players.find((x) => x.id === r.playerId);
+      if (p) p.score += r.delta;
+    }
+    s.phase = "reveal";
+    s.lastEvent = { kind: "judged", correct: c.results.filter((r) => r.correct).map((r) => r.playerId),
+      fastestId: c.results.find((r) => r.fastest)?.playerId, at: Date.now() };
+    return true;
+  }
 
   private delta(sign: 1 | -1) {
     const q = this.s!.questions[this.s!.qIndex];
@@ -246,6 +314,18 @@ export class Room implements DurableObject {
       return;
     }
 
+    if (m.t === "answer") {
+      if (!c.playerId || !s.collect) return;
+      if (s.phase !== "collect") return s.phase === "judge" ? this.send(c, { t: "error", message: "Tiden är ute" }) : undefined;
+      if (!s.players.some((x) => x.id === c.playerId)) return;
+      const err = submitAnswer(s.collect, c.playerId, m.text);
+      if (err) return this.send(c, { t: "error", message: err });
+      const waiting = s.players.filter((x) => x.connected && !s.collect!.answers.some((a) => a.playerId === x.id));
+      if (waiting.length === 0) return this.closeCollect();
+      await this.save();
+      return this.broadcast();
+    }
+
     if (m.t === "type") {
       if (s.buzz && s.buzz.playerId === c.playerId) { s.buzz.typedAnswer = m.text.slice(0, 120); this.broadcast(); }
       return;
@@ -256,9 +336,10 @@ export class Room implements DurableObject {
     switch (m.t) {
       case "host:start":
       case "host:next": {
-        this.clearTimer(); this.clearPending();
+        this.clearTimer(); this.clearPending(); this.clearCollectTimer();
         if (s.qIndex + 1 >= s.questions.length) { s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() }; }
         else { s.qIndex += 1; s.phase = "question"; s.buzz = null; s.lockedOut = []; s.lastEvent = undefined; }
+        if (s.phase !== "finished") this.maybeStartCollect();
         break;
       }
       case "host:correct": {
@@ -273,6 +354,9 @@ export class Room implements DurableObject {
       }
       case "host:wrong": return this.punish("wrong");
       case "host:reveal": {
+        // I insamlingsrundor betyder "visa svaret" nästa steg: stäng insamlingen, sedan bekräfta rättningen.
+        if (s.phase === "collect") return this.closeCollect();
+        if (s.phase === "judge") { this.judgeCollect(); break; }
         this.clearTimer(); this.clearPending(); s.buzz = null; s.phase = "reveal"; s.lastEvent = { kind: "reveal", at: Date.now() };
         break;
       }
@@ -288,12 +372,21 @@ export class Room implements DurableObject {
         const n = m.settings;
         if (n.answerSeconds) s.settings.answerSeconds = Math.max(3, Math.min(60, Math.round(n.answerSeconds)));
         if (n.penalty !== undefined) s.settings.penalty = Math.max(0, Math.min(10, Math.round(n.penalty)));
+        if (n.collectSeconds) s.settings.collectSeconds = Math.max(5, Math.min(180, Math.round(n.collectSeconds)));
+        if (n.fastestBonus !== undefined) s.settings.fastestBonus = Math.max(0, Math.min(5, Math.round(n.fastestBonus)));
         break;
       }
       case "host:finish": {
-        this.clearTimer(); this.clearPending(); s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
+        this.clearTimer(); this.clearPending(); this.clearCollectTimer(); s.phase = "finished"; s.buzz = null; s.lockedOut = []; s.lastEvent = { kind: "finished", at: Date.now() };
         break;
       }
+      case "host:mark": {
+        if (!s.collect || (s.phase !== "collect" && s.phase !== "judge")) return;
+        markAnswer(s.collect, m.playerId, !!m.correct);
+        break;
+      }
+      case "host:close": return this.closeCollect();
+      case "host:judge": { if (!this.judgeCollect()) return; break; }
     }
     await this.save();
     this.broadcast();

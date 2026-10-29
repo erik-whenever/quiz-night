@@ -7,7 +7,17 @@ export interface Question {
   points?: number; // standard 1
   category?: string;
   imageUrl?: string;
+  /** Rundtyp. "buzz" (standard): först att buzza svarar. "all": alla svarar i hemlighet, se Collect*. */
+  mode?: QuestionMode;
 }
+
+export type QuestionMode = "buzz" | "all";
+export const QUESTION_MODES: { value: QuestionMode; label: string }[] = [
+  { value: "buzz", label: "Buzz" },
+  { value: "all", label: "Alla svarar" },
+];
+/** Rundtyper som samlar in hemliga svar från alla spelare (fas "collect"). */
+export const isCollectMode = (m: QuestionMode | undefined): m is Exclude<QuestionMode, "buzz"> => m === "all";
 
 export interface QuestionSet {
   id: string;
@@ -21,9 +31,15 @@ export interface QuestionSet {
 export interface Settings {
   answerSeconds: number; // tid att svara efter buzz
   penalty: number; // poäng som dras vid fel/timeout
+  collectSeconds: number; // tid att lämna svar i insamlingsrundor ("Alla svarar")
+  fastestBonus: number; // extra poäng till snabbaste rätt svar i "Alla svarar"
 }
 
-export type Phase = "lobby" | "question" | "buzzed" | "reveal" | "finished";
+/**
+ * collect = alla lämnar hemliga svar (servern äger nedräkningen), judge = insamlingen stängd, hosten rättar.
+ * Efter judge kommer reveal som vanligt.
+ */
+export type Phase = "lobby" | "question" | "buzzed" | "collect" | "judge" | "reveal" | "finished";
 
 export interface PlayerPublic {
   id: string;
@@ -39,6 +55,39 @@ export interface BuzzState {
   typedAnswer?: string;
 }
 
+/** Ett inlämnat svar i en insamlingsrunda. at = servertid vid inlämning, ms = tid sedan insamlingen öppnade. */
+export interface CollectAnswer {
+  playerId: string;
+  text: string;
+  at: number;
+  ms: number;
+}
+
+/** Rättat svar, visas för alla först vid reveal. */
+export interface CollectResult extends CollectAnswer {
+  correct: boolean;
+  delta: number;
+  fastest: boolean;
+}
+
+/**
+ * Publik del av en insamlingsrunda. Före reveal syns bara VILKA som svarat, aldrig vad.
+ * results sätts först när phase är "reveal" (eller "finished").
+ */
+export interface CollectPublic {
+  mode: Exclude<QuestionMode, "buzz">;
+  startedAt: number;
+  deadline: number;
+  answered: string[];
+  results?: CollectResult[];
+}
+
+/** Hostens del: alla svar i inlämningsordning och vilka som hittills är markerade som rätt. */
+export interface CollectHost {
+  answers: CollectAnswer[];
+  correct: string[];
+}
+
 /** Det alla ser (TV + spelare). Svaret skickas bara när phase === "reveal". */
 export interface PublicState {
   code: string;
@@ -47,18 +96,20 @@ export interface PublicState {
   players: PlayerPublic[];
   qIndex: number;
   qCount: number;
-  question?: { text: string; points: number; category?: string; imageUrl?: string };
+  question?: { text: string; points: number; category?: string; imageUrl?: string; mode: QuestionMode };
   revealedAnswer?: string;
   buzz: BuzzState | null;
   lockedOut: string[];
   lastEvent?: GameEvent;
   settings: Settings;
   serverNow: number;
+  collect?: CollectPublic;
 }
 
 /** Hosten ser dessutom rätt svar. */
 export interface HostState extends PublicState {
   answer?: string;
+  collectHost?: CollectHost;
 }
 
 export type GameEvent =
@@ -67,6 +118,8 @@ export type GameEvent =
   | { kind: "wrong"; playerId: string; delta: number; at: number }
   | { kind: "timeout"; playerId: string; delta: number; at: number }
   | { kind: "reveal"; at: number }
+  /** En insamlingsrunda är rättad: poäng utdelade, svaren visas. */
+  | { kind: "judged"; correct: string[]; fastestId?: string; at: number }
   | { kind: "finished"; at: number };
 
 // Klient -> server
@@ -75,6 +128,8 @@ export type ClientMsg =
   /** at = klientens uppskattade servertid vid tryck (Date.now() + klockoffset). Servern klampar. */
   | { t: "buzz"; at?: number }
   | { t: "type"; text: string }
+  /** Hemligt svar i en insamlingsrunda. Kan bara lämnas en gång (låses). */
+  | { t: "answer"; text: string }
   | { t: "host:start" }
   | { t: "host:next" }
   | { t: "host:correct" }
@@ -84,6 +139,12 @@ export type ClientMsg =
   | { t: "host:kick"; playerId: string }
   | { t: "host:settings"; settings: Partial<Settings> }
   | { t: "host:finish" }
+  /** Markera ett inlämnat svar som rätt/fel (kan ändras tills host:judge). */
+  | { t: "host:mark"; playerId: string; correct: boolean }
+  /** Stäng insamlingen innan tiden gått ut. */
+  | { t: "host:close" }
+  /** Bekräfta rättningen: servern delar ut poäng och visar svaren. */
+  | { t: "host:judge" }
   | { t: "ping"; c: number }
   /** Svar på serverns sping, ekar s oförändrat så servern själv kan mäta RTT. */
   | { t: "spong"; s: number };
@@ -122,4 +183,8 @@ export const BUZZ_BURST = 5;
 export const MSG_RATE_PER_S = 30;
 export const MSG_BURST = 60;
 
-export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1 };
+export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1, collectSeconds: 30, fastestBonus: 1 };
+/** Max längd på ett svar i en insamlingsrunda. */
+export const COLLECT_MAX_LEN = 80;
+/** Nätfördröjning som tillåts efter deadline innan ett svar avvisas. */
+export const COLLECT_GRACE_MS = 500;
