@@ -9,12 +9,25 @@
 #fandom:Items
 #fandom:Boots
 #fandom:Category:Boots
-wikiwiki:合成アイテム
-wikiwiki:Kongor
-wikiwiki:MidWarsについて
-wikiwiki:豆知識
-wikiwiki:Rune
+#wikiwiki:合成アイテム (hämtad)
+#wikiwiki:Kongor (hämtad)
+#wikiwiki:MidWarsについて (hämtad)
+#wikiwiki:豆知識 (hämtad)
+#wikiwiki:Rune (hämtad)
 wikiwiki:Goblinstore
 wikiwiki:Hero
-fandom:Kongor
-fandom:Mid Wars
+#fandom:Kongor (hämtad)
+#fandom:Mid Wars (hämtad)
+wikiwiki:Fluffy's Fletching Arrows
+wikiwiki:Golden Reach
+wikiwiki:Chaosbrand
+wikiwiki:Post Haste
+wikiwiki:Steamboots
+wikiwiki:Pegasus Boots
+wikiwiki:Shrunken Head
+wikiwiki:Sacrificial Stone
+wikiwiki:Ghost Marchers
+wikiwiki:Marchers
+wikiwiki:Crown Greaves
+wikiwiki:Token of Life
+wikiwiki:Staff of the Master
