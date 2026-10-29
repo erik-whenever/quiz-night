@@ -1326,6 +1326,13 @@ def main():
         p1.goto(BASE + "/tabell")
         expect(p1.get_by_role("columnheader", name="Mynt")).to_be_visible()
         shot(p1, "56-tabell-mynt")
+        # Hosten kan ta bort en demokväll ur tabellen
+        host.goto(BASE + "/tabell")
+        expect(host.get_by_role("button", name="Ta bort Lagkväll").first).to_be_visible()
+        nights = host.get_by_role("button", name="Ta bort Lagkväll").count()
+        host.once("dialog", lambda d: d.accept())
+        host.get_by_role("button", name="Ta bort Lagkväll").first.click()
+        expect(host.get_by_role("button", name="Ta bort Lagkväll")).to_have_count(nights - 1)
         assert not page_errors, f"Sidfel hos spelare: {page_errors}"
 
         # Rättvis buzz: direkta websocket-klienter med simulerad ping

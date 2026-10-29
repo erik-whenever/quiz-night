@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { TopBar } from "../App";
-import { api } from "../lib/api";
+import { api, getPin } from "../lib/api";
 import type { HubPublic } from "../../shared/types";
 
 export default function League() {
   const [hub, setHub] = useState<HubPublic | null>(null);
   const [err, setErr] = useState("");
-  useEffect(() => { api.hub().then(setHub).catch((e) => setErr(e.message)); }, []);
+  const load = () => api.hub().then(setHub).catch((e) => setErr(e.message));
+  useEffect(() => { load(); }, []);
+  const isHost = !!getPin();
 
   const totals = new Map<string, { crowns: number; points: number; nights: number }>();
   for (const e of hub?.league ?? []) {
@@ -53,7 +55,11 @@ export default function League() {
               <div key={e.id} className="panel flat" style={{ padding: 14 }}>
                 <div className="spread">
                   <strong>{e.title}</strong>
-                  <span className="muted small">{new Date(e.date).toLocaleDateString("sv-SE", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <span className="row" style={{ gap: 8 }}>
+                    <span className="muted small">{new Date(e.date).toLocaleDateString("sv-SE", { day: "numeric", month: "long", year: "numeric" })}</span>
+                    {isHost && <button className="btn sm ghost" aria-label={`Ta bort ${e.title}`}
+                      onClick={async () => { if (confirm(`Ta bort ${e.title} ur tabellen? Mynten som delades ut ligger kvar.`)) { await api.deleteLeague(e.id).catch((x) => setErr(x.message)); load(); } }}>Ta bort</button>}
+                  </span>
                 </div>
                 <p className="muted small">{e.results.map((r, i) => `${i + 1}. ${r.name} (${r.score.toLocaleString("sv-SE")}${r.team ? `, ${r.team}` : ""})`).join("   ")}</p>
               </div>
