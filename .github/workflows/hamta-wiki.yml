@@ -1,0 +1,22 @@
+name: Hämta wikisidor för HoN-trivia
+
+# Sandlådan når inte wikisidorna, så GitHub hämtar sidorna i council/data/wiki/sidor.txt
+# och checkar in texten. Körs manuellt av Quizresearchern.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .github/scripts/hamta_wiki.py
+      - name: Checka in om ändrat
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add council/data/wiki
+          git diff --cached --quiet || (git commit -m "Synk: wikisidor för HoN-trivia" && git push)

@@ -1,0 +1,11 @@
+# En sida per rad. Hämtas av .github/workflows/hamta-wiki.yml till council/data/wiki/.
+# wikiwiki.jp/hon = japansk wiki som följer HoN Reborn (version anges per sida).
+# fandom: = hon.fandom.com (original-HoN, MediaWiki-API, wikitext).
+wikiwiki:Midas
+wikiwiki:Pyromancer
+wikiwiki:MenuBar
+wikiwiki:FrontPage
+fandom:Fluffylumps
+fandom:Items
+fandom:Boots
+fandom:Category:Boots
