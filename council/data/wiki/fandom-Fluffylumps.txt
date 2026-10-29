@@ -1,0 +1,151 @@
+Källa: https://hon.fandom.com/api.php?action=parse&prop=wikitext&format=json&page=Fluffylumps
+Hämtad: 2026-10-29
+
+{{Unit infobox
+|name = Fluffylumps
+|image = Fluffylumps.jpg
+|combattype = Hero
+|health = 4000
+|healthregen = 15
+|mana = 4000
+|manaregen = 5
+|mindamage = 30
+|armor = 10
+|magicarmor = 15
+|movespeed = 350
+|sightrangeday = 1400
+|sightrangenight = 1400
+|attacktype = Ranged
+|attackrange = 700
+|missilespeed = 1000
+|bat = 1.55
+|attackpoint = 0.4
+|backswing = 0.4
+|turnrate = 540
+|goldbounty = 200
+|expbounty = 1000
+|boss = y
+|notes = Unitwalking<br />Treewalking
+}}
+'''Fluffylumps''' is the Boss [[Neutral]] of [[Mid Wars]], temporarily replacing [[Zorgath]] and [[Transmutanstein]] in [[Version 3.8.5]] and [[Version 3.8.6]].
+
+==Abilities==
+In addition to these abilities, every 30 seconds, Fluffylumps gains 3 Damage and 150 Max Health. Fluffylumps stops gaining bonus stats after 60 minutes. Fluffylumps is also immune to [[Armor]] reduction effects (but not [[Magic Armor]] reductions).
+
+At the beginning of the match and every day/night cycle transition (every 7.5 minutes), Fluffylumps will cast Apocalyptic Breath towards the center of the river.
+
+Fluffylumps spawns with a [[Fluffylumps#Gold Pile|Gold Pile]] next to him, which heroes can steal gold from.
+
+Fluffylumps will be sleeping while not aggroed, and won't attack until either it gets attacked directly. There is also a small chance to wake up Fluffylumps while stealing gold from the Gold Pile. When awoken, it will always cast Tail Whip. Fluffylumps will go back to sleep after being out of combat for 30 seconds.
+
+While its aggro is active, every 2 seconds Fluffylumps will perform a check. If there is an enemy hero within 650 radius, it has a 20% chance to cast Rain of Flames or a 2% chance to cast Apocalyptic Breath on a nearby hero.
+
+{{Ability infobox|Q
+|name = Apocalyptic Breath
+|image = Fluffylumps Apocalyptic Breath.jpg
+|action = Target Position
+|target = Enemy Units
+|type = Magic
+|castactiontime = 1.2
+|castbackswing = 0.8
+|cooldown = 1
+|description = 
+|effects = After a 1.5 second cast time, Fluffylumps roars and sends a huge fireball down the river towards the center of the map. This fireball deals 250 + 20% Max Health in Magic Damage on impact and leaves flames behind for 5 seconds that will deal 150 Magic Damage per second to those who stand in them.
+
+Fluffylumps will always use this ability shortly after the start of the game and during every day/night transition. Fluffylumps will also always use it shortly after waking up. During normal battle circumstances, Fluffylumps has a very small chance to use it as well.
+|notes = * The tooltip incorrectly states the fireball deals 400 Magic Damage and the flame trails deal 200 Magic Damage per second.
+* The fireball travels at 1000 speed and has a touch radius of 250.
+* The fireball destroys trees in a 300 radius.
+}}
+
+{{Ability infobox|W
+|name = Laser Beams
+|image = Fluffylumps Laser Beams.jpg
+|action = Self
+|target = 
+|castactiontime = 0
+|castbackswing = 0
+|cooldown = 1
+|description = 
+|effects = Two small dragonlings will be circling Fluffylumps at all times.
+
+When Fluffylumps uses this ability, the dragonlings form a line of fire between them for 6 seconds, dealing 300 Magic Damage per second to those that touch it.
+|status1 = 
+|status1-effects = 
+|notes = * This ability is '''disabled'''. It does not do anything when cast.
+}}
+
+{{Ability infobox|E
+|name = Rain of Flames
+|image = Fluffylumps Rain of Flames.jpg
+|action = Self
+|target = 
+|type = 
+|castactiontime = 0.5
+|castbackswing = 0.5
+|cooldown = 1
+|description = 
+|effects = Fluffylumps launches 10 fireballs into the sky, targeting random spots within 600 range and marking them on the ground.
+
+After a 3 second delay the fireballs land, dealing 250 Magic Damage on impact and leaving a puddle of fire for 3 seconds that deals 50 Magic Damage per second.
+|notes = * The tooltip incorrectly states the fireballs deals 300 Magic Damage on impact and the flame puddle deal 150 Magic Damage per second.
+* A red circle will be drawn on where the fireballs will land.
+* Flame puddles last 6 seconds.
+}}
+
+{{Ability infobox|E
+|name = Tail Whip
+|image = Fluffylumps Tali Whip.jpg
+|action = Target Unit
+|target = Enemy Units
+|type = 
+|castactiontime = 0.5
+|castbackswing = 0.5
+|range = 1000
+|cooldown = 1
+|description = 
+|effects = Shortly after waking up, Fluffylumps will deal 200 True Damage to a random nearby hero and Stun them for 3 seconds.
+
+Fluffylumps will not use this ability otherwise.
+|notes = 
+}}
+
+==Mechanics==
+===Spawning===
+Unlike other Neutrals, Fluffylumps will spawn as soon as the game starts.
+
+When Fluffylumps is killed, he will respawn exactly 10 minutes after his death. It is impossible to prevent Fluffylumps from spawning.
+
+===Fluffylumps's Lair===
+Fluffylumps cannot be attacked from outside his lair. Any attacks attempted from outside his lair will show a pop-up as a Miss, but [[True Strike]] will not allow you to damage Fluffylumps from outside his lair. However, abilities will damage Fluffylumps, regardless damage type or whether the user is inside or outside the lair.
+
+===AI===
+Fluffylumps will not attempt to use its abilities until it has been awakened.
+
+If Fluffylumps is lured outside of his lair for more than 3 seconds, he will be forced to return to his lair. When this happens, any debuffs are dispelled from Fluffylumps, and Fluffylumps gains Invulnerability, Cliffwalking and Buildingwalking until he returns to his lair.
+
+Fluffylumps will never attack Towers.
+
+===Bounty===
+When Fluffylumps is killed, the killer will receive 200 gold. In addition, the killer's teammates will receive 100 gold. The killer does not receive this gold. If a non-player controlled unit lands the killing blow on Fluffylumps, it gives 200 gold to the team instead.
+
+Unlike other Bosses, Fluffylumps does not drop any items on death.
+
+==Gold Pile==
+When Fluffylumps spawns, there will also be a gold pile (Dragon's Treasure) close to him.
+
+Right-clicking on the gold pile causes your hero to channel. For every second you channel, you gain 30 Gold, but each time you receive gold there is a 10% chance it will wake up Fluffylumps.
+
+==Changelog==
+{{changelog|
+'''[[Version 3.8.7]]'''
+* {{si|Fluffylumps|Apocalyptic Breath}}'s fireball now flies more towards the center of the map (instead of being fired more towards the Hellbourne side).
+* Reduced scaling from {10 Damage and 500 Health per minute to 6 Damage and 300 Health per minute}.
+* Being attacked no longer stops the treasure chest channel.
+* Heroes will no longer attack nearby enemies during the treasure chest channel.
+* Mimics and heropets will no longer be able to obtain gold by right-clicking on the treasure chest.
+}}
+
+{{Neutralsnav}}
+
+[[Category:Bosses]]

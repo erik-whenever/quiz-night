@@ -1,0 +1,78 @@
+Källa: https://hon.fandom.com/api.php?action=parse&prop=wikitext&format=json&page=Items
+Hämtad: 2026-10-29
+
+<div style="float: right;">{{#ev:youtube|m9wDh0kXXTQ}}</div>
+==Basic Items==
+{{/Supplies}}
+
+{{/Accessories}}
+
+{{/Weapons}}
+
+{{/Relics}}
+
+{{/Legendary}}
+
+==Recipe Items==
+{{/Initiation}}
+
+{{/Supportive}}
+
+{{/Protective}}
+
+{{/Combative}}
+
+{{/Morph Attack}}
+
+==Other Shops==
+{{/Outpost}}
+
+{{/Observatory}}
+
+==Boss Drops==
+These items cannot be bought from the Shop and are only dropped by Boss units.
+
+{| width = "100%" border="0" style="border-collapse:collapse;"
+|- valign="top"
+| width="20%" |
+{{Shop item box|Token of Life|type=Basic|Revive upon death.<br />(Dropped by [[Kongor]].)}}
+| width="20%" |
+{{Shop item box|Bananas|type=Basic|On use, restores 2500 Health and 1000 Mana.<br />(Dropped by [[Kongor]] after his 3rd death.)}}
+| width="20%" |
+{{Shop item box|Token of Vision|type=Basic|Grants 900 Clear Vision. Destroys upon wielder death.<br />(Dropped by [[Transmutanstein]].)}}
+| width="20%" |
+| width="20%" |
+|}
+
+==Obsolete Items==
+These items once existed in HoN at some point but were either removed or replaced the game. Spyglass is exception because its sole purpose is to be a debug item.
+
+{| width = "100%" border="0" style="border-collapse:collapse;"
+|- valign="top"
+| width="25%" |
+{{Shop item box|Ground Courier|type=Basic|Summons a Ground Courier to bring your items to you and your team.}}
+| width="25%" |
+{{Shop item box|Winged Courier (Recipe)|type=Basic|image=Winged Courier.jpg}}
+| width="25%" |
+{{Shop item box|Bastard Sword|type=Basic|21 Damage}}
+| width="25%" |
+{{Shop item box|Halberd|type=Basic|21 Damage. 15% chance to deal 40 Bonus Damage.}}
+|- valign="top"
+|
+{{Shop item box|Fenrir's Fang|type=Recipe|The earliest version of [[Frostwolf's Skull]].}}
+|
+{{Shop item box|Token of Stealth|type=Basic|On use, cloaks the user and nearby allied heroes.}}
+|
+{{Shop item box|Charged Hammer|type=Recipe|{{Modifier|Lightning}}<br />Unleashes a Chain Lightning every few attacks. Cast for Lightning Shield.}}
+|
+{{Shop item box|Merrick's Bounty|type=Basic|Generates extra gold when not killing creeps}}
+|- valign="top"
+|
+{{Shop item box|Spyglass|type=Basic|Given to all players at the start of the game to create harmless confetti.}}
+|
+{{Shop item box|Branded Sabre|type=Basic|35 Damage}}
+|
+{{Shop item box|Flayer|type=Recipe|The earliest version of [[Riftshards]]' upgrade}}
+|
+{{Shop item box|Arclight Crown|type=Recipe|{{Modifier|Lightning}}<br />Shoot Lightning every few hits.}}
+|}

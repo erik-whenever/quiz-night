@@ -1,0 +1,153 @@
+Källa: https://wikiwiki.jp/hon/Pyromancer
+Hämtad: 2026-10-29
+
+HoNR Ver.0.12.0
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/Pyromancer.png?rev=8577dbca916305c8cd203a68eb02ec68&t=20090724080721] | RANGE | ステータス | Lv1 | Inc | Lv25 | 
+Pyromancer
+(DotA:[http://dota.gamedb.info/wiki/?Slayer] Slayer) | Strength | 18 | 1.5 | - | 
+Agility | 16 | 1.5 | - | 
+Intelligence | 24 | 3.2 | - | 
+射程 | 525 | HP | 528 | - | - | 
+攻撃間隔 | 1.7 秒 | Mana | 312 | - | - | 
+移動速度 | 295 | Armor | 1.54 | - | - | 
+基本攻撃力 | 46-50 | M.Armor | 5.0 | - | - | 
+Phoenix Wave | 
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/pheonix-wave.png?rev=1ad74a1b2fb2b0b2f3c5350a3bfeda54&t=20090724080718] | タイプ： | Active | 指定した方向に扇状の火の鳥を飛ばし、エリアの敵にダメージを与える
+[flavor text:Contents may be hot!]（やけど注意！） | 
+指定： | 方向 | 
+Level | 消費マナ | クールダウン | 射程 | 範囲 | 効果時間 | 対象 | 効果 | 
+1 | 90 | 9 | 900 | 275 | - | 敵ユニット | 110マジックダメージ | 
+2 | 105 | 9 | 900 | 275 | - | 敵ユニット | 180マジックダメージ | 
+3 | 125 | 9 | 900 | 275 | - | 敵ユニット | 250マジックダメージ | 
+4 | 140 | 9 | 900 | 275 | - | 敵ユニット | 320マジックダメージ | 
+Dragonfire | 
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/dragon-fire.png?rev=047d4ab6f5887ec193b74767154eacd7&t=20090724080710] | タイプ： | Active | 地面から火龍を召還して範囲内の敵にスタンとダメージを与える。
+[flavor text: Mana Cost? Check. Cooldown? Check. The ability to summon a dragon? Priceless.]
+（マナコスト、有り。CD、有り。ドラゴン召喚アビリティ？……プライスレス。） | 
+指定： | 地点 | 
+Level | 消費マナ | クールダウン | 射程 | 範囲 | 効果時間 | 対象 | 効果 | 
+1 | 95 | 8 | 640 | 225 | - | 敵ユニット | 80マジックダメージ 1.6秒スタン | 
+2 | 105 | 8 | 655 | 225 | - | 敵ユニット | 130マジックダメージ 1.9秒スタン | 
+3 | 115 | 8 | 670 | 225 | - | 敵ユニット | 180マジックダメージ 2.2秒スタン | 
+4 | 125 | 8 | 685 | 225 | - | 敵ユニット | 230マジックダメージ 2.5秒スタン | 
+備考 | 
+キャストタイムが長い(1秒)。効果範囲内の木を切り倒す。 | 
+Fervor | 
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/fervor.png?rev=981fbd50b86f474f29ad6710934f9ba9&t=20090724080714] | タイプ： | Passive/Active | Passive:[1]自身のキャストスピードを増加させる。
+Passive:[2]スキル使用後に6秒間Pyromancerの攻撃速度と移動速度が上昇する。この効果は最大3回まで重複する。
+Passive:[3]通常攻撃とスキルダメージに3秒間持続するDotMagicダメージが発生するようになる。
+このダメージはスタックし、建造物にも効果がある。
+Active:即座に3チャージを獲得する。
+[flavor text:Burning!]（燃えてるゥ！） | 
+指定： | 無し | 
+Level | 消費マナ | クールダウン | 射程 | 範囲 | 効果時間 | 対象 | 効果 | 
+1 | 50 | 30 | - | - | 6 | 自分/敵ユニット | 1:キャストスピード+15 
+2:スタックｘ(攻撃速度+15 移動速度+2%)
+3:スタックx毎秒1Magicダメージ | 
+2 | 50 | 30 | - | - | 6 | 自分/敵ユニット | 1:キャストスピード+30 
+2:スタックｘ(攻撃速度+30 移動速度+3%)
+3:スタックx毎秒2Magicダメージ | 
+3 | 50 | 30 | - | - | 6 | 自分/敵ユニット | 1:キャストスピード+45 
+2:スタックｘ(攻撃速度+45 移動速度+4%)
+3:スタックx毎秒3Magicダメージ | 
+4 | 50 | 30 | - | - | 6 | 自分/敵ユニット | 1:キャストスピード+60 
+2:スタックｘ(攻撃速度+60 移動速度+5%)
+3:スタックx毎秒4Magicダメージ | 
+備考 | 
+[3]Illusionで攻撃した場合は三回目の攻撃時のみ1チャージ上昇、それ以外は時間の更新のみ。 | 
+Blazing Strike (Inferno Strike) | 
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/blazing-strike.png?rev=3878609185d0bbc7bcc4d5dc63851515&t=20090724080706] | タイプ： | Active | 敵一体にファイアボールを発射して大ダメージを与える 
+[/hon/Staff%20of%20the%20Master] Staff of the Master所持時、ダメージが増加し、対象の周囲600にも半分のダメージを与える。
+[flavor text:It's kinda like pitching a baseball. Of fire.]（野球ボールを投げる様なもんさ。焔のな。） | 
+指定： | 対象 | 
+Level | 消費マナ | クールダウン | 射程 | 範囲 | 効果時間 | 対象 | 効果 | 
+1 | 280 | 100 | 600 | - | - | 敵ユニット | 450(750)Magicダメージ | 
+2 | 430 | 80 | 600 | - | - | 敵ユニット | 725(1000)Magicダメージ | 
+3 | 570 | 60 | 600 | - | - | 敵ユニット | 1000(1250)Magicダメージ | 
+ビルド一覧 [/hon/::cmd/edit?page=Pyromancer&id=ye6568c7] 
+ビルド名 | 筆者 | 最終更新日 | 
+[/hon/Pyromancer/Build-%E5%90%8D%E7%84%A1%E3%81%97] 名無しビルド | 名無し | 2011-03-09 (水) 15:46:07 | 
+[/hon/Pyromancer/Build-%E5%90%8D%E7%84%A1%E3%81%972] 名無しビルド2 | 名無し | 2013-01-31 (木) 13:50:57 | 
+バックストーリー [/hon/::cmd/edit?page=Pyromancer&id=k6c88c78] 
+For centuries, the Sacred Order has recognized the "Flame-Touched," those men and women filled with a burning, if more than slightly mad, devotion to Sol.
+ Those Flame-Touched who serve in the Legion are more commonly called Pyromancers for their mastery over fire, and creatures strongly attuned to that element.
+the Sacred Orderには何世紀もの間、Flame-TouchedというSolに対する燃え盛るような信仰心を認められた者たちがいた。
+彼らの信仰心は狂信の域に達しているかもしれない。
+この信徒たちはLegionではPyromancerという呼び名で知られており、
+炎の扱い方に長けているだけでなく、生物を組み合わせた強力な炎を使う。
+関連
+[/hon/Witch%20Slayer] Witch Slayer 同教
+[/hon/Martyr] Martyr 同教
+SKIN [/hon/::cmd/edit?page=Pyromancer&id=k9f704a1] 
+デフォルト | Female Pyromancer | Scorcher | Headless Horseman Pyromancer | 
+ | | | | 
+Normal | Shop | Shop | Shop | 
+ | | AvaterShuffle第二弾 | | 
+コメント [/hon/::cmd/edit?page=Pyromancer&id=hd096e84] 
+ TempのUlt中に撃ちこんだら全員はじけ飛んでワロタ -- 2014-05-13 (火) 18:17:10
+3.6 低レベル2ndの威力とマナコストが増加 -- saibaiman[/hon/::cmd/edit?page=saibaiman&refer=%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%88%2FPyromancer] ? 2014-12-16 (火) 23:22:36
+3.8.0、スタンの効果範囲微増（200→225） -- 2015-12-19 (土) 16:13:33
+4.0.8更新 -- saibaiman[/hon/::cmd/edit?page=saibaiman&refer=%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%88%2FPyromancer] ? 2017-05-02 (火) 00:54:27
+4.1更新　壊れ臭のする大幅強化 -- saibaiman[/hon/::cmd/edit?page=saibaiman&refer=%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%88%2FPyromancer] ? 2017-05-09 (火) 00:04:11
+Carry運用増える(確信) -- 2017-05-09 (火) 08:58:21
+1stレンジ伸びすぎてmidで1st振ってるだけで勝てるぞこれ･･･安くて強い新アイテムとの相性もいいし･･･ -- 2017-05-09 (火) 13:56:27
+１ｓｔは確実に修正食らうやろなあ。よけにくすぎ -- 2017-05-23 (火) 10:03:19
+4.2更新 Ultがキルを取らなくても範囲ダメージが発生するように。 -- saibaiman[/hon/::cmd/edit?page=saibaiman&refer=%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%88%2FPyromancer] ? 2017-08-22 (火) 17:28:36
+HoNR Ver.0.7.8　3rd起動で即座に+180攻撃速度と15%移動速度が獲得可能に。誰かのUltかな？ -- saibaiman 2025-11-15 (土) 03:25:43
+ 初めての方へ
+[/hon/%E5%88%9D%E5%BF%83%E8%80%85%E5%90%91%E3%81%91%E3%82%AC%E3%82%A4%E3%83%89] 初心者向けガイド
+[/hon/1%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8BHoN] 1から始めるHoN
+[/hon/Goblinstore] ゲーム内ショップ解説
+[/hon/%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%9E%E3%83%8A%E3%83%BC] ルールとマナー
+[/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MidWarsについて
+[/hon/%E7%94%A8%E8%AA%9E%E9%9B%86] 用語集
+[/hon/%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A] 環境設定
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+HEROの紹介
+[/hon/%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E7%B4%B9%E4%BB%8B] ヒーロー紹介
+[/hon/Hero] HoNRヒーロー一覧
+[/hon/Hero#u87f90d9] Agility
+[/hon/Hero#r6ecd546] Intelligence
+[/hon/Hero#x880c310] Strength
+･[/hon/OldHero] 旧ヒーロー一覧
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方
+アイテム
+[/hon/%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] HoNRアイテム一覧
+･[/hon/%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧ベースアイテム一覧
+･[/hon/%E6%97%A7%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧アイテム一覧
+データ
+[/hon/Hero%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9] ステータスの効果
+[/hon/Modifier] Modifier
+[/hon/Rune] Rune
+[/hon/%E5%90%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E8%A9%B3%E7%B4%B0] Creep詳細
+[/hon/Kongor] Kongor
+[/hon/Illusion] Illusion
+[/hon/Range%E8%A1%A8] Range表
+Tips
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合
+[/hon/%E8%84%B1%E5%88%9D%E5%BF%83%E8%80%85%E3%82%AC%E3%82%A4%E3%83%89] 脱初心者ガイド
+[/hon/%E5%A5%B4%E9%9A%B7%E3%81%AE%E3%81%99%E3%82%9D%E3%82%81] 奴隷のすゝめ
+[/hon/%E7%8A%B6%E6%85%8B%E7%95%B0%E5%B8%B8%E8%A7%A3%E8%AA%AC] 状態異常解説
+[/hon/%E3%83%AF%E3%83%BC%E3%83%89%E3%83%BB%E3%83%9E%E3%83%83%E3%83%97%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ワード・マップについて
+[/hon/Monkey%20Courier] Monkey Courier
+[/hon/MagicImmunity] MagicImmunity
+[/hon/%E8%B1%86%E7%9F%A5%E8%AD%98] 豆知識
+[/hon/%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89] チャットコマンド
+[/hon/MOD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MODについて
+[/hon/SpilitReason%E3%81%A7%E3%81%AE%E8%B3%BC%E5%85%A5] 公式グッズを買う
+その他
+[/hon/%E3%83%AA%E3%83%B3%E3%82%AF] リンク
+[/hon/%E9%9B%91%E8%AB%87%E6%8E%B2%E7%A4%BA%E6%9D%BF] 雑談掲示板
+[/hon/?cmd=edit&page=MenuBar] MenuBar
+[/hon/hero%E5%90%8D%E5%89%8D%EF%BC%8B%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3] hero名前＋アイコン
+[/hon/image] 画像のアップロード
+[/hon/%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC] テンプレ
+[/hon/%E6%95%B4%E5%BD%A2%E3%83%AB%E3%83%BC%E3%83%AB] 整形ルール
+[/hon/%E7%B7%B4%E7%BF%92%E3%83%9A%E3%83%BC%E3%82%B8] 練習ページ
+T.?　Y.?
+NOW.?　TOTAL.?
+[http://wikiwiki.jp/hon/?cmd=edit&page=MenuBar] 編集
+ レンタルWIKI by [https://wikiwiki.jp/] WIKIWIKI.jp* / 
+ [https://wikiwiki.jp/pp/aboutad] 広告について /
+ 無料レンタル掲示板 [https://z.wikiwiki.jp/] zawazawa
+ [/hon/::cmd/mixirss]

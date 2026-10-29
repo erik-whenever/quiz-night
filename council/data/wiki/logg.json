@@ -1,0 +1,42 @@
+{
+ "wikiwiki:Midas": {
+  "status": 200,
+  "file": "wikiwiki-Midas.txt",
+  "chars": 7732
+ },
+ "wikiwiki:Pyromancer": {
+  "status": 200,
+  "file": "wikiwiki-Pyromancer.txt",
+  "chars": 7935
+ },
+ "wikiwiki:MenuBar": {
+  "status": 200,
+  "file": "wikiwiki-MenuBar.txt",
+  "chars": 5480
+ },
+ "wikiwiki:FrontPage": {
+  "status": 200,
+  "file": "wikiwiki-FrontPage.txt",
+  "chars": 8221
+ },
+ "fandom:Fluffylumps": {
+  "status": 200,
+  "file": "fandom-Fluffylumps.txt",
+  "chars": 6648
+ },
+ "fandom:Items": {
+  "status": 200,
+  "file": "fandom-Items.txt",
+  "chars": 2405
+ },
+ "fandom:Boots": {
+  "status": 200,
+  "file": "fandom-Boots.txt",
+  "chars": 341
+ },
+ "fandom:Category:Boots": {
+  "status": 200,
+  "file": "fandom-Category-Boots.txt",
+  "chars": 341
+ }
+}

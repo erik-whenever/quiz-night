@@ -1,0 +1,161 @@
+Källa: https://wikiwiki.jp/hon/FrontPage
+Hämtad: 2026-10-29
+
+Heroes of Newerth: Reborn オープンβ開始！(2025/11/12) New [/hon/::cmd/edit?page=FrontPage&id=t9275373] 
+[https://heroesofnewerth.com/] https://heroesofnewerth.com/
+HoN Rebornとは何ですか?
+このHoN の最新バージョンは、元のゲームの核となるエッセンスを維持しながら、古いプレイヤーの懐かしさと新しい視聴者向けの重要なアップデートを組み合わせることを目指しています。
+Heroes of Newerth: Reborn は、無料でプレイできるマルチプレイヤー オンライン バトル アリーナ (MOBA) ゲームであるオリジナルの Heroes of Newerth (HoN) の復活です。元 S2 Games の開発者とコミュニティ メンバーで構成された Kongor Studios によって開発されたこのゲームは、新しい iGames エンジン上に構築されており、前作に比べてグラフィック、パフォーマンス、マルチプレイヤー エクスペリエンスが向上しています。
+公式サービスは終了しましたがProject KONGORによる非公式サーバー稼働中！ [/hon/::cmd/edit?page=FrontPage&id=ud71c007] 
+プレイ方法は以下参照
+ loading...
+公式Discordで最新のパッチやサーバー状況、導入方法が確認可能です。
+[https://discord.com/channels/991034716360687637/1004847626212094032] https://discord.com/channels/991034716360687637/1004847626212094032
+Discord内のランチャーダウンロード場所
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/948dbaa7cadf24c888cabb79948f488e.png?rev=948dbaa7cadf24c888cabb79948f488e&t=20221213234416] 
+アカウント登録([https://kongor.online/register/)] https://kongor.online/register/)
+導入が非常に簡単になったため12月現在ピーク同接3500人超えでランクマッチやミッドウォーが稼働中。
+2022/12/14
+[https://cdn.wikiwiki.jp/to/w/hon/image/::attach/prokon.jpg?rev=923e03c2f63ecdf80c5da6805024afd8&t=20221214000011] 
+[https://kongor.online/] https://kongor.online/
+＊インスト時（ランチャー指定フォルダ）はルート直下か2バイト文字無しフォルダを指定
+＊失敗する時はDiscordのcommunity→supportに載っているクライアントファイルをDLして試す（例　HoN64-4.10.5.zip）
+＊ランチャーからのアップデートが途中で止まる時はIPv6を解除してみる
+（コンパネ→ネットワークとインターネット→ネットワークと共有センター→イーサネット→プロパティ　IPv6のチェックを外す）
+ IPv6無効化　スクショ
+ [https://cdn.wikiwiki.jp/to/w/hon/image/::attach/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B001.jpg?rev=ff796cfa0bd505f5c251c1fb7c06b4f1&t=20230623192513] 
+このサイトは2022年6月20日まで正式サービスを予定中のゲームHeroes of NewerthについてのWikiです。
+Heroes Of Newerth とは? [/hon/::cmd/edit?page=FrontPage&id=gbf3268c] 
+Heroes Of Newerth 通称HoNはWarcraft3:The Frozen ThroneのUMSであるDotA Allstarsを元にして作られたゲームです
+[http://www.heroesofnewerth.com/] http://www.heroesofnewerth.com/
+ゲームのルールや操作方法はほぼ同じでグラフィックやエフェクトなどが一新されています
+そのためDotaのWikiも参考になるかと思います。(ただし一部の内容は違います)
+[http://dota.gamedb.info/wiki/] http://dota.gamedb.info/wiki/
+&flash(http://www.youtube.com/v/WL3Cty_IVNI&hl=ja&fs=1&,560x340,);
+IRCチャンネル
+サーバー friend系列 | 
+チャンネル名 | 説明 | 
+#HoN_Jap | お友達募集用 | 
+#HHT | 紅白戦等 | 
+[http://limechat.net/] Limechat
+game内ch
+#jp
+#HHT
+ニコニコミュニティ
+ 【ニコニコ動画】[https://ext.nicovideo.jp/community/thumb_community/co1710890] こちらからどうぞ。
+広報欄 [/hon/::cmd/edit?page=FrontPage&id=qdf4eaf8] 
+フレンド募集をするところの作成
+友達の輪を広げていきましょう。一人で遊ぶのが飽きた人などにおすすめです。
+ふざけた書き込みや、騙りはしないように。
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+アップデートに失敗する
+最近、高頻度でパッチが着ていますが、人によってパッチが上手く当たらないようです。
+Ver2.6.10.1よりWindowsのみとなりますが起動時のコマンドラインに-updateと入れる事で強制的にアップデートプログラムを起動出来る様になりました。
+googleIMEなどを入れなおしてみるとアップデート成功する事例が多々出ています。
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合のページを作成しました。参考にしてください。
+ヒーローのビルド掲載について
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方あたりを参照。
+画像について
+編集時に、アイコンなどの画像を添付する際に、画像ファイルは一括して[/hon/image] imageのページへお願いします。
+ページへ添付するときは
+ &ref(image/添付したいファイル名.png,nolink,50x50);
+のように書くことでimageのページに添付してある画像を貼り付けることができます。
+現在HEROページのスキルアイコンやキャラクターアイコンが全てリンク状態になってしまっているので
+ページを編集したときに気が付いたらイメージにnolinkタグを追加してやってください。
+&attachrefを&refにして頂ければ更にGOOD。
+管理人交代のお知らせ
+2012/07/30をもちましてzikuu氏からrate-dat（HoNID:ratedat)に交代しました。
+Wikiに関して何か御座いましたら下記IRCchのHHTもしくはHoNのIDまでお気軽にご連絡下さい。
+一応Twitterの方も御座いますのでTwitterの方へリプライ下さっても大丈夫です。
+[https://twitter.com/rate_dat] https://twitter.com/rate_dat
+アクセス制限のお知らせ
+OCNのとあるアカウントを数日に渡って意図的なページ消去や悪戯改変を行っていたため制限させて頂きました。
+個人名をやたらと追加するスパムっぽいのを制限させていただきました
+現在開催中公式イベント [/hon/::cmd/edit?page=FrontPage&id=a9c1be8c] 
+ [http://forums.heroesofnewerth.com/showthread.php?462049-Follow-us-on-Social-Media-Become-a-Fan-Today!] http://forums.heroesofnewerth.com/showthread.php?462049-Follow-us-on-Social-Media-Become-a-Fan-Today!
+SolsticeとCourierのアバターの無料配布です。
+facebookとyoutubeの自アカウントに紐付けすることでそれぞれのアバターを無料でアンロックできます。
+Solstice Alt Avatar, King Animus
+必須:facebookアカウント
+ログインして [http://facebook.com/heroesofnewerth] http://facebook.com/heroesofnewerth にアクセスして "いいね！" ボタンを押す
+既に「いいね！」をしているか、「いいね！」を押した後に下記の画像をクリック
+押した先でも「いいね！」を押して、地域を選択する。
+（NA/EUが通常サーバー/SEAがGARENA/CISがGARENAロシア/LATが南米）
+HoNのメインアカウントのログインIDとパスワードを入力
+Enjoy your FREE copy of King Animus!
+Caterpillar Courier
+必須：youtubeアカウント
+[http://www.youtube.com/s2games] http://www.youtube.com/s2games
+上のアドレスのページに行きログインした状態で上端ヘッダーの「登録する」を押す
+「登録済み」になったら画面上段の右下の地域を選択する
+（NA/EUが通常サーバー/SEAがGARENA/CISがGARENAロシア/LATが南米）
+HoNのメインアカウントのログインIDとパスワードを入力
+Enjoy your FREE copy of The Caterpillar Courier!
+wikiへの意見・要望 [/hon/::cmd/edit?page=FrontPage&id=p8d727c9] 
+ 今更ちょっとテコ入れしたとこでDota2とLoL並に人口が増えるとは思えないなあ。HoNの方が圧倒的に好きだったけど開発変わってから追加されたキャラとか変更点とかマジ糞だったし始まる前から終わってる気がしてならない。 -- 2025-01-31 (金) 01:37:23
+そう…俺の使っていたヒーロー…その名はthe Madman -- 2025-02-01 (土) 08:20:53
+今日のアプデでスタマス祭です。今までスタマスに対応していなかったHEROにもスタマスが来ました -- 2025-10-09 (木) 17:20:52
+目立った変更あった奴＋αをHoNRverに更新しときました。後は任せます -- saibaiman 2025-11-15 (土) 23:35:47
+open betaだけど鯖がよくないね、一番近いであろうSEA鯖でもわりとおもい。 -- 2025-11-19 (水) 20:06:16
+タイ鯖とSEA鯖でやってるけどゲーム終盤に敵味方問わず強制切断されてなかなか戻ってこれなくなるケースが結構あるね・・・ -- 2025-11-20 (木) 18:42:41
+管理人さん更新お疲れ様でした。Shamans Headdressから派生する合成アイテムのPsionic hoodなるアイテムも新アイテムとして実装されていたのでお時間に余裕があれば追加していただけると幸いです -- 2025-11-20 (木) 18:50:13
+アイテム類は追加変更多くてかなり時間かかりそうなので効果気になった物とか書いてくれれば時間ある時追加しときます -- saibaiman 2025-11-21 (金) 22:53:26
+数値は編集できるけど、新規アイテムの画像とページの作り方が良く解らん。可能な人が居たら、画像とページだけ作って欲しい。ヒーローは現在のHoNRに編集中　2026/05/19 -- 2026-05-19 (火) 13:59:09
+合成アイテム類、新規フェニックスアイテムの編集ほぼ完了 -- 2026-05-25 (月) 05:14:11
+ 初めての方へ
+[/hon/%E5%88%9D%E5%BF%83%E8%80%85%E5%90%91%E3%81%91%E3%82%AC%E3%82%A4%E3%83%89] 初心者向けガイド
+[/hon/1%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8BHoN] 1から始めるHoN
+[/hon/Goblinstore] ゲーム内ショップ解説
+[/hon/%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%9E%E3%83%8A%E3%83%BC] ルールとマナー
+[/hon/MidWars%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MidWarsについて
+[/hon/%E7%94%A8%E8%AA%9E%E9%9B%86] 用語集
+[/hon/%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A] 環境設定
+[/hon/%E3%83%95%E3%83%AC%E3%83%B3%E3%83%89%E5%8B%9F%E9%9B%86] フレンド募集
+HEROの紹介
+[/hon/%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E7%B4%B9%E4%BB%8B] ヒーロー紹介
+[/hon/Hero] HoNRヒーロー一覧
+[/hon/Hero#u87f90d9] Agility
+[/hon/Hero#r6ecd546] Intelligence
+[/hon/Hero#x880c310] Strength
+･[/hon/OldHero] 旧ヒーロー一覧
+[/hon/%E3%83%93%E3%83%AB%E3%83%89%E6%8E%B2%E8%BC%89%E3%81%AE%E4%BB%95%E6%96%B9] ビルド掲載の仕方
+アイテム
+[/hon/%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] HoNRアイテム一覧
+･[/hon/%E3%83%99%E3%83%BC%E3%82%B9%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧ベースアイテム一覧
+･[/hon/%E6%97%A7%E5%90%88%E6%88%90%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0] 旧アイテム一覧
+データ
+[/hon/Hero%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9] ステータスの効果
+[/hon/Modifier] Modifier
+[/hon/Rune] Rune
+[/hon/%E5%90%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E8%A9%B3%E7%B4%B0] Creep詳細
+[/hon/Kongor] Kongor
+[/hon/Illusion] Illusion
+[/hon/Range%E8%A1%A8] Range表
+Tips
+[/hon/%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E7%B7%8F%E5%90%88] トラブル総合
+[/hon/%E8%84%B1%E5%88%9D%E5%BF%83%E8%80%85%E3%82%AC%E3%82%A4%E3%83%89] 脱初心者ガイド
+[/hon/%E5%A5%B4%E9%9A%B7%E3%81%AE%E3%81%99%E3%82%9D%E3%82%81] 奴隷のすゝめ
+[/hon/%E7%8A%B6%E6%85%8B%E7%95%B0%E5%B8%B8%E8%A7%A3%E8%AA%AC] 状態異常解説
+[/hon/%E3%83%AF%E3%83%BC%E3%83%89%E3%83%BB%E3%83%9E%E3%83%83%E3%83%97%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] ワード・マップについて
+[/hon/Monkey%20Courier] Monkey Courier
+[/hon/MagicImmunity] MagicImmunity
+[/hon/%E8%B1%86%E7%9F%A5%E8%AD%98] 豆知識
+[/hon/%E3%83%81%E3%83%A3%E3%83%83%E3%83%88%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89] チャットコマンド
+[/hon/MOD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6] MODについて
+[/hon/SpilitReason%E3%81%A7%E3%81%AE%E8%B3%BC%E5%85%A5] 公式グッズを買う
+その他
+[/hon/%E3%83%AA%E3%83%B3%E3%82%AF] リンク
+[/hon/%E9%9B%91%E8%AB%87%E6%8E%B2%E7%A4%BA%E6%9D%BF] 雑談掲示板
+[/hon/?cmd=edit&page=MenuBar] MenuBar
+[/hon/hero%E5%90%8D%E5%89%8D%EF%BC%8B%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3] hero名前＋アイコン
+[/hon/image] 画像のアップロード
+[/hon/%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC] テンプレ
+[/hon/%E6%95%B4%E5%BD%A2%E3%83%AB%E3%83%BC%E3%83%AB] 整形ルール
+[/hon/%E7%B7%B4%E7%BF%92%E3%83%9A%E3%83%BC%E3%82%B8] 練習ページ
+T.?　Y.?
+NOW.?　TOTAL.?
+[http://wikiwiki.jp/hon/?cmd=edit&page=MenuBar] 編集
+ レンタルWIKI by [https://wikiwiki.jp/] WIKIWIKI.jp* / 
+ [https://wikiwiki.jp/pp/aboutad] 広告について /
+ 無料レンタル掲示板 [https://z.wikiwiki.jp/] zawazawa
+ [/hon/::cmd/mixirss]
