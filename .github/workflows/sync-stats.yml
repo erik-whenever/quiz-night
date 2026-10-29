@@ -1,0 +1,27 @@
+name: Hämta gängets spelstatistik
+
+# Agenternas sandlåda når inte Steam eller HoN-statistiksajter, så GitHub hämtar
+# publik data för gängets konton (council/gänget.md) och checkar in den under
+# council/data/. Används av Quizresearchern till "Gänget i siffror"-frågor.
+# Ingen API-nyckel behövs: Steam-profilernas publika XML och WardUps publika sidor.
+on:
+  schedule:
+    - cron: "41 4 * * 4"   # torsdagar, inför fredagsquizet
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hämta Steam (profil + speltimmar) och WardUp (HoN Reborn)
+        run: python3 .github/scripts/hamta_statistik.py
+      - name: Checka in om ändrat
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add council/data
+          git diff --cached --quiet || (git commit -m "Synk: gängets spelstatistik" && git push)
