@@ -1,77 +1,72 @@
 {
- "wikiwiki:Goblinstore": {
-  "status": 200,
-  "file": "wikiwiki-Goblinstore.txt",
-  "chars": 4366
- },
- "wikiwiki:Hero": {
-  "status": 200,
-  "file": "wikiwiki-Hero.txt",
-  "chars": 8645
- },
- "wikiwiki:Fluffy's Fletching Arrows": {
-  "status": 200,
-  "file": "wikiwiki-Fluffy-27s-20Fletching-20Arrows.txt",
-  "chars": 3421
- },
- "wikiwiki:Golden Reach": {
-  "status": 200,
-  "file": "wikiwiki-Golden-20Reach.txt",
-  "chars": 3040
- },
- "wikiwiki:Chaosbrand": {
-  "status": 200,
-  "file": "wikiwiki-Chaosbrand.txt",
-  "chars": 4337
- },
  "wikiwiki:Post Haste": {
-  "status": 429,
+  "status": 200,
   "file": "wikiwiki-Post-20Haste.txt",
-  "chars": 0
+  "chars": 4946
  },
  "wikiwiki:Steamboots": {
-  "status": 429,
-  "file": "wikiwiki-Steamboots.txt",
-  "chars": 0
- },
- "wikiwiki:Pegasus Boots": {
   "status": 200,
-  "file": "wikiwiki-Pegasus-20Boots.txt",
-  "chars": 4166
+  "file": "wikiwiki-Steamboots.txt",
+  "chars": 4066
  },
  "wikiwiki:Shrunken Head": {
-  "status": 429,
-  "file": "wikiwiki-Shrunken-20Head.txt",
-  "chars": 0
- },
- "wikiwiki:Sacrificial Stone": {
   "status": 200,
-  "file": "wikiwiki-Sacrificial-20Stone.txt",
-  "chars": 6620
+  "file": "wikiwiki-Shrunken-20Head.txt",
+  "chars": 3805
  },
  "wikiwiki:Ghost Marchers": {
-  "status": 429,
-  "file": "wikiwiki-Ghost-20Marchers.txt",
-  "chars": 0
- },
- "wikiwiki:Marchers": {
   "status": 200,
-  "file": "wikiwiki-Marchers.txt",
-  "chars": 3130
+  "file": "wikiwiki-Ghost-20Marchers.txt",
+  "chars": 3625
  },
  "wikiwiki:Crown Greaves": {
-  "status": 429,
-  "file": "wikiwiki-Crown-20Greaves.txt",
-  "chars": 0
- },
- "wikiwiki:Token of Life": {
-  "status": 404,
-  "file": "wikiwiki-Token-20of-20Life.txt",
-  "chars": 0
- },
- "wikiwiki:Staff of the Master": {
   "status": 200,
-  "file": "wikiwiki-Staff-20of-20the-20Master.txt",
-  "chars": 14447
+  "file": "wikiwiki-Crown-20Greaves.txt",
+  "chars": 3749
+ },
+ "fandom:Heroes of Newerth: Reborn": {
+  "status": 200,
+  "file": "fandom-Heroes-20of-20Newerth-3A-20Reborn.txt",
+  "chars": 1509
+ },
+ "fandom:Fluffy's Fletching Arrows": {
+  "status": 200,
+  "file": "fandom-Fluffy-27s-20Fletching-20Arrows.txt",
+  "chars": 341
+ },
+ "fandom:Golden Reach": {
+  "status": 200,
+  "file": "fandom-Golden-20Reach.txt",
+  "chars": 341
+ },
+ "wikiwiki:Striders": {
+  "status": 200,
+  "file": "wikiwiki-Striders.txt",
+  "chars": 4275
+ },
+ "wikiwiki:Plated Greaves": {
+  "status": 200,
+  "file": "wikiwiki-Plated-20Greaves.txt",
+  "chars": 4118
+ },
+ "wikiwiki:Sorcery Boots": {
+  "status": 200,
+  "file": "wikiwiki-Sorcery-20Boots.txt",
+  "chars": 3485
+ },
+ "wikiwiki:Starscribe Boots": {
+  "status": 200,
+  "file": "wikiwiki-Starscribe-20Boots.txt",
+  "chars": 3720
+ },
+ "wikiwiki:Phantasmal Treads": {
+  "status": 200,
+  "file": "wikiwiki-Phantasmal-20Treads.txt",
+  "chars": 3604
+ },
+ "wikiwiki:Warsteam Boots": {
+  "status": 200,
+  "file": "wikiwiki-Warsteam-20Boots.txt",
+  "chars": 3333
  }
 }

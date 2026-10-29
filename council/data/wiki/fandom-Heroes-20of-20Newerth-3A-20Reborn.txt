@@ -1,0 +1,18 @@
+Källa: https://hon.fandom.com/api.php?action=parse&prop=wikitext&format=json&page=Heroes%20of%20Newerth%3A%20Reborn
+Hämtad: 2026-10-29
+
+'''Heroes of Newerth: Reborn''' is a relaunch/remake of ''[[Heroes of Newerth]]'', created in partnership with Kongor Studios and Garena. It was announced on January 28, 2025.
+
+''Heroes of Newerth: Reborn'' acts both as a relaunch of the original game since its end-of-service closure in 2022, as well as a graphical and gameplay update for the game on a new engine using the Juvio platform.
+
+==Features==
+* '''Unleash the Power of 80+ Heroes:''' Jump into battle with over 80 handpicked heroes at launch, each ready to dominate the arena. And the roster will keep growing post-launch!
+* '''Experience Lightning-Fast Gameplay:''' Powered by a cutting-edge engine, enjoy buttery-smooth performance with higher FPS and ultra-responsive 100-tick servers.
+* '''Revamped Audio & Visuals:''' Dive into a fully remastered world with enhanced sounds, updated effects, and a modernized UI that stays true to the game you love.
+* '''Face the Mighty Phoenix:''' Challenge yourself against the all-new boss character, Phoenix, a difficult yet rewarding objective.
+* '''Master New Mechanics:''' Discover innovative gameplay with the introduction of Ravens to assist with sight, have Kongor push a lane, and more.
+* '''Taunt with Style:''' Dominate the psychological game! Use emotes to taunt your opponents and leave them tilted as you claim victory.
+* '''Role Queue:''' You can now select which role(s) you prefer to play when you queue up for a match
+
+==External Links==
+* [http://www.heroesofnewerth.com/ Official site]
