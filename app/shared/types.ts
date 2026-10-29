@@ -115,5 +115,11 @@ export const BUZZ_WINDOW_MS = 150;
 export const BUZZ_MAX_COMP_MS = 70;
 /** Tillåten mätbrus utöver uppmätt RTT/2 när en buzz-tidsstämpel klampas. */
 export const BUZZ_JITTER_MS = 25;
+/** Rate-limit per anslutning (token bucket): buzzar per sekund och hur många som får komma i en klump. */
+export const BUZZ_RATE_PER_S = 5;
+export const BUZZ_BURST = 5;
+/** Generellt tak för alla meddelanden per anslutning (spong undantas, servern styr takten själv). */
+export const MSG_RATE_PER_S = 30;
+export const MSG_BURST = 60;
 
 export const DEFAULT_SETTINGS: Settings = { answerSeconds: 10, penalty: 1 };

@@ -175,6 +175,57 @@ async ([pin]) => {
     const re = await connect(r.code, 'player'); send(re, { t: 'join', name: 'Ladd', playerId: id });
     await sleep(30); send(re, { t: 'buzz', at: Date.now() - 5000 });
     out.reload = await winner(r.host); r.all.push(re); done(r); }
+
+  // Rate-limit: 50 buzzar + 200 ping i en klump. Servern lever, taket håller och vanliga spelare påverkas inte.
+  { const r = await setup(['Flod', 'Vanlig']);
+    const flod = r.ps.Flod; let pongs = 0;
+    flod.ws.addEventListener('message', (ev) => { if (JSON.parse(ev.data).t === 'pong') pongs++; });
+    for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
+    out.floodWinner = await winner(r.host);
+    send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
+    send(r.ps.Vanlig, { t: 'buzz', at: Date.now() });
+    out.normalAfterFlood = await winner(r.host);
+    // Ny fråga direkt efter en ny flod: Flods tomma hink släpper inte igenom nästa buzz, Vanlig vinner.
+    // Tidskänsligt: hinken fylls på med en buzz per 200 ms. Vänta först tills den är exakt full (taket 5),
+    // så floden tömmer den till ~0 och marginalen blir hela 200 ms. Tog host:next-rundan ändå för lång tid
+    // (långsam CI) görs ett nytt försök på nästa fråga; Python hoppar över kontrollen om alla blev för långsamma.
+    for (let q = 1; q <= 2; q++) {
+      await sleep(1100);
+      const t0 = performance.now();
+      for (let i = 0; i < 50; i++) send(flod, { t: 'buzz', at: Date.now() });
+      send(r.host, { t: 'host:next' }); await until(flod, (st) => st?.phase === 'question' && st.qIndex === q);
+      send(flod, { t: 'buzz', at: Date.now() });
+      out.throttleGapMs = Math.round(performance.now() - t0);
+      await sleep(250);
+      send(r.ps.Vanlig, { t: 'buzz', at: Date.now() });
+      out.throttled = await winner(r.host);
+      if (out.throttleGapMs < 150) break;
+    }
+    await sleep(2500);
+    for (let i = 0; i < 200; i++) send(flod, { t: 'ping', c: i });
+    await sleep(500);
+    out.floodPongs = pongs;
+    pongs = 0; await sleep(1500); send(flod, { t: 'ping', c: -1 }); await sleep(300);
+    out.pongAfter = pongs;
+    const tv = await connect(r.code, 'tv'); r.all.push(tv);
+    out.alive = (await until(tv, (st) => !!st)).players.length;
+    done(r); }
+
+  // Legitimt snabbt spel: buzz, fel, ny fråga, buzz direkt igen (tre gånger i rad) går alltid igenom,
+  // och hosten kan rätta poäng med 40 host:adjust i följd utan att något stryps.
+  { const r = await setup(['Snabb', 'Annan']);
+    out.fastRebuzz = [];
+    for (let q = 0; q < 3; q++) {
+      if (q > 0) { send(r.host, { t: 'host:next' }); await until(r.ps.Snabb, (st) => st?.phase === 'question' && st.qIndex === q); }
+      send(r.ps.Snabb, { t: 'buzz', at: Date.now() });
+      out.fastRebuzz.push(await winner(r.host));
+      send(r.host, { t: 'host:wrong' }); await until(r.host, (st) => st?.phase === 'question' && st.lockedOut.length === 1);
+    }
+    const before = r.host.state.players.find((p) => p.name === 'Annan').score;
+    for (let i = 0; i < 40; i++) send(r.host, { t: 'host:adjust', playerId: r.ps.Annan.id, delta: 1 });
+    const st = await until(r.host, (s) => s.players.find((p) => p.name === 'Annan').score === before + 40, 1500).catch(() => r.host.state);
+    out.adjusted = st.players.find((p) => p.name === 'Annan').score - before;
+    done(r); }
   return out;
 }
 """
@@ -396,6 +447,15 @@ def main():
         assert edge["next"]["after"] == "B", f"Buzz på nästa fråga efter avbrutet fönster fungerar inte: {edge['next']}"
         assert edge["lockedOut"] == "Kvar", f"Utlåst spelare fick buzza: {edge['lockedOut']}"
         assert edge["spam"] == "Lugn" and edge["spamBuzzed"] == 1, f"Spam-buzz skrev över första buzzen: {edge}"
+        assert edge["floodWinner"] == "Flod" and edge["normalAfterFlood"] == "Vanlig", f"Servern klarade inte buzz-flod: {edge}"
+        if edge["throttleGapMs"] < 150:
+            assert edge["throttled"] == "Vanlig", f"Buzz-taket släppte igenom flod-buzz: {edge['throttled']} ({edge['throttleGapMs']} ms)"
+        else:
+            print(f"VARNING: buzz-taket kunde inte kontrolleras, host:next tog {edge['throttleGapMs']} ms (gräns 150)")
+        assert 0 < edge["floodPongs"] <= 70, f"Meddelandetaket håller inte (pongs={edge['floodPongs']})"
+        assert edge["pongAfter"] == 1 and edge["alive"] == 2, f"Anslutningen återhämtade sig inte efter flod: {edge}"
+        assert edge["fastRebuzz"] == ["Snabb"] * 3, f"Legitim snabb buzz ströps: {edge['fastRebuzz']}"
+        assert edge["adjusted"] == 40, f"Hostens poängjusteringar ströps: {edge['adjusted']} av 40"
         assert edge["reload"] == "Ladd", f"Buzz försvann vid omladdning mitt i fönstret: {edge['reload']}"
         raw.close()
 
