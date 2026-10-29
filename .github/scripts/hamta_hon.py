@@ -16,7 +16,7 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 API = "https://ward-up.com/api"
 OUT = Path("council/data/hon")
-MAX_PAGES = 60          # tak per spelare
+MAX_PAGES = 40          # tak per spelare
 KEEP = ("game_id", "played_at", "date", "hero_name", "kda", "map", "is_ranked", "level", "hero", "hero_name", "hero_id", "kills", "deaths", "assists",
         "win", "won", "result", "duration", "mode", "game_mode", "gpm", "kda", "team")
 
@@ -107,6 +107,10 @@ def player(name):
     if isinstance(prof, dict):
         add(prof.get("match_history") or [])
     if acc:
+        # Sidindelningen är odokumenterad: prova offset i antal matcher, annars sidnummer.
+        res["pages"] = []
+        mode = "count"
+        page_no = 0
         for page in range(MAX_PAGES):
             st, data = get(f"{API}/players/match-history?account_id={acc}&offset={offset}")
             if page == 0:
@@ -116,9 +120,21 @@ def player(name):
                 elif not isinstance(data, list):
                     res["historySample"] = data
             lst = match_list(data) if st == 200 else None
-            if not lst or not add(lst):
+            more = data.get("has_more") if isinstance(data, dict) else None
+            n = add(lst) if lst else 0
+            res["pages"].append({"offset": offset, "status": st, "got": len(lst or []), "new": n, "has_more": more})
+            if lst and n == 0 and mode == "count" and page > 0:
+                mode = "page"  # offset verkar vara sidnummer
+                page_no = 1
+                offset = page_no
+                continue
+            if not lst or n == 0 or more is False:
                 break
-            offset += len(lst)
+            if mode == "count":
+                offset += len(lst)
+            else:
+                page_no += 1
+                offset = page_no
     for m in matches:  # "kda": "3/1/5" -> kills/deaths/assists
         parts = str(m.get("kda", "")).split("/")
         if len(parts) == 3 and all(x.strip().isdigit() for x in parts):
