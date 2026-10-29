@@ -3,6 +3,8 @@ import { Link, TopBar } from "../App";
 import { api, hostKeyFor } from "../lib/api";
 import { useCountdown, useRoom } from "../lib/useRoom";
 import { Countdown, Podium } from "../components";
+import { answerSecondsFor } from "../../shared/types";
+import { HostWheel } from "../wheel";
 import PinGate from "./PinGate";
 
 function Control({ code }: { code: string }) {
@@ -61,6 +63,7 @@ function Control({ code }: { code: string }) {
                 <h3>Väntar på spelare</h3>
                 <p className="muted">{state.players.length} inne. Starta när alla är med.</p>
                 <button className="btn primary big" onClick={() => send({ t: "host:start" })} disabled={!state.players.length}>Starta första frågan</button>
+                <HostWheel state={state} send={send} serverNow={serverNow} />
               </>
             )}
 
@@ -68,13 +71,14 @@ function Control({ code }: { code: string }) {
               <>
                 <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{state.question.text}</p>
                 <div className="answer-box">Svar: {state.answer}</div>
+                <HostWheel state={state} send={send} serverNow={serverNow} />
 
                 {state.phase === "question" && <p className="muted" aria-live="polite">Fritt fram att buzza… {state.lockedOut.length > 0 && `(${state.lockedOut.length} utlåsta)`}</p>}
 
                 {state.phase === "buzzed" && buzzer && (
                   <div className="stack" style={{ alignItems: "center" }}>
                     <div className="row" style={{ justifyContent: "center" }}>
-                      <Countdown ms={left} total={state.settings.answerSeconds * 1000} size={96} />
+                      <Countdown ms={left} total={answerSecondsFor(state) * 1000} size={96} />
                       <div>
                         <p className="display" style={{ fontSize: "1.8rem", color: buzzer.color }}>{buzzer.name}</p>
                         {state.buzz?.typedAnswer && <p>Skrev: ”{state.buzz.typedAnswer}”</p>}
