@@ -1,3 +1,65 @@
 {
-  "league": []
+  "league": [
+    {
+      "id": "MF7U-2026-10-29",
+      "date": "2026-10-29T18:22:34.071Z",
+      "title": "Demo: Allt i appen",
+      "results": [
+        {
+          "name": "Blusie",
+          "score": 17
+        },
+        {
+          "name": "Erik",
+          "score": 14
+        }
+      ],
+      "coins": {
+        "Erik": 7,
+        "Blusie": 16
+      }
+    }
+  ],
+  "wallets": [
+    {
+      "name": "Blusie",
+      "coins": 19,
+      "items": {
+        "fifty": 1,
+        "double": 1
+      }
+    },
+    {
+      "name": "Röktest",
+      "coins": 10,
+      "items": {}
+    },
+    {
+      "name": "test 1",
+      "coins": 10,
+      "items": {}
+    },
+    {
+      "name": "test2",
+      "coins": 10,
+      "items": {}
+    },
+    {
+      "name": "Test mobil",
+      "coins": 10,
+      "items": {}
+    },
+    {
+      "name": "test edge",
+      "coins": 10,
+      "items": {}
+    },
+    {
+      "name": "Erik",
+      "coins": 8,
+      "items": {
+        "fifty": 1
+      }
+    }
+  ]
 }
