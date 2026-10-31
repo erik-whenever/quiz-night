@@ -1,0 +1,314 @@
+{
+ "id": "tv-rick-and-morty",
+ "title": "Rick and Morty",
+ "theme": "Tv-serier",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "rick-and-morty-1",
+   "text": "Vad heter Rick i efternamn?",
+   "answer": "Sanchez",
+   "category": "Rick and Morty",
+   "choices": [
+    "Sanchez",
+    "Smith",
+    "Sanders",
+    "Martinez",
+    "Rodriguez",
+    "Simpson",
+    "Stevens",
+    "Santos"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "rick-and-morty-2",
+   "text": "Vad förvandlar Rick sig till för att slippa familjeterapin?",
+   "answer": "En inlagd gurka",
+   "category": "Rick and Morty",
+   "choices": [
+    "En inlagd gurka",
+    "En råtta",
+    "En kackerlacka",
+    "En tomat",
+    "En potatis",
+    "En banan",
+    "En morot",
+    "En pizza"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "rick-and-morty-3",
+   "text": "Vad heter de blå varelserna som uppfyller en önskan och sedan försvinner?",
+   "answer": "Mr. Meeseeks",
+   "category": "Rick and Morty",
+   "choices": [
+    "Mr. Meeseeks",
+    "Mr. Poopybutthole",
+    "Gazorpazorpfield",
+    "Squanchy",
+    "Cromulons",
+    "Gromflomites",
+    "Zigerions",
+    "Plumbubbos"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "rick-and-morty-4",
+   "text": "Vad heter Mortys storasyster?",
+   "answer": "Summer",
+   "category": "Rick and Morty",
+   "choices": [
+    "Summer",
+    "Beth",
+    "Tammy",
+    "Jessica",
+    "Unity",
+    "Annie",
+    "Winter",
+    "Spring"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "rick-and-morty-5",
+   "text": "Vad heter Ricks dotter?",
+   "answer": "Beth",
+   "category": "Rick and Morty",
+   "choices": [
+    "Beth",
+    "Summer",
+    "Donna",
+    "Jessica",
+    "Tammy",
+    "Unity",
+    "Kathy",
+    "Annie"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "rick-and-morty-6",
+   "text": "Vem är Ricks fågelliknande bästa vän?",
+   "answer": "Birdperson",
+   "category": "Rick and Morty",
+   "choices": [
+    "Birdperson",
+    "Squanchy",
+    "Gearhead",
+    "Krombopulos Michael",
+    "Phoenixperson",
+    "Scary Terry",
+    "Abradolf Lincler",
+    "Noob-Noob"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "rick-and-morty-7",
+   "text": "Vilken sås är Rick besatt av?",
+   "answer": "McDonald's Szechuansås",
+   "category": "Rick and Morty",
+   "choices": [
+    "McDonald's Szechuansås",
+    "Burger Kings BBQ-sås",
+    "Sriracha",
+    "Heinz ketchup",
+    "Big Mac-sås",
+    "Tabasco",
+    "KFC:s gravy",
+    "Taco Bells hot sauce"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "rick-and-morty-8",
+   "text": "Vilka skapade serien?",
+   "answer": "Justin Roiland och Dan Harmon",
+   "category": "Rick and Morty",
+   "choices": [
+    "Justin Roiland och Dan Harmon",
+    "Dan Harmon och Seth MacFarlane",
+    "Matt Groening och Justin Roiland",
+    "Trey Parker och Matt Stone",
+    "Mike Judge och Dan Harmon",
+    "Justin Roiland och Matt Groening",
+    "Seth Rogen och Evan Goldberg",
+    "Seth MacFarlane och Mike Judge"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "rick-and-morty-9",
+   "text": "Vad betyder ”Wubba Lubba Dub Dub” enligt Birdperson?",
+   "answer": "Jag har stor smärta, snälla hjälp mig",
+   "category": "Rick and Morty",
+   "choices": [
+    "Jag har stor smärta, snälla hjälp mig",
+    "Låt oss festa",
+    "Jag är bäst i universum",
+    "Hejdå för alltid",
+    "Skål för vetenskapen",
+    "Ingen bryr sig",
+    "Jag älskar dig, barnbarn",
+    "Vi ses i nästa dimension"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "rick-and-morty-10",
+   "text": "Vilken vardagsgrej ”har alla hemma” enligt en reklam i interdimensionell kabel-tv?",
+   "answer": "En plumbus",
+   "category": "Rick and Morty",
+   "choices": [
+    "En plumbus",
+    "En schwifty",
+    "En flurbo",
+    "En meeseeksbox",
+    "En squanch",
+    "En gazorp",
+    "En blamph",
+    "En krombopulus"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "rick-and-morty-11",
+   "text": "Vilken dimension kommer ”vår” Rick från?",
+   "answer": "C-137",
+   "category": "Rick and Morty",
+   "choices": [
+    "C-137",
+    "C-131",
+    "C-132",
+    "D-99",
+    "C-500A",
+    "K-22",
+    "Z-137",
+    "A-137"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "rick-and-morty-12",
+   "text": "Vad jobbar Beth med?",
+   "answer": "Hästkirurg",
+   "category": "Rick and Morty",
+   "choices": [
+    "Hästkirurg",
+    "Tandläkare",
+    "Psykolog",
+    "Veterinär för hundar",
+    "Sjuksköterska",
+    "Advokat",
+    "Lärare",
+    "Barnläkare"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "rick-and-morty-13",
+   "text": "Vad heter de jättelika huvudena som skriker ”Show me what you got!”?",
+   "answer": "Cromulons",
+   "category": "Rick and Morty",
+   "choices": [
+    "Cromulons",
+    "Gromflomites",
+    "Zigerions",
+    "Gazorpians",
+    "Meeseeks",
+    "Plutonians",
+    "Unitys",
+    "Galactic Federation"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "rick-and-morty-14",
+   "text": "Vad heter det kollektiva medvetandet som Rick har varit ihop med?",
+   "answer": "Unity",
+   "category": "Rick and Morty",
+   "choices": [
+    "Unity",
+    "Hive",
+    "Supernova",
+    "Tammy",
+    "The One",
+    "Collective",
+    "Synergy",
+    "Gearhead"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "rick-and-morty-15",
+   "text": "Vilken Disneyfilm marknadsförde McDonald's Szechuansås från början 1998?",
+   "answer": "Mulan",
+   "category": "Rick and Morty",
+   "choices": [
+    "Mulan",
+    "Lejonkungen",
+    "Pocahontas",
+    "Herkules",
+    "Tarzan",
+    "Aladdin",
+    "Toy Story 2",
+    "Ett småkryps liv"
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "rick-and-morty-16",
+   "text": "Vad heter Ricks fru i tillbakablickarna?",
+   "answer": "Diane",
+   "category": "Rick and Morty",
+   "choices": [
+    "Diane",
+    "Donna",
+    "Beth",
+    "Tammy",
+    "Unity",
+    "Linda",
+    "Carol",
+    "Jessica"
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "rick-and-morty-ordna",
+   "text": "Rick and Morty: Ordna avsnitten efter när de sändes.",
+   "answer": "",
+   "category": "Rick and Morty",
+   "mode": "skill",
+   "difficulty": 3,
+   "skill": {
+    "kind": "order",
+    "prompt": "Tidigast först",
+    "items": [
+     {
+      "label": "Meeseeks and Destroy",
+      "value": 105,
+      "show": "S1E5"
+     },
+     {
+      "label": "Rixty Minutes (kabel-tv)",
+      "value": 108,
+      "show": "S1E8"
+     },
+     {
+      "label": "Total Rickall",
+      "value": 204,
+      "show": "S2E4"
+     },
+     {
+      "label": "Pickle Rick",
+      "value": 303,
+      "show": "S3E3"
+     }
+    ]
+   }
+  }
+ ]
+}
