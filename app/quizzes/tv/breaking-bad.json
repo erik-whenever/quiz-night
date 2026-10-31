@@ -1,0 +1,314 @@
+{
+ "id": "tv-breaking-bad",
+ "title": "Breaking Bad",
+ "theme": "Tv-serier",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "breaking-bad-1",
+   "text": "Vilket alias använder Walter White i knarkvärlden?",
+   "answer": "Heisenberg",
+   "category": "Breaking Bad",
+   "choices": [
+    "Heisenberg",
+    "Einstein",
+    "Schrödinger",
+    "The Chemist",
+    "Blue Sky",
+    "Mr. White",
+    "El Profesor",
+    "Oppenheimer"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "breaking-bad-2",
+   "text": "Vad jobbar Walter med när serien börjar?",
+   "answer": "Kemilärare på gymnasiet",
+   "category": "Breaking Bad",
+   "choices": [
+    "Kemilärare på gymnasiet",
+    "Apotekare",
+    "Biltvättare",
+    "Forskare på ett labb",
+    "Läkare",
+    "Mattelärare",
+    "Taxichaufför",
+    "Bilmekaniker"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "breaking-bad-3",
+   "text": "I vilken stad utspelar sig serien?",
+   "answer": "Albuquerque",
+   "category": "Breaking Bad",
+   "choices": [
+    "Albuquerque",
+    "Phoenix",
+    "El Paso",
+    "Santa Fe",
+    "Las Vegas",
+    "Tucson",
+    "San Diego",
+    "Denver"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "breaking-bad-4",
+   "text": "Vad heter Gus Frings restaurangkedja?",
+   "answer": "Los Pollos Hermanos",
+   "category": "Breaking Bad",
+   "choices": [
+    "Los Pollos Hermanos",
+    "El Pollo Loco",
+    "Los Tacos Hermanos",
+    "Chicken Brothers",
+    "Pollo Grande",
+    "La Casa del Pollo",
+    "Los Hermanos Fritos",
+    "Taco Fring"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "breaking-bad-5",
+   "text": "Var jobbar Hank Schrader?",
+   "answer": "DEA",
+   "category": "Breaking Bad",
+   "choices": [
+    "DEA",
+    "FBI",
+    "CIA",
+    "Albuquerque-polisen",
+    "Gränspolisen",
+    "ATF",
+    "Marshals",
+    "Militärpolisen"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "breaking-bad-6",
+   "text": "Vilken skådespelare spelar Walter White?",
+   "answer": "Bryan Cranston",
+   "category": "Breaking Bad",
+   "choices": [
+    "Bryan Cranston",
+    "Aaron Paul",
+    "Bob Odenkirk",
+    "Dean Norris",
+    "Giancarlo Esposito",
+    "Jonathan Banks",
+    "Michael C. Hall",
+    "Kevin Spacey"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "breaking-bad-7",
+   "text": "Vilken typ av cancer får Walter diagnos på?",
+   "answer": "Lungcancer",
+   "category": "Breaking Bad",
+   "choices": [
+    "Lungcancer",
+    "Hjärntumör",
+    "Leukemi",
+    "Prostatacancer",
+    "Hudcancer",
+    "Magcancer",
+    "Levercancer",
+    "Bukspottkörtelcancer"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "breaking-bad-8",
+   "text": "Vad heter Saul Goodman egentligen?",
+   "answer": "James McGill",
+   "category": "Breaking Bad",
+   "choices": [
+    "James McGill",
+    "Saul Goldman",
+    "Jimmy Kimmel",
+    "Charles McGill",
+    "James Goodwin",
+    "Howard Hamlin",
+    "Kim Wexler",
+    "Steven Gomez"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "breaking-bad-9",
+   "text": "Vad samlar Hank på (”They're minerals, Marie!”)?",
+   "answer": "Mineraler",
+   "category": "Breaking Bad",
+   "choices": [
+    "Mineraler",
+    "Frimärken",
+    "Ölflaskor",
+    "Vapen",
+    "Mynt",
+    "Basebollkort",
+    "Modellbilar",
+    "Fjärilar"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "breaking-bad-10",
+   "text": "Vilket namn vill Walter Jr. bli kallad?",
+   "answer": "Flynn",
+   "category": "Breaking Bad",
+   "choices": [
+    "Flynn",
+    "Jake",
+    "Junior",
+    "Billy",
+    "Danny",
+    "Skip",
+    "Bobby",
+    "Kenny"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "breaking-bad-11",
+   "text": "Vem ”hjälper” Walter att spränga Gus Fring?",
+   "answer": "Hector Salamanca",
+   "category": "Breaking Bad",
+   "choices": [
+    "Hector Salamanca",
+    "Jesse Pinkman",
+    "Saul Goodman",
+    "Mike Ehrmantraut",
+    "Tuco Salamanca",
+    "Huell",
+    "Todd Alquist",
+    "Badger"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "breaking-bad-12",
+   "text": "Vad heter biltvätten som familjen White köper?",
+   "answer": "A1A Car Wash",
+   "category": "Breaking Bad",
+   "choices": [
+    "A1A Car Wash",
+    "Sunshine Car Wash",
+    "Crystal Clean",
+    "Desert Wash",
+    "Rio Grande Car Wash",
+    "Sparkle Wash",
+    "Blue Sky Car Wash",
+    "Heisenberg Wash"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "breaking-bad-13",
+   "text": "Vad heter labbassistenten som Gus anställer innan Jesse tar över?",
+   "answer": "Gale Boetticher",
+   "category": "Breaking Bad",
+   "choices": [
+    "Gale Boetticher",
+    "Todd Alquist",
+    "Victor",
+    "Tyrus Kitt",
+    "Steven Gomez",
+    "Domingo Molina",
+    "Tuco Salamanca",
+    "Lydia Rodarte-Quayle"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "breaking-bad-14",
+   "text": "Vad heter Mikes barnbarn?",
+   "answer": "Kaylee",
+   "category": "Breaking Bad",
+   "choices": [
+    "Kaylee",
+    "Holly",
+    "Stacey",
+    "Brock",
+    "Andrea",
+    "Lily",
+    "Ashley",
+    "Jane"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "breaking-bad-15",
+   "text": "Vilket företag var Walter med och grundade innan han lämnade för en spottstyver?",
+   "answer": "Gray Matter Technologies",
+   "category": "Breaking Bad",
+   "choices": [
+    "Gray Matter Technologies",
+    "Blue Sky Industries",
+    "Vamonos Pest",
+    "Madrigal Electromotive",
+    "Crystal Ventures",
+    "Albuquerque Chemical",
+    "Elliott & Schwartz Labs",
+    "White & Co."
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "breaking-bad-16",
+   "text": "Vad heter seriens allra sista avsnitt?",
+   "answer": "Felina",
+   "category": "Breaking Bad",
+   "choices": [
+    "Felina",
+    "Ozymandias",
+    "Granite State",
+    "Face Off",
+    "Full Measure",
+    "Say My Name",
+    "To'hajiilee",
+    "Gliding Over All"
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "breaking-bad-ordna",
+   "text": "Breaking Bad: Ordna händelserna efter säsong.",
+   "answer": "",
+   "category": "Breaking Bad",
+   "mode": "skill",
+   "difficulty": 3,
+   "skill": {
+    "kind": "order",
+    "prompt": "Tidigast först",
+    "items": [
+     {
+      "label": "Jane dör",
+      "value": 2,
+      "show": "Säsong 2"
+     },
+     {
+      "label": "Gale dör",
+      "value": 3,
+      "show": "Säsong 3"
+     },
+     {
+      "label": "Gus dör",
+      "value": 4,
+      "show": "Säsong 4"
+     },
+     {
+      "label": "Hank dör",
+      "value": 5,
+      "show": "Säsong 5"
+     }
+    ]
+   }
+  }
+ ]
+}

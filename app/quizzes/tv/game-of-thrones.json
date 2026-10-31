@@ -1,0 +1,319 @@
+{
+ "id": "tv-game-of-thrones",
+ "title": "Game of Thrones",
+ "theme": "Tv-serier",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "game-of-thrones-1",
+   "text": "Vilka är Starkarnas husord?",
+   "answer": "Winter Is Coming",
+   "category": "Game of Thrones",
+   "choices": [
+    "Winter Is Coming",
+    "Hear Me Roar",
+    "Fire and Blood",
+    "We Do Not Sow",
+    "Ours Is the Fury",
+    "Family, Duty, Honor",
+    "Growing Strong",
+    "Unbowed, Unbent, Unbroken"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "game-of-thrones-2",
+   "text": "Vem dödar Nattkungen?",
+   "answer": "Arya Stark",
+   "category": "Game of Thrones",
+   "choices": [
+    "Arya Stark",
+    "Jon Snow",
+    "Daenerys Targaryen",
+    "Bran Stark",
+    "Jaime Lannister",
+    "Brienne av Tarth",
+    "Theon Greyjoy",
+    "Sansa Stark"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "game-of-thrones-3",
+   "text": "Vad heter huvudstaden i de sju konungadömena?",
+   "answer": "King's Landing",
+   "category": "Game of Thrones",
+   "choices": [
+    "King's Landing",
+    "Winterfell",
+    "Casterly Rock",
+    "Highgarden",
+    "Dragonstone",
+    "Riverrun",
+    "Sunspear",
+    "Oldtown"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "game-of-thrones-4",
+   "text": "Vad heter Aryas svärd?",
+   "answer": "Needle",
+   "category": "Game of Thrones",
+   "choices": [
+    "Needle",
+    "Longclaw",
+    "Ice",
+    "Oathkeeper",
+    "Widow's Wail",
+    "Heartsbane",
+    "Dawn",
+    "Lightbringer"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "game-of-thrones-5",
+   "text": "Vad kommer Hodors namn ifrån?",
+   "answer": "”Hold the door”",
+   "category": "Game of Thrones",
+   "choices": [
+    "”Hold the door”",
+    "”Hold the horse”",
+    "”Hodor of House Hodor”",
+    "”Hodor’s horse”",
+    "”Hold your ground”",
+    "”Ho, the door!”",
+    "”Hold the gate”",
+    "”Hold the order”"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "game-of-thrones-6",
+   "text": "Vem är värd för det röda bröllopet?",
+   "answer": "Walder Frey",
+   "category": "Game of Thrones",
+   "choices": [
+    "Walder Frey",
+    "Roose Bolton",
+    "Tywin Lannister",
+    "Edmure Tully",
+    "Ramsay Bolton",
+    "Littlefinger",
+    "Robb Stark",
+    "Black Walder"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "game-of-thrones-7",
+   "text": "Fyll i Tyrion: ”That's what I do. I drink and I …”",
+   "answer": "know things",
+   "category": "Game of Thrones",
+   "choices": [
+    "know things",
+    "forget things",
+    "fix things",
+    "say things",
+    "break things",
+    "see things",
+    "win things",
+    "pay my debts"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "game-of-thrones-8",
+   "text": "Vem spelar Ned Stark?",
+   "answer": "Sean Bean",
+   "category": "Game of Thrones",
+   "choices": [
+    "Sean Bean",
+    "Charles Dance",
+    "Iain Glen",
+    "Stephen Dillane",
+    "Mark Addy",
+    "Liam Cunningham",
+    "Ciarán Hinds",
+    "Michael McElhatton"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "game-of-thrones-9",
+   "text": "Vem är Jon Snows riktiga mamma?",
+   "answer": "Lyanna Stark",
+   "category": "Game of Thrones",
+   "choices": [
+    "Lyanna Stark",
+    "Catelyn Stark",
+    "Ashara Dayne",
+    "Wylla",
+    "Rhaenys Targaryen",
+    "Elia Martell",
+    "Daenerys Targaryen",
+    "Cersei Lannister"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "game-of-thrones-10",
+   "text": "Vilken av Daenerys drakar blir Nattkungens?",
+   "answer": "Viserion",
+   "category": "Game of Thrones",
+   "choices": [
+    "Viserion",
+    "Drogon",
+    "Rhaegal",
+    "Balerion",
+    "Vhagar",
+    "Meraxes",
+    "Syrax",
+    "Caraxes"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "game-of-thrones-11",
+   "text": "Vem blir kung när serien tar slut?",
+   "answer": "Bran Stark",
+   "category": "Game of Thrones",
+   "choices": [
+    "Bran Stark",
+    "Jon Snow",
+    "Sansa Stark",
+    "Tyrion Lannister",
+    "Gendry",
+    "Samwell Tarly",
+    "Yara Greyjoy",
+    "Edmure Tully"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "game-of-thrones-12",
+   "text": "Var dödar Tyrion sin far Tywin?",
+   "answer": "På toaletten",
+   "category": "Game of Thrones",
+   "choices": [
+    "På toaletten",
+    "I tronsalen",
+    "I sovrummet",
+    "På slagfältet",
+    "I fängelsehålan",
+    "På skeppet",
+    "I biblioteket",
+    "Vid hans bröllop"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "game-of-thrones-13",
+   "text": "Vilket gift dödar kung Joffrey?",
+   "answer": "The Strangler",
+   "category": "Game of Thrones",
+   "choices": [
+    "The Strangler",
+    "Tears of Lys",
+    "Basiliskgift",
+    "Nattskatta",
+    "Stormhatt",
+    "Vallmomjölk",
+    "Löpeld",
+    "Mantikorgift"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "game-of-thrones-14",
+   "text": "Vilket efternamn har Ramsay innan han blir erkänd som Bolton?",
+   "answer": "Snow",
+   "category": "Game of Thrones",
+   "choices": [
+    "Snow",
+    "Sand",
+    "Rivers",
+    "Flowers",
+    "Stone",
+    "Hill",
+    "Pyke",
+    "Waters"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "game-of-thrones-15",
+   "text": "Vad heter Jon Snow egentligen?",
+   "answer": "Aegon Targaryen",
+   "category": "Game of Thrones",
+   "choices": [
+    "Aegon Targaryen",
+    "Rhaegar Targaryen",
+    "Aemon Targaryen",
+    "Viserys Targaryen",
+    "Jaehaerys Targaryen",
+    "Aerys Targaryen",
+    "Daeron Targaryen",
+    "Brandon Stark"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "game-of-thrones-16",
+   "text": "Vad skulle Daenerys och Khal Drogos son ha hetat?",
+   "answer": "Rhaego",
+   "category": "Game of Thrones",
+   "choices": [
+    "Rhaego",
+    "Rhaegar",
+    "Aegon",
+    "Rhaegal",
+    "Viserys",
+    "Daeron",
+    "Maekar",
+    "Aerys"
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "game-of-thrones-ordna",
+   "text": "Game of Thrones: Ordna händelserna efter säsong.",
+   "answer": "",
+   "category": "Game of Thrones",
+   "mode": "skill",
+   "difficulty": 3,
+   "skill": {
+    "kind": "order",
+    "prompt": "Tidigast först",
+    "items": [
+     {
+      "label": "Ned Stark avrättas",
+      "value": 1,
+      "show": "Säsong 1"
+     },
+     {
+      "label": "Det röda bröllopet",
+      "value": 3,
+      "show": "Säsong 3"
+     },
+     {
+      "label": "Joffrey förgiftas",
+      "value": 4,
+      "show": "Säsong 4"
+     },
+     {
+      "label": "”Hold the door”",
+      "value": 6,
+      "show": "Säsong 6"
+     },
+     {
+      "label": "Nattkungen besegras",
+      "value": 8,
+      "show": "Säsong 8"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -10,6 +10,7 @@ Målet varje vecka: kora en vinnare ("kröna kungen"). Appen utvecklas löpande 
   - `Hub`: en global instans. Egen frågebank, säsongstabell, datum för nästa quiz.
 - **Delade typer:** `app/shared/types.ts`, ändra här först när protokollet ändras.
 - **Frågeset från rådet:** `app/quizzes/*.json` (byggs in i appen, visas som "från rådet").
+- **Tv-seriequiz:** `app/quizzes/tv/<serie>.json`, en fil per serie (samma format, plus gärna en ordna-utmaning). Hosten bockar i en eller flera serier under "Tv-serier" och frågorna varvas till ett rum (`buildTvSet` i `src/lib/api.ts`). Ny serie = ny fil, inget mer.
 - **Host-skydd:** secret `HOST_PIN` (lokalt i `app/.dev.vars`, i produktion via `wrangler secret put HOST_PIN`).
 
 ## Kommandon (kör i `app/`)

@@ -1,0 +1,297 @@
+{
+ "id": "tv-dexter",
+ "title": "Dexter",
+ "theme": "Tv-serier",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "dexter-1",
+   "text": "Vad jobbar Dexter med?",
+   "answer": "Blodstänksanalytiker",
+   "category": "Dexter",
+   "choices": [
+    "Blodstänksanalytiker",
+    "Rättsläkare",
+    "Mordutredare",
+    "Patolog",
+    "Fingeravtrycksexpert",
+    "Polisfotograf",
+    "Kriminaltekniker för vapen",
+    "Psykolog"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "dexter-2",
+   "text": "I vilken stad utspelar sig serien (de första åtta säsongerna)?",
+   "answer": "Miami",
+   "category": "Dexter",
+   "choices": [
+    "Miami",
+    "Los Angeles",
+    "New York",
+    "Chicago",
+    "Tampa",
+    "Orlando",
+    "Houston",
+    "New Orleans"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "dexter-3",
+   "text": "Vem lär Dexter ”koden”?",
+   "answer": "Harry Morgan",
+   "category": "Dexter",
+   "choices": [
+    "Harry Morgan",
+    "Debra Morgan",
+    "Doakes",
+    "Maria LaGuerta",
+    "Brian Moser",
+    "Dr. Vogel",
+    "Angel Batista",
+    "Rita"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "dexter-4",
+   "text": "Vad heter Dexters syster?",
+   "answer": "Debra",
+   "category": "Dexter",
+   "choices": [
+    "Debra",
+    "Rita",
+    "Rachel",
+    "Lila",
+    "Hannah",
+    "Lumen",
+    "Maria",
+    "Laura"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "dexter-5",
+   "text": "Vad sparar Dexter som trofé från sina offer?",
+   "answer": "En droppe blod på ett objektglas",
+   "category": "Dexter",
+   "choices": [
+    "En droppe blod på ett objektglas",
+    "En hårlock",
+    "En tand",
+    "Ett fotografi",
+    "Ett finger",
+    "Ett smycke",
+    "En nyckel",
+    "Ett körkort"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "dexter-6",
+   "text": "Vem säger ”Surprise, motherfucker!”?",
+   "answer": "Sergeant Doakes",
+   "category": "Dexter",
+   "choices": [
+    "Sergeant Doakes",
+    "Debra Morgan",
+    "Angel Batista",
+    "Masuka",
+    "Joey Quinn",
+    "Maria LaGuerta",
+    "Harry Morgan",
+    "Arthur Mitchell"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "dexter-7",
+   "text": "Vad kallar Dexter mördaren inom sig?",
+   "answer": "The Dark Passenger",
+   "category": "Dexter",
+   "choices": [
+    "The Dark Passenger",
+    "The Beast",
+    "The Shadow",
+    "The Hunger",
+    "The Other Dex",
+    "The Code",
+    "The Ripper",
+    "Mr. Hyde"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "dexter-8",
+   "text": "Vem är isbilsmördaren?",
+   "answer": "Dexters biologiska bror",
+   "category": "Dexter",
+   "choices": [
+    "Dexters biologiska bror",
+    "Doakes",
+    "Debras pojkvän Anton",
+    "Harrys kollega",
+    "Dexters biologiska pappa",
+    "Masuka",
+    "Ritas ex Paul",
+    "Miguel Prado"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "dexter-9",
+   "text": "Vem dödar Rita?",
+   "answer": "Trinitymördaren",
+   "category": "Dexter",
+   "choices": [
+    "Trinitymördaren",
+    "Isbilsmördaren",
+    "Miguel Prado",
+    "Doakes",
+    "Lila",
+    "Domedagsmördaren",
+    "Hannah McKay",
+    "Paul Bennett"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "dexter-10",
+   "text": "Vad heter Dexters son?",
+   "answer": "Harrison",
+   "category": "Dexter",
+   "choices": [
+    "Harrison",
+    "Harry",
+    "Cody",
+    "Brian",
+    "Jake",
+    "Astor",
+    "Ryan",
+    "Joey"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "dexter-11",
+   "text": "Vad gör Dexter i slutet av säsong 8?",
+   "answer": "Jobbar som skogshuggare",
+   "category": "Dexter",
+   "choices": [
+    "Jobbar som skogshuggare",
+    "Flyr till Argentina",
+    "Sitter i fängelse",
+    "Jobbar som fiskare",
+    "Blir präst",
+    "Kör lastbil",
+    "Bor på en båt i Karibien",
+    "Jobbar som bartender"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "dexter-12",
+   "text": "Vad heter Dexters båt?",
+   "answer": "Slice of Life",
+   "category": "Dexter",
+   "choices": [
+    "Slice of Life",
+    "Blood Lust",
+    "Sea Killer",
+    "Cut Above",
+    "Dark Passenger",
+    "Miami Vice",
+    "Reel Justice",
+    "Knot Guilty"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "dexter-13",
+   "text": "Vad heter Ritas barn?",
+   "answer": "Astor och Cody",
+   "category": "Dexter",
+   "choices": [
+    "Astor och Cody",
+    "Astor och Harrison",
+    "Cody och Ryan",
+    "Lily och Cody",
+    "Astor och Josh",
+    "Emma och Cody",
+    "Abby och Jake",
+    "Sophie och Cody"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "dexter-14",
+   "text": "Under vilket namn dejtar isbilsmördaren Debra?",
+   "answer": "Rudy Cooper",
+   "category": "Dexter",
+   "choices": [
+    "Rudy Cooper",
+    "Frank Lundy",
+    "Anton Briggs",
+    "Gabriel Cole",
+    "Rick Benson",
+    "Jake Elway",
+    "Ray Doakes",
+    "Quinn Martin"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "dexter-15",
+   "text": "Vad heter Dexters biologiska mamma?",
+   "answer": "Laura Moser",
+   "category": "Dexter",
+   "choices": [
+    "Laura Moser",
+    "Laura Morgan",
+    "Doris Morgan",
+    "Rita Bennett",
+    "Lila West",
+    "Hannah McKay",
+    "Lumen Pierce",
+    "Sarah Moser"
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "dexter-ordna",
+   "text": "Dexter: Ordna seriemördarna efter säsongen de är huvudskurk.",
+   "answer": "",
+   "category": "Dexter",
+   "mode": "skill",
+   "difficulty": 3,
+   "skill": {
+    "kind": "order",
+    "prompt": "Tidigast först",
+    "items": [
+     {
+      "label": "Isbilsmördaren",
+      "value": 1,
+      "show": "Säsong 1"
+     },
+     {
+      "label": "Miguel Prado",
+      "value": 3,
+      "show": "Säsong 3"
+     },
+     {
+      "label": "Trinitymördaren",
+      "value": 4,
+      "show": "Säsong 4"
+     },
+     {
+      "label": "Domedagsmördaren",
+      "value": 6,
+      "show": "Säsong 6"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1302,6 +1302,43 @@ def main():
         assert sk["qCount"] == 2, f"Ogiltig skill-utmaning ska hoppas över: {sk['qCount']}"
         raw.close()
 
+        # Tv-seriequiz: välj en eller flera serier, frågorna slås ihop till ett rum
+        import glob as _glob
+        for f in sorted(_glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "quizzes", "tv", "*.json"))):
+            d = json.load(open(f, encoding="utf-8"))
+            ids = [q["id"] for q in d["questions"]]
+            assert len(ids) == len(set(ids)), f"Dubbla fråge-id i {f}"
+            assert {q.get("difficulty") for q in d["questions"]} >= {1, 2, 3, 4, 5}, f"{f} saknar någon svårighetsnivå"
+            for q in d["questions"]:
+                if q.get("mode") == "skill":
+                    continue
+                c = [x.strip() for x in q["choices"]]
+                assert len(set(c)) == len(c) and q["answer"] in c and 2 <= len(c) <= 12, f"Ogiltiga alternativ: {q['id']}"
+        tvh = b.new_page(viewport={"width": 1280, "height": 900})
+        tvh.on("pageerror", lambda e: page_errors.append(str(e)))
+        tvh.goto(BASE + "/host")
+        tvh.get_by_label("Host-PIN").fill(PIN)
+        tvh.get_by_role("button", name="Lås upp").click()
+        tvh.locator("label", has_text="Tv-serier").get_by_role("radio").check()
+        expect(tvh.get_by_role("button", name="Öppna rum")).to_be_disabled()
+        series = tvh.get_by_role("group", name="Tv-serier").get_by_role("button")
+        expect(series).to_have_count(5)
+        tvh.get_by_role("button", name="Dexter").click()
+        tvh.get_by_role("button", name="Breaking Bad").click()
+        tvh.get_by_label("Frågor per serie").select_option("3")
+        expect(tvh.get_by_text("2 serier · 8 frågor")).to_be_visible()
+        tvh.get_by_role("button", name="Välj alla").click()
+        expect(tvh.get_by_text("5 serier ·")).to_be_visible()
+        tvh.get_by_role("button", name="✓ Game of Thrones").click()
+        tvh.get_by_role("button", name="✓ How I Met Your Mother").click()
+        tvh.get_by_role("button", name="✓ Rick and Morty").click()
+        shot(tvh, "60-host-tv-serier")
+        tvh.get_by_role("button", name="Öppna rum").click()
+        tvh.wait_for_url("**/host/*")
+        expect(tvh.get_by_role("heading", name="Breaking Bad + Dexter")).to_be_visible()
+        tvh.close()
+        assert not page_errors, f"Sidfel i tv-quiz: {page_errors}"
+
         b.close()
         print("E2E OK. Slutpoäng:", res)
 

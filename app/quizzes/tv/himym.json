@@ -1,0 +1,280 @@
+{
+ "id": "tv-himym",
+ "title": "How I Met Your Mother",
+ "theme": "Tv-serier",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "himym-1",
+   "text": "Vad heter baren där gänget hänger?",
+   "answer": "MacLaren's",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "MacLaren's",
+    "Paddy's Pub",
+    "Central Perk",
+    "Moe's",
+    "The Drunken Clam",
+    "Cheers",
+    "Monk's",
+    "Puzzles"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "himym-2",
+   "text": "Vilket yrke har Ted Mosby?",
+   "answer": "Arkitekt",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Arkitekt",
+    "Advokat",
+    "Läkare",
+    "Journalist",
+    "Polis",
+    "Kock",
+    "Bankman",
+    "Tv-reporter"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "himym-3",
+   "text": "Vilket land kommer Robin Scherbatsky från?",
+   "answer": "Kanada",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Kanada",
+    "USA",
+    "England",
+    "Australien",
+    "Irland",
+    "Nya Zeeland",
+    "Sverige",
+    "Skottland"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "himym-4",
+   "text": "Vad jobbar Lily med under större delen av serien?",
+   "answer": "Förskollärare",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Förskollärare",
+    "Advokat",
+    "Sjuksköterska",
+    "Fotograf",
+    "Servitris",
+    "Inredningsdesigner",
+    "Bibliotekarie",
+    "Frisör"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "himym-5",
+   "text": "Vad stjäl Ted från restaurangen på första dejten med Robin?",
+   "answer": "Ett blått valthorn",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Ett blått valthorn",
+    "Ett rött piano",
+    "En blå trumpet",
+    "En guldsaxofon",
+    "En grön harpa",
+    "Ett blått piano",
+    "En röd trumpet",
+    "En silverflöjt"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "himym-6",
+   "text": "Vad heter Robins popstjärne-alter ego från 90-talet?",
+   "answer": "Robin Sparkles",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Robin Sparkles",
+    "Robin Glitter",
+    "Robin Starlight",
+    "Robin Shimmer",
+    "Robin Diamond",
+    "Robin Twinkle",
+    "Robbie Sparks",
+    "Robin Spangles"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "himym-7",
+   "text": "Vem vinner rätten att örfila Barney i ”Slap Bet”?",
+   "answer": "Marshall",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Marshall",
+    "Ted",
+    "Lily",
+    "Robin",
+    "Ranjit",
+    "Barneys bror James",
+    "Mamman",
+    "Ingen"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "himym-8",
+   "text": "Hur många säsonger har serien?",
+   "answer": "9",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "9",
+    "5",
+    "6",
+    "7",
+    "8",
+    "10",
+    "11",
+    "12"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "himym-9",
+   "text": "Vad heter mamman?",
+   "answer": "Tracy",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Tracy",
+    "Victoria",
+    "Stella",
+    "Zoey",
+    "Jeanette",
+    "Cindy",
+    "Nora",
+    "Quinn"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "himym-10",
+   "text": "Vad heter Barneys bok med raggningstrick?",
+   "answer": "The Playbook",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "The Playbook",
+    "The Bro Code",
+    "The Pickup Bible",
+    "Legendary Moves",
+    "The Suit Manual",
+    "The Barneyfesto",
+    "The Wingman Guide",
+    "The Lay Book"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "himym-11",
+   "text": "Var möts Ted och mamman till slut?",
+   "answer": "På perrongen i Farhampton",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "På perrongen i Farhampton",
+    "I Teds föreläsningssal",
+    "På MacLaren's",
+    "I en taxi",
+    "I Central Park",
+    "På ett flygplan",
+    "I en hiss",
+    "I Robins tv-studio"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "himym-12",
+   "text": "Vad heter Teds barn?",
+   "answer": "Penny och Luke",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Penny och Luke",
+    "Penny och Marvin",
+    "Luke och Leah",
+    "Daisy och Luke",
+    "Lucy och Max",
+    "Stella och Luke",
+    "Penny och Leo",
+    "Sophie och Luke"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "himym-13",
+   "text": "Vilken stad kommer Marshall från?",
+   "answer": "St. Cloud, Minnesota",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "St. Cloud, Minnesota",
+    "Duluth, Minnesota",
+    "Fargo, North Dakota",
+    "Madison, Wisconsin",
+    "Des Moines, Iowa",
+    "Omaha, Nebraska",
+    "Green Bay, Wisconsin",
+    "Sioux Falls, South Dakota"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "himym-14",
+   "text": "Barneys jobb heter PLEASE. Vad står det för?",
+   "answer": "Provide Legal Exculpation And Sign Everything",
+   "category": "How I Met Your Mother",
+   "choices": [
+    "Provide Legal Exculpation And Sign Everything",
+    "Please Leave Everything And Sign Everything",
+    "Provide Legal Evidence And Sell Everything",
+    "Protect Lawyers, Executives And Shareholders Everywhere",
+    "Personal Liability Expert And Settlement Executive",
+    "Process Legal Evidence And Shred Everything",
+    "Provide Liquidity, Equity And Securities Everywhere",
+    "Pay Lawyers Extra And Sue Everyone"
+   ],
+   "difficulty": 5
+  },
+  {
+   "id": "himym-ordna",
+   "text": "How I Met Your Mother: Ordna händelserna efter säsong.",
+   "answer": "",
+   "category": "How I Met Your Mother",
+   "mode": "skill",
+   "difficulty": 3,
+   "skill": {
+    "kind": "order",
+    "prompt": "Tidigast först",
+    "items": [
+     {
+      "label": "Ted träffar Robin",
+      "value": 1,
+      "show": "Säsong 1"
+     },
+     {
+      "label": "Marshall och Lily gifter sig",
+      "value": 2,
+      "show": "Säsong 2"
+     },
+     {
+      "label": "Ted blir professor",
+      "value": 5,
+      "show": "Säsong 5"
+     },
+     {
+      "label": "Barney och Robin gifter sig",
+      "value": 9,
+      "show": "Säsong 9"
+     }
+    ]
+   }
+  }
+ ]
+}
