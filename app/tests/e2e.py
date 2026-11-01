@@ -1289,6 +1289,8 @@ def main():
         p1.get_by_role("button", name="Starta").click()
         flick(p1, "34-spelare-flick")
         expect(p1.get_by_text("Klart!")).to_be_visible()
+        # "Klart!" syns 650 ms innan resultatet skickas; vänta in det innan hosten stänger
+        expect(p1.locator(".locked-text")).to_be_visible(timeout=5000)
         finish_round("35-tv-flick-resultat")
 
         # 3. Stoppa klockan (mål 3 s, klockan blir svart efter 3 s)
