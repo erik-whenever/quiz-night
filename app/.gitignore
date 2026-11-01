@@ -5,3 +5,5 @@ dist
 *.local
 e2e-shots
 wrangler.log
+__pycache__/
+piper-wav/

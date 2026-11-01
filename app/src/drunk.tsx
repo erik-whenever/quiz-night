@@ -4,7 +4,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { DrunkCue, DrunkPublic, PlayerPublic } from "../shared/types";
 import { DRUNK_HOOK_SPIN_MS, DRUNK_HOOK_TALK_MS, DRUNK_NAME, drunkCueMs } from "../shared/types";
-import { sfx } from "./lib/sound";
+import { playVoice, sfx } from "./lib/sound";
+import { piper, type PiperStatus } from "./lib/piper";
 
 // ===== Repliker =====
 // {b} = buddyn, {h} = hookern, {o} = motståndaren. Ljud i hakparentes: [rap] [hick] [skål] [klunk].
@@ -107,30 +108,79 @@ function svVoice(): SpeechSynthesisVoice | null {
 }
 
 /**
- * Säg repliken: tal via webbläsarens talsyntes (svensk röst om den finns) med ljuden emellan.
- * Fullare = långsammare och mer vinglig tonhöjd. Utan röst spelas bara ljuden. Returnerar en stoppfunktion.
+ * Uttal för Piper (espeak-ng läser svenska regler): "Kenta" blir annars "Shenta" (mjukt k före e),
+ * och "buddy" ska låta som när svenskar säger det.
+ */
+export const sayable = (t: string) => t
+  .replace(/\.{3}/g, ",")
+  .replace(/Kenta/g, "Qenta")
+  .replace(/budd(y+)/gi, (_m, y: string) => "baddi" + "i".repeat(Math.min(3, y.length - 1)))
+  .replace(/hooker/gi, "hukker");
+
+/** Fyllan i själva rösten (Piper): långsammare och vingligare uttal ju fler supar. */
+const piperOpts = (level: number) => ({ lengthScale: 1 + level * 0.09, noiseScale: 0.667 + level * 0.07, noiseW: 0.8 + level * 0.1 });
+
+/** Ladda Piper-rösten i bakgrunden och följ hur det går. */
+export function usePiper(enabled: boolean): { status: PiperStatus; progress: number } {
+  const [st, setSt] = useState({ status: piper.status, progress: piper.progress });
+  useEffect(() => piper.subscribe(() => setSt({ status: piper.status, progress: piper.progress })), []);
+  useEffect(() => { if (enabled && (piper.status === "idle" || piper.status === "failed")) void piper.load(); }, [enabled]);
+  return st;
+}
+
+/**
+ * Säg repliken med ljuden emellan. Piper (neural svensk röst) om den är laddad, annars webbläsarens
+ * talsyntes. Meningarna syntetiseras direkt i bakgrunden så att ingen väntar mellan dem.
+ * Utan röst spelas bara ljuden. Returnerar en stoppfunktion.
  */
 export function speak(line: string, level: number, voiceOn: boolean, onTalking?: (on: boolean) => void): () => void {
   let stopped = false;
   const timers: number[] = [];
   const queue = parts(line);
-  const synth = typeof window !== "undefined" && "speechSynthesis" in window ? window.speechSynthesis : null;
-  const voice = voiceOn && synth ? svVoice() : null;
+  const usePiper = voiceOn && piper.status === "ready";
+  const synth = !usePiper && voiceOn && typeof window !== "undefined" && "speechSynthesis" in window ? window.speechSynthesis : null;
+  const voice = synth ? svVoice() : null;
   const keep: SpeechSynthesisUtterance[] = []; // Chrome släpper annars uttalet mitt i
+  let stopAudio = () => {};
+
+  // Piper: syntetisera alla meningar i tur och ordning direkt, spela upp när det är dags.
+  const rendered: (Promise<{ pcm: Float32Array; sampleRate: number }> | undefined)[] = [];
+  if (usePiper) {
+    let chain: Promise<unknown> = Promise.resolve();
+    queue.forEach((p, idx) => {
+      if (!p.say) return;
+      const job = chain.then(() => piper.synth(sayable(p.say!), piperOpts(level)));
+      chain = job.catch(() => undefined);
+      rendered[idx] = job;
+    });
+  }
+
   let i = 0;
-  const next = () => {
+  const later = (ms: number) => timers.push(window.setTimeout(next, ms));
+  function next() {
     if (stopped) return;
-    const part = queue[i++];
+    const idx = i++;
+    const part = queue[idx];
     if (!part) { onTalking?.(false); return; }
     if (part.fx) {
       onTalking?.(false);
       EFFECTS[part.fx]?.(level);
-      timers.push(window.setTimeout(next, part.fx === "rap" ? 650 : 450));
+      later(part.fx === "rap" ? 650 : 450);
       return;
     }
-    if (!synth || !voiceOn || (!voice && !synth.getVoices().length)) {
+    if (usePiper && rendered[idx]) {
+      rendered[idx]!.then(({ pcm, sampleRate }) => {
+        if (stopped) return;
+        onTalking?.(true);
+        const v = playVoice(pcm, sampleRate, level);
+        stopAudio = v.stop;
+        return v.done;
+      }).catch(() => undefined).then(() => { onTalking?.(false); later(90); });
+      return;
+    }
+    if (!synth || (!voice && !synth.getVoices().length)) {
       // Ingen röst: bara pratbubblan, ge läsaren lite tid innan nästa ljud.
-      timers.push(window.setTimeout(next, Math.min(2600, 40 * (part.say?.length ?? 0))));
+      later(Math.min(2600, 40 * (part.say?.length ?? 0)));
       return;
     }
     const u = new SpeechSynthesisUtterance(part.say!);
@@ -140,19 +190,46 @@ export function speak(line: string, level: number, voiceOn: boolean, onTalking?:
     u.pitch = Math.max(0.5, Math.min(1.6, 0.95 + (Math.random() - 0.5) * 0.08 * level));
     u.volume = 1;
     u.onstart = () => onTalking?.(true);
-    u.onend = () => { onTalking?.(false); timers.push(window.setTimeout(next, 120)); };
-    u.onerror = () => { onTalking?.(false); timers.push(window.setTimeout(next, 120)); };
+    u.onend = () => { onTalking?.(false); later(120); };
+    u.onerror = () => { onTalking?.(false); later(120); };
     keep.push(u);
     synth.speak(u);
-  };
+  }
   next();
   return () => {
     stopped = true;
     timers.forEach(clearTimeout);
+    stopAudio();
     try { if (keep.length) synth?.cancel(); } catch { /* */ }
     onTalking?.(false);
   };
 }
+
+/** Testkrok för CI: en replik som WAV (base64), med samma fylla som på TV:n (renderad offline). */
+(window as unknown as { kentaPiperWav?: unknown }).kentaPiperWav = async (text: string, level: number) => {
+  if (!(await piper.load())) throw new Error("Piper laddades inte");
+  const { pcm, sampleRate } = await piper.synth(sayable(text), piperOpts(level));
+  const base = Math.max(0.86, 1.0 - level * 0.022);
+  const len = Math.ceil(pcm.length / (base - 0.05)) + sampleRate;
+  const c = new OfflineAudioContext(1, len, sampleRate);
+  const buf = c.createBuffer(1, pcm.length, sampleRate); buf.getChannelData(0).set(pcm);
+  const src = c.createBufferSource(); src.buffer = buf; src.playbackRate.value = base;
+  const lfo = c.createOscillator(); lfo.frequency.value = 0.45 + level * 0.12;
+  const amt = c.createGain(); amt.gain.value = 0.006 + level * 0.007;
+  lfo.connect(amt).connect(src.playbackRate);
+  const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = Math.max(2600, 7000 - level * 650);
+  src.connect(lp).connect(c.destination); lfo.start(); src.start();
+  const out = (await c.startRendering()).getChannelData(0);
+  const wav = new DataView(new ArrayBuffer(44 + out.length * 2));
+  const str = (o: number, x: string) => [...x].forEach((ch, k) => wav.setUint8(o + k, ch.charCodeAt(0)));
+  str(0, "RIFF"); wav.setUint32(4, 36 + out.length * 2, true); str(8, "WAVEfmt "); wav.setUint32(16, 16, true);
+  wav.setUint16(20, 1, true); wav.setUint16(22, 1, true); wav.setUint32(24, sampleRate, true); wav.setUint32(28, sampleRate * 2, true);
+  wav.setUint16(32, 2, true); wav.setUint16(34, 16, true); str(36, "data"); wav.setUint32(40, out.length * 2, true);
+  out.forEach((v, k) => wav.setInt16(44 + k * 2, Math.max(-1, Math.min(1, v)) * 0x7fff, true));
+  let bin = ""; const bytes = new Uint8Array(wav.buffer);
+  for (let k = 0; k < bytes.length; k += 0x8000) bin += String.fromCharCode(...bytes.subarray(k, k + 0x8000));
+  return btoa(bin);
+};
 
 // ===== Figuren =====
 

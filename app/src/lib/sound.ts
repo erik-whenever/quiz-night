@@ -252,6 +252,41 @@ export const sfx = {
   },
 };
 
+// ===== Röst (Kenta) =====
+
+/**
+ * Spela upp syntetiserat tal genom samma varma kedja. Fyllan läggs på här: lite långsammare och
+ * mörkare uppspelning, en sjösjuk vobbling i tonhöjden och dovare klang ju fullare han är (level 1–6).
+ * Resolvar när repliken är slut (eller direkt om ljud saknas).
+ */
+export function playVoice(pcm: Float32Array, sampleRate: number, level: number): { done: Promise<void>; stop: () => void } {
+  let stop = () => {};
+  const done = new Promise<void>((resolve) => {
+    let started = false;
+    safe((c) => {
+      const buf = c.createBuffer(1, pcm.length, sampleRate);
+      buf.getChannelData(0).set(pcm);
+      const src = c.createBufferSource(); src.buffer = buf;
+      const t = c.currentTime + 0.02;
+      const base = Math.max(0.86, 1.0 - level * 0.022);
+      src.playbackRate.setValueAtTime(base, t);
+      // Vobbling: långsam LFO på uppspelningshastigheten (= tonhöjd och tempo vinglar).
+      const lfo = c.createOscillator(); lfo.frequency.value = 0.45 + level * 0.12;
+      const amt = c.createGain(); amt.gain.value = 0.006 + level * 0.007;
+      lfo.connect(amt).connect(src.playbackRate);
+      const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = Math.max(2600, 7000 - level * 650); lp.Q.value = 0.5;
+      const g = c.createGain(); g.gain.value = 1.1;
+      src.connect(lp).connect(g); route(g, 0.18 + level * 0.03);
+      src.onended = () => { try { lfo.stop(); } catch { /* */ } resolve(); };
+      lfo.start(t); src.start(t);
+      stop = () => { try { src.stop(); } catch { /* */ } };
+      started = true;
+    });
+    if (!started) resolve();
+  });
+  return { done, stop: () => stop() };
+}
+
 // ===== Bakgrundsmusik (TV-vyn) =====
 //
 // En lugn, generativ lo-fi-slinga (82 bpm): Fmaj9 – Em7 – Dm9 – C13 i el-piano, mjuk kick/virvel/hihat

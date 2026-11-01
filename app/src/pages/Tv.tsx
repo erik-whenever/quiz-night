@@ -7,7 +7,7 @@ import { NextBar, Podium, QuestionIntro, Scorebar } from "../components";
 import { CollectTv } from "../collect";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { EffectTags, TeamBoard, TeamPodium } from "../teams";
-import { DrunkOverlay, useDrunkVoice } from "../drunk";
+import { DrunkOverlay, useDrunkVoice, usePiper } from "../drunk";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
@@ -16,6 +16,8 @@ export default function Tv({ code }: { code: string }) {
   const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem("kronan.musik") !== "av"; } catch { return true; } });
   const [unlocked, setUnlocked] = useState(false);
   const [kentaVoice, toggleKenta] = useDrunkVoice();
+  // Kentas röst laddas i förväg (första gången ~60 MB, sedan från webbläsarens cache).
+  const kentaPiper = usePiper(!!state?.settings.drunk && kentaVoice);
   const phase = state?.phase;
   useEffect(() => {
     if (!musicOn || !unlocked || !phase || phase === "finished") { music.stop(); return; }
@@ -67,7 +69,7 @@ export default function Tv({ code }: { code: string }) {
       </button>
       {state.settings.drunk && (
         <button className="btn sm ghost music-toggle kenta-toggle" aria-pressed={kentaVoice} onClick={(e) => { e.stopPropagation(); sfx.unlock(); setUnlocked(true); toggleKenta(); }}>
-          {kentaVoice ? "🍺 Kenta pratar" : "🍺 Kenta tyst"}
+          {!kentaVoice ? "🍺 Kenta tyst" : kentaPiper.status === "loading" ? `🍺 Kenta laddar röst ${Math.round(kentaPiper.progress * 100)} %` : "🍺 Kenta pratar"}
         </button>
       )}
       <DrunkOverlay drunk={state.drunk} players={state.players} serverNow={serverNow} voice={kentaVoice && unlocked} />

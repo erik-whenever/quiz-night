@@ -53,6 +53,44 @@ jobs:
           path: app/e2e-shots
           retention-days: 14
 
+  # Kentas röst (Piper) hämtas från Hugging Face i webbläsaren, vilket sandlådan inte når. Här testas den
+  # på riktigt, och några repliker sparas som WAV (artefakten "kenta-rost") så att man kan lyssna.
+  # Blockerar inte publiceringen: går Hugging Face ner faller Kenta tillbaka på webbläsarens röst.
+  rost:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci && npx vite build
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - name: Piper i webbläsaren
+        run: |
+          printf 'HOST_PIN=1234\n' > .dev.vars
+          npx wrangler dev --port 8787 --ip 127.0.0.1 > wrangler.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:8787/api/hub/public && break; sleep 1; done
+          set -o pipefail
+          python tests/piper_check.py http://127.0.0.1:8787 piper-wav 2>&1 | tee piper.log || {
+            echo "::error title=Kentas röst::$(grep -A2 'PIPER MISSLYCKADES' piper.log | tr '\n' ' ' | cut -c1-600)"
+            exit 1
+          }
+          echo "::notice title=Kentas röst::$(grep -E '^(Piper|Från cache):' piper.log | tr '\n' ' ' | cut -c1-600)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kenta-rost
+          path: app/piper-wav
+          retention-days: 14
+
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

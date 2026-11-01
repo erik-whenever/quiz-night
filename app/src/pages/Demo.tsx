@@ -9,7 +9,7 @@ import { HookOff } from "../hookoff";
 import { correctOrder, orderErrors, orderShuffle, skillText, type OrderItem, type SkillKind, type SkillResult } from "../../shared/skill";
 import { WHEEL_SEGMENTS, WHEEL_SPIN_MS, type WheelState } from "../../shared/types";
 import { sfx } from "../lib/sound";
-import { DrunkOverlay } from "../drunk";
+import { DrunkOverlay, usePiper } from "../drunk";
 import type { DrunkKind, DrunkPublic, PlayerPublic } from "../../shared/types";
 
 const DEMO_PLAYERS: PlayerPublic[] = [
@@ -36,6 +36,7 @@ const GAMES: { id: GameId; name: string; kind?: SkillKind; note?: string }[] = [
 function KentaDemo() {
   const [drunk, setDrunk] = useState<DrunkPublic | null>(null);
   const [sips, setSips] = useState(0);
+  const voice = usePiper(true);
   const say = (kind: DrunkKind) => {
     sfx.unlock();
     const pick = () => DEMO_PLAYERS[Math.floor(Math.random() * DEMO_PLAYERS.length)].id;
@@ -52,8 +53,8 @@ function KentaDemo() {
   return (
     <div className="stack" style={{ alignItems: "center", textAlign: "center" }}>
       <h2>Kenta <span className="muted small">· fyllot</span></h2>
-      <p className="muted">Kenta kliver in när kvällen startar, väljer en buddy och firar eller sörjer med en sup när det går bra eller dåligt för buddyn. Ibland ropar han in en hooker-off. Ju fler supar, desto mer sluddrar han. Rösten är webbläsarens talsyntes (svensk röst om datorn har en).</p>
-      <p className="small">Supar hittills: <strong>{sips}</strong></p>
+      <p className="muted">Kenta kliver in när kvällen startar, väljer en buddy och firar eller sörjer med en sup när det går bra eller dåligt för buddyn. Ibland ropar han in en hooker-off. Ju fler supar, desto mer sluddrar han. Rösten är Piper, en svensk neural röst som körs i webbläsaren (laddas ner en gång, ~60 MB).</p>
+      <p className="small">Supar hittills: <strong>{sips}</strong> · Röst: {voice.status === "ready" ? "Piper (svensk neural röst)" : voice.status === "loading" ? `laddar Piper ${Math.round(voice.progress * 100)} %` : voice.status === "failed" ? "webbläsarens (Piper gick inte att ladda)" : "…"}</p>
       <div className="row" style={{ justifyContent: "center", flexWrap: "wrap" }}>
         <button className="btn primary" onClick={() => say("intro")}>Intro (ny buddy)</button>
         <button className="btn" onClick={() => say("win")}>Buddyn vann</button>
