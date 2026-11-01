@@ -74,7 +74,7 @@ export default {
         for (const x of players) {
           const won = results.length > 0 && nightScore(ts, players, x) === top && top > 0;
           const n = (coins?.[x.id] ?? 0) + (won ? COINS.winner : 0);
-          if (n > 0) payout[x.name] = n;
+          if (n !== 0) payout[x.name] = n; // negativt efter Plinko-förluster dras från plånboken
         }
         const entry: LeagueEntry = {
           id: code + "-" + new Date().toISOString().slice(0, 10),

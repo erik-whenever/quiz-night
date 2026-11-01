@@ -42,6 +42,11 @@ function HookertimeInner({ state, role, me, send, serverNow, subscribeHo }: {
   const h = state.hookertime;
   const stage = useStage(h, serverNow);
   const sound = role === "tv";
+  // Hostfliken ligger oftast bredvid TV-fliken på samma dator: där visas bara ställningen om inget annat valts.
+  const [liteWatch, setLiteWatch] = useState(() => {
+    try { const v = localStorage.getItem(`kronan.hkwatch.${role}`); return v ? v === "lite" : role === "host"; } catch { return role === "host"; }
+  });
+  const setLite = (v: boolean) => { setLiteWatch(v); try { localStorage.setItem(`kronan.hkwatch.${role}`, v ? "lite" : "full"); } catch { /* privat läge */ } };
 
   // Ljud och glitch på hela sidan när skedet byts
   const prev = useRef<HookStage | null>(null);
@@ -71,22 +76,30 @@ function HookertimeInner({ state, role, me, send, serverNow, subscribeHo }: {
   if (stage === "glitch") return <div className="hk hk-glitch" aria-hidden="true"><div className="hk-noise" /><div className="hk-bars" /></div>;
 
   if (stage === "match") {
-    // De två spelar; TV:n visar matchen för alla; övriga spelare och hosten får status.
-    if (role === "tv" || fighting !== null) {
+    // De två spelar. Alla andra (TV:n, övriga spelare, hosten) ser samma match live på sin egen skärm,
+    // så ingen behöver förlita sig på Discords skärmdelning. Svaga mobiler kan välja bara ställningen.
+    if (role !== "tv" && fighting === null && liteWatch) {
       return (
-        <div className="hk hk-match" role="region" aria-label="Hookertime-match">
-          <HookMatch key={h.startedAt} me={role === "tv" ? null : fighting} names={[hooker.name, opp.name]} send={send}
-            serverNow={serverNow} subscribeHo={subscribeHo} sound={sound} />
+        <div className="hk hk-watch" role="status">
+          <p className="hk-kicker">HOOKERTIME #{h.n}</p>
+          <p className="hk-versus"><span style={{ color: hooker.color }}>{hooker.name}</span> <em>vs</em> <span style={{ color: opp.color }}>{opp.name}</span></p>
+          <LiveScore subscribeHo={subscribeHo} />
+          <button className="btn ghost" onClick={() => setLite(false)}>Titta på matchen här</button>
+          {role === "host" && <button className="btn ghost" onClick={() => send({ t: "host:hookertime:stop" })}>Avbryt Hookertime</button>}
         </div>
       );
     }
     return (
-      <div className="hk hk-watch" role="status">
-        <p className="hk-kicker">HOOKERTIME #{h.n}</p>
-        <p className="hk-versus"><span style={{ color: hooker.color }}>{hooker.name}</span> <em>vs</em> <span style={{ color: opp.color }}>{opp.name}</span></p>
-        <LiveScore subscribeHo={subscribeHo} />
-        <p className="hk-sub">{role === "host" ? "Matchen pågår på TV:n." : "Matchen pågår! Titta på TV:n och heja."}</p>
-        {role === "host" && <button className="btn ghost" onClick={() => send({ t: "host:hookertime:stop" })}>Avbryt Hookertime</button>}
+      <div className="hk hk-match" role="region" aria-label="Hookertime-match">
+        <HookMatch key={h.startedAt} me={role === "tv" ? null : fighting} names={[hooker.name, opp.name]} send={send}
+          serverNow={serverNow} subscribeHo={subscribeHo} sound={sound} />
+        {role !== "tv" && fighting === null && (
+          <div className="hk-watchbar">
+            <span>Du tittar · heja i Discord!</span>
+            <button className="btn sm ghost" onClick={() => setLite(true)}>Bara ställningen</button>
+            {role === "host" && <button className="btn sm ghost" onClick={() => send({ t: "host:hookertime:stop" })}>Avbryt</button>}
+          </div>
+        )}
       </div>
     );
   }
@@ -163,7 +176,7 @@ function HookertimeInner({ state, role, me, send, serverNow, subscribeHo }: {
               <li>Bäst av 3. Vinnaren tar <b>{H.STAKE} p</b> från förloraren</li>
             </ul>
             {fighting !== null ? <p className="hk-you">Du är {fighting === 0 ? "blå" : "röd"}. Gör dig redo!</p>
-              : <p className="hk-sub">Ni andra: titta på TV:n och heja (eller bua).</p>}
+              : <p className="hk-sub">Ni andra: matchen visas här också. Heja (eller bua) i Discord.</p>}
             <p className="hk-count">Matchen börjar om {Math.ceil(leftMs / 1000)}</p>
           </div>
         </div>
@@ -221,14 +234,26 @@ function HookMatch({ me, names, send, serverNow, subscribeHo, sound }: {
       }
     };
     const onInput = (m: HookInput) => cb.current.send({ t: "hook", ...("move" in m ? { move: m.move } : "hook" in m ? { hook: m.hook } : { stop: true }) });
+    // Flera flikar på samma dator (Erik har ofta host, TV och sin spelarflik öppna): den som spelar
+    // säger till, och de andra flikarna ritar snålare så att spelarens flik får datorn.
+    let chan: BroadcastChannel | null = null, beat = 0, heardAt = 0, bgCheck = 0;
+    try { chan = new BroadcastChannel("kronan-hookertime"); } catch { /* gammal webbläsare */ }
+    if (chan && me !== null) {
+      const say = () => chan?.postMessage({ fighting: true });
+      say(); beat = window.setInterval(say, 1000);
+    } else if (chan) {
+      chan.onmessage = (e) => { if (e.data?.fighting) { heardAt = Date.now(); game?.setBackground(true); } };
+      bgCheck = window.setInterval(() => { if (heardAt && Date.now() - heardAt > 3000) { heardAt = 0; game?.setBackground(false); } }, 1000);
+    }
     import("./hookoff3d").then((mod) => {
       if (cancelled || !host.current) return;
       game = mod.createHookOff(host.current, onEvent, { mode: "net", me, names, onInput, serverNow, low: lowGfx() });
       if (!game) { setFailed(true); return; }
+      if (heardAt) game.setBackground(true);
       for (const s of early.splice(0)) game.push(s);
       setReady(true);
     }).catch(() => setFailed(true));
-    return () => { cancelled = true; unsub(); clearTimeout(bannerTimer); game?.dispose(); };
+    return () => { cancelled = true; unsub(); clearTimeout(bannerTimer); clearInterval(beat); clearInterval(bgCheck); chan?.close(); game?.dispose(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const aimHook = () => (host.current as (HTMLDivElement & { aimHook?: () => void }) | null)?.aimHook?.();

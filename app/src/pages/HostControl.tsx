@@ -9,6 +9,7 @@ import { DIFFICULTY_LABELS, DRUNK_PAUSED, MAX_SHOWN, MIN_SHOWN, effectiveChoiceR
 import { HostWheel } from "../wheel";
 import { HostDrunk } from "../drunkHost";
 import { Hookertime } from "../hookertime";
+import { Plinko } from "../plinko";
 import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
 
@@ -131,6 +132,10 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
         <input type="checkbox" style={{ width: "auto" }} checked={s.hookertime} onChange={(e) => set({ hookertime: e.target.checked })} />
         Hookertime (två överraskande 1v1-dueller i hooker-off, vinnaren tar 2 p)
       </label>
+      <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <input type="checkbox" style={{ width: "auto" }} checked={s.plinko} onChange={(e) => set({ plinko: e.target.checked })} />
+        Plinko (två rundor där alla satsar mynt och släpper en kula, 0,1×–10×)
+      </label>
       {!DRUNK_PAUSED && (
         <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <input type="checkbox" style={{ width: "auto" }} checked={s.drunk} onChange={(e) => set({ drunk: e.target.checked })} />
@@ -178,6 +183,7 @@ function Control({ code }: { code: string }) {
       <TopBar host />
       <main className="wrap stack">
         <Hookertime state={state} role="host" send={send} serverNow={serverNow} subscribeHo={subscribeHo} />
+        <Plinko state={state} role="host" send={send} serverNow={serverNow} />
         <div className="spread">
           <div>
             <h2>{state.title}</h2>
@@ -223,6 +229,9 @@ function Control({ code }: { code: string }) {
                 <HostDrunk state={state} send={send} />
                 {state.phase === "reveal" && state.settings.hookertime && !state.hookertime && state.players.filter((p) => p.connected).length >= 2 && (
                   <button className="btn sm ghost" style={{ alignSelf: "flex-start" }} onClick={() => send({ t: "host:hookertime" })}>Hookertime nu</button>
+                )}
+                {state.phase === "reveal" && state.settings.plinko && !state.plinko && !state.hookertime && (
+                  <button className="btn sm ghost" style={{ alignSelf: "flex-start" }} onClick={() => send({ t: "host:plinko" })}>Plinko nu</button>
                 )}
                 <DifficultySlider state={state} send={send} />
                 <AutoControls state={state} send={send} serverNow={serverNow} />

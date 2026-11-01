@@ -12,8 +12,9 @@ import { secureIndex, spinWheel, stealTarget } from "./wheel";
 import { type DrunkServer, drunkAfterJudge, drunkHookoff, drunkIntro } from "./drunk";
 import { hookSlots, pickFighters } from "./hookertime";
 import { type HookSim, advanceSim, createSim, drainEvents, simMove, simStop, simThrow, snapOf, startSim } from "../shared/hooksim";
-import { HOOKERTIME, HOOK_INTRO_MS, type HookertimePublic } from "../shared/types";
+import { HOOKERTIME, HOOK_INTRO_MS, HOOK_TICK_MS, type HookertimePublic } from "../shared/types";
 import { drunkCueMs } from "../shared/types";
+import { PLINKO, RISKS, bankroll, betFor, binOf, multOf, plinkoSlots, winOf, type PlinkoPublic, type PlinkoRisk } from "../shared/plinko";
 import {
   COINS, EXTRA_TIME_MS, SHOP, TEAM_COLORS, TEAM_NAMES, type CoinNote, type Effects, type ShopItem, type Team,
   type TeamMode, type TokenItem, type Wallet, splitTeams, unitOf,
@@ -91,6 +92,11 @@ interface Persisted {
   hookDoneSlots?: number[];
   hookPairs?: [string, string][];
   hook?: HookertimePublic | null;
+  /** Plinko: före vilka omgångar, vilka som körts och pågående runda. */
+  plinkoSlots?: number[];
+  plinkoDone?: number[];
+  plinkoN?: number;
+  plinko?: PlinkoPublic | null;
 }
 
 const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor" | "order" | "turnIdx" | "choiceRounds"> => ({
@@ -138,6 +144,7 @@ const clampSettings = (s: Settings): Settings => ({
   revealSeconds: clamp(s.revealSeconds, 3, 30, DEFAULT_SETTINGS.revealSeconds),
   drunk: s.drunk === undefined ? DEFAULT_SETTINGS.drunk : !!s.drunk,
   hookertime: s.hookertime === undefined ? DEFAULT_SETTINGS.hookertime : !!s.hookertime,
+  plinko: s.plinko === undefined ? DEFAULT_SETTINGS.plinko : !!s.plinko,
 });
 
 export class Room implements DurableObject {
@@ -151,6 +158,8 @@ export class Room implements DurableObject {
   private hookTimer: ReturnType<typeof setTimeout> | null = null;
   private hookLoop: ReturnType<typeof setInterval> | null = null;
   private sim: HookSim | null = null;
+  /** Plinko: nästa steg (släppet stänger / sammanfattningen slutar). */
+  private plinkoTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private ctx: DurableObjectState, private env: Env) {
     ctx.blockConcurrencyWhile(async () => {
@@ -161,6 +170,8 @@ export class Room implements DurableObject {
         if (this.s.phase === "collect" && this.s.collect) this.armCollectTimer();
         // En Hookertime som pågick när objektet startades om kan inte återupptas: avsluta den.
         if (this.s.hook) { this.s.hook = null; }
+        // Plinko likaså (mynten är redan avräknade vid varje släpp).
+        if (this.s.plinko) { this.s.plinko = null; }
         this.reschedule();
       }
     });
@@ -247,6 +258,7 @@ export class Room implements DurableObject {
       diffLeft: this.diffLeft(),
       drunk: s.settings.drunk && s.drunk ? { buddyId: s.drunk.buddyId, sips: s.drunk.sips, cue: s.drunk.cue } : null,
       hookertime: s.hook ?? null,
+      plinko: s.plinko ?? null,
       ...(c.playerId && col?.removed?.[c.playerId] ? { myRemoved: col.removed[c.playerId] } : {}),
     };
     // Spelande värd: hostkontrollen får exakt samma som alla andra, inget facit och inga svar.
@@ -263,7 +275,7 @@ export class Room implements DurableObject {
     const s = this.s!;
     // Kentas intro: första frågan startar när han pratat klart (värden har redan tryckt start).
     if (s.phase === "lobby" && s.drunk?.startAt) return s.drunk.startAt;
-    if (s.hook) return undefined; // Hookertime styr själv
+    if (s.hook || s.plinko) return undefined; // Hookertime och Plinko styr själva
     if (!s.settings.autoplay || s.paused) return undefined;
     const at = s.phaseAt ?? Date.now();
     if (s.phase === "judge") return at + JUDGE_PAUSE_MS;
@@ -311,11 +323,17 @@ export class Room implements DurableObject {
     const s = this.s!;
     // Första frågan: bestäm när kvällens Hookertime slår till.
     if (s.qIndex < 0 && !s.hookSlots) s.hookSlots = hookSlots(s.questions.length);
+    if (s.qIndex < 0 && !s.plinkoSlots) s.plinkoSlots = plinkoSlots(s.questions.length, s.hookSlots ?? [], secureIndex);
     // Hookertime i stället för frågan som alla väntar på?
     const slot = s.qIndex + 1;
     if (s.phase === "reveal" && !s.hook && s.settings.hookertime && (s.hookSlots ?? []).includes(slot) && !(s.hookDoneSlots ?? []).includes(slot)) {
       (s.hookDoneSlots ??= []).push(slot);
       if (this.startHookertime()) return;
+    }
+    // Plinko i stället för frågan?
+    if (s.phase === "reveal" && !s.plinko && s.settings.plinko && (s.plinkoSlots ?? []).includes(slot) && !(s.plinkoDone ?? []).includes(slot)) {
+      (s.plinkoDone ??= []).push(slot);
+      if (this.startPlinko()) return;
     }
     this.clearCollectTimer();
     const next = this.pickNext();
@@ -543,6 +561,7 @@ export class Room implements DurableObject {
   }
 
   private startMatch() {
+    // 30 bilder/s till alla (var 20): mjukare för åskådarna och kortare väntan på den egna kroken.
     const s = this.s;
     if (!s?.hook) return;
     this.hookTimer = null;
@@ -562,7 +581,7 @@ export class Room implements DurableObject {
       if (over && over.k === "over") void this.finishMatch(over.w, [sim.score[0], sim.score[1]]);
       // Nödbroms: ingen hookar någon på 3 minuter. Ledaren vinner, annars avgör slumpen.
       else if (sim.t > 180) void this.finishMatch(sim.score[0] !== sim.score[1] ? (sim.score[0] > sim.score[1] ? 0 : 1) : (secureIndex(2) as 0 | 1), [sim.score[0], sim.score[1]]);
-    }, 50);
+    }, HOOK_TICK_MS);
     void this.save().then(() => this.broadcast());
   }
 
@@ -605,6 +624,70 @@ export class Room implements DurableObject {
     if (m.move && ok(m.move)) simMove(sim, i, m.move);
     else if (m.hook && ok(m.hook)) simThrow(sim, i, m.hook);
     else if (m.stop) simStop(sim, i);
+  }
+
+  // ===== Plinko =====
+
+  private clearPlinko() { if (this.plinkoTimer) { clearTimeout(this.plinkoTimer); this.plinkoTimer = null; } }
+
+  private startPlinko(): boolean {
+    const s = this.s!;
+    if (!s.players.some((p) => p.connected)) return false;
+    this.clearPlinko();
+    const now = Date.now();
+    s.plinkoN = (s.plinkoN ?? 0) + 1;
+    s.plinko = { n: s.plinkoN, startedAt: now, dropUntil: now + PLINKO.INTRO_MS + PLINKO.DROP_MS, drops: [] };
+    this.plinkoTimer = setTimeout(() => { void this.closePlinko(); }, PLINKO.INTRO_MS + PLINKO.DROP_MS);
+    return true;
+  }
+
+  /** Släppet stängt: vänta in sista kulan, sedan sammanfattning, sedan tillbaka till quizet. */
+  private async closePlinko() {
+    const s = this.s!, p = s.plinko;
+    this.plinkoTimer = null;
+    if (!p || p.summaryAt) return;
+    const now = Date.now();
+    p.dropUntil = Math.min(p.dropUntil, now);
+    const lastLand = Math.max(now, ...p.drops.map((d) => d.at + PLINKO.BALL_MS));
+    p.summaryAt = lastLand + 900;
+    p.endsAt = p.summaryAt + PLINKO.SUMMARY_MS;
+    this.plinkoTimer = setTimeout(() => { void this.endPlinko(); }, p.endsAt - now);
+    await this.save();
+    this.broadcast();
+  }
+
+  private async endPlinko() {
+    const s = this.s!;
+    this.clearPlinko();
+    s.plinko = null;
+    if (s.settings.autoplay && !s.paused && s.phase === "reveal") this.nextQuestion();
+    else s.phaseAt = Date.now();
+    await this.save();
+    this.broadcast();
+  }
+
+  /** En spelare släpper sin kula. Servern slumpar vägen och räknar av mynten direkt. */
+  private async plinkoDrop(c: Conn, m: Extract<ClientMsg, { t: "plinko" }>) {
+    const s = this.s!, p = s.plinko, pid = c.playerId;
+    if (!p || !pid || p.summaryAt) return;
+    const now = Date.now();
+    if (now < p.startedAt + PLINKO.INTRO_MS - 300 || now >= p.dropUntil) return;
+    if (p.drops.some((d) => d.playerId === pid)) return;
+    const player = s.players.find((x) => x.id === pid);
+    if (!player) return;
+    const risk: PlinkoRisk = RISKS.includes(m.risk) ? m.risk : "low";
+    const bank = bankroll(s.wallets[pid]?.coins ?? 0, s.coins[pid] ?? 0);
+    const choice = m.bet === "all" ? "all" : Number.isFinite(m.bet) ? Math.max(0, Math.floor(m.bet)) : 0;
+    const bet = betFor(choice, bank);
+    const path = Array.from({ length: PLINKO.ROWS }, () => secureIndex(2));
+    const bin = binOf(path), mult = multOf(risk, bin), win = winOf(bet, mult);
+    p.drops.push({ playerId: pid, bet, risk, path, at: now, bin, mult, win });
+    if (bet > 0) s.coins[pid] = (s.coins[pid] ?? 0) - bet + win;
+    // Alla anslutna har släppt: stäng direkt i stället för att vänta ut tiden
+    const live = s.players.filter((x) => x.connected).map((x) => x.id);
+    if (live.every((id) => p.drops.some((d) => d.playerId === id))) { this.clearPlinko(); await this.closePlinko(); return; }
+    await this.save();
+    this.broadcast();
   }
 
   // ===== Kenta, fyllot =====
@@ -855,6 +938,7 @@ export class Room implements DurableObject {
 
     if (m.t === "buy" || m.t === "use") return this.shop(c, m);
     if (m.t === "hook") return this.hookInput(c, m);
+    if (m.t === "plinko") return this.plinkoDrop(c, m);
 
     if (c.role !== "host") return this.send(c, { t: "error", message: "Bara hosten kan göra det" });
 
@@ -863,6 +947,7 @@ export class Room implements DurableObject {
       case "host:next": {
         if (s.phase === "collect" || s.phase === "judge") return this.send(c, { t: "error", message: "Visa svaret först" });
         if (s.hook) return this.send(c, { t: "error", message: "Hookertime pågår" });
+        if (s.plinko) return this.send(c, { t: "error", message: "Plinko pågår" });
         // Första starten: Kenta kliver in och väljer buddy, frågan startar när han pratat klart.
         // Trycker värden igen under introt startar frågan direkt.
         if (s.phase === "lobby" && s.settings.drunk && !s.drunk) {
@@ -876,10 +961,26 @@ export class Room implements DurableObject {
       case "host:hookertime": {
         if (s.phase !== "reveal") return this.send(c, { t: "error", message: "Hookertime startar när svaret visas" });
         if (s.hook) return this.send(c, { t: "error", message: "Hookertime pågår redan" });
+        if (s.plinko) return this.send(c, { t: "error", message: "Plinko pågår" });
         // Använder kvällens nästa schemalagda tillfälle (så det blir två totalt)
         const next = (s.hookSlots ?? []).find((x) => x > s.qIndex && !(s.hookDoneSlots ?? []).includes(x));
         if (next !== undefined) (s.hookDoneSlots ??= []).push(next);
         if (!this.startHookertime()) return this.send(c, { t: "error", message: "Det behövs minst två anslutna spelare" });
+        break;
+      }
+      case "host:plinko": {
+        if (s.phase !== "reveal") return this.send(c, { t: "error", message: "Plinko startar när svaret visas" });
+        if (s.plinko || s.hook) return this.send(c, { t: "error", message: "Något annat pågår redan" });
+        const next = (s.plinkoSlots ?? []).find((x) => x > s.qIndex && !(s.plinkoDone ?? []).includes(x));
+        if (next !== undefined) (s.plinkoDone ??= []).push(next);
+        if (!this.startPlinko()) return this.send(c, { t: "error", message: "Ingen spelare är ansluten" });
+        break;
+      }
+      case "host:plinko:stop": {
+        if (!s.plinko) return;
+        this.clearPlinko();
+        s.plinko = null;
+        s.phaseAt = Date.now();
         break;
       }
       case "host:hookertime:stop": {
@@ -934,6 +1035,7 @@ export class Room implements DurableObject {
       }
       case "host:finish": {
         this.clearHook(); s.hook = null;
+        this.clearPlinko(); s.plinko = null;
         this.clearCollectTimer(); s.wheel = null; s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() };
         break;
       }

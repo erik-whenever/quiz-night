@@ -11,6 +11,7 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
   const [connected, setConnected] = useState(false);
   const ws = useRef<WebSocket | null>(null);
   const offset = useRef(0); // serverTid - lokalTid
+  const samples = useRef<{ rtt: number; off: number }[]>([]);
   const queue = useRef<ClientMsg[]>([]);
   const hoSubs = useRef(new Set<(s: HsSnap) => void>());
   const onJoined = useRef(opts.onJoined);
@@ -30,15 +31,31 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
       sock.onopen = () => {
         attempts = 0; setConnected(true); setError("");
         for (const m of queue.current.splice(0)) sock.send(JSON.stringify(m));
-        const ping = () => sock.readyState === 1 && sock.send(JSON.stringify({ t: "ping", c: Date.now() }));
-        ping(); pinger = setInterval(ping, 5000);
+        // Tät pingning först (klockan måste stämma för Hookertime och nedräkningar), sedan glesare
+        let n = 0;
+        const ping = () => {
+          if (sock.readyState !== 1) return;
+          sock.send(JSON.stringify({ t: "ping", c: Date.now() }));
+          n++;
+          clearInterval(pinger);
+          pinger = setInterval(ping, n < 6 ? 500 : 3000);
+        };
+        ping();
       };
       sock.onmessage = (ev) => {
         const m = JSON.parse(ev.data) as ServerMsg;
         if (m.t === "state") setState(m.state as HostState);
         else if (m.t === "error") setError(m.message);
         else if (m.t === "joined") onJoined.current?.(m.playerId);
-        else if (m.t === "pong") { const now = Date.now(); offset.current = m.s - (m.c + now) / 2; }
+        else if (m.t === "pong") {
+          // Lita mest på mätningarna med kortast tur och retur (minst brus), och flytta klockan mjukt
+          const now = Date.now(), rtt = now - m.c;
+          samples.current.push({ rtt, off: m.s - (m.c + now) / 2 });
+          if (samples.current.length > 12) samples.current.shift();
+          const best = samples.current.reduce((x, y) => (y.rtt < x.rtt ? y : x));
+          const first = samples.current.length === 1;
+          offset.current = first || Math.abs(best.off - offset.current) > 250 ? best.off : offset.current + (best.off - offset.current) * 0.3;
+        }
         else if (m.t === "ho") hoSubs.current.forEach((f) => f(m.s));
       };
       sock.onclose = (ev) => {

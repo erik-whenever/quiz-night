@@ -98,7 +98,8 @@ export class Hub implements DurableObject {
       const paid = (await st.get<string[]>("paid")) ?? [];
       if (paid.includes(id)) return Response.json({ ok: true, already: true });
       const ws = await wallets();
-      for (const [name, n] of Object.entries(coins)) getOrCreate(ws, name).coins += Math.max(0, Math.round(n));
+      // Kvällens mynt kan vara negativa efter Plinko: dras från plånboken, men aldrig under noll.
+      for (const [name, n] of Object.entries(coins)) { const w = getOrCreate(ws, name); w.coins = Math.max(0, w.coins + Math.round(n)); }
       await st.put("wallets", ws);
       await st.put("paid", [...paid, id].slice(-200));
       return Response.json({ ok: true });

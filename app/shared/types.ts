@@ -3,6 +3,7 @@
 // Sedan 2026-10-29 är varje fråga antingen svarsalternativ i mobilen ("choice", standard) eller en
 // skill-utmaning ("skill"). Muntliga buzz-svar och fritextsvar är borttagna (Eriks beslut), så att
 // allt rättas automatiskt och värden kan spela med utan att se facit.
+import type { PlinkoPublic, PlinkoRisk } from "./plinko";
 import type { OrderItem, SkillSpec } from "./skill";
 import type { HsSnap } from "./hooksim";
 export type { SkillSpec, SkillKind, OrderItem } from "./skill";
@@ -121,12 +122,14 @@ export interface Settings {
   drunk: boolean;
   /** Hookertime: två överraskande 1v1-dueller i hooker-off per kväll. */
   hookertime: boolean;
+  /** Plinko: två rundor per kväll där alla satsar mynt och släpper en kula. */
+  plinko: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
   playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
-  autoplay: true, revealSeconds: 8, drunk: false, hookertime: true,
+  autoplay: true, revealSeconds: 8, drunk: false, hookertime: true, plinko: true,
 };
 /** Hur länge frågans intro visas innan svarsknapparna öppnas (läggs på svarstiden). */
 export const INTRO_MS = 1400;
@@ -241,6 +244,8 @@ export interface PublicState {
   drunk?: DrunkPublic | null;
   /** Pågående Hookertime (glitch, intro, match, resultat). Kvällen står still under tiden. */
   hookertime?: HookertimePublic | null;
+  /** Pågående Plinko-runda. Kvällen står still under tiden. */
+  plinko?: PlinkoPublic | null;
 }
 
 /** Hosten ser dessutom facit och svaren, men bara när värden inte spelar själv. */
@@ -290,6 +295,11 @@ export type ClientMsg =
   | { t: "host:hookertime:stop" }
   /** Spelarens input i en Hookertime-match: gå, kasta kroken eller stanna. */
   | { t: "hook"; move?: { x: number; z: number }; hook?: { x: number; z: number }; stop?: boolean }
+  /** Starta Plinko nu (när svaret visas), resp. avbryt. */
+  | { t: "host:plinko" }
+  | { t: "host:plinko:stop" }
+  /** Släpp min kula i Plinko: insats (mynt eller "all") och risk. En gång per runda. */
+  | { t: "plinko"; bet: number | "all"; risk: PlinkoRisk }
   /** Lagläge: 0 = alla mot alla, annars lagstorlek. Slumpar nya lag (bara i lobbyn). */
   | { t: "host:teams"; mode: TeamMode }
   /** Köp i butiken (lobbyn). */
@@ -431,6 +441,8 @@ export const HOOKERTIME = {
   /** Poäng som vinnaren tar från förloraren. */
   STAKE: 2,
 } as const;
+/** Hur ofta servern skickar Hookertime-matchen till alla (ms). */
+export const HOOK_TICK_MS = 33;
 /** Från glitchen till att matchen börjar. */
 export const HOOK_INTRO_MS = HOOKERTIME.GLITCH_MS + HOOKERTIME.TITLE_MS + HOOKERTIME.PICK_MS + HOOKERTIME.SPIN_MS + HOOKERTIME.HOLD_MS + HOOKERTIME.VS_MS;
 

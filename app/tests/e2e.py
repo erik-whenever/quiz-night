@@ -21,7 +21,7 @@ LIB = """
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   // Rummen i testerna spelar "alla samtidigt" utan buzzer om testet inte säger annat.
   const mkRoom = async (body) => {
-    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, drunk: false, hookertime: false, ...(body.settings ?? {}) } };
+    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, drunk: false, hookertime: false, plinko: false, ...(body.settings ?? {}) } };
     const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: res.status, ...(await res.json()) };
   };
@@ -656,11 +656,56 @@ HOOK_JS = js("""
   return out;
 """)
 
+# Plinko: skydd, insatser mot saldot, en kula per spelare, mynten räknas, stängs när alla släppt, kvällen fortsätter.
+PLINKO_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (i) => ({ id: 'p' + i, text: 'P' + i, answer: 'R', choices: ['R', 'F'] });
+  const out = {};
+  const room = await mkRoom({ title: 'PK', settings: { plinko: true }, questions: [q(1), q(2), q(3), q(4), q(5), q(6)] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const ps = await players(room.code, ['A' + tag, 'B' + tag, 'C' + tag]);
+  const [A, B, C] = Object.values(ps);
+  await until(host, (s) => s.players.length === 3 && Object.keys(s.wallets ?? {}).length === 3);
+  send(host, { t: 'host:plinko' }); await sleep(150);
+  out.inLobby = host.errors.splice(0);
+  send(host, { t: 'host:start' }); await until(host, (s) => s.phase === 'collect');
+  send(host, { t: 'host:judge' }); await until(host, (s) => s.phase === 'reveal');
+  send(A, { t: 'host:plinko' }); await sleep(150);
+  out.playerStart = A.errors.splice(0);
+  const bankA = host.state.wallets[A.id].coins + (host.state.coinsTonight[A.id] ?? 0);
+  const coins0 = { ...host.state.coinsTonight };
+  send(host, { t: 'host:plinko' });
+  const p0 = (await until(host, (s) => !!s.plinko)).plinko;
+  out.started = { n: p0.n, drops: p0.drops.length, window: p0.dropUntil - p0.startedAt };
+  send(A, { t: 'plinko', bet: 'all', risk: 'high' }); await sleep(150);
+  out.duringIntro = host.state.plinko.drops.length;   // under introt ignoreras släpp
+  await sleep(Math.max(0, p0.startedAt + 3500 - Date.now()) + 50);
+  send(host, { t: 'host:next' }); await sleep(150);
+  out.nextBlocked = host.errors.splice(0);
+  send(A, { t: 'plinko', bet: 'all', risk: 'high' });
+  send(B, { t: 'plinko', bet: 999, risk: 'nonsens' });
+  await until(host, (s) => s.plinko?.drops.length === 2);
+  send(A, { t: 'plinko', bet: 1, risk: 'low' }); await sleep(150);
+  const st = host.state, dA = st.plinko.drops.find((d) => d.playerId === A.id), dB = st.plinko.drops.find((d) => d.playerId === B.id);
+  out.twice = st.plinko.drops.filter((d) => d.playerId === A.id).length;
+  out.A = { bet: dA.bet, bank: bankA, risk: dA.risk, path: dA.path.length, binOk: dA.bin === dA.path.reduce((a, b) => a + b, 0),
+    coinsOk: (st.coinsTonight[A.id] ?? 0) === (coins0[A.id] ?? 0) - dA.bet + dA.win, winOk: dA.win === Math.floor(dA.bet * dA.mult + 1e-9) };
+  out.B = { betClamped: dB.bet <= st.wallets[B.id].coins + (coins0[B.id] ?? 0), risk: dB.risk };
+  send(C, { t: 'plinko', bet: 0, risk: 'mid' });
+  const closed = (await until(host, (s) => !!s.plinko?.summaryAt)).plinko;
+  out.closedEarly = closed.dropUntil < p0.dropUntil;
+  out.cFree = closed.drops.find((d) => d.playerId === C.id)?.bet === 0 && (host.state.coinsTonight[C.id] ?? 0) === (coins0[C.id] ?? 0);
+  const after = await untilRaw(host, (s) => !s.plinko, 20000);
+  out.afterPhase = after.phase;
+  closeAll(host, ...Object.values(ps));
+  return out;
+""")
+
 SKILL_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false, hookertime: false }, questions: [
+    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false, hookertime: false, plinko: false }, questions: [
       { id: 'k1', text: 'Flick', answer: '', mode: 'skill', skill: { kind: 'aim' } },
       { id: 'k2', text: 'Ordna', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'Z', value: 3 }, { label: 'X', value: 1 }, { label: 'Y', value: 2 }] } },
       { id: 'k3', text: 'Trasig', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'A', value: 1 }] } } ] }) });
@@ -836,7 +881,7 @@ def create_room(host, title, questions, settings):
     return host.evaluate("""async ([pin, body]) => {
       const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""",
-        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, "drunk": False, "hookertime": False, **settings}}])
+        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, "drunk": False, "hookertime": False, "plinko": False, **settings}}])
 
 
 def join(page, code, name):
@@ -847,6 +892,81 @@ def join(page, code, name):
 
 
 POOL8 = ["Rätt", "Fel 1", "Fel 2", "Fel 3", "Fel 4", "Fel 5", "Fel 6", "Fel 7"]
+
+
+def spectator_and_plinko_ui(b):
+    """Hookertime med tre spelare: den som inte spelar ser matchen live i sin egen mobil.
+    Sedan Plinko: två släpper via knapparna, den tredje låter bli (släppet stänger på tid)."""
+    errors = []
+    host = b.new_page(viewport={"width": 1280, "height": 860})
+    tv = b.new_page(viewport={"width": 1600, "height": 900})
+    ps = [b.new_page(viewport={"width": 390, "height": 844}) for _ in range(3)]
+    for pg in [host, tv, *ps]:
+        pg.on("pageerror", lambda e: errors.append(str(e)))
+    host.goto(BASE + "/")
+    q = lambda i: {"id": f"s{i}", "text": f"Fråga {i}", "answer": "Rätt", "choices": ["Rätt", "Fel"]}
+    r = create_room(host, "Åskådare", [q(i) for i in range(1, 7)], {"hookertime": True, "plinko": True})
+    code = r["code"]
+    host.goto(f"{BASE}/host/{code}")
+    host.get_by_label("Host-PIN").fill(PIN)
+    host.get_by_role("button", name="Lås upp").click()
+    tv.goto(f"{BASE}/tv/{code}")
+    names = [n + code.lower() for n in ["Anna", "Bosse", "Cissi"]]  # unika: plånböckerna sparas mellan körningar
+    for pg, n in zip(ps, names):
+        join(pg, code, n)
+    expect(tv.get_by_text("3 spelare inne")).to_be_visible()
+    host.get_by_role("button", name="Starta första frågan").click()
+    expect(host.get_by_role("button", name="Visa svaret nu (V)")).to_be_visible()
+    host.get_by_role("button", name="Visa svaret nu (V)").click()
+
+    host.get_by_role("button", name="Hookertime nu").click()
+    expect(tv.locator(".hk-howto")).to_be_visible(timeout=20000)
+    for pg in ps:
+        expect(pg.locator(".hk-howto")).to_be_visible(timeout=5000)
+    expect(tv.locator(".hk-howto")).to_be_visible()
+    fighters = [pg for pg in ps if pg.locator(".hk-you").count() == 1]
+    assert len(fighters) == 2, f"Fel antal i duellen: {len(fighters)}"
+    watcher = next(pg for pg in ps if pg not in fighters)
+    expect(watcher.locator(".hk-howto")).to_contain_text("matchen visas här också")
+    expect(watcher.locator(".hk-match .ho")).to_be_visible(timeout=40000)   # 3D-laddningen kan vara seg i testmiljön
+    expect(watcher.locator(".hk-watchbar")).to_contain_text("Du tittar")
+    assert watcher.locator(".hk-hookbtn").count() == 0, "Åskådaren fick en KROK-knapp"
+    watcher.wait_for_timeout(1500)
+    shot(watcher, "08i-spelare-askadare-hookertime")
+    # Hostfliken visar bara ställningen som standard (ligger oftast bredvid TV:n på samma dator)
+    expect(host.locator(".hk-watch .hk-live")).to_be_visible()
+    watcher.get_by_role("button", name="Bara ställningen").click()
+    expect(watcher.locator(".hk-watch .hk-live")).to_be_visible()
+    expect(watcher.get_by_role("button", name="Titta på matchen här")).to_be_visible()
+    host.get_by_role("button", name="Avbryt Hookertime").first.click()
+    expect(tv.locator(".hk")).to_have_count(0, timeout=10000)
+
+    host.get_by_role("button", name="Plinko nu").click()
+    expect(tv.locator(".pk-title")).to_have_text("PLINKO")
+    tv.wait_for_timeout(900)
+    shot(tv, "60-tv-plinko-intro")
+    expect(ps[0].locator(".pk-controls")).to_be_visible(timeout=6000)
+    expect(ps[0].locator(".pk-bank")).to_contain_text("10")   # välkomstbonusen
+    ps[0].get_by_role("radio", name="Hög").click()
+    ps[0].get_by_role("radio", name="5", exact=True).click()
+    shot(ps[0], "61-spelare-plinko-val")
+    ps[0].get_by_role("button", name="Släpp kulan · 5 mynt").click()
+    ps[1].get_by_role("radio", name="Allt").click()
+    ps[1].get_by_role("button", name=re.compile("^Släpp kulan · 10 mynt")).click()
+    expect(ps[0].locator(".pk-note.big")).to_contain_text("Din kula faller")
+    tv.wait_for_timeout(1300)
+    shot(tv, "62-tv-plinko-kulor")
+    expect(ps[0].locator(".pk-mine")).to_be_visible(timeout=6000)
+    shot(ps[0], "63-spelare-plinko-utfall")
+    # Cissi släpper inte: släppet stänger på tid, sedan sammanfattning och tillbaka till quizet
+    expect(ps[2].locator(".pk-note")).to_contain_text("hann inte", timeout=25000)
+    expect(tv.locator(".pk-sum-card")).to_be_visible(timeout=10000)
+    expect(tv.locator(".pk-list li")).to_have_count(2)
+    shot(tv, "64-tv-plinko-resultat")
+    expect(tv.locator(".pk")).to_have_count(0, timeout=12000)
+    assert not errors, f"Sidfel med åskådare/Plinko: {errors}"
+    for pg in [host, tv, *ps]:
+        pg.close()
 
 
 def main():
@@ -965,6 +1085,8 @@ def main():
         host.get_by_text("Kvällens regler").click()
         host.get_by_label(re.compile("^Hookertime")).click()
         expect(host.get_by_label(re.compile("^Hookertime"))).not_to_be_checked()
+        host.get_by_label(re.compile("^Plinko")).click()
+        expect(host.get_by_label(re.compile("^Plinko"))).not_to_be_checked()
         host.get_by_text("Kvällens regler").click()   # stäng reglerna igen
         expect(tv.locator("html[data-music=lift]")).to_have_count(1)   # hissmusik mellan frågorna
 
@@ -1216,7 +1338,7 @@ def main():
         # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
         sdata = host.evaluate("""async ([pin]) => {
           const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false, hookertime: false }, questions: [
+            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false, hookertime: false, plinko: false }, questions: [
               { id: 'k1', text: 'Last hit!', answer: '', mode: 'skill', skill: { kind: 'lasthit' } },
               { id: 'k2', text: 'Flick!', answer: '', mode: 'skill', skill: { kind: 'aim' } },
               { id: 'k3', text: 'Stoppa klockan!', answer: '', mode: 'skill', skill: { kind: 'stopwatch', target: 3 } },
@@ -1519,6 +1641,21 @@ def main():
         assert m["tvGotSnaps"] and m["coins"] >= 2, f"TV:n fick inga ögonblicksbilder eller mynt saknas: {m}"
         assert hk["afterPhase"] == "reveal", f"Kvällen fortsatte inte efter Hookertime: {hk['afterPhase']}"
 
+        pk = raw.evaluate(PLINKO_JS, [PIN])
+        print("Plinko:", pk)
+        assert pk["inLobby"] == ["Plinko startar när svaret visas"], f"Plinko i lobbyn: {pk['inLobby']}"
+        assert pk["playerStart"] == ["Bara hosten kan göra det"], "Spelare kunde starta Plinko"
+        assert pk["started"]["n"] == 1 and pk["started"]["drops"] == 0 and pk["started"]["window"] == 19500, f"Plinko startade fel: {pk['started']}"
+        assert pk["duringIntro"] == 0, "Kula gick att släppa under introt"
+        assert pk["nextBlocked"] == ["Plinko pågår"], f"Nästa fråga gick under Plinko: {pk['nextBlocked']}"
+        assert pk["twice"] == 1, "Samma spelare kunde släppa två kulor"
+        a = pk["A"]
+        assert a["bet"] == a["bank"] and a["bet"] > 0 and a["risk"] == "high" and a["path"] == 8 and a["binOk"] and a["coinsOk"] and a["winOk"], f"Allt-in räknades fel: {a}"
+        assert pk["B"] == {"betClamped": True, "risk": "low"}, f"Insats över saldot eller ogiltig risk godtogs: {pk['B']}"
+        assert pk["closedEarly"], "Plinko stängde inte när alla släppt"
+        assert pk["cFree"], "Gratiskulan kostade mynt"
+        assert pk["afterPhase"] == "reveal", f"Kvällen fortsatte inte efter Plinko: {pk['afterPhase']}"
+
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)
         assert sk["mode"] == "skill" and sk["seedSame"], f"Spelarna fick inte samma frö: {sk}"
@@ -1595,6 +1732,8 @@ def main():
         shot(dm, "84-demo-kenta")
         assert not dm_errors, f"Sidfel i demoläget: {dm_errors}"
         dm.close()
+
+        spectator_and_plinko_ui(b)
 
         b.close()
         print("E2E OK. Slutpoäng:", res)

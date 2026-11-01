@@ -28,6 +28,8 @@ export interface HookOff {
   start(): void;
   /** Nätläge: en ny ögonblicksbild från servern. */
   push(snap: HsSnap): void;
+  /** Spara på datorn: lägre upplösning, inga effekter och halva bildtakten (t.ex. när en annan flik spelar). */
+  setBackground(on: boolean): void;
   dispose(): void;
 }
 
@@ -53,8 +55,14 @@ const R0 = HS.R0;
 const HOOK_RANGE = HS.HOOK_RANGE;
 const HOOK_CD = HS.HOOK_CD;
 const PILLARS = HS_PILLARS;
-/** Hur långt efter servern vi ritar, så att det finns två bilder att interpolera mellan. */
-const NET_DELAY_MS = 110;
+/**
+ * Hur långt efter servern vi ritar motståndaren och krokarna, så att det finns två bilder att interpolera
+ * mellan. Anpassas efter hur ojämnt bilderna faktiskt kommer fram (wifi, Discord i bakgrunden …).
+ * Den egna gubben ritas inte fördröjd alls, den förutsägs lokalt (se ownPredict).
+ */
+const NET_DELAY_MIN = 45, NET_DELAY_MAX = 260;
+/** Hur långt vi får gissa framåt om bilderna tar slut (i stället för att frysa). */
+const NET_EXTRAP_MS = 140;
 
 const COL = {
   skyTop: "#0b1250", skyMid: "#3b2a7a", skyLow: "#e0795a",
@@ -606,12 +614,39 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
   const mouse = V(4, 0, 0);
   let lastScore = "";
 
+  // Nätläge, den egna gubben: lokal förutsägelse så att klick syns direkt (inte efter en tur till servern).
+  const pred = { on: false, x: 0, z: 0, face: 0 };
+  let predTarget: P2 | null = null;
+  let predTargetAt = 0;
+  let localThrowAt = -1e9;
+  let localThrowFace = 0;
+  /** Adaptiv fördröjning (ms) och hur sena bilderna brukar vara. */
+  let netDelay = 110;
+  const lateness: number[] = [];
+
   const sendInput = (m: HookInput) => {
     if (!net) {
       if ("move" in m) simMove(sim, 0, m.move);
       else if ("hook" in m) simThrow(sim, 0, m.hook);
       else simStop(sim, 0);
-    } else if (me !== null) opts.onInput?.(m);
+      return;
+    }
+    if (me === null) return;
+    if ("move" in m) {
+      const L = Math.hypot(m.move.x, m.move.z), lim = sim.radius - HS.UNIT_R;
+      predTarget = L > lim ? { x: (m.move.x / L) * lim, z: (m.move.z / L) * lim } : { ...m.move };
+      predTargetAt = performance.now();
+    } else if ("hook" in m) {
+      const latest = snaps[snaps.length - 1];
+      const u = latest?.u[me];
+      // Kastar direkt i bild om servern troligen tar emot det (ingen cooldown, kroken hemma, inte hookad)
+      if (u && latest.ph === "fight" && !u[5] && !u[6] && u[7] <= 0.05 && latest.h[me][0] === 0) {
+        localThrowAt = performance.now();
+        localThrowFace = Math.atan2(-(m.hook.z - pred.z), m.hook.x - pred.x);
+        predTarget = null;
+      }
+    } else predTarget = null;
+    opts.onInput?.(m);
   };
 
   function start() {
@@ -640,10 +675,25 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     if (!toGround(ev, p)) return;
     if (sim.phase !== "fight" && sim.phase !== "intro") return;
     const now = performance.now();
-    if (!force && net && now - lastMoveSent < 90) return; // högst ~11 st/s över nätet
+    if (!force && net && now - lastMoveSent < 70) {
+      // Högst ~14 st/s över nätet, men gubben svänger direkt i bild. Sista punkten skickas vid släpp.
+      pendingMove = { x: p.x, z: p.z };
+      const L = Math.hypot(p.x, p.z), lim = sim.radius - HS.UNIT_R;
+      predTarget = L > lim ? { x: (p.x / L) * lim, z: (p.z / L) * lim } : { x: p.x, z: p.z };
+      predTargetAt = now;
+      return;
+    }
     lastMoveSent = now;
+    pendingMove = null;
     sendInput({ move: { x: p.x, z: p.z } });
     marker.position.set(p.x, 0.07, p.z); markerT = 0;
+  };
+  let pendingMove: P2 | null = null;
+  const flushMove = () => {
+    if (!pendingMove) return;
+    lastMoveSent = performance.now();
+    sendInput({ move: pendingMove });
+    pendingMove = null;
   };
   const onDown = (ev: PointerEvent) => {
     toGround(ev, mouse);
@@ -658,7 +708,7 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     toGround(ev, mouse);
     if (moving && ev.buttons) orderMove(ev);
   };
-  const onUp = () => { moving = false; };
+  const onUp = () => { moving = false; flushMove(); };
   const throwAtMouse = () => { if (me !== null) sendInput({ hook: { x: mouse.x, z: mouse.z } }); };
   const onKey = (ev: KeyboardEvent) => {
     if (ev.repeat || me === null) return;
@@ -705,9 +755,22 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
 
   // ===== Nätläge: interpolera ögonblicksbilder =====
   const angLerp = (a: number, b: number, k: number) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * k;
-  function netUpdate() {
+  /** Ny bild från servern: mät hur sen den är, och låt fördröjningen följa nätets ojämnhet. */
+  function onSnap(snap: HsSnap) {
+    lateness.push(serverNow() - snap.at);
+    if (lateness.length > 60) lateness.shift();
+    if (lateness.length >= 8) {
+      const sorted = [...lateness].sort((x, y) => x - y);
+      // Tillräckligt för att 90 % av bilderna hunnit fram, plus en tick marginal
+      const want = clamp(sorted[Math.floor(sorted.length * 0.9)] + 20, NET_DELAY_MIN, NET_DELAY_MAX);
+      netDelay = want > netDelay ? lerp(netDelay, want, 0.25) : lerp(netDelay, want, 0.03);
+    }
+  }
+
+  function netUpdate(rdt: number) {
+    if (pendingMove && performance.now() - lastMoveSent >= 70) flushMove();
     if (!snaps.length) return;
-    const rt = serverNow() - NET_DELAY_MS;
+    const rt = serverNow() - netDelay;
     // Händelser när deras bild blir aktuell (så effekterna hamnar där gubbarna är)
     while (snaps.length > 2 && snaps[1].at <= rt) snaps.shift();
     let a = snaps[0], b = snaps[1] ?? snaps[0];
@@ -718,14 +781,80 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
       for (const e of s.ev) handle(e);
     }
     if (rt < a.at) a = b = snaps[0];
-    const k = b.at > a.at ? clamp((rt - a.at) / (b.at - a.at), 0, 1) : 0;
     applySnap(sim, b);
-    for (const i of [0, 1] as const) {
-      const ua = a.u[i], u = sim.units[i];
-      u.x = lerp(ua[0], b.u[i][0], k); u.z = lerp(ua[1], b.u[i][1], k); u.face = angLerp(ua[2], b.u[i][2], k);
-      const ha = a.h[i], hb = b.h[i], h = sim.hooks[i];
-      if (ha[0] === hb[0]) { h.x = lerp(ha[1], hb[1], k); h.z = lerp(ha[2], hb[2], k); }
+    if (b.at > a.at && rt <= b.at) {
+      const k = clamp((rt - a.at) / (b.at - a.at), 0, 1);
+      for (const i of [0, 1] as const) {
+        const ua = a.u[i], u = sim.units[i];
+        u.x = lerp(ua[0], b.u[i][0], k); u.z = lerp(ua[1], b.u[i][1], k); u.face = angLerp(ua[2], b.u[i][2], k);
+        const ha = a.h[i], hb = b.h[i], h = sim.hooks[i];
+        if (ha[0] === hb[0]) { h.x = lerp(ha[1], hb[1], k); h.z = lerp(ha[2], hb[2], k); }
+      }
+    } else if (rt > b.at) {
+      // Bilderna har tagit slut (nätet hackar): gissa vidare en liten bit i stället för att frysa
+      const ex = Math.min(NET_EXTRAP_MS, rt - b.at) / 1000 * b.ts;
+      for (const i of [0, 1] as const) {
+        const u = sim.units[i], h = sim.hooks[i];
+        if (!u.hooked && !u.down) { u.x += u.vx * ex; u.z += u.vz * ex; }
+        if (h.state === "out") { h.x += h.dx * HS.HOOK_SPEED * ex; h.z += h.dz * HS.HOOK_SPEED * ex; }
+      }
     }
+    if (me !== null) ownPredict(rdt);
+  }
+
+  /**
+   * Den egna gubben ritas "nu", inte fördröjd: vi går mot klickpunkten direkt med samma fart och kollisioner
+   * som servern, och glider mjukt mot serverns position om vi kommit fel (t.ex. knuffad). Hookad, nere,
+   * kastar eller mellan ronder: servern bestämmer helt.
+   */
+  function ownPredict(rdt: number) {
+    const i = me as 0 | 1;
+    const latest = snaps[snaps.length - 1];
+    const lu = latest.u[i];
+    const age = clamp((serverNow() - latest.at) / 1000, 0, 0.25);
+    // Serverns position just nu (senaste bilden, framräknad)
+    const sx = lu[0] + lu[3] * age, sz = lu[1] + lu[4] * age;
+    const hooked = !!lu[5], down = !!lu[6], windup = !!lu[8];
+    const hookHome = latest.h[i][0] === 0;
+    const throwing = performance.now() - localThrowAt < 450 && hookHome && !windup;
+    const free = latest.ph === "fight" && !hooked && !down && !windup && hookHome && !throwing;
+    const u = sim.units[i];
+    const px0 = pred.x, pz0 = pred.z;
+    if (!pred.on || !free) {
+      // Låt servern styra, men utan ryck: snabb glidning om vi redan ritar något
+      if (!pred.on || hooked || down || latest.ph !== "fight") { pred.x = u.x; pred.z = u.z; pred.face = u.face; }
+      else { const k = Math.min(1, rdt * 12); pred.x = lerp(pred.x, sx, k); pred.z = lerp(pred.z, sz, k); pred.face = angLerp(pred.face, lu[2], k); }
+      pred.on = true;
+      if (hooked || down || latest.ph !== "fight") predTarget = null;
+      if (throwing) pred.face = localThrowFace;
+    } else {
+      // Servern har släppt målet och vi har inte klickat på länge: stå still där servern står
+      const srvTarget = Number.isFinite(lu[9]);
+      if (predTarget && !srvTarget && performance.now() - predTargetAt > 600) predTarget = null;
+      const tgt = predTarget ?? (srvTarget ? { x: lu[9], z: lu[10] } : null);
+      if (tgt) {
+        const dx = tgt.x - pred.x, dz = tgt.z - pred.z, L = Math.hypot(dx, dz);
+        if (L >= 0.08) {
+          const m = Math.min(L, HS.MOVE * latest.ts * rdt) / L;
+          pred.x += dx * m; pred.z += dz * m;
+          let da = Math.atan2(-dz, dx) - pred.face; da = Math.atan2(Math.sin(da), Math.cos(da));
+          pred.face += da * Math.min(1, rdt * 14);
+        }
+      }
+      for (const p of PILLARS) {
+        const dx = pred.x - p.x, dz = pred.z - p.z, d = Math.hypot(dx, dz), min = p.r + HS.UNIT_R;
+        if (d < min && d > 1e-4) { pred.x = p.x + (dx / d) * min; pred.z = p.z + (dz / d) * min; }
+      }
+      const lim = latest.r - HS.UNIT_R, d = Math.hypot(pred.x, pred.z);
+      if (d > lim) { pred.x *= lim / d; pred.z *= lim / d; }
+      // Rätta mot servern: stora fel snabbt, små fel (vi ligger alltid lite före) knappt alls
+      const err = Math.hypot(sx - pred.x, sz - pred.z);
+      if (err > 2.5) { pred.x = sx; pred.z = sz; }
+      else if (err > 0.3) { const k = Math.min(1, rdt * (err > 1 ? 6 : 2.5)); pred.x = lerp(pred.x, sx, k); pred.z = lerp(pred.z, sz, k); }
+    }
+    if (free && rdt > 0) { u.vx = (pred.x - px0) / rdt; u.vz = (pred.z - pz0) / rdt; } else { u.vx = lu[3]; u.vz = lu[4]; }
+    u.x = pred.x; u.z = pred.z; u.face = pred.face;
+    if (throwing && !u.windup) u.windup = { until: 0, dx: Math.cos(-localThrowFace), dz: Math.sin(-localThrowFace) };
   }
 
   // ===== Grafik =====
@@ -764,6 +893,7 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     composer.addPass(new OutputPass());
   };
   if (high) setupComposer();
+  let camDist = 1;
   const resize = () => {
     const W = host.clientWidth || 800, H = host.clientHeight || 500;
     renderer.setSize(W, H, false);
@@ -771,10 +901,32 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     camera.aspect = W / H;
     camera.fov = clamp((2 * Math.atan(0.42 / Math.min(1, camera.aspect / 1.5)) * 180) / Math.PI, 38, 70);
     camera.updateProjectionMatrix();
+    // Stående mobil: hela arenan (radie ~9,5) ska få plats på bredden, så kameran backar
+    const halfW = 18.8 * Math.tan((camera.fov * Math.PI) / 360) * camera.aspect;
+    camDist = clamp(10.2 / halfW, 1, 2.4);
+    const fog = scene.fog as THREE.Fog;
+    fog.near = 20 * camDist; fog.far = 48 * camDist;
   };
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
+
+  // Adaptiv grafik: om datorn inte hinner med (under ~45 bilder/s) skalar vi ner steg för steg,
+  // hellre lite fulare än hackigt. Bloom → skuggor → upplösning.
+  let qLevel = 0, qSum = 0, qN = 0, qSkip = 30;
+  function adaptQuality(frameMs: number) {
+    if (document.hidden || frameMs > 250) return;
+    if (qSkip > 0) { qSkip--; return; }
+    qSum += frameMs; qN++;
+    if (qN < 90) return;
+    const avg = qSum / qN; qSum = 0; qN = 0;
+    if (avg < 22 || qLevel >= 4) return;
+    qLevel++; qSkip = 30;
+    if (qLevel === 1 && composer) { composer.dispose(); composer = null; }
+    else if (qLevel <= 2 && renderer.shadowMap.enabled) { renderer.shadowMap.enabled = false; sun.castShadow = false; qLevel = 2; }
+    else if (qLevel <= 3) { renderer.setPixelRatio(1); qLevel = 3; resize(); }
+    else { renderer.setPixelRatio(0.75); resize(); }
+  }
 
   const CAM_OFF = V(0, 14, 12.6);
   const camFocus = V();
@@ -782,13 +934,17 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
   let raf = 0;
   let disposed = false;
 
+  let background = false, oddFrame = false;
   const frame = () => {
     if (disposed) return;
     raf = requestAnimationFrame(frame);
+    oddFrame = !oddFrame;
+    if (background && oddFrame) return;
     const nowMs = performance.now();
     const rdt = Math.min(0.05, (nowMs - last) / 1000);
+    adaptQuality(nowMs - last);
     last = nowMs;
-    if (net) netUpdate();
+    if (net) netUpdate(rdt);
     else {
       advanceSim(sim, rdt, (s) => botThink(s, 1, bot, skill));
       for (const e of drainEvents(sim)) handle(e);
@@ -933,7 +1089,7 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     punch = Math.max(0, punch - rdt * 0.7);
     const pp = punch * punch;
     const look = camFocus.clone().lerp(punchAt, pp * 0.6);
-    const pos = look.clone().add(CAM_OFF.clone().multiplyScalar(1 - pp * 0.35));
+    const pos = look.clone().add(CAM_OFF.clone().multiplyScalar((1 - pp * 0.35) * camDist));
     if (phase === "idle") pos.x += Math.sin(t / 3000) * 2;
     camera.position.copy(pos);
     shake = Math.max(0, shake - rdt * 1.6);
@@ -946,7 +1102,17 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
 
   return {
     start,
+    setBackground(on: boolean) {
+      if (on === background) return;
+      background = on;
+      if (on) {
+        if (composer) { composer.dispose(); composer = null; }
+        renderer.shadowMap.enabled = false; sun.castShadow = false;
+        renderer.setPixelRatio(Math.min(1, devicePixelRatio)); qLevel = Math.max(qLevel, 3); resize();
+      }
+    },
     push(snap: HsSnap) {
+      onSnap(snap);
       snaps.push(snap);
       if (snaps.length > 40) snaps.splice(0, snaps.length - 40);
     },

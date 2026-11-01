@@ -8,6 +8,7 @@ import { CHOICE_LETTERS } from "../../shared/types";
 import { unitOf } from "../../shared/teams";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { Hookertime } from "../hookertime";
+import { Plinko } from "../plinko";
 import { CoinToast, EffectTags, FiftyButton, PlayerShop, TeamBoard, TeamPodium } from "../teams";
 
 const idKey = (code: string) => "kronan.player." + code;
@@ -122,6 +123,7 @@ export default function Play({ code }: { code: string }) {
   return (
     <main className={`narrow stack ${flash}`} key={ev?.at} style={{ minHeight: "100dvh" }}>
       <Hookertime state={state} role="player" me={playerId} send={send} serverNow={serverNow} subscribeHo={subscribeHo} />
+      <Plinko state={state} role="player" me={playerId} send={send} serverNow={serverNow} />
       <QuestionIntro state={state} serverNow={serverNow} />
       <div className="spread">
         <span className="chip" style={{ "--c": me.color } as React.CSSProperties}>

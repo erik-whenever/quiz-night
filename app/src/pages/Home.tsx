@@ -29,6 +29,7 @@ export default function Home() {
           <input id="code" className="code-input" inputMode="text" autoComplete="off" maxLength={4} placeholder="ABCD"
             value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))} />
           <button className="btn primary big" disabled={code.length !== 4}>Gå med</button>
+          <button type="button" className="btn ghost" disabled={code.length !== 4} onClick={() => navigate("/tv/" + code)}>Bara titta</button>
         </form>
 
         {hub?.nextQuiz && (

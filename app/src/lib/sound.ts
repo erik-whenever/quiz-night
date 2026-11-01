@@ -340,6 +340,26 @@ export const hookSfx = {
  * mörkare uppspelning, en sjösjuk vobbling i tonhöjden och dovare klang ju fullare han är (level 1–6).
  * Resolvar när repliken är slut (eller direkt om ljud saknas).
  */
+/** Plinko: mjuka kalimbaplingar när kulorna studsar, ett ackord när de landar. */
+let lastPeg = 0;
+export const plinkoSfx = {
+  intro: () => { kick(0, 0.2); [60, 64, 67, 72, 76].forEach((n, i) => kalimba(n, 0.05 + i * 0.07, 0.09)); chord(Fmaj9, 0.1, 2, 0.05); },
+  /** row 0..7: högre ton längre ner. Begränsat så att tio kulor inte blir en vägg av ljud. */
+  peg: (row: number) => {
+    const now = performance.now();
+    if (now - lastPeg < 45) return;
+    lastPeg = now;
+    const scale = [72, 74, 76, 79, 81, 84, 86, 88];
+    kalimba(scale[Math.max(0, Math.min(7, row))], 0, 0.045, 0.5);
+  },
+  drop: () => breath(0, 0.25, 2400, 600, 0.04, 1.2, 0.3),
+  land: (mult: number) => {
+    if (mult >= 5) { chord(Fmaj9, 0, 2.2, 0.08); [72, 76, 79, 84, 88].forEach((n, i) => kalimba(n, 0.05 + i * 0.06, 0.1)); kick(0, 0.2); }
+    else if (mult >= 1) { chord([60, 64, 67, 71], 0, 1.2, 0.05); kalimba(79, 0.04, 0.07); }
+    else { bass(36, 0, 0.5, 0.12); kalimba(60, 0.02, 0.05); }
+  },
+};
+
 export function playVoice(pcm: Float32Array, sampleRate: number, level: number): { done: Promise<void>; stop: () => void } {
   let stop = () => {};
   const done = new Promise<void>((resolve) => {

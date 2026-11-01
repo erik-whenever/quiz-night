@@ -9,6 +9,7 @@ import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { EffectTags, TeamBoard, TeamPodium } from "../teams";
 import { DrunkOverlay, useDrunkVoice, usePiper } from "../drunk";
 import { Hookertime } from "../hookertime";
+import { Plinko } from "../plinko";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
@@ -78,6 +79,7 @@ export default function Tv({ code }: { code: string }) {
         </button>
       )}
       <Hookertime state={state} role="tv" send={send} serverNow={serverNow} subscribeHo={subscribeHo} />
+      <Plinko state={state} role="tv" send={send} serverNow={serverNow} />
       <DrunkOverlay drunk={state.drunk} players={state.players} serverNow={serverNow} voice={kentaVoice && unlocked} />
       <QuestionIntro state={state} serverNow={serverNow} big />
       <div className="tv-head">
