@@ -739,6 +739,9 @@ def flick(page, shot_name=None):
         const b = document.querySelector('[aria-label="Mål"]');
         if (b) b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
         while (+document.querySelector('.aim-field')?.dataset.target === i) await frame();
+        // Som en människa: servern underkänner orimligt snabba resultat (under 80 ms per mål), och på
+        // en snabb CI-maskin hann testet annars träffa alla tio på under 0,8 s.
+        await new Promise((r) => setTimeout(r, 120));
       }
     }""")
     if shot_name: shot(page, shot_name)
