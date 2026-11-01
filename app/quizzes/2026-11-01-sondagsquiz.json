@@ -1,0 +1,685 @@
+{
+ "id": "2026-11-01-sondagsquiz",
+ "title": "Söndagsquiz 1 nov",
+ "theme": "Mycket HoN om gänget, tv-citat, mat, lite allmänt och CS2, fem skill-utmaningar",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "sq1",
+   "text": "Vem i gänget har spelat minst HoN-games i år?",
+   "answer": "bmwlover123",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 1,
+   "source": "Svar i detalj: bmwlover123 181 games (Henchman 647, poppeyeflipp 620, högerback 522, sneykijap 290). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "tv1",
+   "text": "Vem säger: ”Say my name.”?",
+   "answer": "Walter White (Breaking Bad)",
+   "category": "Tv-citat",
+   "choices": [
+    "Walter White (Breaking Bad)",
+    "Jesse Pinkman (Breaking Bad)",
+    "Saul Goodman (Breaking Bad)",
+    "Gus Fring (Breaking Bad)",
+    "Hank Schrader (Breaking Bad)",
+    "Mike Ehrmantraut (Breaking Bad)",
+    "Skyler White (Breaking Bad)",
+    "Tuco Salamanca (Breaking Bad)"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "m5",
+   "text": "Vad heter den japanska tekniken med grönsaker och skaldjur friterade i lätt, krispig smet?",
+   "answer": "Tempura",
+   "category": "Mat",
+   "choices": [
+    "Tempura",
+    "Teriyaki",
+    "Yakitori",
+    "Sashimi",
+    "Gyoza",
+    "Katsu",
+    "Okonomiyaki",
+    "Takoyaki"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "sq2",
+   "text": "Vem körde 16 games i ett svep den 25 september (11:37 till 00:20)?",
+   "answer": "poppeyeflipp",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 2,
+   "source": "Svar i detalj: poppeyeflipp, 16 games med högst 75 min mellan dem. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "h2",
+   "text": "Vad heter HoN:s vanliga karta?",
+   "answer": "Forests of Caldavar",
+   "category": "HoN",
+   "choices": [
+    "Forests of Caldavar",
+    "Grimm's Crossing",
+    "Midwars",
+    "Summoner's Rift",
+    "Caldavar Depths",
+    "Kongor's Lair",
+    "Hellbourne Wastes",
+    "Legion's Reach"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "sqs1",
+   "text": "Skill: Last hit! Ta creepen innan den blir denied.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "lasthit"
+   }
+  },
+  {
+   "id": "sq3",
+   "text": "Vem har förlorat flest games under ett och samma dygn?",
+   "answer": "högerback",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 2,
+   "source": "Svar i detalj: högerback, 12 förluster på 24 h (8 okt 12:04 – 9 okt 10:57). Övriga: poppeyeflipp 11, Henchman 9, sneykijap 9, bmwlover123 7. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "tv7",
+   "text": "Vem säger: ”We were on a break!”?",
+   "answer": "Ross Geller (Friends)",
+   "category": "Tv-citat",
+   "choices": [
+    "Ross Geller (Friends)",
+    "Chandler Bing (Friends)",
+    "Joey Tribbiani (Friends)",
+    "Ted Mosby (How I Met Your Mother)",
+    "Barney Stinson (How I Met Your Mother)",
+    "Michael Scott (The Office)",
+    "Jim Halpert (The Office)",
+    "Rachel Green (Friends)"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "sq4",
+   "text": "Vem har flest games där man dött minst 15 gånger?",
+   "answer": "Henchman",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 2,
+   "source": "Svar i detalj: Henchman 38 games, högerback 18, bmwlover123 4, poppeyeflipp 3, sneykijap 0 (Forests of Caldavar). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "m1",
+   "text": "Vilken ost hör hemma i en klassisk romersk carbonara?",
+   "answer": "Pecorino Romano",
+   "category": "Mat",
+   "choices": [
+    "Pecorino Romano",
+    "Parmigiano Reggiano",
+    "Grana Padano",
+    "Mozzarella",
+    "Gorgonzola",
+    "Ricotta",
+    "Gruyère",
+    "Taleggio"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "a1",
+   "text": "Vilken planet har flest bekräftade månar?",
+   "answer": "Saturnus",
+   "category": "Allmänt",
+   "choices": [
+    "Saturnus",
+    "Jupiter",
+    "Uranus",
+    "Neptunus",
+    "Mars",
+    "Venus",
+    "Merkurius",
+    "Jorden"
+   ],
+   "difficulty": 2,
+   "source": "NASA: 293 bekräftade månar (aug 2026), Jupiter 115."
+  },
+  {
+   "id": "sq5",
+   "text": "Vem har förlorat 29 games med Solstice?",
+   "answer": "Henchman",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: Henchman 29 förluster på 61 games. poppeyeflipp 26 på 63. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "sqs2",
+   "text": "Skill: Flick! Tio mål, snabbast vinner.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "aim"
+   }
+  },
+  {
+   "id": "tv2",
+   "text": "Vem säger: ”Yeah, science!”?",
+   "answer": "Jesse Pinkman (Breaking Bad)",
+   "category": "Tv-citat",
+   "choices": [
+    "Jesse Pinkman (Breaking Bad)",
+    "Walter White (Breaking Bad)",
+    "Badger (Breaking Bad)",
+    "Skinny Pete (Breaking Bad)",
+    "Hank Schrader (Breaking Bad)",
+    "Walter White Jr. (Breaking Bad)",
+    "Saul Goodman (Breaking Bad)",
+    "Gale Boetticher (Breaking Bad)"
+   ],
+   "difficulty": 2
+  },
+  {
+   "id": "sq6",
+   "text": "Bästa game utan att dö: 22 kills och 0 deaths. Vem?",
+   "answer": "sneykijap",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: sneykijap, 22/0/10 med Deadwood 21 feb, vinst. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "c1",
+   "text": "Vilken CS-karta har platserna Banana, Apartments och Pit?",
+   "answer": "Inferno",
+   "category": "CS2",
+   "choices": [
+    "Inferno",
+    "Mirage",
+    "Nuke",
+    "Ancient",
+    "Anubis",
+    "Overpass",
+    "Vertigo",
+    "Train"
+   ],
+   "difficulty": 1
+  },
+  {
+   "id": "sq7",
+   "text": "Vilken hjälte har högerback förlorat flest games med (17 st)?",
+   "answer": "Pyromancer",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Pyromancer",
+    "Glacius",
+    "Forsaken Archer",
+    "Midas",
+    "Tarot",
+    "Amun-Ra",
+    "Chronos",
+    "Flint Beastwood"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: Pyromancer, 17 förluster på 38 games. Glacius 16 förluster på 40. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "m2",
+   "text": "En nektarin är en variant av vilken frukt?",
+   "answer": "Persika",
+   "category": "Mat",
+   "choices": [
+    "Persika",
+    "Plommon",
+    "Aprikos",
+    "Mango",
+    "Äpple",
+    "Körsbär",
+    "Päron",
+    "Kumquat"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "h3",
+   "text": "Gänget i siffror: högerback delar gängets kill-rekord, 34 kills i ett game (20 okt, 34/3/15). Med vilken hjälte?",
+   "answer": "Tarot",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Tarot",
+    "Zephyr",
+    "Pyromancer",
+    "Glacius",
+    "Kraken",
+    "Slither",
+    "Forsaken Archer",
+    "Amun-Ra"
+   ],
+   "difficulty": 3,
+   "source": "council/data/hon-svar.md (WardUp t.o.m. 28 okt)."
+  },
+  {
+   "id": "sqs3",
+   "text": "Skill: Ordna gänget efter antal HoN-games i år.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "order",
+    "prompt": "Minst först",
+    "items": [
+     {
+      "label": "bmwlover123",
+      "value": 181,
+      "show": "181"
+     },
+     {
+      "label": "sneykijap",
+      "value": 290,
+      "show": "290"
+     },
+     {
+      "label": "högerback",
+      "value": 522,
+      "show": "522"
+     },
+     {
+      "label": "poppeyeflipp",
+      "value": 620,
+      "show": "620"
+     },
+     {
+      "label": "Henchman",
+      "value": 647,
+      "show": "647"
+     }
+    ]
+   }
+  },
+  {
+   "id": "sq8",
+   "text": "Vem spelade HoN 23 dagar i rad?",
+   "answer": "högerback",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: högerback, 23 dagar i rad fram till 2 mars. Henchman 17, sneykijap 16. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "tv4",
+   "text": "Vem säger: ”Chaos isn't a pit. Chaos is a ladder.”?",
+   "answer": "Petyr Baelish/Littlefinger (Game of Thrones)",
+   "category": "Tv-citat",
+   "choices": [
+    "Petyr Baelish/Littlefinger (Game of Thrones)",
+    "Varys (Game of Thrones)",
+    "Tyrion Lannister (Game of Thrones)",
+    "Cersei Lannister (Game of Thrones)",
+    "Tywin Lannister (Game of Thrones)",
+    "Ramsay Bolton (Game of Thrones)",
+    "Olenna Tyrell (Game of Thrones)",
+    "Daenerys Targaryen (Game of Thrones)"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "sq9",
+   "text": "Vilken veckodag har poppeyeflipp spelat 216 games?",
+   "answer": "Måndag",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Måndag",
+    "Tisdag",
+    "Onsdag",
+    "Torsdag",
+    "Fredag",
+    "Lördag",
+    "Söndag"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: Måndag 216, söndag 129. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "a2",
+   "text": "Hur många hjärtan har en bläckfisk (åttaarmad)?",
+   "answer": "3",
+   "category": "Allmänt",
+   "choices": [
+    "3",
+    "1",
+    "2",
+    "4",
+    "5",
+    "6",
+    "8",
+    "9"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "sq10",
+   "text": "Och hur slutade poppeyeflipps 16-gamesmaraton?",
+   "answer": "5 vinster, 11 förluster",
+   "category": "Gänget i siffror",
+   "choices": [
+    "5 vinster, 11 förluster",
+    "8 vinster, 8 förluster",
+    "11 vinster, 5 förluster",
+    "3 vinster, 13 förluster",
+    "7 vinster, 9 förluster",
+    "10 vinster, 6 förluster",
+    "4 vinster, 12 förluster",
+    "6 vinster, 10 förluster"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: 5–11. Samma dag var 10 förluster, hans värsta kalenderdag. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "m3",
+   "text": "Den gröna ”wasabin” på sushiställen utanför Japan är oftast mest gjord på…",
+   "answer": "Pepparrot",
+   "category": "Mat",
+   "choices": [
+    "Pepparrot",
+    "Ingefära",
+    "Avokado",
+    "Senapsfrön",
+    "Gröna ärtor",
+    "Spenat",
+    "Matcha",
+    "Koriander"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "sqs4",
+   "text": "Skill: Stoppa klockan på exakt 13 sekunder.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "stopwatch",
+    "target": 13
+   }
+  },
+  {
+   "id": "tv6",
+   "text": "Vem i How I Met Your Mother säger: ”Lawyered!”?",
+   "answer": "Marshall Eriksen",
+   "category": "Tv-citat",
+   "choices": [
+    "Marshall Eriksen",
+    "Barney Stinson",
+    "Ted Mosby",
+    "Lily Aldrin",
+    "Robin Scherbatsky",
+    "Ranjit",
+    "Carl (bartendern)",
+    "Marvin Eriksen"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "sq11",
+   "text": "bmwlover123 har bäst vinstprocent i gänget, men en hjälte drar ner honom: 14 förluster på 26 games. Vilken?",
+   "answer": "Zephyr",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Zephyr",
+    "Flux",
+    "Soul Reaper",
+    "Wretched Hag",
+    "Vindicator",
+    "Night Hound",
+    "Armadon",
+    "Pestilence"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: Zephyr, 12 vinster och 14 förluster. Hans enda hjälte med minst 10 games under 50 %. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "h1",
+   "text": "Vilket år släpptes Heroes of Newerth i fullversion (efter betan)?",
+   "answer": "2010",
+   "category": "HoN",
+   "choices": [
+    "2010",
+    "2008",
+    "2009",
+    "2011",
+    "2012",
+    "2013",
+    "2007",
+    "2014"
+   ],
+   "difficulty": 3,
+   "source": "12 maj 2010 (beta från 2009)."
+  },
+  {
+   "id": "sq12",
+   "text": "Under de 24 timmarna med 12 förluster: hur många games vann högerback?",
+   "answer": "1",
+   "category": "Gänget i siffror",
+   "choices": [
+    "1",
+    "0",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: 1 vinst och 12 förluster mellan 8 okt 12:04 och 9 okt 10:57. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "m4",
+   "text": "Vad är ’nduja?",
+   "answer": "Kryddig bredbar salami från Kalabrien",
+   "category": "Mat",
+   "choices": [
+    "Kryddig bredbar salami från Kalabrien",
+    "Fårost från Sardinien",
+    "Friterad risboll från Sicilien",
+    "Mandelkaka från Toscana",
+    "Pastaform från Apulien",
+    "Tomatsoppa från Neapel",
+    "Sardellsås från Ligurien",
+    "Lufttorkad skinka från Parma"
+   ],
+   "difficulty": 4
+  },
+  {
+   "id": "sq13",
+   "text": "Vilken hjälte har poppeyeflipp spelat 31 gånger och förlorat 19?",
+   "answer": "The Chipper",
+   "category": "Gänget i siffror",
+   "choices": [
+    "The Chipper",
+    "Solstice",
+    "Zephyr",
+    "Voodoo Jester",
+    "Plague Rider",
+    "Rampage",
+    "Valkyrie",
+    "Midas"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: The Chipper, 12–19 (39 %). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "sqs5",
+   "text": "Skill: Häll upp! Släpp vid strecket utan att spilla.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "pour"
+   }
+  },
+  {
+   "id": "tv5",
+   "text": "Vem ropar ”Hold the door!” i Game of Thrones?",
+   "answer": "Meera Reed",
+   "category": "Tv-citat",
+   "choices": [
+    "Meera Reed",
+    "Bran Stark",
+    "Hodor",
+    "Jojen Reed",
+    "Osha",
+    "Sansa Stark",
+    "Arya Stark",
+    "Brienne of Tarth"
+   ],
+   "difficulty": 4,
+   "source": "S6E5 ”The Door”: Meera ropar det, unge Wylis hör det som ”Hodor”."
+  },
+  {
+   "id": "sq14",
+   "text": "Hur många games har alla fem spelat ihop i år?",
+   "answer": "5",
+   "category": "Gänget i siffror",
+   "choices": [
+    "5",
+    "2",
+    "9",
+    "14",
+    "21",
+    "30",
+    "45",
+    "63"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: 5 games (12–17 feb), 3 vinster och 2 förluster. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "tv3",
+   "text": "Vem säger: ”No more half measures.”?",
+   "answer": "Mike Ehrmantraut (Breaking Bad)",
+   "category": "Tv-citat",
+   "choices": [
+    "Mike Ehrmantraut (Breaking Bad)",
+    "Gus Fring (Breaking Bad)",
+    "Walter White (Breaking Bad)",
+    "Saul Goodman (Breaking Bad)",
+    "Hank Schrader (Breaking Bad)",
+    "Hector Salamanca (Breaking Bad)",
+    "Jesse Pinkman (Breaking Bad)",
+    "Todd Alquist (Breaking Bad)"
+   ],
+   "difficulty": 3
+  },
+  {
+   "id": "sq15",
+   "text": "Den 2 oktober möttes Henchman och sneykijap som motståndare fem gånger. Hur slutade det?",
+   "answer": "Henchman vann 3–2",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman vann 3–2",
+    "sneykijap vann 3–2",
+    "Henchman vann 4–1",
+    "sneykijap vann 4–1",
+    "Henchman vann 5–0",
+    "sneykijap vann 5–0"
+   ],
+   "difficulty": 5,
+   "source": "Svar i detalj: Henchman 3, sneykijap 2 (mest Slither mot Bubbles). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "a3",
+   "text": "Vilket land har flest tidszoner, räknat med alla territorier?",
+   "answer": "Frankrike",
+   "category": "Allmänt",
+   "choices": [
+    "Frankrike",
+    "Ryssland",
+    "USA",
+    "Storbritannien",
+    "Kina",
+    "Australien",
+    "Kanada",
+    "Brasilien"
+   ],
+   "difficulty": 5,
+   "source": "Frankrike 12 (13 med Antarktis-anspråk), tack vare utomeuropeiska territorier."
+  },
+  {
+   "id": "sq16",
+   "text": "Vilken duo har högst vinstprocent tillsammans (minst 50 games ihop)?",
+   "answer": "bmwlover123 och poppeyeflipp",
+   "category": "Gänget i siffror",
+   "choices": [
+    "bmwlover123 och poppeyeflipp",
+    "högerback och poppeyeflipp",
+    "poppeyeflipp och sneykijap",
+    "Henchman och högerback",
+    "Henchman och sneykijap",
+    "bmwlover123 och högerback",
+    "Henchman och poppeyeflipp",
+    "högerback och sneykijap"
+   ],
+   "difficulty": 5,
+   "source": "Svar i detalj: bmwlover123 + poppeyeflipp 61 % på 64 games. poppeyeflipp + sneykijap 57 % på 134. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  }
+ ]
+}
