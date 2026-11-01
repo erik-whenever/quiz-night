@@ -137,6 +137,22 @@ label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
 .answer-reveal { background: var(--signal); color: var(--studio-ink); padding: 14px 28px; border-radius: 16px; font: 800 clamp(1.6rem, 4vw, 3rem) var(--display); animation: drop 380ms cubic-bezier(.2,1.6,.4,1); }
 @keyframes drop { from { transform: translateY(-30px) scale(0.9); opacity: 0; } }
 .qmeta { color: var(--mist); font-weight: 600; font-size: 1.1rem; }
+/* Frågan i mobilen/hostvyn: huvudsaken på skärmen, inte en fotnot */
+.play-status {
+  margin: 0; text-align: center; color: var(--signal);
+  font: 800 0.95rem var(--display); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.play-question {
+  background: #fff; color: var(--studio-ink); border-radius: 20px; padding: 22px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 -5px 0 var(--signal);
+  animation: card-in 420ms cubic-bezier(.2, 1.2, .4, 1) both;
+}
+.play-question p {
+  margin: 0; text-align: center; text-wrap: balance;
+  font: 800 clamp(1.6rem, 7vw, 2.3rem) var(--display); line-height: 1.15; letter-spacing: -0.015em;
+}
+.play-question.host p { font-size: clamp(1.5rem, 3vw, 2.2rem); text-align: left; }
+@media (prefers-reduced-motion: reduce) { .play-question { animation: none; } }
 
 .buzz-banner { display: flex; align-items: center; gap: 24px; padding: 18px 28px; border-radius: 999px; font: 800 clamp(1.5rem, 3.5vw, 2.6rem) var(--display); background: var(--studio-ink); box-shadow: 0 0 0 6px var(--player, var(--buzz)); animation: drop 300ms cubic-bezier(.2,1.6,.4,1); }
 

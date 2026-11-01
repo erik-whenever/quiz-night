@@ -135,11 +135,15 @@ export default function Play({ code }: { code: string }) {
         </div>
       ) : (
         <>
-          <p className="display" style={{ fontSize: "1.5rem", textAlign: "center", minHeight: "2em" }} aria-live="polite">{status}</p>
+          {state.question && state.phase !== "lobby" ? (
+            <p className="play-status" aria-live="polite">{status}</p>
+          ) : (
+            <p className="display" style={{ fontSize: "1.5rem", textAlign: "center", minHeight: "2em" }} aria-live="polite">{status}</p>
+          )}
           {state.phase !== "lobby" && <div style={{ textAlign: "center" }}><TwistBadge state={state} /></div>}
           <EffectTags state={state} />
           {state.question && state.phase !== "lobby" && (
-            <p style={{ textAlign: "center", fontSize: "1.15rem" }}>{state.question.text}</p>
+            <div className="play-question"><p>{state.question.text}</p></div>
           )}
           {state.revealedAnswer && !skill && <p className="answer-reveal" style={{ textAlign: "center", fontSize: "1.6rem" }}>{state.revealedAnswer}</p>}
           <StealNote state={state} />

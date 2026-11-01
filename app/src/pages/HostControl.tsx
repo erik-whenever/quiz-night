@@ -207,7 +207,7 @@ function Control({ code }: { code: string }) {
 
             {inQuestion && state.question && (
               <>
-                <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{state.question.text}</p>
+                <div className="play-question host"><p>{state.question.text}</p></div>
                 {state.answer && <div className="answer-box">Svar: {state.answer}</div>}
                 <EffectTags state={state} />
                 <CollectHost state={state} send={send} serverNow={serverNow} />
