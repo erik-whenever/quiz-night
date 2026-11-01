@@ -1,6 +1,35 @@
 {
   "league": [
     {
+      "id": "JA39-2026-10-31",
+      "date": "2026-10-31T23:29:35.843Z",
+      "title": "HoN-quizet",
+      "results": [
+        {
+          "name": "Big-D",
+          "score": 37
+        },
+        {
+          "name": "Popps",
+          "score": 25
+        },
+        {
+          "name": "Ecoooo",
+          "score": 23
+        },
+        {
+          "name": "J",
+          "score": 13
+        }
+      ],
+      "coins": {
+        "Big-D": 28,
+        "Ecoooo": 15,
+        "Popps": 18,
+        "J": 9
+      }
+    },
+    {
       "id": "MF7U-2026-10-29",
       "date": "2026-10-29T18:22:34.071Z",
       "title": "Demo: Allt i appen",
@@ -22,12 +51,32 @@
   ],
   "wallets": [
     {
+      "name": "Big-D",
+      "coins": 38,
+      "items": {}
+    },
+    {
+      "name": "Popps",
+      "coins": 28,
+      "items": {}
+    },
+    {
+      "name": "Ecoooo",
+      "coins": 25,
+      "items": {}
+    },
+    {
       "name": "Blusie",
       "coins": 19,
       "items": {
         "fifty": 1,
         "double": 1
       }
+    },
+    {
+      "name": "J",
+      "coins": 19,
+      "items": {}
     },
     {
       "name": "Röktest",
