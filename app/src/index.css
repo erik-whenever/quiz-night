@@ -639,3 +639,10 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .drunk, .drunk-body, .drunk-mug, .drunk-bubble, .drunk-versus, .drunk-face.talking .drunk-mouth { animation: none; }
 }
 .kenta-toggle { left: 150px; }
+.sw3d-wrap { position: relative; width: 100%; max-width: 560px; }
+.sw3d { aspect-ratio: 16 / 11; max-width: none; background: #050826; }
+@media (max-width: 600px) { .sw3d { aspect-ratio: 1 / 1; } }
+.sw3d-digits { position: absolute; left: 10px; top: 10px; font: 800 clamp(1.6rem, 7vw, 2.6rem) var(--display); font-variant-numeric: tabular-nums; letter-spacing: -0.03em;
+  color: var(--chalk); background: rgba(5, 8, 38, 0.6); border: 1px solid var(--line); border-radius: 14px; padding: 0 16px; backdrop-filter: blur(4px); pointer-events: none; transition: color 300ms, opacity 300ms; }
+.sw3d-digits.dark { color: var(--studio-deep); opacity: 0.6; }
+.sw3d-digits.done { color: var(--signal); }

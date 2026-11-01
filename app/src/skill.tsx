@@ -12,6 +12,7 @@ import { Countdown, initials } from "./components";
 import { haptic, sfx } from "./lib/sound";
 import type { LastHitScene, LhEvent, LhFrame } from "./lasthit3d";
 import type { PourScene } from "./pour3d";
+import type { StopwatchScene } from "./stopwatch3d";
 import { HowTo } from "./howto";
 import type { FlickEvent, FlickFrame, FlickScene } from "./flick3d";
 
@@ -329,29 +330,69 @@ export function Aim({ seed, onDone }: { seed: number; onDone: Done }) {
 const STOPWATCH_VISIBLE_MS = 3000;
 const STOPWATCH_OVER_MS = 5000;
 
+const loadStopwatch = () => import("./stopwatch3d");
+const SW_SHOW_MS = 1800;
+
 export function Stopwatch({ target, onDone }: { target: number; onDone: Done }) {
-  const start = useRef(now());
+  // Klockan startar först när scenen syns, så att alla får lika många synliga sekunder.
+  const start = useRef<number | null>(null);
   const [ms, setMs] = useState(0);
   const [done, setDone] = useState(false);
+  const [view, setView] = useState<"loading" | "3d" | "plain">("loading");
+  const host = useRef<HTMLDivElement>(null);
+  const scene3d = useRef<StopwatchScene | null>(null);
   const goal = target * 1000;
+  useEffect(() => {
+    let gone = false;
+    const plain = () => { if (!gone) { setView("plain"); start.current = now(); } };
+    const slow = setTimeout(() => { if (!scene3d.current) { gone = true; setView("plain"); start.current = now(); } }, 4000);
+    loadStopwatch().then((m) => {
+      if (gone || !host.current) return;
+      const sc = m.createStopwatchScene(host.current, () => ({ ms: start.current === null ? null : now() - start.current, hidden: start.current !== null && now() - start.current > STOPWATCH_VISIBLE_MS, target }), gfxLow());
+      if (!sc) return plain();
+      scene3d.current = sc;
+      setView("3d"); // klockan startar i useFrame när scenen har ritats
+    }).catch(plain);
+    return () => { gone = true; clearTimeout(slow); scene3d.current?.dispose(); scene3d.current = null; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const finish = (r: SkillResult) => {
+    if (scene3d.current) setTimeout(() => onDone(r), SW_SHOW_MS); else onDone(r);
+  };
   useFrame((t) => {
+    if (start.current === null) {
+      if (scene3d.current?.ready()) { start.current = now(); setMs(0); }
+      return;
+    }
     const e = t - start.current;
     setMs(e);
-    if (e > goal + STOPWATCH_OVER_MS && !done) { setDone(true); onDone({ value: STOPWATCH_OVER_MS, ok: false }); }
+    if (e > goal + STOPWATCH_OVER_MS && !done) { setDone(true); scene3d.current?.event({ type: "late" }); finish({ value: STOPWATCH_OVER_MS, ok: false }); }
   }, !done);
-  const stop = () => {
-    if (done) return;
-    setDone(true); haptic.buzz();
-    const diff = Math.round(now() - start.current - goal);
-    onDone({ value: Math.max(-60000, Math.min(60000, diff)), ok: true });
+  const stop = (at = now()) => {
+    if (done || start.current === null) return;
+    const e = Math.max(0, at - start.current);
+    setDone(true); setMs(e); haptic.buzz();
+    const diff = Math.round(e - goal);
+    scene3d.current?.event({ type: "stop", ms: e, diff });
+    finish({ value: Math.max(-60000, Math.min(60000, diff)), ok: true });
   };
-  const hidden = ms > STOPWATCH_VISIBLE_MS;
+  const started = start.current !== null;
+  const hidden = ms > STOPWATCH_VISIBLE_MS && !done;
   const txt = (ms / 1000).toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const shown = !started ? "0,00" : hidden ? "?,??" : txt;
   return (
     <div className="skill-game">
       <p className="skill-status">Stoppa på exakt <strong>{target.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} s</strong></p>
-      <div className={`stopwatch${hidden ? " dark" : ""}`} aria-live="off">{hidden ? "?,??" : txt}</div>
-      <button className="buzzer skill-stop" onPointerDown={(e) => { e.preventDefault(); stop(); }} aria-label="Stopp">STOPP</button>
+      {view !== "plain" ? (
+        <div className="sw3d-wrap">
+          <div className={`lh3d sw3d${view === "3d" ? " ready" : ""}`} ref={host} role="img" aria-label="Tidtagarur i strålkastarljus" />
+          <div className={`sw3d-digits${hidden ? " dark" : ""}${done ? " done" : ""}`} aria-live="off">{shown}</div>
+        </div>
+      ) : (
+        <div className={`stopwatch${hidden ? " dark" : ""}`} aria-live="off">{shown}</div>
+      )}
+      {started ? (
+        <button className="buzzer skill-stop" onPointerDown={(e) => { e.preventDefault(); stop(e.timeStamp > 0 ? Math.min(now(), e.timeStamp) : now()); }} aria-label="Stopp">STOPP</button>
+      ) : <div className="buzzer skill-stop" aria-hidden style={{ opacity: 0.3 }}>STOPP</div>}
     </div>
   );
 }
@@ -520,6 +561,7 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
     if (spec.kind === "lasthit") load3d().catch(() => {}); // hämta 3D-scenen i förväg
     if (spec.kind === "aim") loadFlick().catch(() => {});
     if (spec.kind === "pour") loadPour().catch(() => {});
+    if (spec.kind === "stopwatch") loadStopwatch().catch(() => {});
     return (
       <div className="stack skill-intro" style={{ alignItems: "center", textAlign: "center" }}>
         <Countdown ms={left} total={c.deadline - c.startedAt} size={90} />
