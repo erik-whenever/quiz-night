@@ -1369,6 +1369,15 @@ def main():
         dm.get_by_role("button", name="Snurra").click()
         expect(dm.locator(".wheel-caption[data-twist]")).to_be_visible(timeout=8000)
         shot(dm, "82-demo-hjulet")
+        # Hooker-off: 3D-arenan startar och nedräkningen syns
+        tab("Hooker-off").click()
+        dm.get_by_role("button", name="Starta").click()
+        expect(dm.locator(".ho.ready, .demo-stage p.muted")).to_be_visible(timeout=15000)
+        if dm.locator(".ho.ready").count():
+            expect(dm.locator(".ho-score")).to_contain_text("Du")
+            dm.keyboard.press("q")
+            dm.wait_for_timeout(1500)
+        shot(dm, "83-demo-hookoff")
         assert not dm_errors, f"Sidfel i demoläget: {dm_errors}"
         dm.close()
 

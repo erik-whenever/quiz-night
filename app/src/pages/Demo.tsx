@@ -5,11 +5,12 @@ import { TopBar } from "../App";
 import { Aim, LastHit, Order, Pour, Stopwatch } from "../skill";
 import { WheelPanel } from "../wheel";
 import { HowTo } from "../howto";
+import { HookOff } from "../hookoff";
 import { correctOrder, orderErrors, orderShuffle, skillText, type OrderItem, type SkillKind, type SkillResult } from "../../shared/skill";
 import { WHEEL_SEGMENTS, WHEEL_SPIN_MS, type WheelState } from "../../shared/types";
 import { sfx } from "../lib/sound";
 
-type GameId = "lasthit" | "aim" | "stopwatch" | "pour" | "order" | "wheel";
+type GameId = "lasthit" | "aim" | "stopwatch" | "pour" | "order" | "wheel" | "hookoff";
 
 const GAMES: { id: GameId; name: string; kind?: SkillKind; note?: string }[] = [
   { id: "lasthit", name: "Last hit", kind: "lasthit" },
@@ -18,6 +19,7 @@ const GAMES: { id: GameId; name: string; kind?: SkillKind; note?: string }[] = [
   { id: "pour", name: "Häll upp", kind: "pour" },
   { id: "order", name: "Ordna rätt", kind: "order" },
   { id: "wheel", name: "Lyckohjulet" },
+  { id: "hookoff", name: "Hooker-off", note: "prototyp mot bot" },
 ];
 
 const ORDER_SETS: { name: string; prompt: string; items: OrderItem[] }[] = [
@@ -60,6 +62,7 @@ export default function Demo() {
 
   const play = () => {
     switch (game) {
+      case "hookoff": return <HookOff key={run} onDone={(won) => { setPlaying(false); setResult(won ? "Du vann hooker-off!" : "Boten vann den här gången."); }} />;
       case "lasthit": return <LastHit key={run} seed={seed} onDone={done} />;
       case "aim": return <Aim key={run} seed={seed} onDone={done} />;
       case "stopwatch": return <Stopwatch key={run} target={target} onDone={done} />;
@@ -75,7 +78,7 @@ export default function Demo() {
   return (
     <>
       <TopBar host />
-      <main className="wrap stack demo" style={{ gap: 20 }}>
+      <main className={`wrap stack demo${game === "hookoff" ? " demo-wide" : ""}`} style={{ gap: 20 }}>
         <div>
           <h1>Minispel</h1>
           <p className="muted">Testa utmaningarna direkt, utan att starta något rum. Inga poäng, inget sparas.</p>
@@ -99,7 +102,7 @@ export default function Demo() {
           ) : (
             <div className="stack" style={{ alignItems: "center", textAlign: "center" }}>
               <h2>{g.name}{g.note && <span className="muted small"> · {g.note}</span>}</h2>
-              {result === null ? <HowTo kind={g.kind!} /> : null}
+              {result === null ? (g.kind ? <HowTo kind={g.kind} /> : <p className="muted">Två slaktare, en krok var. Högerklick för att gå, Q eller mellanslag för att kasta kroken mot muspekaren. Pelare stoppar kroken och arenan krymper efter en stund. Bäst av 3. Bäst på dator med mus.</p>) : null}
               {game === "stopwatch" && (
                 <label style={{ maxWidth: 160 }}>Mål (s)
                   <input type="number" aria-label="Mål i sekunder" min={3} max={30} step={0.5} value={target} onChange={(e) => setTarget(Math.max(3, Math.min(30, +e.target.value || 5)))} />
@@ -120,7 +123,7 @@ export default function Demo() {
                 </div>
               )}
               <div className="row" style={{ justifyContent: "center" }}>
-                {result !== null && game !== "stopwatch" && <button className="btn ghost" onClick={() => start(false)}>Samma bana igen</button>}
+                {result !== null && game !== "stopwatch" && game !== "hookoff" && <button className="btn ghost" onClick={() => start(false)}>Samma bana igen</button>}
                 <button className="btn primary big" onClick={() => start(true)}>{result !== null ? "Spela igen" : "Starta"}</button>
               </div>
             </div>
