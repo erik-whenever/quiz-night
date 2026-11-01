@@ -43,6 +43,12 @@ Bra gängfrågor räknas fram ur matchhistoriken (rullande 24 h, svitar, session
 Håll ett lager av färdiga set så Erik alltid har något att köra. Ett set per körning, rotera teman efter `council/gänget.md`:
 mat → HoN (gänget) → tv-seriecitat ("vem sa det?" / "vilken serie?") → HoN (gänget) → allmänt → CS2 → mat …
 Filnamn `app/quizzes/lager-<tema>-<nr>.json`, titel t.ex. "Mat #2". Upprepa aldrig en fråga som finns i ett annat set (sök i `app/quizzes/`).
+
+## Spelade frågor vilar
+`app/quizzes/spelat/register.json` listar frågor vi redan kört (Erik 2026-11-01: inte upprepa de närmaste gångerna, men de får smygas in igen senare).
+- Inom karensen (`karens` kvällar efter att de spelats): använd dem inte, inte heller omformulerade med samma svar. Appen hoppar ändå över dem automatiskt.
+- Efter karensen: högst 2 återkommande frågor per set, och hellre de som många svarade fel på.
+- Gängfrågor (statistik) återanvänds aldrig, se ovan.
 Citat: korta repliker (en mening), inte långa utdrag. Svaret är karaktären eller serien.
 
 ## Erik lägger själv in frågor

@@ -9,6 +9,7 @@ Du äger helheten: vad som byggs, i vilken ordning, hur appen känns och ser ut,
    - Finns ett tema och ett datum, se till att backloggen har en rad `QUIZ: <tema> till <datum>` för Quizresearchern.
    - Saknas datum inom 10 dagar, fråga inte. Erik sätter det i appen när han vill.
    - `league` visar spelade kvällar. Använd det för att se om appen faktiskt används.
+   - **Ny kväll i `league`?** Markera setet som spelat så att frågorna vilar: `cd app && python3 scripts/spelat.py <kvällens datum> <set-id>` (set-id ur `app/quizzes/`, titeln står i `league`). Är det Eriks eget set från `/bank`, be honom kryssa i det eller skicka frågorna. Committa `PO: <set> spelat <datum>`.
 4. **Triage av idéer:** för varje ny idé, välj *in i backlog* (med prioritet), *parkera* eller *nej* (kort motivering i idéfilen, rad `**PO:** …`).
    Väg in: roligt för gänget > fungerar stabilt på quizkvällen > snyggt > tekniskt intressant.
 5. **Håll backloggen frisk** (`council/backlog.md`). Högst ~10 rader i `Redo`. Varje rad ska vara så tydlig att en utvecklare kan bygga den utan frågor:

@@ -4,6 +4,7 @@ import { api, repoSets } from "../lib/api";
 import type { HubPublic, Question, QuestionSet } from "../../shared/types";
 import { DEFAULT_SETTINGS, MAX_SHOWN, MIN_SHOWN, validChoices } from "../../shared/types";
 import { validSkill } from "../../shared/skill";
+import { KARENS, restingOf, restingQuestions, shortDate } from "../lib/spelat";
 
 /** Frågor som går att spela: svarsalternativ eller skill-utmaning. Andra hoppas över av servern. */
 const playable = (q: Question) => (q.mode === "skill" ? !!validSkill(q.skill) : !!validChoices(q));
@@ -20,6 +21,7 @@ function Dashboard() {
   const [buzzEvery, setBuzzEvery] = useState(DEFAULT_SETTINGS.buzzEvery);
   const [autoplay, setAutoplay] = useState(DEFAULT_SETTINGS.autoplay);
   const [shuffle, setShuffle] = useState(false);
+  const [includeResting, setIncludeResting] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [nextDate, setNextDate] = useState("");
@@ -37,15 +39,23 @@ function Dashboard() {
   const all = useMemo(() => [...bank, ...repoSets], [bank]);
   useEffect(() => { if (!selected && all[0]) setSelected(all[0].id); }, [all, selected]);
   const set = all.find((s) => s.id === selected);
+  const resting = useMemo(() => restingQuestions(hub?.league ?? []), [hub]);
+  const restingIn = (s: QuestionSet) => s.questions.filter((q) => playable(q) && restingOf(q, resting));
 
   async function start() {
     if (!set) return;
+    const qs = includeResting ? set.questions : set.questions.filter((q) => !restingOf(q, resting));
+    if (!qs.some((q) => playable(q) && q.mode !== "skill")) {
+      setErr("Alla frågor i setet har spelats nyligen. Välj ett annat set eller kryssa i att ta med spelade frågor.");
+      return;
+    }
     setBusy(true); setErr("");
     try {
-      const { code } = await api.createRoom(set, { choiceCount, collectSeconds, hostPlays, playMode, buzzEvery, autoplay }, shuffle);
+      const { code } = await api.createRoom({ ...set, questions: qs }, { choiceCount, collectSeconds, hostPlays, playMode, buzzEvery, autoplay }, shuffle);
       navigate("/host/" + code);
     } catch (e) { setErr((e as Error).message); setBusy(false); }
   }
+
 
   return (
     <>
@@ -59,11 +69,12 @@ function Dashboard() {
             <div className="stack" style={{ gap: 8 }} role="radiogroup">
               {all.map((s) => (
                 <label key={s.id} className="panel flat" style={{ flexDirection: "row", alignItems: "center", gap: 12, cursor: "pointer", padding: 12, borderColor: s.id === selected ? "var(--signal)" : undefined }}>
-                  <input type="radio" name="set" checked={s.id === selected} onChange={() => setSelected(s.id)} style={{ width: "auto" }} />
+                  <input type="radio" name="set" checked={s.id === selected} onChange={() => { setSelected(s.id); setErr(""); }} style={{ width: "auto" }} />
                   <span style={{ flex: 1 }}>
                     <strong>{s.title}</strong>
                     <span className="muted small"> · {s.questions.filter(playable).length} frågor
-                      {s.questions.some((q) => !playable(q)) && <span className="err"> · {s.questions.filter((q) => !playable(q)).length} saknar alternativ och hoppas över</span>}</span>
+                      {s.questions.some((q) => !playable(q)) && <span className="err"> · {s.questions.filter((q) => !playable(q)).length} saknar alternativ och hoppas över</span>}
+                      {restingIn(s).length > 0 && <span> · {restingIn(s).length === s.questions.filter((q) => playable(q) && q.mode !== "skill").length ? "alla" : restingIn(s).length} spelade {shortDate(restingOf(restingIn(s)[0], resting)!.datum)} och vilar</span>}</span>
                   </span>
                   <span className={`tag ${s.source}`}>{s.source === "repo" ? "från rådet" : "egen"}</span>
                 </label>
@@ -107,6 +118,11 @@ function Dashboard() {
               <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} style={{ width: "auto" }} />
               Blanda frågorna
             </label>
+            <label style={{ flexDirection: "row", alignItems: "center" }}>
+              <input type="checkbox" checked={includeResting} onChange={(e) => setIncludeResting(e.target.checked)} style={{ width: "auto" }} />
+              Ta med nyligen spelade frågor
+            </label>
+            <p className="muted small">Frågor vi kört vilar i {KARENS} quizkvällar och hoppas annars över automatiskt. Skill-utmaningarna kommer alltid med.</p>
             {err && <p className="err">{err}</p>}
             <button className="btn primary big" onClick={start} disabled={!set || busy}>Öppna rum</button>
           </section>

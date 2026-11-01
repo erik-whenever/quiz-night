@@ -789,6 +789,13 @@ def main():
         host.get_by_label("Buzzerfråga").select_option("0")
         host.get_by_label("Antal svarsalternativ").select_option("4")
         expect(host.get_by_label("Jag spelar själv (dölj facit för mig)")).to_be_checked()
+        # Spelade frågor vilar (quizzes/spelat/register.json): fredagsquizet är helt förbrukat
+        expect(host.locator("label", has_text="Fredagsquiz 30 okt")).to_contain_text("alla spelade 30 okt")
+        expect(host.get_by_label("Ta med nyligen spelade frågor")).not_to_be_checked()
+        host.locator("label", has_text="Fredagsquiz 30 okt").get_by_role("radio").check()
+        host.get_by_role("button", name="Öppna rum").click()
+        expect(host.locator(".err", has_text="spelats nyligen")).to_be_visible()
+        expect(host).to_have_url(BASE + "/host")
         host.locator("label", has_text="Premiär: Blandat").get_by_role("radio").check()
         shot(host, "02-host-dashboard")
         host.get_by_role("button", name="Öppna rum").click()
