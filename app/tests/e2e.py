@@ -1050,8 +1050,14 @@ def main():
         shot(p1, "31-spelare-skill-intro")
         p2.get_by_role("button", name="Starta").click()
         expect(p2.get_by_role("button", name="Skjut")).to_be_visible()
+        # 3D-scenen laddas (eller faller tillbaka till SVG om webbläsaren saknar WebGL)
+        expect(p2.locator(".lh3d.ready, .lasthit > .lh-scene")).to_be_visible(timeout=15000)
+        p2.wait_for_timeout(1200)
+        shot(p2, "32b-spelare-lasthit-3d")
         p2.reload()  # försöket är förbrukat
         expect(host.get_by_label("Skill-resultat").locator("li", has_text="Tobbe")).to_contain_text("Diskad")
+        # Tidtestet kör den platta scenen: samma spellogik, men mjukvaru-WebGL i CI ger för få bildrutor för exakt timing
+        p1.evaluate("localStorage.setItem('kronan.lh', '2d')")
         p1.get_by_role("button", name="Starta").click()
         expect(p1.get_by_role("button", name="Skjut")).to_be_visible()
         p1.wait_for_timeout(1500)
