@@ -7,6 +7,7 @@ import { NextBar, Podium, QuestionIntro, Scorebar } from "../components";
 import { CollectTv } from "../collect";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { EffectTags, TeamBoard, TeamPodium } from "../teams";
+import { DrunkOverlay, useDrunkVoice } from "../drunk";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
@@ -14,6 +15,7 @@ export default function Tv({ code }: { code: string }) {
   // Bakgrundsmusik: på som standard, kommer ihåg valet. Ljud kräver ett klick på sidan först (webbläsarregel).
   const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem("kronan.musik") !== "av"; } catch { return true; } });
   const [unlocked, setUnlocked] = useState(false);
+  const [kentaVoice, toggleKenta] = useDrunkVoice();
   const phase = state?.phase;
   useEffect(() => {
     if (!musicOn || !unlocked || !phase || phase === "finished") { music.stop(); return; }
@@ -63,6 +65,12 @@ export default function Tv({ code }: { code: string }) {
       <button className="btn sm ghost music-toggle" aria-pressed={musicOn} onClick={(e) => { e.stopPropagation(); sfx.unlock(); setUnlocked(true); toggleMusic(); }}>
         {musicOn ? (unlocked ? "♪ Musik på" : "♪ Klicka för ljud") : "♪ Musik av"}
       </button>
+      {state.settings.drunk && (
+        <button className="btn sm ghost music-toggle kenta-toggle" aria-pressed={kentaVoice} onClick={(e) => { e.stopPropagation(); sfx.unlock(); setUnlocked(true); toggleKenta(); }}>
+          {kentaVoice ? "🍺 Kenta pratar" : "🍺 Kenta tyst"}
+        </button>
+      )}
+      <DrunkOverlay drunk={state.drunk} players={state.players} serverNow={serverNow} voice={kentaVoice && unlocked} />
       <QuestionIntro state={state} serverNow={serverNow} big />
       <div className="tv-head">
         <div className="row"><div style={{ width: 44 }}><Crown /></div><h2>{state.title}</h2></div>

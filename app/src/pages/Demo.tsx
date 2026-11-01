@@ -9,8 +9,17 @@ import { HookOff } from "../hookoff";
 import { correctOrder, orderErrors, orderShuffle, skillText, type OrderItem, type SkillKind, type SkillResult } from "../../shared/skill";
 import { WHEEL_SEGMENTS, WHEEL_SPIN_MS, type WheelState } from "../../shared/types";
 import { sfx } from "../lib/sound";
+import { DrunkOverlay } from "../drunk";
+import type { DrunkKind, DrunkPublic, PlayerPublic } from "../../shared/types";
 
-type GameId = "lasthit" | "aim" | "stopwatch" | "pour" | "order" | "wheel" | "hookoff";
+const DEMO_PLAYERS: PlayerPublic[] = [
+  { id: "p1", name: "Erik", color: "#FFD23F", score: 0, connected: true },
+  { id: "p2", name: "Tobbe", color: "#4CC9F0", score: 0, connected: true },
+  { id: "p3", name: "Henke", color: "#FF5D73", score: 0, connected: true },
+  { id: "p4", name: "Mackan", color: "#3DDC97", score: 0, connected: true },
+];
+
+type GameId = "lasthit" | "aim" | "stopwatch" | "pour" | "order" | "wheel" | "hookoff" | "kenta";
 
 const GAMES: { id: GameId; name: string; kind?: SkillKind; note?: string }[] = [
   { id: "lasthit", name: "Last hit", kind: "lasthit" },
@@ -20,7 +29,42 @@ const GAMES: { id: GameId; name: string; kind?: SkillKind; note?: string }[] = [
   { id: "order", name: "Ordna rätt", kind: "order" },
   { id: "wheel", name: "Lyckohjulet" },
   { id: "hookoff", name: "Hooker-off", note: "prototyp mot bot" },
+  { id: "kenta", name: "Kenta", note: "fyllot" },
 ];
+
+/** Testa Kentas repliker utan rum. Samma figur och röst som på TV:n. */
+function KentaDemo() {
+  const [drunk, setDrunk] = useState<DrunkPublic | null>(null);
+  const [sips, setSips] = useState(0);
+  const say = (kind: DrunkKind) => {
+    sfx.unlock();
+    const pick = () => DEMO_PLAYERS[Math.floor(Math.random() * DEMO_PLAYERS.length)].id;
+    const buddyId = kind === "intro" || !drunk ? pick() : drunk.buddyId;
+    const n = kind === "intro" ? 0 : sips + 1;
+    const hooker = pick();
+    const pool = DEMO_PLAYERS.filter((p) => p.id !== hooker).map((p) => p.id);
+    setSips(n);
+    setDrunk({ buddyId, sips: n, cue: {
+      id: (drunk?.cue?.id ?? 0) + 1, kind, at: Date.now(), buddyId, sips: n,
+      ...(kind === "hookoff" ? { hooker, pool, opponent: pool[Math.floor(Math.random() * pool.length)] } : {}),
+    } });
+  };
+  return (
+    <div className="stack" style={{ alignItems: "center", textAlign: "center" }}>
+      <h2>Kenta <span className="muted small">· fyllot</span></h2>
+      <p className="muted">Kenta kliver in när kvällen startar, väljer en buddy och firar eller sörjer med en sup när det går bra eller dåligt för buddyn. Ibland ropar han in en hooker-off. Ju fler supar, desto mer sluddrar han. Rösten är webbläsarens talsyntes (svensk röst om datorn har en).</p>
+      <p className="small">Supar hittills: <strong>{sips}</strong></p>
+      <div className="row" style={{ justifyContent: "center", flexWrap: "wrap" }}>
+        <button className="btn primary" onClick={() => say("intro")}>Intro (ny buddy)</button>
+        <button className="btn" onClick={() => say("win")}>Buddyn vann</button>
+        <button className="btn" onClick={() => say("lose")}>Buddyn förlorade</button>
+        <button className="btn" onClick={() => say("hookoff")}>Hooker-off</button>
+        <button className="btn ghost" onClick={() => setSips(0)}>Nykter igen</button>
+      </div>
+      <DrunkOverlay drunk={drunk} players={DEMO_PLAYERS} serverNow={Date.now} voice />
+    </div>
+  );
+}
 
 const ORDER_SETS: { name: string; prompt: string; items: OrderItem[] }[] = [
   { name: "Serier", prompt: "Äldst först", items: [
@@ -92,7 +136,7 @@ export default function Demo() {
         </div>
 
         <section className="panel stack demo-stage" aria-label={`${g.name}${g.note ? ` (${g.note})` : ""}`}>
-          {game === "wheel" ? (
+          {game === "kenta" ? <KentaDemo /> : game === "wheel" ? (
             <div className="stack" style={{ alignItems: "center" }}>
               {wheel ? <WheelPanel wheel={wheel} serverNow={Date.now} size={300} /> : <p className="muted">Lyckohjulet snurras mellan frågorna och ger nästa fråga en twist.</p>}
               <button className="btn primary big" onClick={spin}>{wheel ? "Snurra igen" : "Snurra"}</button>

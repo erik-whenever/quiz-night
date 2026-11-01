@@ -116,12 +116,14 @@ export interface Settings {
   autoplay: boolean;
   /** Sekunder som svaret visas innan nästa fråga (autoplay). */
   revealSeconds: number;
+  /** Kenta, fyllot som hejar på en buddy och kommenterar kvällen på TV:n. */
+  drunk: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
   playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
-  autoplay: true, revealSeconds: 8,
+  autoplay: true, revealSeconds: 8, drunk: true,
 };
 /** Hur länge frågans intro visas innan svarsknapparna öppnas (läggs på svarstiden). */
 export const INTRO_MS = 1400;
@@ -232,6 +234,8 @@ export interface PublicState {
   diffLeft: number[];
   /** Bara till spelaren själv: alternativ som 50/50 har tagit bort för hen på pågående fråga. */
   myRemoved?: string[];
+  /** Kenta (fyllot): vem han hejar på, hur full han är och vad han säger just nu. null = avstängt/inte igång. */
+  drunk?: DrunkPublic | null;
 }
 
 /** Hosten ser dessutom facit och svaren, men bara när värden inte spelar själv. */
@@ -274,6 +278,8 @@ export type ClientMsg =
   | { t: "host:pause"; paused: boolean }
   /** Snurra lyckohjulet (bara i lobbyn eller när svaret visas). Servern slumpar utfallet. */
   | { t: "host:spin" }
+  /** Kalla in Kenta för en hooker-off nu (bara när svaret visas). Servern slumpar hookern och motståndaren. */
+  | { t: "host:hookoff" }
   /** Lagläge: 0 = alla mot alla, annars lagstorlek. Slumpar nya lag (bara i lobbyn). */
   | { t: "host:teams"; mode: TeamMode }
   /** Köp i butiken (lobbyn). */
@@ -352,3 +358,43 @@ export function activeTwist(st: { phase: Phase; qIndex: number; wheel?: WheelSta
   if (!w || w.forQ !== st.qIndex || w.result === "none") return null;
   return ["collect", "judge", "reveal"].includes(st.phase) ? w.result : null;
 }
+
+// ===== Kenta, fyllot =====
+//
+// Eriks idé 2026-11-01 (i stil med Pipey i Silicon Valley: medvetet töntig hjälpreda). Kenta dyker upp
+// när kvällen startar, utser en slumpad spelare till sin buddy och hejar på hen. Ibland efter en fråga
+// firar han (vinst) eller sörjer (förlust) med en sup, så han blir fullare under kvällen. Ibland ropar han
+// in en hooker-off: slumpar en hooker och snurrar ett hjul om motståndaren. Servern slumpar allt;
+// TV:n står för röst, repliker och animation (src/drunk.tsx).
+
+export const DRUNK_NAME = "Kenta";
+export type DrunkKind = "intro" | "win" | "lose" | "hookoff";
+
+export interface DrunkCue {
+  /** Ökar för varje replik, så klienterna vet när en ny börjar. */
+  id: number;
+  kind: DrunkKind;
+  /** Servertid när repliken börjar. */
+  at: number;
+  /** Buddyn när repliken sades. */
+  buddyId: string;
+  /** Supar inne efter den här repliken (styr hur mycket han sluddrar). */
+  sips: number;
+  /** Hooker-off: hookern, motståndaren och spelarna på hjulet (i ordning, hookern ingår inte). */
+  hooker?: string;
+  opponent?: string;
+  pool?: string[];
+}
+
+export interface DrunkPublic { buddyId: string; sips: number; cue: DrunkCue | null }
+
+/** Hur länge introt pågår innan första frågan startar, och hur länge en vinst/förlust-replik får ta. */
+export const DRUNK_INTRO_MS = 7500;
+export const DRUNK_CUE_MS = 7000;
+/** Hooker-off: pratet innan hjulet, hjulets snurr och tid att se utfallet. */
+export const DRUNK_HOOK_TALK_MS = 3800;
+export const DRUNK_HOOK_SPIN_MS = 4500;
+export const DRUNK_HOOK_MS = DRUNK_HOOK_TALK_MS + DRUNK_HOOK_SPIN_MS + 4500;
+
+/** Hur länge en replik visas. */
+export const drunkCueMs = (k: DrunkKind) => k === "intro" ? DRUNK_INTRO_MS : k === "hookoff" ? DRUNK_HOOK_MS : DRUNK_CUE_MS;

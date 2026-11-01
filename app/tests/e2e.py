@@ -7,7 +7,7 @@ Avslutar med kod 1 om något steg misslyckas. Används av Testaren i AI-rådet.
 Sedan 2026-10-29 är alla frågor svarsalternativ (eller skill-utmaningar). Värden kan spela själv,
 och då skickas aldrig facit till hostkontrollen; det kontrolleras här.
 """
-import sys, os, json, urllib.request
+import sys, os, re, json, urllib.request
 from playwright.sync_api import sync_playwright, expect
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8787"
@@ -21,7 +21,7 @@ LIB = """
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   // Rummen i testerna spelar "alla samtidigt" utan buzzer om testet inte säger annat.
   const mkRoom = async (body) => {
-    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, ...(body.settings ?? {}) } };
+    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, drunk: false, ...(body.settings ?? {}) } };
     const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: res.status, ...(await res.json()) };
   };
@@ -521,11 +521,60 @@ LASTHIT_JS = js("""
 """)
 
 # Skill-rundor på protokollnivå: frö, validering, rankning och att ordningen inte läcker.
+# Kenta (fyllot): intro med buddy före första frågan, hoppa över introt, hooker-off bara när svaret visas.
+DRUNK_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (i) => ({ id: 'k' + i, text: 'K' + i, answer: 'R', choices: ['R', 'F1', 'F2', 'F3'] });
+  const room = await mkRoom({ title: 'Kenta', settings: { drunk: true, collectSeconds: 20 }, questions: [q(1), q(2), q(3)] });
+  const host = await connect(room.code, 'host', room.hostKey);
+  const tv = await connect(room.code, 'tv');
+  const ps = await players(room.code, ['A' + tag, 'B' + tag, 'C' + tag]);
+  const ids = Object.values(ps).map((p) => p.id);
+  await until(tv, (s) => s.players.length === 3);
+  send(host, { t: 'host:start' });
+  const intro = await until(tv, (s) => !!s.drunk?.cue);
+  const out = { introKind: intro.drunk.cue.kind, phaseDuringIntro: intro.phase, buddyIsPlayer: ids.includes(intro.drunk.buddyId), nextAt: !!intro.nextAt };
+  send(ps['A' + tag], { t: 'host:hookoff' }); await sleep(150);
+  out.playerHook = ps['A' + tag].errors.slice();
+  const t0 = Date.now();
+  const s1 = await until(tv, (s) => s.phase === 'collect', 10000);
+  out.introMs = Date.now() - t0;
+  send(host, { t: 'host:hookoff' }); await sleep(150);
+  out.hookInCollect = host.errors.slice();
+  for (const p of Object.values(ps)) send(p, { t: 'answer', text: 'R' });
+  await until(tv, (s) => s.phase === 'judge');
+  send(host, { t: 'host:judge' });
+  await until(tv, (s) => s.phase === 'reveal');
+  const sips = tv.state.drunk.sips;
+  send(host, { t: 'host:hookoff' });
+  const h = await until(tv, (s) => s.drunk?.cue?.kind === 'hookoff');
+  const c = h.drunk.cue;
+  out.hook = { distinct: c.hooker !== c.opponent, poolOk: !c.pool.includes(c.hooker) && c.pool.includes(c.opponent) && c.pool.length === 2,
+    bothPlayers: ids.includes(c.hooker) && ids.includes(c.opponent), sipUp: h.drunk.sips === sips + 1 };
+  // Avstängd Kenta: inget drunk i state
+  send(host, { t: 'host:settings', settings: { drunk: false } });
+  out.off = (await until(tv, (s) => s.settings.drunk === false)).drunk;
+  closeAll(host, tv, ...Object.values(ps));
+  // Värden trycker start igen under introt: frågan startar direkt
+  const room2 = await mkRoom({ title: 'Kenta2', settings: { drunk: true }, questions: [q(1)] });
+  const host2 = await connect(room2.code, 'host', room2.hostKey);
+  const p2 = await players(room2.code, ['D' + tag]);
+  await until(host2, (s) => s.players.length === 1);
+  send(host2, { t: 'host:start' });
+  await until(host2, (s) => !!s.drunk?.cue);
+  const t1 = Date.now();
+  send(host2, { t: 'host:start' });
+  await untilRaw(host2, (s) => s.phase === 'collect');
+  out.skipMs = Date.now() - t1;
+  closeAll(host2, ...Object.values(p2));
+  return out;
+""")
+
 SKILL_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false }, questions: [
+    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false }, questions: [
       { id: 'k1', text: 'Flick', answer: '', mode: 'skill', skill: { kind: 'aim' } },
       { id: 'k2', text: 'Ordna', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'Z', value: 3 }, { label: 'X', value: 1 }, { label: 'Y', value: 2 }] } },
       { id: 'k3', text: 'Trasig', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'A', value: 1 }] } } ] }) });
@@ -698,7 +747,7 @@ def create_room(host, title, questions, settings):
     return host.evaluate("""async ([pin, body]) => {
       const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""",
-        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, **settings}}])
+        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, "drunk": False, **settings}}])
 
 
 def join(page, code, name):
@@ -765,9 +814,19 @@ def main():
         shot(tv, "03-tv-lobby")
         shot(p1, "04-spelare-lobby")
 
-        # Fråga 1: fyra alternativ. Värden spelar själv och ser inget facit; TV:n visar inte rätt svar.
+        # Kenta (fyllot) kliver in före första frågan och väljer en buddy bland spelarna
+        tv.locator("main.tv").click(position={"x": 5, "y": 5})
         host.get_by_role("button", name="Starta första frågan").click()
-        expect(choices_of(p1)).to_have_count(4)
+        expect(tv.locator(".drunk-intro")).to_be_visible()
+        expect(tv.locator(".drunk-intro .drunk-bubble")).to_contain_text("buddy")
+        expect(tv.locator(".drunk-intro .drunk-bubble")).to_contain_text(re.compile("Erik|Tobbe"))
+        expect(host.get_by_text(re.compile("Kenta hejar på (Erik|Tobbe)"))).to_be_visible()
+        expect(host.get_by_role("button", name="Hoppa över Kenta, starta nu")).to_be_visible()
+        tv.wait_for_timeout(900)
+        shot(tv, "04b-tv-kenta-intro")
+
+        # Fråga 1: fyra alternativ. Värden spelar själv och ser inget facit; TV:n visar inte rätt svar.
+        expect(choices_of(p1)).to_have_count(4, timeout=12000)
         expect(tv.get_by_label("Svarsalternativ").locator("li")).to_have_count(4)
         expect(host.get_by_text("Du spelar själv, så du ser inte facit")).to_be_visible()
         assert host.get_by_text("Svar:").count() == 0, "Hosten ser facit trots att hen spelar"
@@ -786,6 +845,16 @@ def main():
         expect(p2.get_by_text("Fel den här gången")).to_be_visible()
         wait_vib(p1, [VIB_RIGHT])
         shot(tv, "08-tv-facit")
+
+        # Hooker-off: Kenta ropar in den, hjulet med spelarnamn landar på motståndaren
+        host.get_by_role("button", name="Hooker-off nu").click()
+        expect(tv.locator(".drunk-hook")).to_be_visible()
+        expect(tv.locator(".drunk-hook .drunk-bubble")).to_contain_text(re.compile("[Hh]ooker"))
+        expect(tv.locator(".drunk-versus")).to_contain_text("mot", timeout=12000)
+        expect(tv.locator(".drunk-versus")).to_contain_text("Erik")
+        expect(tv.locator(".drunk-versus")).to_contain_text("Tobbe")
+        shot(tv, "08a-tv-kenta-hookoff")
+        expect(tv.locator(".drunk-hook")).to_be_hidden(timeout=8000)
 
         # Lyckohjulet: hosten snurrar mellan frågorna, TV och spelare ser samma utfall
         host.get_by_role("button", name="Snurra hjulet").click()
@@ -1035,7 +1104,7 @@ def main():
         # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
         sdata = host.evaluate("""async ([pin]) => {
           const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false }, questions: [
+            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false }, questions: [
               { id: 'k1', text: 'Last hit!', answer: '', mode: 'skill', skill: { kind: 'lasthit' } },
               { id: 'k2', text: 'Flick!', answer: '', mode: 'skill', skill: { kind: 'aim' } },
               { id: 'k3', text: 'Stoppa klockan!', answer: '', mode: 'skill', skill: { kind: 'stopwatch', target: 3 } },
@@ -1312,6 +1381,16 @@ def main():
         assert lh["errors"] == ["Du har redan lämnat ditt resultat"], f"Last hit gick att lämna två gånger eller avvisades: {lh['errors']}"
         assert lh["results"] == [["2/3 last hits · 4 pilar", 1], ["Inga last hits · 7 pilar", 0]], f"Fel resultat i Last hit: {lh['results']}"
 
+        dr = raw.evaluate(DRUNK_JS, [PIN])
+        print("Kenta:", dr)
+        assert dr["introKind"] == "intro" and dr["phaseDuringIntro"] == "lobby" and dr["buddyIsPlayer"] and dr["nextAt"], f"Kentas intro fel: {dr}"
+        assert dr["playerHook"] == ["Bara hosten kan göra det"], "Spelare kunde kalla in hooker-off"
+        assert 6000 <= dr["introMs"] <= 9500, f"Första frågan startade inte efter introt: {dr['introMs']} ms"
+        assert dr["hookInCollect"] == ["Kenta kommer in när svaret visas"], f"Hooker-off mitt i en fråga: {dr['hookInCollect']}"
+        assert all(dr["hook"].values()), f"Hooker-off fel: {dr['hook']}"
+        assert dr["off"] is None, "Kenta syns trots avstängd"
+        assert dr["skipMs"] < 1500, f"Start under introt hoppade inte över Kenta: {dr['skipMs']} ms"
+
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)
         assert sk["mode"] == "skill" and sk["seedSame"], f"Spelarna fick inte samma frö: {sk}"
@@ -1378,6 +1457,14 @@ def main():
             dm.keyboard.press("q")
             dm.wait_for_timeout(1500)
         shot(dm, "83-demo-hookoff")
+        # Kenta: intro och en förlust (sup), bubblan syns och han räknar suparna
+        tab("Kenta (fyllot)").click()
+        dm.get_by_role("button", name="Intro (ny buddy)").click()
+        expect(dm.locator(".drunk-intro .drunk-bubble")).to_contain_text("buddy")
+        dm.get_by_role("button", name="Buddyn förlorade").click()
+        expect(dm.locator(".drunk-lose .drunk-name")).to_contain_text("sup nr 1")
+        dm.wait_for_timeout(700)
+        shot(dm, "84-demo-kenta")
         assert not dm_errors, f"Sidfel i demoläget: {dm_errors}"
         dm.close()
 

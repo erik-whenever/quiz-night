@@ -7,6 +7,7 @@ import { CollectHost } from "../collect";
 import type { ClientMsg, HostState } from "../../shared/types";
 import { DIFFICULTY_LABELS, MAX_SHOWN, MIN_SHOWN, effectiveChoiceRules } from "../../shared/types";
 import { HostWheel } from "../wheel";
+import { HostDrunk } from "../drunkHost";
 import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
 
@@ -125,6 +126,10 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
           onChange={(e) => set({ hostPlays: e.target.checked })} />
         Jag spelar själv (dölj facit och andras svar för mig)
       </label>
+      <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <input type="checkbox" style={{ width: "auto" }} checked={s.drunk} onChange={(e) => set({ drunk: e.target.checked })} />
+        Kenta (fyllot) hejar på en buddy och kommenterar på TV:n
+      </label>
       {s.difficulty > 0 && <p className="muted small">Svårighetsreglaget styr antal alternativ och tid just nu. Dra det till "Setets ordning" för att använda inställningarna här.</p>}
       {started && <p className="muted small">Ändringar av spelform, antal alternativ och tid gäller från nästa fråga.{s.hostPlays ? " Facit kan inte visas för dig förrän kvällen är slut." : ""}</p>}
     </div>
@@ -194,7 +199,8 @@ function Control({ code }: { code: string }) {
                 <HostTeams state={state} send={send} />
                 <DifficultySlider state={state} send={send} />
                 <EffectTags state={state} />
-                <button className="btn primary big" onClick={() => send({ t: "host:start" })} disabled={!state.players.length}>Starta första frågan</button>
+                <button className="btn primary big" onClick={() => send({ t: "host:start" })} disabled={!state.players.length}>{state.drunk ? "Hoppa över Kenta, starta nu" : "Starta första frågan"}</button>
+                <HostDrunk state={state} send={send} />
                 <HostWheel state={state} send={send} serverNow={serverNow} />
               </>
             )}
@@ -206,6 +212,7 @@ function Control({ code }: { code: string }) {
                 <EffectTags state={state} />
                 <CollectHost state={state} send={send} serverNow={serverNow} />
                 <HostWheel state={state} send={send} serverNow={serverNow} />
+                <HostDrunk state={state} send={send} />
                 <DifficultySlider state={state} send={send} />
                 <AutoControls state={state} send={send} serverNow={serverNow} />
               </>

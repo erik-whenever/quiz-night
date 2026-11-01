@@ -190,6 +190,66 @@ export const sfx = {
   thud: () => { kick(0, 0.07); },
   lastHit: () => { kick(0, 0.16); [79, 84, 88].forEach((n, i) => kalimba(n, 0.04 + i * 0.06, 0.09)); epiano(72, 0.05, 1.2, 0.05); },
   denied: () => { epiano(55, 0, 0.5, 0.07); epiano(54, 0.14, 0.8, 0.07); },
+  // Kenta, fyllot. Medvetet fula ljud, men genom samma varma kedja.
+  /** Rap: sågtand runt 80 Hz med skrovlig vibrato genom ett mörkt formantfilter. len 0–1 = kort–långt. */
+  burp: (len = 0.5) => {
+    safe((c) => {
+      const t = c.currentTime;
+      const dur = 0.35 + len * 0.7;
+      const o = c.createOscillator(); o.type = "sawtooth";
+      const f0 = 70 + Math.random() * 30;
+      o.frequency.setValueAtTime(f0 * 1.3, t); o.frequency.exponentialRampToValueAtTime(f0, t + 0.08);
+      o.frequency.linearRampToValueAtTime(f0 * 0.82, t + dur);
+      const rasp = c.createOscillator(); rasp.frequency.value = 22 + Math.random() * 10;
+      const raspAmt = c.createGain(); raspAmt.gain.value = f0 * 0.35;
+      rasp.connect(raspAmt).connect(o.frequency);
+      const form = c.createBiquadFilter(); form.type = "bandpass"; form.Q.value = 2.5;
+      form.frequency.setValueAtTime(520, t); form.frequency.linearRampToValueAtTime(380, t + dur);
+      const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1100;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.04);
+      g.gain.setValueAtTime(0.45, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(form).connect(lp).connect(g); route(g, 0.15);
+      o.start(t); rasp.start(t); o.stop(t + dur + 0.05); rasp.stop(t + dur + 0.05);
+    });
+    breath(0, 0.3 + len * 0.5, 300, 200, 0.05, 1.5, 0.1, "lowpass");
+  },
+  /** Hick: snabb glidning uppåt med ett litet klick. */
+  hiccup: () => {
+    safe((c) => {
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type = "triangle";
+      o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(820, t + 0.07);
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+      o.connect(g); route(g, 0.3); o.start(t); o.stop(t + 0.16);
+    });
+    breath(0, 0.06, 2500, 1200, 0.06, 1.5, 0.2);
+  },
+  /** Skål: två glas som klirrar (oharmoniska sinustoner som klingar ut). */
+  clink: () => {
+    safe((c) => {
+      for (const [when, base] of [[0, 2350], [0.09, 2610]] as const) {
+        const t = c.currentTime + when;
+        for (const [mul, v] of [[1, 0.06], [1.51, 0.035], [2.37, 0.02]] as const) {
+          const o = c.createOscillator(); o.type = "sine"; o.frequency.value = base * mul;
+          const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+          o.connect(g); route(g, 0.7); o.start(t); o.stop(t + 0.95);
+        }
+      }
+    });
+  },
+  /** Klunk: två dova "glugg". */
+  gulp: () => {
+    safe((c) => {
+      for (const when of [0, 0.32]) {
+        const t = c.currentTime + when;
+        const o = c.createOscillator(); o.type = "sine";
+        o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(110, t + 0.12);
+        const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+        o.connect(g); route(g, 0.2); o.start(t); o.stop(t + 0.2);
+      }
+    });
+  },
 };
 
 // ===== Bakgrundsmusik (TV-vyn) =====

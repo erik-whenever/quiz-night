@@ -2,13 +2,15 @@ import type {
   ClientMsg, GameEvent, HostState, Phase, PlayerPublic, PublicState, Question, ServerMsg, Settings, WheelState,
 } from "../shared/types";
 import {
-  DEFAULT_SETTINGS, INTRO_MS, JUDGE_PAUSE_MS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, effectiveChoiceRules, validChoices,
+  DEFAULT_SETTINGS, DRUNK_INTRO_MS, INTRO_MS, JUDGE_PAUSE_MS, MAX_SHOWN, MIN_SHOWN, MSG_BURST, MSG_RATE_PER_S, SKILL_TWISTS, activeTwist, difficultyOf, effectiveChoiceRules, validChoices,
 } from "../shared/types";
 import {
   type CollectServer, collectEnd, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
 } from "./collect";
 import { SKILLS, correctOrder, orderShuffle, validSkill } from "../shared/skill";
 import { spinWheel, stealTarget } from "./wheel";
+import { type DrunkServer, drunkAfterJudge, drunkHookoff, drunkIntro } from "./drunk";
+import { drunkCueMs } from "../shared/types";
 import {
   COINS, EXTRA_TIME_MS, SHOP, TEAM_COLORS, TEAM_NAMES, type CoinNote, type Effects, type ShopItem, type Team,
   type TeamMode, type TokenItem, type Wallet, splitTeams, unitOf,
@@ -79,6 +81,8 @@ interface Persisted {
   phaseAt?: number;
   lastPhase?: Phase;
   paused?: boolean;
+  /** Kenta, fyllot (se worker/drunk.ts). */
+  drunk?: DrunkServer | null;
 }
 
 const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor" | "order" | "turnIdx" | "choiceRounds"> => ({
@@ -124,6 +128,7 @@ const clampSettings = (s: Settings): Settings => ({
   difficulty: clamp(s.difficulty, 0, 5, DEFAULT_SETTINGS.difficulty),
   autoplay: s.autoplay === undefined ? DEFAULT_SETTINGS.autoplay : !!s.autoplay,
   revealSeconds: clamp(s.revealSeconds, 3, 30, DEFAULT_SETTINGS.revealSeconds),
+  drunk: s.drunk === undefined ? DEFAULT_SETTINGS.drunk : !!s.drunk,
 });
 
 export class Room implements DurableObject {
@@ -225,6 +230,7 @@ export class Room implements DurableObject {
       teamMode: s.teamMode, teams: s.teams, wallets: s.wallets, coinsTonight: s.coins, coinLog: s.coinLog.slice(-12),
       effects: this.effects(),
       diffLeft: this.diffLeft(),
+      drunk: s.settings.drunk && s.drunk ? { buddyId: s.drunk.buddyId, sips: s.drunk.sips, cue: s.drunk.cue } : null,
       ...(c.playerId && col?.removed?.[c.playerId] ? { myRemoved: col.removed[c.playerId] } : {}),
     };
     // Spelande värd: hostkontrollen får exakt samma som alla andra, inget facit och inga svar.
@@ -239,6 +245,8 @@ export class Room implements DurableObject {
   /** När nästa automatiska steg ska ske, eller undefined om det väntar på värden. */
   private nextAt(): number | undefined {
     const s = this.s!;
+    // Kentas intro: första frågan startar när han pratat klart (värden har redan tryckt start).
+    if (s.phase === "lobby" && s.drunk?.startAt) return s.drunk.startAt;
     if (!s.settings.autoplay || s.paused) return undefined;
     const at = s.phaseAt ?? Date.now();
     if (s.phase === "judge") return at + JUDGE_PAUSE_MS;
@@ -246,6 +254,9 @@ export class Room implements DurableObject {
       let t = at + s.settings.revealSeconds * 1000;
       // Ett lyckohjul som snurrar får landa och synas en stund först.
       if (s.wheel && s.wheel.forQ === s.qIndex + 1) t = Math.max(t, s.wheel.startedAt + s.wheel.spinMs + 3000);
+      // Kenta får prata klart (och hooker-off-hjulet landa) innan nästa fråga.
+      const cue = s.settings.drunk ? s.drunk?.cue : null;
+      if (cue && cue.at >= at - 3000) t = Math.max(t, cue.at + drunkCueMs(cue.kind) + 500);
       return t;
     }
     return undefined;
@@ -272,6 +283,7 @@ export class Room implements DurableObject {
     if (Date.now() < at) return this.reschedule();
     if (s.phase === "judge") { if (!this.judgeCollect()) return; }
     else if (s.phase === "reveal") this.nextQuestion();
+    else if (s.phase === "lobby" && s.drunk?.startAt) { s.drunk.startAt = undefined; this.nextQuestion(); }
     else return;
     await this.save();
     this.broadcast();
@@ -456,6 +468,7 @@ export class Room implements DurableObject {
       }
       s.phase = "reveal";
       s.lastEvent = { kind: "judged", correct: c.results.filter((r) => r.correct).flatMap((r) => this.members(this.unit(r.playerId))), at: Date.now() };
+      this.drunkJudged();
       return true;
     }
     c.results = c.mode === "skill" && q?.skill ? scoreSkill(c, q.skill, mult) : scoreAll(c, (q?.points ?? 1) * mult, s.settings);
@@ -478,7 +491,26 @@ export class Room implements DurableObject {
     s.lastEvent = { kind: "judged", correct: c.results.filter((r) => r.correct).map((r) => r.playerId),
       fastestId: fastest?.playerId, at: Date.now(),
       ...(steal ? { stolenFrom: steal.from.id, stolen: steal.amount, stealer: fastest!.playerId } : {}) };
+    this.drunkJudged();
     return true;
+  }
+
+  // ===== Kenta, fyllot =====
+
+  /** Efter rättningen: hur gick det för Kentas buddy? Han säger ibland något (se worker/drunk.ts). */
+  private drunkJudged() {
+    const s = this.s!;
+    const d = s.drunk, c = s.collect;
+    if (!s.settings.drunk || !d || !c?.results) return;
+    const team = c.format === "turn" || c.format === "buzz";
+    const bu = this.unit(d.buddyId);
+    // Lagets tur/buzzer: lagets svar räknas (bara om buddyns lag var med). Annars buddyns eget resultat.
+    const mine = team ? c.results.find((r) => this.unit(r.playerId) === bu) : c.results.find((r) => r.playerId === d.buddyId);
+    const played = team ? (c.format === "buzz" ? !!mine : c.turn === bu) : true;
+    drunkAfterJudge(d, {
+      players: s.players, qIndex: s.qIndex, hasNext: s.qIndex + 1 < s.questions.length,
+      wheelPending: !!s.wheel && s.wheel.forQ === s.qIndex + 1, mine, played, skill: c.mode === "skill",
+    }, Date.now());
   }
 
   // ===== Lag, mynt och butik =====
@@ -717,7 +749,22 @@ export class Room implements DurableObject {
       case "host:start":
       case "host:next": {
         if (s.phase === "collect" || s.phase === "judge") return this.send(c, { t: "error", message: "Visa svaret först" });
+        // Första starten: Kenta kliver in och väljer buddy, frågan startar när han pratat klart.
+        // Trycker värden igen under introt startar frågan direkt.
+        if (s.phase === "lobby" && s.settings.drunk && !s.drunk) {
+          s.drunk = drunkIntro(s.players, Date.now());
+          if (s.drunk) { s.drunk.startAt = Date.now() + DRUNK_INTRO_MS; break; }
+        }
+        if (s.drunk) s.drunk.startAt = undefined;
         this.nextQuestion();
+        break;
+      }
+      case "host:hookoff": {
+        if (s.phase !== "reveal") return this.send(c, { t: "error", message: "Kenta kommer in när svaret visas" });
+        if (s.players.length < 2) return this.send(c, { t: "error", message: "Det behövs minst två spelare" });
+        if (!s.drunk) s.drunk = drunkIntro(s.players, Date.now());
+        if (!s.drunk || !drunkHookoff(s.drunk, s.players, s.qIndex, Date.now())) return;
+        if (!s.settings.drunk) s.settings = { ...s.settings, drunk: true };
         break;
       }
       case "host:judge": { if (!this.judgeCollect()) return; break; }
