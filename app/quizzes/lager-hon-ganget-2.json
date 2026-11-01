@@ -1,0 +1,364 @@
+{
+ "id": "lager-hon-ganget-2",
+ "title": "HoN: Gänget i siffror #2",
+ "theme": "HoN Reborn: hur vi spelar (förluster, maraton, hjältar vi inte borde spela)",
+ "updatedAt": "2026-11-01",
+ "questions": [
+  {
+   "id": "hg1",
+   "text": "Vem i gänget har spelat minst HoN-games i år?",
+   "answer": "bmwlover123",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 1,
+   "source": "Svar i detalj: bmwlover123 181 games (Henchman 647, poppeyeflipp 620, högerback 522, sneykijap 290). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg2",
+   "text": "Vem har förlorat flest games under ett och samma dygn?",
+   "answer": "högerback",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 2,
+   "source": "Svar i detalj: högerback, 12 förluster på 24 h (8 okt 12:04 – 9 okt 10:57). Övriga: poppeyeflipp 11, Henchman 9, sneykijap 9, bmwlover123 7. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg3",
+   "text": "Under de 24 timmarna med 12 förluster: hur många games vann högerback?",
+   "answer": "1",
+   "category": "Gänget i siffror",
+   "choices": [
+    "1",
+    "0",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: 1 vinst och 12 förluster mellan 8 okt 12:04 och 9 okt 10:57. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hg4",
+   "text": "Vilken hjälte har högerback förlorat flest games med (17 st)?",
+   "answer": "Pyromancer",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Pyromancer",
+    "Glacius",
+    "Forsaken Archer",
+    "Midas",
+    "Tarot",
+    "Amun-Ra",
+    "Chronos",
+    "Flint Beastwood"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: Pyromancer, 17 förluster på 38 games. Glacius 16 förluster på 40. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hgs1",
+   "text": "Skill: Last hit! Ta creepen innan den blir denied.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "lasthit"
+   }
+  },
+  {
+   "id": "hg5",
+   "text": "Vem har förlorat 29 games med Solstice?",
+   "answer": "Henchman",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: Henchman 29 förluster på 61 games. poppeyeflipp 26 på 63. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg6",
+   "text": "bmwlover123 har bäst vinstprocent i gänget, men en hjälte drar ner honom: 14 förluster på 26 games. Vilken?",
+   "answer": "Zephyr",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Zephyr",
+    "Flux",
+    "Soul Reaper",
+    "Wretched Hag",
+    "Vindicator",
+    "Night Hound",
+    "Armadon",
+    "Pestilence"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: Zephyr, 12 vinster och 14 förluster. Hans enda hjälte med minst 10 games under 50 %. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hg7",
+   "text": "Vem körde 16 games i ett svep den 25 september (11:37 till 00:20)?",
+   "answer": "poppeyeflipp",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 2,
+   "source": "Svar i detalj: poppeyeflipp, 16 games med högst 75 min mellan dem. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg8",
+   "text": "Och hur slutade poppeyeflipps 16-gamesmaraton?",
+   "answer": "5 vinster, 11 förluster",
+   "category": "Gänget i siffror",
+   "choices": [
+    "5 vinster, 11 förluster",
+    "8 vinster, 8 förluster",
+    "11 vinster, 5 förluster",
+    "3 vinster, 13 förluster",
+    "7 vinster, 9 förluster",
+    "10 vinster, 6 förluster",
+    "4 vinster, 12 förluster",
+    "6 vinster, 10 förluster"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: 5–11. Samma dag var 10 förluster, hans värsta kalenderdag. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hg9",
+   "text": "poppeyeflipp förlorade 6 raka med samma hjälte i september. Vilken?",
+   "answer": "Zephyr",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Zephyr",
+    "Solstice",
+    "The Chipper",
+    "Voodoo Jester",
+    "Plague Rider",
+    "Rampage",
+    "Valkyrie",
+    "Midas"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: Zephyr, 6 raka förluster 13–25 sep. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hgs2",
+   "text": "Skill: Ordna gänget efter antal HoN-games i år.",
+   "answer": "",
+   "category": "Skill",
+   "mode": "skill",
+   "skill": {
+    "kind": "order",
+    "prompt": "Minst först",
+    "items": [
+     {
+      "label": "bmwlover123",
+      "value": 181,
+      "show": "181"
+     },
+     {
+      "label": "sneykijap",
+      "value": 290,
+      "show": "290"
+     },
+     {
+      "label": "högerback",
+      "value": 522,
+      "show": "522"
+     },
+     {
+      "label": "poppeyeflipp",
+      "value": 620,
+      "show": "620"
+     },
+     {
+      "label": "Henchman",
+      "value": 647,
+      "show": "647"
+     }
+    ]
+   }
+  },
+  {
+   "id": "hg10",
+   "text": "Vilken hjälte har poppeyeflipp spelat 31 gånger och förlorat 19?",
+   "answer": "The Chipper",
+   "category": "Gänget i siffror",
+   "choices": [
+    "The Chipper",
+    "Solstice",
+    "Zephyr",
+    "Voodoo Jester",
+    "Plague Rider",
+    "Rampage",
+    "Valkyrie",
+    "Midas"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: The Chipper, 12–19 (39 %). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hg11",
+   "text": "Vem har flest games där man dött minst 15 gånger?",
+   "answer": "Henchman",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 2,
+   "source": "Svar i detalj: Henchman 38 games, högerback 18, bmwlover123 4, poppeyeflipp 3, sneykijap 0 (Forests of Caldavar). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg12",
+   "text": "Bästa game utan att dö: 22 kills och 0 deaths. Vem?",
+   "answer": "sneykijap",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: sneykijap, 22/0/10 med Deadwood 21 feb, vinst. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg13",
+   "text": "Den 2 oktober möttes Henchman och sneykijap som motståndare fem gånger. Hur slutade det?",
+   "answer": "Henchman vann 3–2",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman vann 3–2",
+    "sneykijap vann 3–2",
+    "Henchman vann 4–1",
+    "sneykijap vann 4–1",
+    "Henchman vann 5–0",
+    "sneykijap vann 5–0"
+   ],
+   "difficulty": 5,
+   "source": "Svar i detalj: Henchman 3, sneykijap 2 (mest Slither mot Bubbles). Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hg14",
+   "text": "Hur många games har alla fem spelat ihop i år?",
+   "answer": "5",
+   "category": "Gänget i siffror",
+   "choices": [
+    "5",
+    "2",
+    "9",
+    "14",
+    "21",
+    "30",
+    "45",
+    "63"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: 5 games (12–17 feb), 3 vinster och 2 förluster. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg15",
+   "text": "Vem spelade HoN 23 dagar i rad?",
+   "answer": "högerback",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Henchman",
+    "bmwlover123",
+    "högerback",
+    "poppeyeflipp",
+    "sneykijap"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: högerback, 23 dagar i rad fram till 2 mars. Henchman 17, sneykijap 16. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg16",
+   "text": "Vilken veckodag har poppeyeflipp spelat 216 games?",
+   "answer": "Måndag",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Måndag",
+    "Tisdag",
+    "Onsdag",
+    "Torsdag",
+    "Fredag",
+    "Lördag",
+    "Söndag"
+   ],
+   "difficulty": 3,
+   "source": "Svar i detalj: Måndag 216, söndag 129. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md."
+  },
+  {
+   "id": "hg17",
+   "text": "Vilken duo har högst vinstprocent tillsammans (minst 50 games ihop)?",
+   "answer": "bmwlover123 och poppeyeflipp",
+   "category": "Gänget i siffror",
+   "choices": [
+    "bmwlover123 och poppeyeflipp",
+    "högerback och poppeyeflipp",
+    "poppeyeflipp och sneykijap",
+    "Henchman och högerback",
+    "Henchman och sneykijap",
+    "bmwlover123 och högerback",
+    "Henchman och poppeyeflipp",
+    "högerback och sneykijap"
+   ],
+   "difficulty": 5,
+   "source": "Svar i detalj: bmwlover123 + poppeyeflipp 61 % på 64 games. poppeyeflipp + sneykijap 57 % på 134. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  },
+  {
+   "id": "hg18",
+   "text": "Vilken hjälte har gänget spelat näst mest totalt (121 games)?",
+   "answer": "Zephyr",
+   "category": "Gänget i siffror",
+   "choices": [
+    "Zephyr",
+    "Solstice",
+    "Glacius",
+    "Legionnaire",
+    "Slither",
+    "Moraxus",
+    "Pyromancer",
+    "Voodoo Jester"
+   ],
+   "difficulty": 4,
+   "source": "Svar i detalj: Solstice 131, Zephyr 121, Glacius 103, Legionnaire 100. Källa: WardUp (ward-up.com/player/<namn>), matchhistorik hämtad 2026-10-29 av sync-stats.yml, data t.o.m. 28 okt. Uträknat ur council/data/hon/, se council/data/hon-svar.md.",
+   "points": 2
+  }
+ ]
+}

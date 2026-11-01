@@ -26,11 +26,22 @@ Du tar fram veckans frågor. Du är noggrann med fakta (Erik faktagranskar allt)
    - kort frågetext, entydigt svar
    - **verifiera varje faktasvar mot minst en källa**; lägg källan i ett fält `"source"` per fråga
    - personliga frågor sist för dramatiken
+   - **HoN-mixen** (Erik 2026-11-01, se `gänget.md`): se tabellen "Inställningar för HoN-frågor" nedan
 6. Kör typkontroll + bygg (se `CLAUDE.md`), committa `Quizresearchern: <tema> (N frågor)`, pusha, bocka av raden i backloggen.
+
+## Inställningar för HoN-frågor (justeras efter gängets feedback)
+| Värde | Nu | Varför |
+|---|---|---|
+| Andel HoN-frågor i blandade set | minst 1/3 | Erik vill ha fler HoN-frågor (2026-11-01) |
+| Andel av HoN-frågorna som handlar om gänget (statistik ur `council/data/hon/`) | minst 2/3 | Gick hem mest första kvällen |
+| Exakta spell/item-siffror (mana, skada, guld, kombos) eller huvudräkning | högst 1 per set | Blev tråkigt när det var många |
+| Frågor om samma hjälte (detaljer) | högst 1 per set | 6–7 om Pyromancer/Midas var för mycket |
+
+Bra gängfrågor räknas fram ur matchhistoriken (rullande 24 h, svitar, sessioner, hjälte med flest förluster per spelare, duos, femstack, veckodagar). Skriv svaret i detalj i `source` och lägg nya siffror i `council/data/hon-svar.md`. Återanvänd aldrig en gängfråga som redan körts, och kolla att datan är färsk (`fetchedAt`); kör `sync-stats.yml` vid behov.
 
 ## Lagerset (när inget quiz är beställt)
 Håll ett lager av färdiga set så Erik alltid har något att köra. Ett set per körning, rotera teman efter `council/gänget.md`:
-mat → tv-seriecitat ("vem sa det?" / "vilken serie?") → allmänt → HoN → CS2 → mat …
+mat → HoN (gänget) → tv-seriecitat ("vem sa det?" / "vilken serie?") → HoN (gänget) → allmänt → CS2 → mat …
 Filnamn `app/quizzes/lager-<tema>-<nr>.json`, titel t.ex. "Mat #2". Upprepa aldrig en fråga som finns i ett annat set (sök i `app/quizzes/`).
 Citat: korta repliker (en mening), inte långa utdrag. Svaret är karaktären eller serien.
 

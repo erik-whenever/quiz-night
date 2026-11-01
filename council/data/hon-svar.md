@@ -26,3 +26,18 @@ Rekord i kills/deaths/assists gäller vanliga games (Forests of Caldavar), MidWa
 - Flest placerade wards: poppeyeflipp, 5 348.
 - Mest speltid i år: poppeyeflipp, cirka 359 timmar (620 games).
 - Högst MMR just nu: Henchman, 1 803 (Warlord).
+
+## Fler siffror (uträknade 2026-11-01, samma data t.o.m. 28 okt), används i `lager-hon-ganget-2.json`
+- Flest förluster på rullande 24 h: högerback 12 (8 okt 12:04 – 9 okt 10:57, 1 vinst), poppeyeflipp 11, Henchman 9, sneykijap 9, bmwlover123 7.
+- Flest vinster på 24 h: Henchman och poppeyeflipp 11, högerback och sneykijap 10, bmwlover123 7.
+- Hjälte med flest förluster: högerback Pyromancer 17/38 (Glacius 16/40), Henchman Solstice 29/61, poppeyeflipp Solstice 26/63 och The Chipper 19/31, sneykijap Silhouette 11/31, bmwlover123 Zephyr 14/26.
+- Längsta förlustsvit med samma hjälte: Henchman 6 (Bubbles, t.o.m. 2 okt), poppeyeflipp 6 (Zephyr, 13–25 sep).
+- Längsta session (högst 75 min mellan games): poppeyeflipp 16 games 25 sep 11:37 – 00:20, 5–11. Henchman 12 (5 okt, 5–7).
+- Games med minst 15 deaths: Henchman 38, högerback 18, bmwlover123 4, poppeyeflipp 3, sneykijap 0. Bästa deathless: sneykijap 22/0/10 (Deadwood, 21 feb).
+- Henchman mot sneykijap som motståndare 2 okt: 5 games, Henchman 3–2.
+- Alla fem i samma game: 5 gånger (12–17 feb), 3–2.
+- Flest dagar i rad: högerback 23 (t.o.m. 2 mars), Henchman 17, sneykijap 16.
+- poppeyeflipp: 216 games på måndagar.
+- Duo-vinstprocent (minst 50 ihop): bmwlover123 + poppeyeflipp 61 % (64), poppeyeflipp + sneykijap 57 % (134).
+- Gänget totalt: Solstice 131, Zephyr 121, Glacius 103, Legionnaire 100.
+- Obs: ett "game" på 0:13 (Henchman, 1 juni) och GPM 5571 är skräpdata, används inte.

@@ -4,6 +4,7 @@ Format: `- [ ] P1 | S/M/L | Titel: vad + acceptanskriterie`. `[~]` = pågår (da
 Produktägaren äger ordningen i **Redo**. Utvecklingsansvarig äger status.
 
 ## Quiz
+- [x] 2026-11-01 | Eriks feedback: fler HoN-frågor, mest om gänget. Set `app/quizzes/lager-hon-ganget-2.json` klart (18 frågor + 2 skill). Regler i `roles/quizresearcher.md`.
 - [x] 2026-10-28 | QUIZ: Fredagsquiz till 2026-10-30. Set `app/quizzes/2026-10-30-fredagsquiz.json` (20 frågor) klart. 2026-10-29: 3 personliga frågor (f21–f23) tillagda. Quizresearchern: lägg gärna till 3–5 personliga "Gänget i siffror"-frågor sist om statistik hittas senast torsdag, annars rör inte setet.
 - KODFRYS: 2026-10-30 (quizdag). Utvecklingsansvarig mergar inget till `main` den dagen.
 - [x] 2026-10-28 | DEMO: `app/quizzes/2026-10-demo-allmanbildning.json` (20 lätta–medel allmänfrågor) för en testkväll med gänget så snart som möjligt. Feedbacken hamnar i `council/feedback.md`.

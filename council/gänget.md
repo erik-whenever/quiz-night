@@ -26,5 +26,11 @@ Personliga frågor kan formuleras med spelarnamnen ("Vem av bmwlover123 och hög
 - **Mycket mat**: rätter, råvaror, kök från olika länder, kockar, matkultur
 - **Mycket tv-serier**, särskilt **citat**: Breaking Bad, Game of Thrones, How I Met Your Mother "med flera". Gissa vilken karaktär som sa det, vilken serie det kommer ifrån eller fyll i slutet.
 
+## HoN-frågor (Erik 2026-11-01, efter första kvällen)
+- **Fler HoN-frågor** i quizen överlag.
+- **Bäst: frågor om hur vi spelar** (rekord, förluster, maraton, svitar, hjältar någon förlorar orimligt mycket med, vem som spelat mest med vem). Det var kvällens höjdpunkt.
+- **Undvik:** exakta siffror om spells och items (manakostnad, skada, kombos, guld) och frågor som kräver huvudräkning. Högst en sådan per set.
+- **Sprid hjältarna:** aldrig en klunga frågor om samma hjälte (6–7 om Pyromancer och Midas blev tråkigt).
+
 ## Folk
 Inte ifyllt än.
