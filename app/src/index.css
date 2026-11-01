@@ -599,3 +599,5 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 @keyframes ho-pop { from { opacity: 0; transform: translate(-50%, -50%) scale(0.6); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes ho-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ho-count, .ho-banner, .ho-sub { animation: none; } }
+.po3d { aspect-ratio: 1 / 1; max-width: 520px; background: #070b3a; }
+@media (max-width: 600px) { .po3d { aspect-ratio: 4 / 5; } }

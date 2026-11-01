@@ -24,7 +24,7 @@ export const HOWTO_STEPS: Record<SkillKind, string[]> = {
     "Tryck STOPP så nära målet du kan. Närmast vinner, före eller efter spelar ingen roll.",
   ],
   pour: [
-    "Håll inne Häll. Ölen rinner allt snabbare.",
+    "Håll inne Häll. Drycken rinner allt snabbare.",
     "Släpp lite innan strecket: skummet stiger en bit efter att du släppt.",
     "Närmast strecket vinner. Rinner det över är du diskad.",
   ],
@@ -258,7 +258,7 @@ function PourDemo() {
   const atRelease = pourLevel(PO_UP);
   const level = t < PO_UP ? pourLevel(t) : atRelease + PO_FOAM * ease((t - PO_UP) / 700);
   const holding = t >= PO_DOWN && t < PO_UP;
-  const cap = t < PO_DOWN ? "Håll inne Häll" : holding ? "Ölen rinner allt snabbare…" : t < PO_UP + 700 ? "Släpp innan strecket, skummet stiger" : "Nära strecket vinner";
+  const cap = t < PO_DOWN ? "Håll inne Häll" : holding ? "Drycken rinner allt snabbare…" : t < PO_UP + 700 ? "Släpp innan strecket, skummet stiger" : "Nära strecket vinner";
   const GX = 120, GY = 40, GW = 80, GH = 110;
   return (
     <svg viewBox="0 0 320 200" className="howto-svg" role="img" aria-label="Så går Häll upp till">

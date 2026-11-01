@@ -11,6 +11,7 @@ import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
 import { haptic, sfx } from "./lib/sound";
 import type { LastHitScene, LhEvent, LhFrame } from "./lasthit3d";
+import type { PourScene } from "./pour3d";
 import { HowTo } from "./howto";
 import type { FlickEvent, FlickFrame, FlickScene } from "./flick3d";
 
@@ -387,16 +388,42 @@ export function Order({ items, prompt, onLock }: { items: { label: string }[]; p
 
 const FOAM_MS = 700;
 
+const loadPour = () => import("./pour3d");
+const POUR_SHOW_MS = 1700;
+
 export function Pour({ seed, onDone }: { seed: number; onDone: Done }) {
   const c = useRef(pourCourse(seed)).current;
   const [level, setLevel] = useState(0);
   const st = useRef<{ phase: "idle" | "pour" | "foam" | "done"; t0: number; last: number; base: number }>({ phase: "idle", t0: 0, last: 0, base: 0 });
   const lvl = useRef(0);
+
+  // 3D-scenen: burken plockas ur frysen först, sedan visas Häll. Utan WebGL visas 2D-glaset direkt.
+  const [view, setView] = useState<"loading" | "3d" | "plain">("loading");
+  const [ready, setReady] = useState(false);
+  const host = useRef<HTMLDivElement>(null);
+  const scene3d = useRef<PourScene | null>(null);
+  useEffect(() => {
+    let gone = false;
+    loadPour().then((m) => {
+      if (gone || !host.current) return;
+      const sc = m.createPourScene(host.current, () => ({ phase: st.current.phase, level: lvl.current, target: c.target }), gfxLow());
+      if (!sc) { setView("plain"); setReady(true); return; }
+      scene3d.current = sc;
+      setView("3d");
+    }).catch(() => { if (!gone) { setView("plain"); setReady(true); } });
+    return () => { gone = true; scene3d.current?.dispose(); scene3d.current = null; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const end = (final: number, spilled: boolean) => {
     st.current.phase = "done";
-    onDone(spilled ? { value: 1000, ok: false } : { value: Math.max(-1000, Math.min(1000, Math.round((final - c.target) * 10))), ok: true });
+    if (spilled) scene3d.current?.event({ type: "spill" });
+    else scene3d.current?.event({ type: "done", diff: final - c.target });
+    const r = spilled ? { value: 1000, ok: false } : { value: Math.max(-1000, Math.min(1000, Math.round((final - c.target) * 10))), ok: true };
+    // I 3D får man se resultatet (skum, spill, banner) en stund innan vyn byts
+    if (scene3d.current) setTimeout(() => onDone(r), POUR_SHOW_MS); else onDone(r);
   };
   useFrame((t) => {
+    if (!ready && scene3d.current?.introDone()) setReady(true);
     const s = st.current;
     if (s.phase === "pour") {
       const dt = (t - s.last) / 1000, e = (t - s.t0) / 1000;
@@ -407,21 +434,27 @@ export function Pour({ seed, onDone }: { seed: number; onDone: Done }) {
       lvl.current = s.base + c.foam * (1 - (1 - k) * (1 - k));
       if (k >= 1 && lvl.current <= 100) { setLevel(lvl.current); return end(lvl.current, false); }
     } else return;
-    if (lvl.current > 100) { setLevel(100); sfx.wrong(); haptic.wrong(); return end(100, true); }
+    if (lvl.current > 100) { lvl.current = 100; setLevel(100); sfx.wrong(); haptic.wrong(); return end(100, true); }
     setLevel(lvl.current);
   }, true);
-  const down = () => { if (st.current.phase === "idle") { const t = now(); st.current = { phase: "pour", t0: t, last: t, base: 0 }; } };
+  const down = () => { if (ready && st.current.phase === "idle") { const t = now(); st.current = { phase: "pour", t0: t, last: t, base: 0 }; } };
   const up = () => { if (st.current.phase === "pour") st.current = { phase: "foam", t0: now(), last: now(), base: lvl.current }; };
   const phase = st.current.phase;
   return (
     <div className="skill-game" data-level={level.toFixed(1)} data-target={c.target}>
-      <p className="skill-status" aria-live="polite">{phase === "idle" ? "Håll inne för att hälla" : phase === "pour" ? "Släpp vid strecket!" : phase === "foam" ? "Skummet stiger…" : level >= 100 ? "Spillde!" : "Klart"}</p>
-      <div className="glass" aria-hidden>
-        <div className="beer" style={{ height: `${Math.min(100, level)}%` }} />
-        <div className="mark" style={{ bottom: `${c.target}%` }} />
-      </div>
-      <button className="btn primary big skill-tap" aria-label="Häll" disabled={phase !== "idle" && phase !== "pour"}
-        onPointerDown={(e) => { e.preventDefault(); down(); }} onPointerUp={up} onPointerLeave={up} onPointerCancel={up}>Häll</button>
+      <p className="skill-status" aria-live="polite">{!ready ? "Hämtar en iskall ur frysen…" : phase === "idle" ? "Håll inne för att hälla" : phase === "pour" ? "Släpp vid strecket!" : phase === "foam" ? "Skummet stiger…" : level >= 100 ? "Spillde!" : "Klart"}</p>
+      {view !== "plain" ? (
+        <div className={`lh3d po3d${view === "3d" ? " ready" : ""}`} ref={host} role="img" aria-label="Iskall burk som hälls upp i ett glas" />
+      ) : (
+        <div className="glass" aria-hidden>
+          <div className="beer" style={{ height: `${Math.min(100, level)}%` }} />
+          <div className="mark" style={{ bottom: `${c.target}%` }} />
+        </div>
+      )}
+      {ready ? (
+        <button className="btn primary big skill-tap" aria-label="Häll" disabled={phase !== "idle" && phase !== "pour"}
+          onPointerDown={(e) => { e.preventDefault(); down(); }} onPointerUp={up} onPointerLeave={up} onPointerCancel={up}>Häll</button>
+      ) : <div className="btn big skill-tap ghost" aria-hidden style={{ opacity: 0.35 }}>Häll</div>}
     </div>
   );
 }
@@ -486,6 +519,7 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
   if (!playing) {
     if (spec.kind === "lasthit") load3d().catch(() => {}); // hämta 3D-scenen i förväg
     if (spec.kind === "aim") loadFlick().catch(() => {});
+    if (spec.kind === "pour") loadPour().catch(() => {});
     return (
       <div className="stack skill-intro" style={{ alignItems: "center", textAlign: "center" }}>
         <Countdown ms={left} total={c.deadline - c.startedAt} size={90} />
