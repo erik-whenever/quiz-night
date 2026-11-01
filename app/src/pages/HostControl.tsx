@@ -8,6 +8,7 @@ import type { ClientMsg, HostState } from "../../shared/types";
 import { DIFFICULTY_LABELS, DRUNK_PAUSED, MAX_SHOWN, MIN_SHOWN, effectiveChoiceRules } from "../../shared/types";
 import { HostWheel } from "../wheel";
 import { HostDrunk } from "../drunkHost";
+import { Hookertime } from "../hookertime";
 import { EffectTags, HostTeams, TeamBoard, TeamPodium } from "../teams";
 import PinGate from "./PinGate";
 
@@ -126,6 +127,10 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
           onChange={(e) => set({ hostPlays: e.target.checked })} />
         Jag spelar själv (dölj facit och andras svar för mig)
       </label>
+      <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <input type="checkbox" style={{ width: "auto" }} checked={s.hookertime} onChange={(e) => set({ hookertime: e.target.checked })} />
+        Hookertime (två överraskande 1v1-dueller i hooker-off, vinnaren tar 2 p)
+      </label>
       {!DRUNK_PAUSED && (
         <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <input type="checkbox" style={{ width: "auto" }} checked={s.drunk} onChange={(e) => set({ drunk: e.target.checked })} />
@@ -140,7 +145,7 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
 
 function Control({ code }: { code: string }) {
   const hostKey = hostKeyFor(code);
-  const { state, error, send, serverNow, connected } = useRoom(code, "host", { hostKey });
+  const { state, error, send, serverNow, connected, subscribeHo } = useRoom(code, "host", { hostKey });
   const [crowned, setCrowned] = useState("");
   const [copied, setCopied] = useState("");
 
@@ -172,6 +177,7 @@ function Control({ code }: { code: string }) {
     <>
       <TopBar host />
       <main className="wrap stack">
+        <Hookertime state={state} role="host" send={send} serverNow={serverNow} subscribeHo={subscribeHo} />
         <div className="spread">
           <div>
             <h2>{state.title}</h2>
@@ -215,6 +221,9 @@ function Control({ code }: { code: string }) {
                 <CollectHost state={state} send={send} serverNow={serverNow} />
                 <HostWheel state={state} send={send} serverNow={serverNow} />
                 <HostDrunk state={state} send={send} />
+                {state.phase === "reveal" && state.settings.hookertime && !state.hookertime && state.players.filter((p) => p.connected).length >= 2 && (
+                  <button className="btn sm ghost" style={{ alignSelf: "flex-start" }} onClick={() => send({ t: "host:hookertime" })}>Hookertime nu</button>
+                )}
                 <DifficultySlider state={state} send={send} />
                 <AutoControls state={state} send={send} serverNow={serverNow} />
               </>

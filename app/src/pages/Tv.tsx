@@ -8,10 +8,11 @@ import { CollectTv } from "../collect";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
 import { EffectTags, TeamBoard, TeamPodium } from "../teams";
 import { DrunkOverlay, useDrunkVoice, usePiper } from "../drunk";
+import { Hookertime } from "../hookertime";
 
 /** Skärmen hosten delar i Discord. Visar aldrig svaret innan det avslöjas. */
 export default function Tv({ code }: { code: string }) {
-  const { state, error, serverNow } = useRoom(code, "tv");
+  const { state, error, serverNow, send, subscribeHo } = useRoom(code, "tv");
   // Bakgrundsmusik: på som standard, kommer ihåg valet. Ljud kräver ett klick på sidan först (webbläsarregel).
   const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem("kronan.musik") !== "av"; } catch { return true; } });
   const [unlocked, setUnlocked] = useState(false);
@@ -19,14 +20,15 @@ export default function Tv({ code }: { code: string }) {
   // Kentas röst laddas i förväg (första gången ~60 MB, sedan från webbläsarens cache).
   const kentaPiper = usePiper(!!state?.settings.drunk && kentaVoice);
   const phase = state?.phase;
+  const hooking = !!state?.hookertime;
   useEffect(() => {
-    if (!musicOn || !unlocked || !phase || phase === "finished") { music.stop(); delete document.documentElement.dataset.music; return; }
+    if (!musicOn || !unlocked || !phase || phase === "finished" || hooking) { music.stop(); delete document.documentElement.dataset.music; return; }
     // Under frågan: lo-fi-grooven. Mellan frågorna (lobby, facit): hissmusik.
     const m = phase === "collect" || phase === "judge" ? "think" : "lift";
     music.start(m);
     music.mood(m);
     document.documentElement.dataset.music = m;
-  }, [musicOn, unlocked, phase]);
+  }, [musicOn, unlocked, phase, hooking]);
   useEffect(() => () => music.stop(), []);
   const toggleMusic = () => {
     const on = !musicOn;
@@ -75,6 +77,7 @@ export default function Tv({ code }: { code: string }) {
           {!kentaVoice ? "🍺 Kenta tyst" : kentaPiper.status === "loading" ? `🍺 Kenta laddar röst ${Math.round(kentaPiper.progress * 100)} %` : "🍺 Kenta pratar"}
         </button>
       )}
+      <Hookertime state={state} role="tv" send={send} serverNow={serverNow} subscribeHo={subscribeHo} />
       <DrunkOverlay drunk={state.drunk} players={state.players} serverNow={serverNow} voice={kentaVoice && unlocked} />
       <QuestionIntro state={state} serverNow={serverNow} big />
       <div className="tv-head">

@@ -8,8 +8,11 @@ import {
   type CollectServer, collectEnd, collectHost, collectPublic, markAnswer, scoreAll, scoreSkill, startCollect, submitAnswer, submitSkill,
 } from "./collect";
 import { SKILLS, correctOrder, orderShuffle, validSkill } from "../shared/skill";
-import { spinWheel, stealTarget } from "./wheel";
+import { secureIndex, spinWheel, stealTarget } from "./wheel";
 import { type DrunkServer, drunkAfterJudge, drunkHookoff, drunkIntro } from "./drunk";
+import { hookSlots, pickFighters } from "./hookertime";
+import { type HookSim, advanceSim, createSim, drainEvents, simMove, simStop, simThrow, snapOf, startSim } from "../shared/hooksim";
+import { HOOKERTIME, HOOK_INTRO_MS, type HookertimePublic } from "../shared/types";
 import { drunkCueMs } from "../shared/types";
 import {
   COINS, EXTRA_TIME_MS, SHOP, TEAM_COLORS, TEAM_NAMES, type CoinNote, type Effects, type ShopItem, type Team,
@@ -83,6 +86,11 @@ interface Persisted {
   paused?: boolean;
   /** Kenta, fyllot (se worker/drunk.ts). */
   drunk?: DrunkServer | null;
+  /** Hookertime: före vilka omgångar den slår till, vilka som redan körts, dueller i kväll och pågående. */
+  hookSlots?: number[];
+  hookDoneSlots?: number[];
+  hookPairs?: [string, string][];
+  hook?: HookertimePublic | null;
 }
 
 const TEAM_DEFAULTS = (): Pick<Persisted, "teamMode" | "teams" | "wallets" | "coins" | "coinLog" | "streak" | "extraBuyers" | "doubleFor" | "sabotageFor" | "order" | "turnIdx" | "choiceRounds"> => ({
@@ -129,6 +137,7 @@ const clampSettings = (s: Settings): Settings => ({
   autoplay: s.autoplay === undefined ? DEFAULT_SETTINGS.autoplay : !!s.autoplay,
   revealSeconds: clamp(s.revealSeconds, 3, 30, DEFAULT_SETTINGS.revealSeconds),
   drunk: s.drunk === undefined ? DEFAULT_SETTINGS.drunk : !!s.drunk,
+  hookertime: s.hookertime === undefined ? DEFAULT_SETTINGS.hookertime : !!s.hookertime,
 });
 
 export class Room implements DurableObject {
@@ -138,6 +147,10 @@ export class Room implements DurableObject {
   private collectTimer: ReturnType<typeof setTimeout> | null = null;
   /** Autoplay: visar svaret / startar nästa fråga. */
   private autoTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Hookertime: nästa steg (match startar / resultatet slutar) och matchens loop. */
+  private hookTimer: ReturnType<typeof setTimeout> | null = null;
+  private hookLoop: ReturnType<typeof setInterval> | null = null;
+  private sim: HookSim | null = null;
 
   constructor(private ctx: DurableObjectState, private env: Env) {
     ctx.blockConcurrencyWhile(async () => {
@@ -146,6 +159,8 @@ export class Room implements DurableObject {
         this.s = { ...TEAM_DEFAULTS(), ...s, settings: clampSettings({ ...DEFAULT_SETTINGS, ...s.settings }) };
         // Fråga som pågick när objektet sövdes: stäng den direkt eller vid deadline.
         if (this.s.phase === "collect" && this.s.collect) this.armCollectTimer();
+        // En Hookertime som pågick när objektet startades om kan inte återupptas: avsluta den.
+        if (this.s.hook) { this.s.hook = null; }
         this.reschedule();
       }
     });
@@ -231,6 +246,7 @@ export class Room implements DurableObject {
       effects: this.effects(),
       diffLeft: this.diffLeft(),
       drunk: s.settings.drunk && s.drunk ? { buddyId: s.drunk.buddyId, sips: s.drunk.sips, cue: s.drunk.cue } : null,
+      hookertime: s.hook ?? null,
       ...(c.playerId && col?.removed?.[c.playerId] ? { myRemoved: col.removed[c.playerId] } : {}),
     };
     // Spelande värd: hostkontrollen får exakt samma som alla andra, inget facit och inga svar.
@@ -247,6 +263,7 @@ export class Room implements DurableObject {
     const s = this.s!;
     // Kentas intro: första frågan startar när han pratat klart (värden har redan tryckt start).
     if (s.phase === "lobby" && s.drunk?.startAt) return s.drunk.startAt;
+    if (s.hook) return undefined; // Hookertime styr själv
     if (!s.settings.autoplay || s.paused) return undefined;
     const at = s.phaseAt ?? Date.now();
     if (s.phase === "judge") return at + JUDGE_PAUSE_MS;
@@ -292,6 +309,14 @@ export class Room implements DurableObject {
   /** Nästa fråga (eller pallen efter sista). Används av host:next och autoplay. */
   private nextQuestion() {
     const s = this.s!;
+    // Första frågan: bestäm när kvällens Hookertime slår till.
+    if (s.qIndex < 0 && !s.hookSlots) s.hookSlots = hookSlots(s.questions.length);
+    // Hookertime i stället för frågan som alla väntar på?
+    const slot = s.qIndex + 1;
+    if (s.phase === "reveal" && !s.hook && s.settings.hookertime && (s.hookSlots ?? []).includes(slot) && !(s.hookDoneSlots ?? []).includes(slot)) {
+      (s.hookDoneSlots ??= []).push(slot);
+      if (this.startHookertime()) return;
+    }
     this.clearCollectTimer();
     const next = this.pickNext();
     if (next === null) { s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() }; }
@@ -493,6 +518,93 @@ export class Room implements DurableObject {
       ...(steal ? { stolenFrom: steal.from.id, stolen: steal.amount, stealer: fastest!.playerId } : {}) };
     this.drunkJudged();
     return true;
+  }
+
+  // ===== Hookertime =====
+
+  private clearHook() {
+    if (this.hookTimer) { clearTimeout(this.hookTimer); this.hookTimer = null; }
+    if (this.hookLoop) { clearInterval(this.hookLoop); this.hookLoop = null; }
+    this.sim = null;
+  }
+
+  /** Glitch, intro och sedan match. false om det inte går (för få anslutna spelare). */
+  private startHookertime(): boolean {
+    const s = this.s!;
+    const live = s.players.filter((p) => p.connected).map((p) => p.id);
+    const f = pickFighters(live, s.hookPairs ?? []);
+    if (!f) return false;
+    this.clearHook();
+    const now = Date.now();
+    s.hookPairs = [...(s.hookPairs ?? []), [f.hooker, f.opponent]];
+    s.hook = { n: s.hookPairs.length, startedAt: now, matchAt: now + HOOK_INTRO_MS, stage: "intro", ...f };
+    this.hookTimer = setTimeout(() => this.startMatch(), HOOK_INTRO_MS);
+    return true;
+  }
+
+  private startMatch() {
+    const s = this.s;
+    if (!s?.hook) return;
+    this.hookTimer = null;
+    s.hook = { ...s.hook, stage: "match" };
+    const sim = createSim();
+    startSim(sim);
+    this.sim = sim;
+    let last = Date.now();
+    this.hookLoop = setInterval(() => {
+      const now = Date.now();
+      advanceSim(sim, (now - last) / 1000);
+      last = now;
+      const ev = drainEvents(sim);
+      const msg = JSON.stringify({ t: "ho", s: snapOf(sim, now, ev) });
+      for (const c of this.conns) { try { c.ws.send(msg); } catch { /* stängd */ } }
+      const over = ev.find((e) => e.k === "over");
+      if (over && over.k === "over") void this.finishMatch(over.w, [sim.score[0], sim.score[1]]);
+      // Nödbroms: ingen hookar någon på 3 minuter. Ledaren vinner, annars avgör slumpen.
+      else if (sim.t > 180) void this.finishMatch(sim.score[0] !== sim.score[1] ? (sim.score[0] > sim.score[1] ? 0 : 1) : (secureIndex(2) as 0 | 1), [sim.score[0], sim.score[1]]);
+    }, 50);
+    void this.save().then(() => this.broadcast());
+  }
+
+  /** Matchen klar: vinnaren tar poängen av förloraren, resultatet visas en stund. */
+  private async finishMatch(w: 0 | 1, rounds: [number, number]) {
+    const s = this.s!;
+    const h = s.hook;
+    if (!h || h.stage !== "match") return;
+    if (this.hookLoop) { clearInterval(this.hookLoop); this.hookLoop = null; }
+    const winner = w === 0 ? h.hooker : h.opponent, loser = w === 0 ? h.opponent : h.hooker;
+    const pw = s.players.find((p) => p.id === winner), pl = s.players.find((p) => p.id === loser);
+    if (pw) pw.score += HOOKERTIME.STAKE;
+    if (pl) pl.score -= HOOKERTIME.STAKE;
+    this.award(winner, COINS.skillWin, "vann Hookertime");
+    s.hook = { ...h, stage: "result", winner, rounds, endsAt: Date.now() + HOOKERTIME.RESULT_MS };
+    this.hookTimer = setTimeout(() => { void this.endHookertime(); }, HOOKERTIME.RESULT_MS);
+    await this.save();
+    this.broadcast();
+  }
+
+  /** Tillbaka till quizet: nästa fråga startar (med autoplay), annars väntar den på värden. */
+  private async endHookertime() {
+    const s = this.s!;
+    this.clearHook();
+    s.hook = null;
+    if (s.settings.autoplay && !s.paused && s.phase === "reveal") this.nextQuestion();
+    else s.phaseAt = Date.now();
+    await this.save();
+    this.broadcast();
+  }
+
+  /** Input från en av de två i matchen. */
+  private hookInput(c: Conn, m: Extract<ClientMsg, { t: "hook" }>) {
+    const s = this.s!, h = s.hook, sim = this.sim;
+    if (!h || h.stage !== "match" || !sim || !c.playerId) return;
+    const idx = c.playerId === h.hooker ? 0 : c.playerId === h.opponent ? 1 : -1;
+    if (idx < 0) return;
+    const i = idx as 0 | 1;
+    const ok = (p?: { x: number; z: number }) => !!p && Number.isFinite(p.x) && Number.isFinite(p.z) && Math.abs(p.x) < 40 && Math.abs(p.z) < 40;
+    if (m.move && ok(m.move)) simMove(sim, i, m.move);
+    else if (m.hook && ok(m.hook)) simThrow(sim, i, m.hook);
+    else if (m.stop) simStop(sim, i);
   }
 
   // ===== Kenta, fyllot =====
@@ -742,6 +854,7 @@ export class Room implements DurableObject {
     }
 
     if (m.t === "buy" || m.t === "use") return this.shop(c, m);
+    if (m.t === "hook") return this.hookInput(c, m);
 
     if (c.role !== "host") return this.send(c, { t: "error", message: "Bara hosten kan göra det" });
 
@@ -749,6 +862,7 @@ export class Room implements DurableObject {
       case "host:start":
       case "host:next": {
         if (s.phase === "collect" || s.phase === "judge") return this.send(c, { t: "error", message: "Visa svaret först" });
+        if (s.hook) return this.send(c, { t: "error", message: "Hookertime pågår" });
         // Första starten: Kenta kliver in och väljer buddy, frågan startar när han pratat klart.
         // Trycker värden igen under introt startar frågan direkt.
         if (s.phase === "lobby" && s.settings.drunk && !s.drunk) {
@@ -757,6 +871,22 @@ export class Room implements DurableObject {
         }
         if (s.drunk) s.drunk.startAt = undefined;
         this.nextQuestion();
+        break;
+      }
+      case "host:hookertime": {
+        if (s.phase !== "reveal") return this.send(c, { t: "error", message: "Hookertime startar när svaret visas" });
+        if (s.hook) return this.send(c, { t: "error", message: "Hookertime pågår redan" });
+        // Använder kvällens nästa schemalagda tillfälle (så det blir två totalt)
+        const next = (s.hookSlots ?? []).find((x) => x > s.qIndex && !(s.hookDoneSlots ?? []).includes(x));
+        if (next !== undefined) (s.hookDoneSlots ??= []).push(next);
+        if (!this.startHookertime()) return this.send(c, { t: "error", message: "Det behövs minst två anslutna spelare" });
+        break;
+      }
+      case "host:hookertime:stop": {
+        if (!s.hook) return;
+        this.clearHook();
+        s.hook = null;
+        s.phaseAt = Date.now();
         break;
       }
       case "host:hookoff": {
@@ -803,6 +933,7 @@ export class Room implements DurableObject {
         break;
       }
       case "host:finish": {
+        this.clearHook(); s.hook = null;
         this.clearCollectTimer(); s.wheel = null; s.phase = "finished"; s.collect = null; s.lastEvent = { kind: "finished", at: Date.now() };
         break;
       }

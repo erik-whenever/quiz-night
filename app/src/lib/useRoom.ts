@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClientMsg, HostState, ServerMsg } from "../../shared/types";
+import type { HsSnap } from "../../shared/hooksim";
 
 type Role = "host" | "tv" | "player";
 
@@ -11,6 +12,7 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
   const ws = useRef<WebSocket | null>(null);
   const offset = useRef(0); // serverTid - lokalTid
   const queue = useRef<ClientMsg[]>([]);
+  const hoSubs = useRef(new Set<(s: HsSnap) => void>());
   const onJoined = useRef(opts.onJoined);
   onJoined.current = opts.onJoined;
 
@@ -37,6 +39,7 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
         else if (m.t === "error") setError(m.message);
         else if (m.t === "joined") onJoined.current?.(m.playerId);
         else if (m.t === "pong") { const now = Date.now(); offset.current = m.s - (m.c + now) / 2; }
+        else if (m.t === "ho") hoSubs.current.forEach((f) => f(m.s));
       };
       sock.onclose = (ev) => {
         clearInterval(pinger); setConnected(false);
@@ -58,7 +61,9 @@ export function useRoom(code: string, role: Role, opts: { hostKey?: string; onJo
   }, []);
 
   const serverNow = useCallback(() => Date.now() + offset.current, []);
-  return { state, error, connected, send, serverNow };
+  /** Hookertime-matchens ögonblicksbilder (kommer utanför vanliga state). */
+  const subscribeHo = useCallback((f: (s: HsSnap) => void) => { hoSubs.current.add(f); return () => { hoSubs.current.delete(f); }; }, []);
+  return { state, error, connected, send, serverNow, subscribeHo };
 }
 
 /** Sekunder kvar till en deadline (servertid), uppdateras ofta. */

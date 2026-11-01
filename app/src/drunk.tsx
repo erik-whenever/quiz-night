@@ -274,7 +274,7 @@ function Mug() {
 const mod = (a: number, m: number) => ((a % m) + m) % m;
 
 /** Hjul med spelarnas namn. Snurrar från startAt och landar på motståndaren. */
-function PlayerWheel({ names, colors, target, startAt, spinMs, serverNow, size, onLanded }: {
+export function PlayerWheel({ names, colors, target, startAt, spinMs, serverNow, size, onLanded }: {
   names: string[]; colors: string[]; target: number; startAt: number; spinMs: number; serverNow: () => number; size: number; onLanded: () => void;
 }) {
   const n = Math.max(1, names.length);

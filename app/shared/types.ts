@@ -4,6 +4,7 @@
 // skill-utmaning ("skill"). Muntliga buzz-svar och fritextsvar är borttagna (Eriks beslut), så att
 // allt rättas automatiskt och värden kan spela med utan att se facit.
 import type { OrderItem, SkillSpec } from "./skill";
+import type { HsSnap } from "./hooksim";
 export type { SkillSpec, SkillKind, OrderItem } from "./skill";
 import type { CoinNote, Effects, ShopItem, Team, TeamMode, TokenItem, Wallet } from "./teams";
 export type { CoinNote, Effects, ShopItem, Team, TeamMode, TokenItem, Wallet } from "./teams";
@@ -118,12 +119,14 @@ export interface Settings {
   revealSeconds: number;
   /** Kenta, fyllot som hejar på en buddy och kommenterar kvällen på TV:n. */
   drunk: boolean;
+  /** Hookertime: två överraskande 1v1-dueller i hooker-off per kväll. */
+  hookertime: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
   playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
-  autoplay: true, revealSeconds: 8, drunk: false,
+  autoplay: true, revealSeconds: 8, drunk: false, hookertime: true,
 };
 /** Hur länge frågans intro visas innan svarsknapparna öppnas (läggs på svarstiden). */
 export const INTRO_MS = 1400;
@@ -236,6 +239,8 @@ export interface PublicState {
   myRemoved?: string[];
   /** Kenta (fyllot): vem han hejar på, hur full han är och vad han säger just nu. null = avstängt/inte igång. */
   drunk?: DrunkPublic | null;
+  /** Pågående Hookertime (glitch, intro, match, resultat). Kvällen står still under tiden. */
+  hookertime?: HookertimePublic | null;
 }
 
 /** Hosten ser dessutom facit och svaren, men bara när värden inte spelar själv. */
@@ -280,6 +285,11 @@ export type ClientMsg =
   | { t: "host:spin" }
   /** Kalla in Kenta för en hooker-off nu (bara när svaret visas). Servern slumpar hookern och motståndaren. */
   | { t: "host:hookoff" }
+  /** Starta Hookertime nu (bara när svaret visas), resp. avbryt en pågående. */
+  | { t: "host:hookertime" }
+  | { t: "host:hookertime:stop" }
+  /** Spelarens input i en Hookertime-match: gå, kasta kroken eller stanna. */
+  | { t: "hook"; move?: { x: number; z: number }; hook?: { x: number; z: number }; stop?: boolean }
   /** Lagläge: 0 = alla mot alla, annars lagstorlek. Slumpar nya lag (bara i lobbyn). */
   | { t: "host:teams"; mode: TeamMode }
   /** Köp i butiken (lobbyn). */
@@ -293,7 +303,9 @@ export type ServerMsg =
   | { t: "state"; state: PublicState | HostState }
   | { t: "joined"; playerId: string }
   | { t: "error"; message: string }
-  | { t: "pong"; c: number; s: number };
+  | { t: "pong"; c: number; s: number }
+  /** Hookertime-matchen: ögonblicksbild ~20 ggr/s till alla. */
+  | { t: "ho"; s: HsSnap };
 
 export interface LeagueEntry {
   id: string;
@@ -400,3 +412,56 @@ export const DRUNK_HOOK_MS = DRUNK_HOOK_TALK_MS + DRUNK_HOOK_SPIN_MS + 4500;
 
 /** Hur länge en replik visas. */
 export const drunkCueMs = (k: DrunkKind) => k === "intro" ? DRUNK_INTRO_MS : k === "hookoff" ? DRUNK_HOOK_MS : DRUNK_CUE_MS;
+
+// ===== Hookertime =====
+//
+// Eriks idé 2026-11-01: plötsligt, när alla väntar på nästa fråga, glitchar grafiken och det blir
+// HOOKERTIME i anime-stil. En slumpad hooker, ett hjul väljer motståndaren, kort intro med instruktioner,
+// sedan en riktig 1v1-match i hooker-off (servern kör simuleringen, shared/hooksim.ts). Två gånger per
+// kväll; urvalet andra gången följer Eriks regler (worker/hookertime.ts). Vinnaren tar 2 p av förloraren.
+
+export const HOOKERTIME = {
+  GLITCH_MS: 2400,
+  TITLE_MS: 3000,
+  PICK_MS: 2600,
+  SPIN_MS: 4500,
+  HOLD_MS: 1800,
+  VS_MS: 8000,
+  RESULT_MS: 7000,
+  /** Poäng som vinnaren tar från förloraren. */
+  STAKE: 2,
+} as const;
+/** Från glitchen till att matchen börjar. */
+export const HOOK_INTRO_MS = HOOKERTIME.GLITCH_MS + HOOKERTIME.TITLE_MS + HOOKERTIME.PICK_MS + HOOKERTIME.SPIN_MS + HOOKERTIME.HOLD_MS + HOOKERTIME.VS_MS;
+
+export type HookStage = "glitch" | "title" | "pick" | "wheel" | "vs" | "match" | "result";
+
+export interface HookertimePublic {
+  /** Vilken Hookertime i kväll (1 eller 2, fler om värden kör extra). */
+  n: number;
+  startedAt: number;
+  /** Servertid då matchen startar (efter introt). */
+  matchAt: number;
+  /** "intro" fram till matchAt, sedan "match", sedan "result". */
+  stage: "intro" | "match" | "result";
+  hooker: string;
+  opponent: string;
+  /** Spelarna på hjulet (hookern ingår inte), i ordning. */
+  pool: string[];
+  /** Resultat: vinnaren, ställningen i ronder och när resultatet slutar visas. */
+  winner?: string;
+  rounds?: [number, number];
+  endsAt?: number;
+}
+
+/** Vilket skede introt är i, räknat från startedAt. */
+export function hookStage(h: Pick<HookertimePublic, "startedAt" | "stage">, now: number): HookStage {
+  if (h.stage !== "intro") return h.stage;
+  let t = now - h.startedAt;
+  const H = HOOKERTIME;
+  if ((t -= H.GLITCH_MS) < 0) return "glitch";
+  if ((t -= H.TITLE_MS) < 0) return "title";
+  if ((t -= H.PICK_MS) < 0) return "pick";
+  if ((t -= H.SPIN_MS + H.HOLD_MS) < 0) return "wheel";
+  return "vs";
+}

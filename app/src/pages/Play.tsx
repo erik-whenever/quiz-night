@@ -7,6 +7,7 @@ import { CollectPlay, rememberAnswer } from "../collect";
 import { CHOICE_LETTERS } from "../../shared/types";
 import { unitOf } from "../../shared/teams";
 import { StealNote, TwistBadge, WheelPanel, pendingWheel } from "../wheel";
+import { Hookertime } from "../hookertime";
 import { CoinToast, EffectTags, FiftyButton, PlayerShop, TeamBoard, TeamPodium } from "../teams";
 
 const idKey = (code: string) => "kronan.player." + code;
@@ -24,7 +25,7 @@ export default function Play({ code }: { code: string }) {
   const [playerId, setPlayerId] = useState(read(idKey(code)));
   const [name, setName] = useState(read(NAME_KEY));
   const [joining, setJoining] = useState(false);
-  const { state, error, send, serverNow, connected } = useRoom(code, "player", {
+  const { state, error, send, serverNow, connected, subscribeHo } = useRoom(code, "player", {
     onJoined: (id) => { setPlayerId(id); write(idKey(code), id); setJoining(false); },
   });
 
@@ -120,6 +121,7 @@ export default function Play({ code }: { code: string }) {
 
   return (
     <main className={`narrow stack ${flash}`} key={ev?.at} style={{ minHeight: "100dvh" }}>
+      <Hookertime state={state} role="player" me={playerId} send={send} serverNow={serverNow} subscribeHo={subscribeHo} />
       <QuestionIntro state={state} serverNow={serverNow} />
       <div className="spread">
         <span className="chip" style={{ "--c": me.color } as React.CSSProperties}>

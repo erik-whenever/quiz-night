@@ -1,6 +1,6 @@
 // Hooker-off i 3D: två slaktare i en arena, den som hookar den andra först tar ronden. Bäst av 3.
-// Prototyp: du mot en bot, all logik lokalt. Simuleringen (step) är skild från grafiken så att den
-// senare kan flyttas till en Durable Object och köras som riktig 1v1 över nätet.
+// Spelreglerna ligger i shared/hooksim.ts: lokalt mot en bot i demoläget, eller på servern som riktig
+// 1v1 över nätet (då ritar den här filen bara servern ögonblicksbilder och skickar spelarens input).
 //
 // Allt är byggt av enkla låg-poly-former i kod (inga modellfiler), i samma stil som Last hit.
 import * as THREE from "three";
@@ -9,45 +9,52 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
+import {
+  HS, HS_PILLARS, advanceSim, applySnap, botThink, createSim, drainEvents, handOf, newBot, simMove, simStop, simThrow, startSim,
+  type HookSim, type HsEvent, type HsSnap, type P2,
+} from "../shared/hooksim";
+
 export type HookEvent =
   | { type: "countdown"; n: number | null }
+  /** you = gubbe 0 (blå), bot = gubbe 1 (röd). */
   | { type: "score"; you: number; bot: number; round: number }
   | { type: "banner"; text: string; sub?: string; tone: "win" | "lose" | "info" }
-  | { type: "over"; youWon: boolean }
+  /** youWon gäller gubbe 0 i demoläget, annars "jag" (åskådare: gubbe 0). winner = 0/1. */
+  | { type: "over"; youWon: boolean; winner: 0 | 1 }
   | { type: "phase"; phase: Phase };
 export type Phase = "idle" | "intro" | "fight" | "roundEnd" | "over";
 
 export interface HookOff {
   start(): void;
+  /** Nätläge: en ny ögonblicksbild från servern. */
+  push(snap: HsSnap): void;
   dispose(): void;
 }
 
-// ===== Regler =====
-const R0 = 9.2;            // arenans radie
-const R_MIN = 3.8;         // minsta radie när den krympt klart
-const SHRINK_AT = 18;      // sekunder in i ronden
-const SHRINK_DUR = 16;
-const MOVE = 4.3;          // enheter/s
-const UNIT_R = 0.6;
-const HOOK_SPEED = 18;
-const HOOK_RANGE = 10.5;
-const HOOK_BACK = 30;
-const PULL_SPEED = 13;
-const HOOK_CD = 2.6;
-const WINDUP = 0.15;
-const HIT_R = 0.75;
-const WINS = 2;
-const STEP = 1 / 120;
+/** Input från spelaren i nätläge (skickas till servern). */
+export type HookInput = { move: P2 } | { hook: P2 } | { stop: true };
 
-const START: [number, number][] = [[-6.4, 0.3], [6.4, -0.3]];
-const PILLARS: { x: number; z: number; r: number }[] = [
-  { x: 0, z: 2.5, r: 0.62 },
-  { x: 0, z: -2.5, r: 0.62 },
-  { x: -3.4, z: -4.0, r: 0.5 },
-  { x: 3.4, z: 4.0, r: 0.5 },
-  { x: -4.6, z: 4.4, r: 0.45 },
-  { x: 4.6, z: -4.4, r: 0.45 },
-];
+export interface HookOffOpts {
+  low?: boolean;
+  botSkill?: number;
+  /** "bot" (standard): du mot boten, allt lokalt. "net": servern kör matchen, vi ritar och skickar input. */
+  mode?: "bot" | "net";
+  /** Nätläge: vilken gubbe jag styr (0/1), null = åskådare (TV:n). */
+  me?: 0 | 1 | null;
+  /** Namn på gubbarna (för banderoller). */
+  names?: [string, string];
+  onInput?: (m: HookInput) => void;
+  /** Servertid (ms), för att interpolera ögonblicksbilderna. */
+  serverNow?: () => number;
+}
+
+// ===== Regler (se shared/hooksim.ts) =====
+const R0 = HS.R0;
+const HOOK_RANGE = HS.HOOK_RANGE;
+const HOOK_CD = HS.HOOK_CD;
+const PILLARS = HS_PILLARS;
+/** Hur långt efter servern vi ritar, så att det finns två bilder att interpolera mellan. */
+const NET_DELAY_MS = 110;
 
 const COL = {
   skyTop: "#0b1250", skyMid: "#3b2a7a", skyLow: "#e0795a",
@@ -458,35 +465,29 @@ function buildWorld(scene: THREE.Scene, high: boolean) {
 }
 
 // ===== Spelet =====
-interface Unit {
+/** Det som bara behövs för att rita en gubbe (själva tillståndet finns i simuleringen). */
+interface Vis {
   id: 0 | 1;
   pos: THREE.Vector3;
-  prev: THREE.Vector3;
   vel: THREE.Vector3;
-  target: THREE.Vector3 | null;
-  face: number;
-  cdUntil: number;
-  windup: { until: number; dir: THREE.Vector3 } | null;
-  hooked: boolean;
   fig: Butcher;
   walk: number;
   armZ: number;
   down: number;
 }
-interface Hook {
-  owner: Unit;
-  state: "idle" | "out" | "back" | "pull";
-  tip: THREE.Vector3;
-  dir: THREE.Vector3;
-  dist: number;
-  victim: Unit | null;
+interface HookVis {
   head: THREE.Group;
   links: THREE.InstancedMesh;
   light: THREE.PointLight;
+  tip: THREE.Vector3;
 }
 
-export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void, opts: { botSkill?: number; low?: boolean } = {}): HookOff | null {
+export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void, opts: HookOffOpts = {}): HookOff | null {
   const skill = clamp(opts.botSkill ?? 0.6, 0, 1);
+  const net = opts.mode === "net";
+  const me: 0 | 1 | null = net ? (opts.me ?? null) : 0;
+  const names = opts.names ?? ["Du", "Boten"];
+  const serverNow = opts.serverNow ?? (() => Date.now());
   let renderer: THREE.WebGLRenderer;
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -543,11 +544,11 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
   const edgeGlow = new THREE.Mesh(new THREE.TorusGeometry(1, 0.012, 4, 160), glow(0xff3b6a, 0));
   edgeGlow.rotation.x = -Math.PI / 2; edgeGlow.position.y = 0.08; scene.add(edgeGlow);
 
-  // Sikte och cooldownring för spelaren
+  // Sikte för den egna gubben
   const aim = new THREE.Group();
-  const aimMat = glow(TEAMS[0].glow, 0.16);
+  const aimMat = glow(TEAMS[me ?? 0].glow, 0.16);
   const aimBar = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.42), aimMat);
-  aimBar.rotation.x = -Math.PI / 2; aimBar.position.x = 0.5; aimBar.scale.x = HOOK_RANGE - 0.6;
+  aimBar.rotation.x = -Math.PI / 2; aimBar.scale.x = HOOK_RANGE - 0.6;
   aimBar.position.x = (HOOK_RANGE - 0.6) / 2 + 0.3;
   const tri = new THREE.Shape([new THREE.Vector2(0, 0.42), new THREE.Vector2(0.6, 0), new THREE.Vector2(0, -0.42)]);
   const aimHead = new THREE.Mesh(new THREE.ShapeGeometry(tri), aimMat);
@@ -574,15 +575,15 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
   marker.rotation.x = -Math.PI / 2; marker.position.y = 0.07; scene.add(marker);
   let markerT = -1;
 
-  const units: Unit[] = [0, 1].map((i) => {
+  const vis: Vis[] = [0, 1].map((i) => {
     const fig = makeButcher(TEAMS[i]);
     scene.add(fig.root);
-    return { id: i as 0 | 1, pos: V(), prev: V(), vel: V(), target: null, face: 0, cdUntil: 0, windup: null, hooked: false, fig, walk: 0, armZ: 0.2, down: 0 };
+    return { id: i as 0 | 1, pos: V(), vel: V(), fig, walk: 0, armZ: 0.2, down: 0 };
   });
   const linkG = new THREE.TorusGeometry(0.075, 0.024, 4, 8);
   const linkMat = mat(0x9aa0ad, { metalness: 0.85, roughness: 0.3 });
   const MAXL = 90;
-  const hooks: Hook[] = units.map((u) => {
+  const hookVis: HookVis[] = vis.map((u) => {
     const head = makeHookHead(TEAMS[u.id]);
     scene.add(head);
     const links = new THREE.InstancedMesh(linkG, linkMat, MAXL);
@@ -590,48 +591,33 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     scene.add(links);
     const light = new THREE.PointLight(TEAMS[u.id].glow, 0, 4, 1.8);
     scene.add(light);
-    return { owner: u, state: "idle" as const, tip: V(), dir: V(1, 0, 0), dist: 0, victim: null, head, links, light };
+    return { head, links, light, tip: V() };
   });
 
   // ===== Tillstånd =====
-  let phase: Phase = "idle";
-  let simT = 0, phaseT = 0, fightT = 0;
-  let radius = R0;
-  let score = [0, 0];
-  let round = 0;
-  let lastCount = -1;
-  let timeScale = 1, slowUntil = 0;
+  // Botläget: `sim` är sanningen. Nätläget: `sim` fylls från interpolerade ögonblicksbilder.
+  const sim: HookSim = createSim();
+  const bot = newBot(skill);
+  const snaps: HsSnap[] = [];
+  let lastEvAt = 0;
   let shake = 0;
   let punch = 0;
-  let punchAt = V();
-  let shrinkAnnounced = false;
+  const punchAt = V();
   const mouse = V(4, 0, 0);
-  const bot = { nextMove: 0, throwReadyAt: 0, dodgeAt: -1, dodgeDir: V() };
+  let lastScore = "";
 
-  const setPhase = (p: Phase) => { phase = p; phaseT = 0; onEvent({ type: "phase", phase: p }); };
-  const enemyOf = (u: Unit) => units[1 - u.id];
-  const handPos = (u: Unit, out = V()) => {
-    u.fig.root.updateMatrixWorld(true);
-    return u.fig.hand.getWorldPosition(out);
+  const sendInput = (m: HookInput) => {
+    if (!net) {
+      if ("move" in m) simMove(sim, 0, m.move);
+      else if ("hook" in m) simThrow(sim, 0, m.hook);
+      else simStop(sim, 0);
+    } else if (me !== null) opts.onInput?.(m);
   };
 
-  function resetRound() {
-    radius = R0; fightT = 0; shrinkAnnounced = false;
-    units.forEach((u, i) => {
-      u.pos.set(START[i][0], 0, START[i][1]); u.prev.copy(u.pos); u.vel.set(0, 0, 0);
-      u.target = null; u.face = i === 0 ? 0 : Math.PI; u.cdUntil = 0; u.windup = null; u.hooked = false; u.down = 0; u.armZ = 0.2;
-      u.fig.body.rotation.set(0, 0, 0); u.fig.body.position.set(0, 0, 0); u.fig.root.scale.setScalar(0.92);
-    });
-    hooks.forEach((h) => { h.state = "idle"; h.victim = null; });
-    bot.nextMove = 0; bot.throwReadyAt = 1.2 - skill * 0.6; bot.dodgeAt = -1;
-    lastCount = -1;
-  }
-
   function start() {
-    score = [0, 0]; round = 1;
-    onEvent({ type: "score", you: 0, bot: 0, round });
-    resetRound();
-    setPhase("intro");
+    if (net) return; // servern startar
+    startSim(sim);
+    onEvent({ type: "score", you: 0, bot: 0, round: 1 });
   }
 
   // ===== Input =====
@@ -645,33 +631,40 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     return ray.ray.intersectPlane(plane, out);
   };
   let moving = false;
-  const orderMove = (ev: PointerEvent) => {
+  let lastMoveSent = 0;
+  /** Mobil: tryck på KROK-knappen och sedan där kroken ska. */
+  let aimNext = false;
+  const orderMove = (ev: PointerEvent, force = false) => {
+    if (me === null) return;
     const p = V();
     if (!toGround(ev, p)) return;
-    const me = units[0];
-    if (phase !== "fight" && phase !== "intro") return;
-    me.target = p.setY(0);
+    if (sim.phase !== "fight" && sim.phase !== "intro") return;
+    const now = performance.now();
+    if (!force && net && now - lastMoveSent < 90) return; // högst ~11 st/s över nätet
+    lastMoveSent = now;
+    sendInput({ move: { x: p.x, z: p.z } });
     marker.position.set(p.x, 0.07, p.z); markerT = 0;
   };
   const onDown = (ev: PointerEvent) => {
     toGround(ev, mouse);
     if (ev.pointerType === "touch") {
-      // Mobil: tryck = gå. Tryck på den egna gubben = kasta mot senaste riktningen.
-      orderMove(ev);
+      if (aimNext) { aimNext = false; throwAtMouse(); return; }
+      orderMove(ev, true);
       return;
     }
-    if (ev.button === 2 || ev.button === 0) { moving = true; orderMove(ev); }
+    if (ev.button === 2 || ev.button === 0) { moving = true; orderMove(ev, true); }
   };
   const onMove = (ev: PointerEvent) => {
     toGround(ev, mouse);
     if (moving && ev.buttons) orderMove(ev);
   };
   const onUp = () => { moving = false; };
+  const throwAtMouse = () => { if (me !== null) sendInput({ hook: { x: mouse.x, z: mouse.z } }); };
   const onKey = (ev: KeyboardEvent) => {
-    if (ev.repeat) return;
+    if (ev.repeat || me === null) return;
     const k = ev.key.toLowerCase();
-    if (k === "q" || k === " " || k === "w") { ev.preventDefault(); tryThrow(units[0], mouse); }
-    if (k === "s") units[0].target = null;
+    if (k === "q" || k === " " || k === "w") { ev.preventDefault(); throwAtMouse(); }
+    if (k === "s") sendInput({ stop: true });
   };
   const noMenu = (e: Event) => e.preventDefault();
   renderer.domElement.addEventListener("pointerdown", onDown);
@@ -679,231 +672,70 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
   window.addEventListener("pointerup", onUp);
   window.addEventListener("keydown", onKey);
   renderer.domElement.addEventListener("contextmenu", noMenu);
+  /** Mobilens KROK-knapp: nästa tryck i arenan kastar dit. */
+  (host as HTMLElement & { aimHook?: () => void }).aimHook = () => { aimNext = true; };
 
-  // ===== Simulering =====
-  function tryThrow(u: Unit, at: THREE.Vector3) {
-    if (phase !== "fight" || u.hooked || u.windup || simT < u.cdUntil || hooks[u.id].state !== "idle") return false;
-    const dir = V(at.x - u.pos.x, 0, at.z - u.pos.z);
-    if (dir.lengthSq() < 0.01) dir.set(Math.cos(-u.face), 0, Math.sin(-u.face));
-    dir.normalize();
-    u.windup = { until: simT + WINDUP, dir };
-    u.cdUntil = simT + HOOK_CD;
-    u.face = Math.atan2(-dir.z, dir.x);
-    u.target = null;
-    return true;
-  }
-
-  function segBlocked(a: THREE.Vector3, b: THREE.Vector3, pad = 0.15) {
-    const d = V().subVectors(b, a); d.y = 0;
-    const L = d.length(); if (L < 1e-4) return false;
-    d.divideScalar(L);
-    for (const p of PILLARS) {
-      const t = clamp((p.x - a.x) * d.x + (p.z - a.z) * d.z, 0, L);
-      const cx = a.x + d.x * t, cz = a.z + d.z * t;
-      if (Math.hypot(cx - p.x, cz - p.z) < p.r + pad) return true;
-    }
-    return false;
-  }
-
+  // ===== Effekter från händelser =====
   function burst(at: THREE.Vector3, n: number, colors: number[], speed: number, life = 0.7, g = 6) {
     for (let i = 0; i < n; i++) {
       const v = V(rand(-1, 1), rand(0.2, 1.4), rand(-1, 1)).normalize().multiplyScalar(speed * rand(0.4, 1));
       sparks.spawn(at, v, life * rand(0.6, 1.2), colors[i % colors.length], g, 1.5);
     }
   }
-
-  function hookStep(h: Hook, dt: number) {
-    const u = h.owner;
-    if (h.state === "out") {
-      const stepLen = HOOK_SPEED * dt;
-      const prevTip = h.tip.clone();
-      h.tip.addScaledVector(h.dir, stepLen);
-      h.dist += stepLen;
-      const e = enemyOf(u);
-      if (!e.hooked && phase === "fight" && Math.hypot(h.tip.x - e.pos.x, h.tip.z - e.pos.z) < HIT_R) {
-        // Träff!
-        h.state = "pull"; h.victim = e; e.hooked = true; e.target = null; e.windup = null;
-        const eh = hooks[e.id];
-        if (eh.state === "out") eh.state = "back";
-        slowUntil = simT + 0.18; timeScale = 0.25;
-        shake = 0.5; punch = 1; punchAt.copy(e.pos);
-        burst(h.tip, 70, [TEAMS[u.id].glow, 0xffffff, 0xffe9a8], 8, 0.8);
-        onEvent({ type: "banner", text: "HOOKAD!", sub: u.id === 0 ? "Du fick tag i boten" : "Boten fick tag i dig", tone: u.id === 0 ? "win" : "lose" });
-        return;
-      }
-      if (segBlocked(prevTip, h.tip, 0.12)) {
-        h.state = "back";
-        burst(h.tip, 22, [0xffe9a8, 0xffd23f], 5, 0.45);
-        shake = Math.max(shake, 0.08);
-        return;
-      }
-      if (h.dist >= HOOK_RANGE) h.state = "back";
-    } else if (h.state === "back") {
-      const hp = handPos(u);
-      const d = V().subVectors(hp, h.tip);
-      const L = d.length();
-      if (L < 0.35) { h.state = "idle"; return; }
-      h.tip.addScaledVector(d.divideScalar(L), Math.min(L, HOOK_BACK * dt));
-      h.dir.copy(d).negate();
-    } else if (h.state === "pull") {
-      const v = h.victim!;
-      const goal = V(u.pos.x + Math.cos(-u.face) * 1.25, 1.1, u.pos.z + Math.sin(-u.face) * 1.25);
-      const d = V().subVectors(goal, h.tip); d.y = 0;
-      const L = d.length();
-      if (L < 0.12) {
-        if (phase === "fight") endRound(u);
-        return;
-      }
-      h.tip.addScaledVector(d.divideScalar(L), Math.min(L, PULL_SPEED * dt));
-      h.dir.copy(d).negate();
-      v.pos.set(h.tip.x, 0, h.tip.z);
-      if (Math.random() < 0.6) sparks.spawn(V(v.pos.x, 0.15, v.pos.z), V(rand(-1, 1), rand(0.5, 1.5), rand(-1, 1)), 0.5, 0x9a8a78, 3, 2);
-    }
+  function handle(e: HsEvent) {
+    if (e.k === "count") onEvent({ type: "countdown", n: e.n });
+    else if (e.k === "hit") {
+      shake = 0.5; punch = 1; punchAt.set(sim.units[1 - e.u].x, 0, sim.units[1 - e.u].z);
+      burst(V(e.x, 1.1, e.z), 70, [TEAMS[e.u].glow, 0xffffff, 0xffe9a8], 8, 0.8);
+      const mine = me === null ? null : e.u === me;
+      onEvent({ type: "banner", text: "HOOKAD!", sub: me === e.u ? `Du fick tag i ${names[1 - e.u]}` : me === 1 - e.u ? `${names[e.u]} fick tag i dig` : `${names[e.u]} fick tag i ${names[1 - e.u]}`,
+        tone: mine === null ? "info" : mine ? "win" : "lose" });
+    } else if (e.k === "block") {
+      burst(V(e.x, 1.1, e.z), 22, [0xffe9a8, 0xffd23f], 5, 0.45);
+      shake = Math.max(shake, 0.08);
+    } else if (e.k === "shrink") onEvent({ type: "banner", text: "Arenan krymper!", tone: "info" });
+    else if (e.k === "round") {
+      vis[1 - e.w].down = 0.001;
+      shake = 0.7; punch = 1; punchAt.set(sim.units[e.w].x, 0, sim.units[e.w].z);
+      burst(V(e.x, 1.3, e.z), 110, [TEAMS[e.w].glow, 0xffffff, 0xff7a3d, 0xffe9a8], 10, 1.0, 9);
+    } else if (e.k === "over") {
+      onEvent({ type: "over", winner: e.w, youWon: (me ?? 0) === e.w });
+    } else if (e.k === "phase") onEvent({ type: "phase", phase: e.p });
   }
 
-  function endRound(w: Unit) {
-    const l = enemyOf(w);
-    score[w.id]++;
-    l.down = 0.001;
-    shake = 0.7; punch = 1; punchAt.copy(w.pos);
-    const at = V(l.pos.x, 1.3, l.pos.z);
-    burst(at, 110, [TEAMS[w.id].glow, 0xffffff, 0xff7a3d, 0xffe9a8], 10, 1.0, 9);
-    hooks[w.id].state = "idle"; hooks[w.id].victim = null;
-    onEvent({ type: "score", you: score[0], bot: score[1], round });
-    setPhase("roundEnd");
-  }
-
-  function botThink() {
-    const me = units[1], you = units[0];
-    if (me.hooked || phase !== "fight") return;
-    const yh = hooks[0];
-    // Undan för inkommande krok
-    if (yh.state === "out" && bot.dodgeAt < 0) {
-      const rel = V(me.pos.x - yh.tip.x, 0, me.pos.z - yh.tip.z);
-      const along = rel.dot(yh.dir);
-      const remaining = HOOK_RANGE - yh.dist;
-      if (along > 0 && along < remaining + 0.5) {
-        const perp = rel.clone().addScaledVector(yh.dir, -along);
-        if (perp.length() < 1.35 && Math.random() < 0.35 + skill * 0.6) {
-          bot.dodgeAt = simT + lerp(0.36, 0.14, skill) + rand(0, 0.08);
-          const side = perp.lengthSq() > 1e-4 ? perp.normalize() : V(-yh.dir.z, 0, yh.dir.x).multiplyScalar(Math.random() < 0.5 ? 1 : -1);
-          bot.dodgeDir.copy(side);
-        }
-      }
+  // ===== Nätläge: interpolera ögonblicksbilder =====
+  const angLerp = (a: number, b: number, k: number) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * k;
+  function netUpdate() {
+    if (!snaps.length) return;
+    const rt = serverNow() - NET_DELAY_MS;
+    // Händelser när deras bild blir aktuell (så effekterna hamnar där gubbarna är)
+    while (snaps.length > 2 && snaps[1].at <= rt) snaps.shift();
+    let a = snaps[0], b = snaps[1] ?? snaps[0];
+    if (rt < a.at) b = a;
+    for (const s of snaps) if (s.at <= rt && s.at > lastEvAt) {
+      lastEvAt = s.at;
+      applySnap(sim, s);
+      for (const e of s.ev) handle(e);
     }
-    if (bot.dodgeAt > 0 && simT >= bot.dodgeAt) {
-      me.target = me.pos.clone().addScaledVector(bot.dodgeDir, 2.6);
-      bot.dodgeAt = -1; bot.nextMove = simT + 0.6;
+    if (rt < a.at) a = b = snaps[0];
+    const k = b.at > a.at ? clamp((rt - a.at) / (b.at - a.at), 0, 1) : 0;
+    applySnap(sim, b);
+    for (const i of [0, 1] as const) {
+      const ua = a.u[i], u = sim.units[i];
+      u.x = lerp(ua[0], b.u[i][0], k); u.z = lerp(ua[1], b.u[i][1], k); u.face = angLerp(ua[2], b.u[i][2], k);
+      const ha = a.h[i], hb = b.h[i], h = sim.hooks[i];
+      if (ha[0] === hb[0]) { h.x = lerp(ha[1], hb[1], k); h.z = lerp(ha[2], hb[2], k); }
     }
-    if (yh.state !== "out") bot.dodgeAt = -1;
-    // Positionering: håll ett lagom avstånd och sidoförflytta
-    if (simT >= bot.nextMove && !me.windup && hooks[1].state === "idle") {
-      const ang = Math.atan2(me.pos.z - you.pos.z, me.pos.x - you.pos.x) + rand(-0.8, 0.8);
-      const d = rand(5.2, 8);
-      const t = V(you.pos.x + Math.cos(ang) * d, 0, you.pos.z + Math.sin(ang) * d);
-      const lim = radius - 1.2;
-      if (t.length() > lim) t.setLength(lim);
-      me.target = t;
-      bot.nextMove = simT + rand(0.5, 1.3);
-    }
-    // Kasta
-    if (simT >= bot.throwReadyAt && simT >= me.cdUntil && hooks[1].state === "idle" && !me.windup) {
-      const dist = me.pos.distanceTo(you.pos);
-      if (dist < HOOK_RANGE * 0.93 && !segBlocked(me.pos, you.pos, 0.3)) {
-        const lead = (dist / HOOK_SPEED) * rand(0.35, 1.05) * (0.6 + skill * 0.4);
-        const aimAt = you.pos.clone().addScaledVector(you.vel, lead);
-        const err = (rand(-1, 1) * (1 - skill) * 14 + rand(-3, 3)) * (Math.PI / 180);
-        const d = V(aimAt.x - me.pos.x, 0, aimAt.z - me.pos.z).applyAxisAngle(V(0, 1, 0), err);
-        tryThrow(me, me.pos.clone().add(d));
-        bot.throwReadyAt = simT + HOOK_CD + rand(0.15, 1.1) * (1.3 - skill);
-      } else if (Math.random() < 0.02) {
-        bot.nextMove = simT; // byt plats för att få fri sikt
-      }
-    }
-  }
-
-  function step(dt: number) {
-    simT += dt; phaseT += dt;
-    if (phase === "intro") {
-      const n = 3 - Math.floor(phaseT / 0.8);
-      if (n !== lastCount) { lastCount = n; onEvent({ type: "countdown", n: n > 0 ? n : 0 }); }
-      if (phaseT >= 2.4) { onEvent({ type: "countdown", n: null }); setPhase("fight"); }
-    } else if (phase === "fight") {
-      fightT += dt;
-      const k = clamp((fightT - SHRINK_AT) / SHRINK_DUR, 0, 1);
-      radius = lerp(R0, R_MIN, k * k * (3 - 2 * k));
-      if (k > 0 && !shrinkAnnounced) { shrinkAnnounced = true; onEvent({ type: "banner", text: "Arenan krymper!", tone: "info" }); }
-      botThink();
-    } else if (phase === "roundEnd") {
-      if (phaseT >= 2.2) {
-        if (score[0] >= WINS || score[1] >= WINS) {
-          setPhase("over");
-          onEvent({ type: "over", youWon: score[0] > score[1] });
-        } else {
-          round++;
-          onEvent({ type: "score", you: score[0], bot: score[1], round });
-          resetRound();
-          setPhase("intro");
-        }
-      }
-    }
-
-    for (const u of units) {
-      u.prev.copy(u.pos);
-      const h = hooks[u.id];
-      if (u.windup && simT >= u.windup.until) {
-        h.state = "out"; h.dir.copy(u.windup.dir); h.dist = 0;
-        handPos(u, h.tip); h.tip.y = 1.1;
-        u.windup = null;
-      }
-      const canMove = (phase === "fight" || phase === "intro") && !u.hooked && !u.windup && h.state === "idle" && u.down === 0;
-      if (canMove && u.target && phase === "fight") {
-        const d = V(u.target.x - u.pos.x, 0, u.target.z - u.pos.z);
-        const L = d.length();
-        if (L < 0.08) u.target = null;
-        else {
-          d.divideScalar(L);
-          u.pos.addScaledVector(d, Math.min(L, MOVE * dt));
-          const want = Math.atan2(-d.z, d.x);
-          let da = want - u.face; da = Math.atan2(Math.sin(da), Math.cos(da));
-          u.face += da * Math.min(1, dt * 14);
-          u.walk += dt * 11;
-        }
-      } else if (canMove && phase === "intro" && u.target) {
-        const d = V(u.target.x - u.pos.x, 0, u.target.z - u.pos.z);
-        u.face += Math.atan2(Math.sin(Math.atan2(-d.z, d.x) - u.face), Math.cos(Math.atan2(-d.z, d.x) - u.face)) * Math.min(1, dt * 10);
-      }
-    }
-    for (const h of hooks) hookStep(h, dt);
-
-    // Kollisioner: pelare, varandra, arenans kant
-    for (const u of units) {
-      if (u.hooked) continue;
-      for (const p of PILLARS) {
-        const dx = u.pos.x - p.x, dz = u.pos.z - p.z;
-        const d = Math.hypot(dx, dz), min = p.r + UNIT_R;
-        if (d < min && d > 1e-4) { u.pos.x = p.x + (dx / d) * min; u.pos.z = p.z + (dz / d) * min; }
-      }
-      const lim = radius - UNIT_R;
-      const d = Math.hypot(u.pos.x, u.pos.z);
-      if (d > lim) u.pos.multiplyScalar(lim / d);
-    }
-    const [a, b] = units;
-    if (!a.hooked && !b.hooked) {
-      const dx = b.pos.x - a.pos.x, dz = b.pos.z - a.pos.z, d = Math.hypot(dx, dz);
-      if (d < UNIT_R * 2 && d > 1e-4) {
-        const push = (UNIT_R * 2 - d) / 2;
-        a.pos.x -= (dx / d) * push; a.pos.z -= (dz / d) * push;
-        b.pos.x += (dx / d) * push; b.pos.z += (dz / d) * push;
-      }
-    }
-    for (const u of units) u.vel.subVectors(u.pos, u.prev).divideScalar(dt);
   }
 
   // ===== Grafik =====
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), q2 = new THREE.Quaternion(), sc = V(), tmp = V();
   const X = V(1, 0, 0);
-  function drawChain(h: Hook, from: THREE.Vector3, to: THREE.Vector3, sag: number, t: number) {
+  const handPos = (u: Vis, out = V()) => {
+    u.fig.root.updateMatrixWorld(true);
+    return u.fig.hand.getWorldPosition(out);
+  };
+  function drawChain(h: HookVis, out: boolean, from: THREE.Vector3, to: THREE.Vector3, sag: number, t: number) {
     const d = V().subVectors(to, from);
     const L = d.length();
     const n = Math.min(MAXL, Math.max(2, Math.floor(L / 0.15)));
@@ -911,10 +743,10 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     q.setFromUnitVectors(X, dir);
     sc.set(1.35, 1, 1);
     for (let i = 0; i < n; i++) {
-      const k = (i + 0.5) / n;
-      tmp.copy(from).addScaledVector(d, k);
-      tmp.y -= Math.sin(k * Math.PI) * sag;
-      tmp.y += Math.sin(k * 14 - t * 0.03) * 0.02 * (h.state === "out" ? 1 : 0);
+      const kk = (i + 0.5) / n;
+      tmp.copy(from).addScaledVector(d, kk);
+      tmp.y -= Math.sin(kk * Math.PI) * sag;
+      tmp.y += Math.sin(kk * 14 - t * 0.03) * 0.02 * (out ? 1 : 0);
       q2.setFromAxisAngle(X, i % 2 ? Math.PI / 2 : 0);
       m4.compose(tmp, q.clone().multiply(q2), sc);
       h.links.setMatrixAt(i, m4);
@@ -937,7 +769,6 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     renderer.setSize(W, H, false);
     composer?.setSize(W, H);
     camera.aspect = W / H;
-    // Håll hela arenan i bild även på smala skärmar
     camera.fov = clamp((2 * Math.atan(0.42 / Math.min(1, camera.aspect / 1.5)) * 180) / Math.PI, 38, 70);
     camera.updateProjectionMatrix();
   };
@@ -948,7 +779,6 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
   const CAM_OFF = V(0, 14, 12.6);
   const camFocus = V();
   let last = performance.now();
-  let acc = 0;
   let raf = 0;
   let disposed = false;
 
@@ -958,35 +788,45 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     const nowMs = performance.now();
     const rdt = Math.min(0.05, (nowMs - last) / 1000);
     last = nowMs;
-    if (simT >= slowUntil) timeScale = lerp(timeScale, 1, Math.min(1, rdt * 6));
-    acc += rdt * timeScale;
-    while (acc >= STEP) { step(STEP); acc -= STEP; }
+    if (net) netUpdate();
+    else {
+      advanceSim(sim, rdt, (s) => botThink(s, 1, bot, skill));
+      for (const e of drainEvents(sim)) handle(e);
+    }
+    const sc0 = `${sim.score[0]}-${sim.score[1]}-${sim.round}`;
+    if (sc0 !== lastScore && sim.round > 0) { lastScore = sc0; onEvent({ type: "score", you: sim.score[0], bot: sim.score[1], round: sim.round }); }
     const t = nowMs;
+    const phase = sim.phase;
 
     // Figurer
-    for (const u of units) {
+    for (const u of vis) {
+      const su = sim.units[u.id];
+      u.pos.set(su.x, 0, su.z); u.vel.set(su.vx, 0, su.vz);
+      if (!su.down && u.down > 0) u.down = 0; // ny rond
       const f = u.fig;
       f.root.position.set(u.pos.x, 0, u.pos.z);
-      f.root.rotation.y = u.face;
-      const walking = u.vel.lengthSq() > 0.5 && !u.hooked;
+      f.root.rotation.y = su.face;
+      const walking = u.vel.lengthSq() > 0.5 && !su.hooked;
       if (!walking) u.walk = lerp(u.walk, Math.round(u.walk / Math.PI) * Math.PI, Math.min(1, rdt * 10));
+      else u.walk += rdt * 11;
       const sw = Math.sin(u.walk);
       f.legs[0].rotation.z = sw * 0.6; f.legs[1].rotation.z = -sw * 0.6;
       f.body.position.y = Math.abs(sw) * 0.07 + Math.sin(t / 420 + u.id) * 0.015;
-      f.body.rotation.x = sw * 0.06;
+      f.body.rotation.set(sw * 0.06, 0, 0);
       f.otherArm.rotation.z = -sw * 0.45 + 0.15; f.otherArm.rotation.x = 0.18;
-      const h = hooks[u.id];
+      const h = sim.hooks[u.id];
       let wantArm = 0.2 + sw * 0.35;
-      if (u.windup) wantArm = -1.1;
+      if (su.windup) wantArm = -1.1;
       else if (h.state === "out" || h.state === "pull") wantArm = 1.5;
       else if (h.state === "back") wantArm = 1.0;
-      u.armZ = lerp(u.armZ, wantArm, Math.min(1, rdt * (u.windup ? 24 : 14)));
+      u.armZ = lerp(u.armZ, wantArm, Math.min(1, rdt * (su.windup ? 24 : 14)));
       f.hookArm.rotation.z = u.armZ; f.hookArm.rotation.x = -0.2;
-      if (u.hooked && u.down === 0) {
+      f.root.scale.setScalar(0.92);
+      if (su.hooked && u.down === 0) {
         f.body.rotation.z = Math.sin(t / 50) * 0.25;
         f.hookArm.rotation.z = 2.6 + Math.sin(t / 70) * 0.3; f.otherArm.rotation.z = 2.4 + Math.cos(t / 60) * 0.3;
-        f.root.rotation.y = h.state === "idle" ? Math.atan2(-(enemyOf(u).pos.z - u.pos.z), enemyOf(u).pos.x - u.pos.x) : u.face;
       }
+      if (su.down && u.down === 0) u.down = 0.001;
       if (u.down > 0) {
         u.down = Math.min(1, u.down + rdt * 2.2);
         const k = 1 - (1 - u.down) ** 3;
@@ -998,32 +838,37 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     }
 
     // Krokar och kedjor
-    for (const h of hooks) {
-      const hp = handPos(h.owner);
+    hookVis.forEach((hv, i) => {
+      const h = sim.hooks[i];
+      const owner = vis[i];
+      const hp = handPos(owner);
       if (h.state === "idle") {
-        const sway = Math.sin(t / 300 + h.owner.id) * 0.06;
+        const sway = Math.sin(t / 300 + i) * 0.06;
         const tip = V(hp.x + sway, hp.y - 0.5, hp.z);
-        h.head.position.copy(tip);
-        h.head.rotation.set(0, h.owner.face, -Math.PI / 2 + sway);
-        drawChain(h, hp, tip, 0, t);
-        h.light.intensity = lerp(h.light.intensity, 0, Math.min(1, rdt * 10));
+        hv.head.position.copy(tip);
+        hv.head.rotation.set(0, sim.units[i].face, -Math.PI / 2 + sway);
+        drawChain(hv, false, hp, tip, 0, t);
+        hv.light.intensity = lerp(hv.light.intensity, 0, Math.min(1, rdt * 10));
       } else {
-        h.head.position.copy(h.tip);
-        const yaw = Math.atan2(-h.dir.z, h.dir.x);
-        h.head.rotation.set(0, yaw, 0);
-        if (h.state === "out") h.head.rotation.x = t / 40;
-        drawChain(h, hp, h.tip, h.state === "back" ? 0.25 : 0.05, t);
-        h.light.position.copy(h.tip);
-        h.light.intensity = lerp(h.light.intensity, 8, Math.min(1, rdt * 12));
-        if (h.state === "out" && Math.random() < 0.9) sparks.spawn(h.tip, V(rand(-0.4, 0.4), rand(0, 0.5), rand(-0.4, 0.4)), 0.35, TEAMS[h.owner.id].glow, 0, 2);
+        // Simuleringens krokspets ligger i planet; i bild utgår den från den riktiga handen.
+        const sh = handOf(sim.units[i]);
+        hv.tip.set(h.x + (hp.x - sh.x) * 0.15, 1.1, h.z + (hp.z - sh.z) * 0.15);
+        hv.head.position.copy(hv.tip);
+        hv.head.rotation.set(0, Math.atan2(-h.dz, h.dx), 0);
+        if (h.state === "out") hv.head.rotation.x = t / 40;
+        drawChain(hv, h.state === "out", hp, hv.tip, h.state === "back" ? 0.25 : 0.05, t);
+        hv.light.position.copy(hv.tip);
+        hv.light.intensity = lerp(hv.light.intensity, 8, Math.min(1, rdt * 12));
+        if (h.state === "out" && Math.random() < 0.9) sparks.spawn(hv.tip, V(rand(-0.4, 0.4), rand(0, 0.5), rand(-0.4, 0.4)), 0.35, TEAMS[i].glow, 0, 2);
+        if (h.state === "pull" && Math.random() < 0.6) { const v = sim.units[1 - i]; sparks.spawn(V(v.x, 0.15, v.z), V(rand(-1, 1), rand(0.5, 1.5), rand(-1, 1)), 0.5, 0x9a8a78, 3, 2); }
       }
-    }
+    });
 
     // Cooldownringar
     rings.forEach((ring, i) => {
-      const u = units[i];
-      ring.position.set(u.pos.x, 0, u.pos.z);
-      const ready = clamp(1 - (u.cdUntil - simT) / HOOK_CD, 0, 1);
+      const su = sim.units[i];
+      ring.position.set(su.x, 0, su.z);
+      const ready = clamp(1 - (su.cdUntil - sim.t) / HOOK_CD, 0, 1);
       const lit = Math.round(ready * DASH);
       const c = new THREE.Color();
       for (let d = 0; d < DASH; d++) {
@@ -1031,16 +876,18 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
         ring.setColorAt(d, c);
       }
       ring.instanceColor!.needsUpdate = true;
-      ring.visible = phase !== "idle" && units[i].down === 0;
+      ring.visible = phase !== "idle" && vis[i].down === 0;
     });
 
-    // Sikte
-    const me = units[0];
-    const ready = simT >= me.cdUntil && hooks[0].state === "idle" && !me.hooked;
-    aim.visible = (phase === "fight" || phase === "intro") && !me.hooked;
-    aim.position.set(me.pos.x, 0.06, me.pos.z);
-    aim.rotation.y = Math.atan2(-(mouse.z - me.pos.z), mouse.x - me.pos.x);
-    aimMat.opacity = lerp(aimMat.opacity, ready ? 0.2 : 0.05, Math.min(1, rdt * 10));
+    // Sikte (bara för den som spelar)
+    if (me !== null) {
+      const mu = sim.units[me];
+      const ready = mu.cdUntil - sim.t <= 0 && sim.hooks[me].state === "idle" && !mu.hooked;
+      aim.visible = (phase === "fight" || phase === "intro") && !mu.hooked;
+      aim.position.set(mu.x, 0.06, mu.z);
+      aim.rotation.y = Math.atan2(-(mouse.z - mu.z), mouse.x - mu.x);
+      aimMat.opacity = lerp(aimMat.opacity, ready ? (aimNext ? 0.45 : 0.2) : 0.05, Math.min(1, rdt * 10));
+    } else aim.visible = false;
 
     // Klickmarkör
     if (markerT >= 0) {
@@ -1052,6 +899,7 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
     }
 
     // Arenans kant
+    const radius = sim.radius;
     const shrinking = radius < R0 - 0.01;
     voidRing.scale.set(radius, radius, 1);
     edgeGlow.scale.set(radius, radius, 1);
@@ -1075,16 +923,17 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
       if (motePos[i * 3 + 1] > 6.5) motePos[i * 3 + 1] = 0.3;
     }
     moteGeo.attributes.position.needsUpdate = true;
-    sparks.update(rdt * Math.max(timeScale, 0.4));
+    sparks.update(rdt * Math.max(sim.timeScale, 0.4));
     fire.update(rdt);
 
-    // Kamera: följer lite mot spelaren, rycker in vid träff
-    const focusWant = phase === "idle" ? V(Math.sin(t / 4000) * 1.5, 0, 0) : V(me.pos.x * 0.3, 0, me.pos.z * 0.25 + 0.4);
+    // Kamera: följer lite mot den egna gubben (åskådare: mitt emellan), rycker in vid träff
+    const focus = me !== null ? vis[me].pos : V().addVectors(vis[0].pos, vis[1].pos).multiplyScalar(0.5);
+    const focusWant = phase === "idle" ? V(Math.sin(t / 4000) * 1.5, 0, 0) : V(focus.x * 0.3, 0, focus.z * 0.25 + 0.4);
     camFocus.lerp(focusWant, Math.min(1, rdt * 2.5));
     punch = Math.max(0, punch - rdt * 0.7);
-    const p = punch * punch;
-    const look = camFocus.clone().lerp(punchAt, p * 0.6);
-    const pos = look.clone().add(CAM_OFF.clone().multiplyScalar(1 - p * 0.35));
+    const pp = punch * punch;
+    const look = camFocus.clone().lerp(punchAt, pp * 0.6);
+    const pos = look.clone().add(CAM_OFF.clone().multiplyScalar(1 - pp * 0.35));
     if (phase === "idle") pos.x += Math.sin(t / 3000) * 2;
     camera.position.copy(pos);
     shake = Math.max(0, shake - rdt * 1.6);
@@ -1093,11 +942,14 @@ export function createHookOff(host: HTMLElement, onEvent: (e: HookEvent) => void
 
     if (composer) composer.render(); else renderer.render(scene, camera);
   };
-  resetRound();
   raf = requestAnimationFrame(frame);
 
   return {
     start,
+    push(snap: HsSnap) {
+      snaps.push(snap);
+      if (snaps.length > 40) snaps.splice(0, snaps.length - 40);
+    },
     dispose() {
       disposed = true;
       cancelAnimationFrame(raf);

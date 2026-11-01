@@ -252,6 +252,87 @@ export const sfx = {
   },
 };
 
+// ===== Hookertime (anime-intro) =====
+// Medvetet bryter de här mot den mjuka ljudprofilen: det ska kännas som att något går sönder.
+
+/** Kort fyrkantsstöt (digitalt fel). */
+function blip(when: number, f: number, dur: number, vel: number) {
+  safe((c) => {
+    const t = c.currentTime + when;
+    const o = c.createOscillator(); o.type = "square"; o.frequency.setValueAtTime(f, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(30, f * (Math.random() < 0.5 ? 0.25 : 3)), t + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(vel, t); g.gain.setValueAtTime(0.0001, t + dur);
+    o.connect(g); route(g, 0); o.start(t); o.stop(t + dur + 0.01);
+  });
+}
+
+export const hookSfx = {
+  /** Glitch: hackiga digitala stötar och brus i ~1,6 s. */
+  glitch: () => {
+    let t = 0;
+    while (t < 1.6) {
+      const d = 0.02 + Math.random() * 0.09;
+      if (Math.random() < 0.6) blip(t, 80 + Math.random() * 2400, d, 0.05 + Math.random() * 0.05);
+      else breath(t, d + 0.03, 200 + Math.random() * 6000, 100 + Math.random() * 8000, 0.12, 4, 0, "bandpass");
+      t += d + Math.random() * 0.07;
+    }
+  },
+  /** Stort anime-slag: djup kick, smäll och lång klang. */
+  impact: () => {
+    safe((c) => {
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type = "sine";
+      o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(32, t + 0.6);
+      const g = c.createGain(); g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      o.connect(g); route(g, 0.4); o.start(t); o.stop(t + 1.2);
+    });
+    breath(0, 0.5, 4000, 300, 0.22, 0.6, 1.2, "lowpass");
+    chord([38, 45, 50, 57], 0, 2.2, 0.05, 0);
+  },
+  /** Svisch som ett svärd: brus som sveper upp och en metallisk ton. */
+  slash: () => {
+    breath(0, 0.28, 900, 9000, 0.16, 1.4, 0.4, "bandpass");
+    safe((c) => {
+      const t = c.currentTime + 0.1;
+      for (const f of [2960, 4410]) {
+        const o = c.createOscillator(); o.type = "sine"; o.frequency.value = f;
+        const g = c.createGain(); g.gain.setValueAtTime(0.03, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+        o.connect(g); route(g, 0.8); o.start(t); o.stop(t + 0.95);
+      }
+    });
+  },
+  /** Stigande spänning (brus + sågtand uppåt) under `dur` sekunder. */
+  riser: (dur = 2) => {
+    breath(0, dur, 300, 9000, 0.1, 1, 0.5, "highpass");
+    safe((c) => {
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type = "sawtooth";
+      o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(880, t + dur);
+      const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(5000, t + dur);
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + dur * 0.9); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.05);
+      o.connect(f).connect(g); route(g, 0.3); o.start(t); o.stop(t + dur + 0.1);
+    });
+  },
+  /** Mässingsstöt (VS-skärmen): mollackord i breda sågtänder. */
+  stab: () => {
+    safe((c) => {
+      const t = c.currentTime;
+      for (const n of [50, 57, 62, 65, 69]) for (const det of [-8, 8]) {
+        const o = c.createOscillator(); o.type = "sawtooth"; o.frequency.value = midi(n); o.detune.value = det;
+        const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(3500, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.8);
+        const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.025, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+        o.connect(f).connect(g); route(g, 0.5); o.start(t); o.stop(t + 1.4);
+      }
+    });
+    kick(0, 0.3);
+  },
+  /** Matchljud */
+  throw: () => breath(0, 0.22, 3000, 700, 0.07, 1.2, 0.2),
+  hit: () => { kick(0, 0.3); breath(0, 0.3, 5000, 600, 0.14, 1, 0.5); blip(0, 1200, 0.05, 0.04); },
+  clank: () => { kalimba(91, 0, 0.06, 0.3); breath(0, 0.08, 4000, 2000, 0.05, 3, 0.2); },
+  roundWin: () => { hookSfx.impact(); [72, 76, 79].forEach((n, i) => kalimba(n, 0.1 + i * 0.08, 0.08)); },
+};
+
 // ===== Röst (Kenta) =====
 
 /**

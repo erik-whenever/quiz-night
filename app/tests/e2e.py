@@ -21,7 +21,7 @@ LIB = """
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   // Rummen i testerna spelar "alla samtidigt" utan buzzer om testet inte säger annat.
   const mkRoom = async (body) => {
-    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, drunk: false, ...(body.settings ?? {}) } };
+    body = { ...body, settings: { playMode: 'all', buzzEvery: 0, autoplay: false, drunk: false, hookertime: false, ...(body.settings ?? {}) } };
     const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: res.status, ...(await res.json()) };
   };
@@ -34,6 +34,7 @@ LIB = """
       if (m.t === 'joined') c.id = m.playerId;
       if (m.t === 'error') c.errors.push(m.message);
       if (m.t === 'state') { c.raw.push(ev.data); c.state = m.state; c.waiters = c.waiters.filter((w) => !w()); }
+      if (m.t === 'ho') { c.ho = m.s; c.hoCount = (c.hoCount ?? 0) + 1; }
     };
     ws.onopen = () => resolve(c);
   });
@@ -570,11 +571,96 @@ DRUNK_JS = js("""
   return out;
 """)
 
+# Hookertime: urvalet (4 och 3 spelare), skydd, och en hel match över nätet med +2/−2 p.
+HOOK_JS = js("""
+  const tag = Math.random().toString(36).slice(2, 6);
+  const q = (i) => ({ id: 'h' + i, text: 'H' + i, answer: 'R', choices: ['R', 'F'] });
+  const toReveal = async (host) => { send(host, { t: 'host:start' }); await until(host, (s) => s.phase === 'collect'); send(host, { t: 'host:judge' }); await until(host, (s) => s.phase === 'reveal'); };
+  const pairOf = (h) => [h.hooker, h.opponent];
+  const out = {};
+  {
+    const room = await mkRoom({ title: 'HK4', settings: { hookertime: true }, questions: [q(1), q(2), q(3), q(4), q(5), q(6)] });
+    const host = await connect(room.code, 'host', room.hostKey);
+    const ps = await players(room.code, ['A' + tag, 'B' + tag, 'C' + tag, 'D' + tag]);
+    const ids = Object.values(ps).map((p) => p.id);
+    await until(host, (s) => s.players.length === 4);
+    send(host, { t: 'host:hookertime' }); await sleep(150);
+    out.hookInLobby = host.errors.splice(0);
+    await toReveal(host);
+    send(Object.values(ps)[0], { t: 'host:hookertime' }); await sleep(150);
+    out.playerHook = Object.values(ps)[0].errors.slice();
+    send(host, { t: 'host:hookertime' });
+    const h1 = (await until(host, (s) => !!s.hookertime)).hookertime;
+    out.first = { inPlayers: ids.includes(h1.hooker) && ids.includes(h1.opponent), poolOk: h1.pool.length === 3 && !h1.pool.includes(h1.hooker) && h1.pool.includes(h1.opponent), stage: h1.stage, n: h1.n };
+    send(host, { t: 'host:next' }); await sleep(150);
+    out.nextBlocked = host.errors.splice(0);
+    send(host, { t: 'host:hookertime:stop' });
+    await until(host, (s) => !s.hookertime);
+    send(host, { t: 'host:hookertime' });
+    const h2 = (await until(host, (s) => !!s.hookertime)).hookertime;
+    out.second4 = !pairOf(h1).includes(h2.hooker) && !pairOf(h1).includes(h2.opponent) && h2.n === 2;
+    send(host, { t: 'host:hookertime:stop' }); await until(host, (s) => !s.hookertime);
+    closeAll(host, ...Object.values(ps));
+  }
+  {
+    const room = await mkRoom({ title: 'HK3', settings: { hookertime: true }, questions: [q(1), q(2), q(3), q(4)] });
+    const host = await connect(room.code, 'host', room.hostKey);
+    const ps = await players(room.code, ['E' + tag, 'F' + tag, 'G' + tag]);
+    await until(host, (s) => s.players.length === 3);
+    await toReveal(host);
+    send(host, { t: 'host:hookertime' });
+    const h1 = (await until(host, (s) => !!s.hookertime)).hookertime;
+    send(host, { t: 'host:hookertime:stop' }); await until(host, (s) => !s.hookertime);
+    send(host, { t: 'host:hookertime' });
+    const h2 = (await until(host, (s) => !!s.hookertime)).hookertime;
+    out.second3 = !pairOf(h1).includes(h2.hooker) && h2.pool.length === 2 && h2.pool.every((x) => pairOf(h1).includes(x));
+    send(host, { t: 'host:hookertime:stop' }); await until(host, (s) => !s.hookertime);
+    closeAll(host, ...Object.values(ps));
+  }
+  {
+    const room = await mkRoom({ title: 'HK2', settings: { hookertime: true }, questions: [q(1), q(2), q(3)] });
+    const host = await connect(room.code, 'host', room.hostKey);
+    const tv = await connect(room.code, 'tv');
+    const ps = await players(room.code, ['H' + tag, 'I' + tag]);
+    await until(host, (s) => s.players.length === 2);
+    await toReveal(host);
+    send(host, { t: 'host:hookertime' });
+    const h = (await until(host, (s) => !!s.hookertime)).hookertime;
+    const P = Object.values(ps);
+    const hk = P.find((p) => p.id === h.hooker);
+    out.introMs = h.matchAt - h.startedAt;
+    await untilRaw(host, (s) => s.hookertime?.stage === 'match', 25000);
+    send(host, { t: 'hook', move: { x: 0, z: 0 } });
+    const t0 = Date.now();
+    let throws = 0;
+    while (Date.now() - t0 < 60000) {
+      await sleep(100);
+      const st = host.state.hookertime;
+      if (!st || st.stage !== 'match') break;
+      const s = hk.ho;
+      if (!s || s.ph !== 'fight') continue;
+      const [a, b] = [s.u[0], s.u[1]];
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (s.h[0][0] !== 0 || a[7] > 0 || a[8]) continue;
+      if (d > 8.5) send(hk, { t: 'hook', move: { x: b[0] - (b[0] - a[0]) / d * 6, z: b[1] - (b[1] - a[1]) / d * 6 } });
+      else { send(hk, { t: 'hook', hook: { x: b[0], z: b[1] } }); throws++; }
+    }
+    const fin = await untilRaw(host, (s) => s.hookertime?.stage === 'result', 5000);
+    const sc = (id) => fin.players.find((p) => p.id === id).score;
+    out.match = { winnerIsHooker: fin.hookertime.winner === h.hooker, rounds: fin.hookertime.rounds, hookerScore: sc(h.hooker), oppScore: sc(h.opponent), throws,
+      tvGotSnaps: (tv.hoCount ?? 0) > 50, coins: fin.coinsTonight[h.hooker] ?? 0 };
+    const after = await untilRaw(host, (s) => !s.hookertime, 10000);
+    out.afterPhase = after.phase;
+    closeAll(host, tv, ...P);
+  }
+  return out;
+""")
+
 SKILL_JS = """
 async ([pin]) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false }, questions: [
+    body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false, hookertime: false }, questions: [
       { id: 'k1', text: 'Flick', answer: '', mode: 'skill', skill: { kind: 'aim' } },
       { id: 'k2', text: 'Ordna', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'Z', value: 3 }, { label: 'X', value: 1 }, { label: 'Y', value: 2 }] } },
       { id: 'k3', text: 'Trasig', answer: '', mode: 'skill', skill: { kind: 'order', items: [{ label: 'A', value: 1 }] } } ] }) });
@@ -747,7 +833,7 @@ def create_room(host, title, questions, settings):
     return host.evaluate("""async ([pin, body]) => {
       const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const r = await res.json(); localStorage.setItem('kronan.host.' + r.code, r.hostKey); return r; }""",
-        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, "drunk": False, **settings}}])
+        [PIN, {"title": title, "questions": questions, "settings": {"playMode": "all", "buzzEvery": 0, "autoplay": False, "drunk": False, "hookertime": False, **settings}}])
 
 
 def join(page, code, name):
@@ -851,6 +937,32 @@ def main():
         shot(tv, "08-tv-facit")
 
         assert host.get_by_role("button", name="Hooker-off nu").count() == 0, "Kentas hooker-off-knapp syns fast han är pausad"
+
+        # Hookertime: glitch, anime-intro med hooker, hjul och instruktioner, sedan matchen i 3D för de två
+        host.get_by_role("button", name="Hookertime nu").click()
+        expect(tv.locator(".hk-glitch")).to_be_visible()
+        expect(tv.locator(".hk-title")).to_have_text("HOOKERTIME", timeout=6000)
+        tv.wait_for_timeout(700)
+        shot(tv, "08d-tv-hookertime-titel")
+        expect(tv.locator(".hk-pick .hk-name")).to_have_text(re.compile("^(Erik|Tobbe)$"), timeout=6000)
+        shot(tv, "08e-tv-hookertime-hooker")
+        expect(tv.locator(".hk-howto")).to_be_visible(timeout=15000)
+        expect(p1.locator(".hk-you")).to_have_text(re.compile("Du är (blå|röd)"))
+        expect(tv.locator(".hk-howto")).to_contain_text("Vinnaren tar 2 p")
+        tv.wait_for_timeout(900)
+        shot(tv, "08f-tv-hookertime-vs")
+        shot(p1, "08g-spelare-hookertime-vs")
+        expect(p1.locator(".hk-match .ho.ready, .hk-match .hk-sub").first).to_be_visible(timeout=40000)
+        expect(tv.locator(".hk-match")).to_be_visible()
+        p1.wait_for_timeout(1500)
+        shot(tv, "08h-tv-hookertime-match")
+        host.get_by_role("button", name="Avbryt Hookertime").click()
+        expect(tv.locator(".hk")).to_have_count(0, timeout=20000)
+        # Resten av kvällen utan Hookertime (annars kan den slå till mitt i testet)
+        host.get_by_text("Kvällens regler").click()
+        host.get_by_label(re.compile("^Hookertime")).click()
+        expect(host.get_by_label(re.compile("^Hookertime"))).not_to_be_checked()
+        host.get_by_text("Kvällens regler").click()   # stäng reglerna igen
         expect(tv.locator("html[data-music=lift]")).to_have_count(1)   # hissmusik mellan frågorna
 
         # Lyckohjulet: hosten snurrar mellan frågorna, TV och spelare ser samma utfall
@@ -1101,7 +1213,7 @@ def main():
         # Skill-utmaningar: Erik spelar alla fem på riktigt, Tobbe laddar om mitt i och blir diskad
         sdata = host.evaluate("""async ([pin]) => {
           const res = await fetch('/api/rooms', { method: 'POST', headers: { 'x-host-pin': pin, 'content-type': 'application/json' },
-            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false }, questions: [
+            body: JSON.stringify({ title: 'Skill', settings: { hostPlays: false, autoplay: false, drunk: false, hookertime: false }, questions: [
               { id: 'k1', text: 'Last hit!', answer: '', mode: 'skill', skill: { kind: 'lasthit' } },
               { id: 'k2', text: 'Flick!', answer: '', mode: 'skill', skill: { kind: 'aim' } },
               { id: 'k3', text: 'Stoppa klockan!', answer: '', mode: 'skill', skill: { kind: 'stopwatch', target: 3 } },
@@ -1387,6 +1499,20 @@ def main():
         assert all(dr["hook"].values()), f"Hooker-off fel: {dr['hook']}"
         assert dr["off"] is None, "Kenta syns trots avstängd"
         assert dr["skipMs"] < 1500, f"Start under introt hoppade inte över Kenta: {dr['skipMs']} ms"
+
+        hk = raw.evaluate(HOOK_JS, [PIN])
+        print("Hookertime:", hk)
+        assert hk["hookInLobby"] == ["Hookertime startar när svaret visas"], f"Hookertime i lobbyn: {hk['hookInLobby']}"
+        assert hk["playerHook"] == ["Bara hosten kan göra det"], "Spelare kunde starta Hookertime"
+        assert hk["first"] == {"inPlayers": True, "poolOk": True, "stage": "intro", "n": 1}, f"Första urvalet fel: {hk['first']}"
+        assert hk["nextBlocked"] == ["Hookertime pågår"], f"Nästa fråga gick under Hookertime: {hk['nextBlocked']}"
+        assert hk["second4"], "Med 4 spelare ska de två som inte var med mötas andra gången"
+        assert hk["second3"], "Med 3 spelare ska den tredje vara hooker och hjulet välja bland de två"
+        m = hk["match"]
+        assert m["winnerIsHooker"] and m["rounds"] == [2, 0], f"Matchen avgjordes fel: {m}"
+        assert m["hookerScore"] == 2 and m["oppScore"] == -2, f"Vinnaren ska ta 2 p av förloraren: {m}"
+        assert m["tvGotSnaps"] and m["coins"] >= 2, f"TV:n fick inga ögonblicksbilder eller mynt saknas: {m}"
+        assert hk["afterPhase"] == "reveal", f"Kvällen fortsatte inte efter Hookertime: {hk['afterPhase']}"
 
         sk = raw.evaluate(SKILL_JS, [PIN])
         print("Skill:", sk)
