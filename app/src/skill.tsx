@@ -4,13 +4,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { ClientMsg, HostState, PlayerPublic } from "../shared/types";
 import {
-  AIM_MISS_MS, AIM_TARGETS, ARROW_FLIGHT_MS, BOW_COOLDOWN_MS, BOW_DRAW_MS, LASTHIT_CREEPS, SKILLS, type SkillKind, type SkillResult, type SkillSpec,
-  aimCourse, lasthitCourse, pourCourse, rankSkill, skillText,
+  AIM_DECOY_MS, AIM_ESCAPE_MS, AIM_LIFE_MS, AIM_MISS_MS, AIM_TARGETS, ARROW_FLIGHT_MS, BOW_COOLDOWN_MS, BOW_DRAW_MS, LASTHIT_CREEPS, SKILLS, type SkillKind, type SkillResult, type SkillSpec,
+  aimCourse, aimPos, lasthitCourse, pourCourse, rankSkill, skillText,
 } from "../shared/skill";
 import { useCountdown } from "./lib/useRoom";
 import { Countdown, initials } from "./components";
 import { haptic, sfx } from "./lib/sound";
 import type { LastHitScene, LhEvent, LhFrame } from "./lasthit3d";
+import { HowTo } from "./howto";
+import type { FlickEvent, FlickFrame, FlickScene } from "./flick3d";
 
 type Send = (m: ClientMsg) => void;
 type Done = (r: SkillResult) => void;
@@ -46,15 +48,14 @@ function useFrame(fn: (t: number) => void, on = true) {
 
 type CreepOutcome = "hit" | "denied";
 interface Arrow { firedAt: number; landsAt: number }
-interface Float { id: number; text: string; kind: "ally" | "mine" | "gold"; at: number }
 
 const LH_START_MS = 900;
 const LH_PAUSE_MS = 1300;
-/** Platt SVG-scen i stället för 3D: ?lh=2d i adressen eller localStorage kronan.lh = "2d". */
-const force2d = () => { try { return new URLSearchParams(location.search).get("lh") === "2d" || localStorage.getItem("kronan.lh") === "2d"; } catch { return false; } };
 const load3d = () => import("./lasthit3d");
+/** Lätt grafik från start (localStorage kronan.gfx = "low"). Används av e2e i CI, som saknar grafikkort. */
+export const gfxLow = () => { try { return localStorage.getItem("kronan.gfx") === "low"; } catch { return false; } };
 
-export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done; classic?: boolean }) {
+export function LastHit({ seed, onDone }: { seed: number; onDone: Done }) {
   const course = useRef(lasthitCourse(seed)).current;
   const [idx, setIdx] = useState(0);
   const [t0, setT0] = useState(() => now() + LH_START_MS);
@@ -65,29 +66,27 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
   const ourDmg = useRef(0);
   const othersSeen = useRef(0);
   const shots = useRef(0);
-  const floats = useRef<Float[]>([]);
   const ended = useRef(-1);
   const creep = course[idx];
   const running = !flash && idx < LASTHIT_CREEPS;
 
-  // 3D-scenen (laddas i bakgrunden, SVG visas tills den är redo eller om WebGL saknas)
-  const [view, setView] = useState<"loading" | "3d" | "2d">(() => (classic || force2d() ? "2d" : "loading"));
+  // 3D-scenen. Utan WebGL visas bara en enkel HP-mätare (spelet fungerar ändå).
+  const [view, setView] = useState<"loading" | "3d" | "plain">("loading");
   const host = useRef<HTMLDivElement>(null);
   const scene3d = useRef<LastHitScene | null>(null);
   const frame3d = useRef<() => LhFrame>(() => ({ t0, idx, creep, hp: 100, arrows: [], flash }));
   const fx = (e: LhEvent) => scene3d.current?.event(e);
   useEffect(() => {
-    if (view === "2d") return;
     let gone = false;
     load3d().then((m) => {
       if (gone || !host.current) return;
-      const sc = m.createLastHitScene(host.current, () => frame3d.current());
-      if (!sc) { setView("2d"); return; }
+      const sc = m.createLastHitScene(host.current, () => frame3d.current(), gfxLow());
+      if (!sc) { setView("plain"); return; }
       scene3d.current = sc;
       setView("3d");
-    }).catch(() => { if (!gone) setView("2d"); });
+    }).catch(() => { if (!gone) setView("plain"); });
     return () => { gone = true; scene3d.current?.dispose(); scene3d.current = null; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   /** HP efter de andra creepsens slag fram till tiden e (ms sedan creepen började). */
   const othersHp = (e: number) => {
@@ -105,7 +104,7 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
     setOutcomes(all);
     setFlash(o);
     arrows.current = [];
-    if (o === "hit") { sfx.lastHit(); haptic.correct(); floats.current.push({ id: Math.random(), text: "+ guld", kind: "gold", at: now() }); fx({ type: "hit" }); }
+    if (o === "hit") { sfx.lastHit(); haptic.correct(); fx({ type: "hit" }); }
     else { sfx.denied(); haptic.wrong(); fx({ type: "denied" }); }
     setTimeout(() => {
       if (all.length >= LASTHIT_CREEPS) {
@@ -113,7 +112,7 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
         onDone({ value: misses * 100000 + Math.min(999, shots.current) * 100, ok: misses < LASTHIT_CREEPS });
         return;
       }
-      ourDmg.current = 0; othersSeen.current = 0; floats.current = [];
+      ourDmg.current = 0; othersSeen.current = 0;
       setIdx((i) => i + 1); setFlash(null); setT0(now() + 700);
     }, LH_PAUSE_MS);
   };
@@ -122,12 +121,11 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
     setFrame((f) => (f + 1) % 1000000);
     const e = t - t0;
     if (e < 0 || ended.current === idx) return;
-    // De andras slag (visa skadesiffror)
+    // De andras slag (skadesiffror i scenen)
     const seen = creep.hits.filter((x) => x.at <= e).length;
     while (othersSeen.current < seen) {
       const h = creep.hits[othersSeen.current];
       const prev = othersSeen.current === 0 ? 100 : creep.hits[othersSeen.current - 1].hp;
-      floats.current.push({ id: Math.random(), text: `−${Math.round((prev - h.hp) * 5.5)}`, kind: "ally", at: t });
       fx({ type: "ally", text: `−${Math.round((prev - h.hp) * 5.5)}` });
       othersSeen.current += 1;
       sfx.thud();
@@ -140,12 +138,10 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
       if (hpAt <= 0) continue; // redan död
       if (hpAt <= creep.dmg) return end("hit");
       ourDmg.current += creep.dmg;
-      floats.current.push({ id: Math.random(), text: `−${Math.round(creep.dmg * 5.5)}`, kind: "mine", at: t });
       fx({ type: "mine", text: `−${Math.round(creep.dmg * 5.5)}` });
       sfx.arrowHit();
     }
     if (othersHp(e) - ourDmg.current <= 0) end("denied");
-    floats.current = floats.current.filter((f) => t - f.at < 900);
   }, running);
 
   const t = now();
@@ -153,7 +149,6 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
   const hp = creep ? Math.max(0, (e < 0 ? 100 : othersHp(e)) - ourDmg.current) : 0;
   const last = arrows.current.length ? Math.max(...arrows.current.map((a) => a.firedAt)) : -Infinity;
   const cooldownLeft = Math.max(0, BOW_COOLDOWN_MS - (t - last));
-  const drawing = arrows.current.find((a) => t - a.firedAt < BOW_DRAW_MS);
   // Scenen läser av spellogiken varje bildruta, även när komponenten inte ritas om
   frame3d.current = () => {
     const tt = now(), ee = tt - t0;
@@ -161,15 +156,14 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
   };
 
   const shoot = () => {
-    if (!running || e < 0 || cooldownLeft > 0) return;
+    const tt = now();
+    if (!running || tt - t0 < 0 || BOW_COOLDOWN_MS - (tt - (arrows.current.length ? Math.max(...arrows.current.map((a) => a.firedAt)) : -Infinity)) > 0) return;
     shots.current += 1;
-    const firedAt = now();
-    arrows.current.push({ firedAt, landsAt: firedAt + BOW_DRAW_MS + ARROW_FLIGHT_MS });
+    arrows.current.push({ firedAt: tt, landsAt: tt + BOW_DRAW_MS + ARROW_FLIGHT_MS });
     sfx.bowDraw();
     setTimeout(() => sfx.bowRelease(), BOW_DRAW_MS);
     haptic.buzz();
   };
-
   // Mellanslag skjuter på dator
   const shootRef = useRef(shoot);
   shootRef.current = shoot;
@@ -180,57 +174,20 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
   }, []);
 
   const label = flash === "hit" ? "Last hit!" : flash === "denied" ? "Denied!" : e < 0 ? "Redo…" : "Skjut i förväg, pilen tar en halv sekund";
-  // Scenens koordinater (viewBox 360×200)
-  const BOW_X = 58, CREEP_X = 290, Y = 128;
-  const svgScene = (
-      <svg className="lh-scene" viewBox="0 0 360 200" role="img" aria-label="Bågskytt och creep">
-        <defs>
-          <linearGradient id="lh-ground" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#2b3a8f" /><stop offset="1" stopColor="#141c5c" /></linearGradient>
-        </defs>
-        <rect x="0" y="150" width="360" height="50" fill="url(#lh-ground)" rx="10" />
-        {/* Bågskytten */}
-        <g transform={`translate(${BOW_X - 26} ${Y - 46})`}>
-          <circle cx="14" cy="10" r="9" fill="#ffd23f" />
-          <path d="M14 19 L14 52 M14 52 L4 74 M14 52 L24 74 M14 28 L34 34" stroke="#f4f5ff" strokeWidth="5" strokeLinecap="round" fill="none" />
-          <path d="M36 6 Q58 36 36 66" stroke="#c98a3c" strokeWidth="5" fill="none" strokeLinecap="round" />
-          <path d={`M36 6 L${drawing ? 22 : 36} 36 L36 66`} stroke="#f4f5ff" strokeWidth="1.5" fill="none" />
-        </g>
-        {/* Creepen med HP-mätare och strecket för din skada */}
-        <g className={`lh-creep${flash ? " " + flash : ""}`} transform={`translate(${CREEP_X - 40} ${Y - 40})`}>
-          <rect x="-4" y="-26" width="88" height="12" rx="4" fill="#070b3a" />
-          <rect x="-4" y="-26" width={(88 * hp) / 100} height="12" rx="4" fill={hp <= (creep?.dmg ?? 0) ? "#2fe08f" : "#ff3b47"} />
-          <rect x={-4 + (88 * (creep?.dmg ?? 0)) / 100 - 1.5} y="-30" width="3" height="20" fill="#ffd23f" />
-          <text x="40" y="-33" textAnchor="middle" className="lh-hp" role="meter" aria-label="Creepens HP" aria-valuenow={Math.round(hp)}>{Math.round(hp * 5.5)} HP</text>
-          <ellipse cx="40" cy="48" rx="34" ry="26" fill="#6b4e9b" />
-          <circle cx="28" cy="42" r="6" fill="#ffd23f" /><circle cx="52" cy="42" r="6" fill="#ffd23f" />
-          <path d="M26 60 Q40 52 54 60" stroke="#070b3a" strokeWidth="4" fill="none" />
-          <path d="M10 30 L20 40 M70 30 L60 40" stroke="#6b4e9b" strokeWidth="8" strokeLinecap="round" />
-        </g>
-        {/* Pilar i luften */}
-        {arrows.current.filter((a) => t - a.firedAt >= BOW_DRAW_MS).map((a) => {
-          const k = Math.min(1, (t - a.firedAt - BOW_DRAW_MS) / ARROW_FLIGHT_MS);
-          const x = BOW_X + 12 + (CREEP_X - 34 - BOW_X - 12) * k;
-          const y = Y - 10 - Math.sin(Math.PI * k) * 26;
-          const ang = Math.atan2(-Math.cos(Math.PI * k) * 26 * Math.PI, CREEP_X - BOW_X) * 180 / Math.PI;
-          return (
-            <g key={a.firedAt} transform={`translate(${x} ${y}) rotate(${ang})`}>
-              <line x1="-26" y1="0" x2="0" y2="0" stroke="#f4f5ff" strokeWidth="3" strokeLinecap="round" />
-              <path d="M0 -5 L9 0 L0 5 Z" fill="#ffd23f" />
-              <path d="M-26 0 L-31 -5 M-26 0 L-31 5" stroke="#ff9f45" strokeWidth="2" />
-            </g>
-          );
-        })}
-        {floats.current.map((f) => (
-          <text key={f.id} x={CREEP_X + (f.kind === "mine" ? 34 : f.kind === "gold" ? 0 : -44)} y={Y - 82 - (t - f.at) / 25} textAnchor="middle" className={`lh-float ${f.kind}`}
-            opacity={Math.max(0, 1 - (t - f.at) / 900)}>{f.text}</text>
-        ))}
-      </svg>
-  );
+  const dmg = creep?.dmg ?? 0;
   return (
-    <div className="skill-game lasthit" data-hp={hp.toFixed(1)} data-dmg={creep?.dmg ?? 0} data-running={running && e >= 0 ? "1" : "0"}
+    <div className="skill-game lasthit" data-hp={hp.toFixed(1)} data-dmg={dmg} data-running={running && e >= 0 ? "1" : "0"}
       data-enter-at={(t0 + enterAt).toFixed(0)} data-kill-at={(t0 + killAt).toFixed(0)} data-lead={BOW_DRAW_MS + ARROW_FLIGHT_MS}>
-      <p className="muted small">Creep {Math.min(idx + 1, LASTHIT_CREEPS)} av {LASTHIT_CREEPS} · din skada {Math.round((creep?.dmg ?? 0) * 5.5)}</p>
-      {view === "2d" ? svgScene : <div className={`lh3d${view === "3d" ? " ready" : ""}`} ref={host} role="img" aria-label="Bågskytt och creep i 3D">{view === "loading" && svgScene}</div>}
+      <p className="muted small">Creep {Math.min(idx + 1, LASTHIT_CREEPS)} av {LASTHIT_CREEPS} · din skada {Math.round(dmg * 5.5)}</p>
+      {view === "plain" ? (
+        <div className="lh-plain" role="meter" aria-label="Creepens HP" aria-valuenow={Math.round(hp)}>
+          <span className="lh-plain-fill" style={{ width: `${hp}%`, background: hp <= dmg && hp > 0 ? "var(--go)" : "var(--buzz)" }} />
+          <span className="lh-plain-mark" style={{ left: `${dmg}%` }} />
+          <span className="lh-plain-txt">{Math.round(hp * 5.5)} HP</span>
+        </div>
+      ) : (
+        <div className={`lh3d${view === "3d" ? " ready" : ""}`} ref={host} role="img" aria-label="Bågskytt och creep i 3D" />
+      )}
       <p className="skill-status" aria-live="polite">{label}</p>
       <button className="btn primary big skill-tap lh-shoot" aria-label="Skjut" disabled={!running || e < 0}
         style={{ "--cd": `${(cooldownLeft / BOW_COOLDOWN_MS) * 100}%` } as React.CSSProperties}
@@ -242,31 +199,126 @@ export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done;
 }
 
 // ===== 2. Flick =====
+//
+// Tio mål ur banan (samma för alla): de krymper, börjar röra sig och får röda lockbeten. Träffytan är en
+// osynlig knapp som följer målet; 3D-scenen (flick3d.ts) ritar samma position. Tid = från första målet
+// till sista träffen, plus straff för miss, lockbete och mål som hinner försvinna (AIM_LIFE_MS).
+
+const AIM_START_MS = 1100;
+const loadFlick = () => import("./flick3d");
+const s2 = (ms: number) => (ms / 1000).toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function Aim({ seed, onDone }: { seed: number; onDone: Done }) {
   const course = useRef(aimCourse(seed)).current;
   const [i, setI] = useState(-1);
-  const [misses, setMisses] = useState(0);
-  const start = useRef(0);
-  useEffect(() => { const t = setTimeout(() => { start.current = now(); setI(0); }, 900); return () => clearTimeout(t); }, []);
-  const hit = () => {
-    sfx.tick(); haptic.buzz();
+  const [, setFrame] = useState(0);
+  const st = useRef({ start: 0, spawnAt: 0, misses: 0, decoys: 0, escapes: 0, done: false });
+  const [size, setSize] = useState({ w: 1, h: 1 });
+  const field = useRef<HTMLDivElement>(null);
+  const host = useRef<HTMLDivElement>(null);
+  const scene = useRef<FlickScene | null>(null);
+  const [view, setView] = useState<"loading" | "3d" | "plain">("loading");
+  const frameRef = useRef<() => FlickFrame>(() => ({ course, i: -1, spawnAt: 0 }));
+  frameRef.current = () => ({ course, i, spawnAt: st.current.spawnAt });
+  const fx = (e: FlickEvent) => scene.current?.event(e);
+
+  useEffect(() => {
+    let gone = false;
+    loadFlick().then((m) => {
+      if (gone || !host.current) return;
+      const sc = m.createFlickScene(host.current, () => frameRef.current(), gfxLow());
+      if (!sc) { setView("plain"); return; }
+      scene.current = sc; setView("3d");
+    }).catch(() => { if (!gone) setView("plain"); });
+    const ro = new ResizeObserver(() => { const el = field.current; if (el) setSize({ w: el.clientWidth, h: el.clientHeight }); });
+    if (field.current) ro.observe(field.current);
+    return () => { gone = true; ro.disconnect(); scene.current?.dispose(); scene.current = null; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Klockan startar först när scenen är redo (eller visar sig sakna WebGL), så en seg laddning inte kostar tid
+  useEffect(() => {
+    if (view === "loading") return;
+    const t = setTimeout(() => { st.current.start = st.current.spawnAt = now(); setI(0); sfx.tick(); }, AIM_START_MS);
+    return () => clearTimeout(t);
+  }, [view]);
+
+  const penalty = () => st.current.misses * AIM_MISS_MS + st.current.decoys * AIM_DECOY_MS + st.current.escapes * AIM_ESCAPE_MS;
+  const advance = () => {
+    const s = st.current;
     if (i + 1 >= AIM_TARGETS) {
-      const ms = Math.round(now() - start.current + misses * AIM_MISS_MS);
-      onDone({ value: Math.max(AIM_TARGETS * 80, Math.min(120000, ms)), ok: true });
+      s.done = true;
+      const ms = Math.round(now() - s.start + penalty());
+      setI(AIM_TARGETS);
+      setTimeout(() => onDone({ value: Math.max(AIM_TARGETS * 80, Math.min(120000, ms)), ok: true }), 650);
+      return;
     }
+    s.spawnAt = now();
     setI(i + 1);
   };
-  const p = course[i];
+  const cur = i >= 0 && i < AIM_TARGETS ? course[i] : undefined;
+  const pos = cur ? aimPos(cur, now() - st.current.spawnAt) : null;
+
+  useFrame(() => {
+    setFrame((f) => (f + 1) % 1000000);
+    if (!cur || st.current.done) return;
+    if (now() - st.current.spawnAt > AIM_LIFE_MS) {
+      st.current.escapes += 1;
+      const p = aimPos(cur, AIM_LIFE_MS);
+      fx({ type: "escape", u: p.x, v: p.y }); sfx.wrong(); haptic.wrong();
+      advance();
+    }
+  }, i >= 0 && i < AIM_TARGETS);
+
+  const hit = () => {
+    if (!cur || !pos || st.current.done) return;
+    const split = now() - st.current.spawnAt;
+    fx({ type: "shot" });
+    fx({ type: "hit", u: pos.x, v: pos.y, split });
+    sfx.tick(); haptic.buzz();
+    advance();
+  };
+  const hitDecoy = () => {
+    if (!cur?.decoy || st.current.done) return;
+    st.current.decoys += 1;
+    fx({ type: "shot" });
+    fx({ type: "decoy", u: cur.decoy.x, v: cur.decoy.y });
+    sfx.wrong(); haptic.wrong();
+  };
+  const miss = (ev: React.PointerEvent) => {
+    if (!cur || st.current.done) return;
+    const r = field.current!.getBoundingClientRect();
+    st.current.misses += 1;
+    fx({ type: "shot" });
+    fx({ type: "miss", u: (ev.clientX - r.left) / r.width, v: (ev.clientY - r.top) / r.height });
+    haptic.wrong();
+  };
+
+  const minSide = Math.min(size.w, size.h);
+  const btn = (x: number, y: number, r: number) => {
+    const d = r * minSide * 2 * 1.15; // lite förlåtande träffyta
+    return { left: `${x * 100}%`, top: `${y * 100}%`, width: d, height: d, marginLeft: -d / 2, marginTop: -d / 2 };
+  };
+  const elapsed = i < 0 ? 0 : (st.current.done ? 0 : now() - st.current.start);
+  const pen = penalty();
   return (
     <div className="skill-game">
-      <p className="skill-status" aria-live="polite">{i < 0 ? "Redo…" : `${Math.min(i + 1, AIM_TARGETS)} av ${AIM_TARGETS}${misses ? ` · ${misses} miss` : ""}`}</p>
-      <div className="aim-field" data-target={i} onPointerDown={() => { if (i >= 0 && i < AIM_TARGETS) { setMisses((m) => m + 1); haptic.wrong(); } }}>
-        {p && i < AIM_TARGETS && (
-          <button className="aim-target" aria-label="Mål" style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%` }}
+      <div className={`aim-field fl3d${view === "3d" ? " ready" : ""}${view === "plain" ? " plain" : ""}`} ref={field} data-target={i}
+        onPointerDown={(ev) => { if (cur) miss(ev); }}>
+        <div className="fl3d-host" ref={host} />
+        <div className="fl3d-hud" aria-live="off">
+          <span className="fl3d-count">{i < 0 ? "Redo…" : `Mål ${Math.min(i + 1, AIM_TARGETS)}/${AIM_TARGETS}`}</span>
+          <span className="fl3d-time">{i >= AIM_TARGETS ? "Klart!" : `${s2(elapsed)} s`}{pen > 0 && <em> +{s2(pen)}</em>}</span>
+        </div>
+        {i < 0 && <div className="fl3d-ready" aria-hidden>Gör dig redo</div>}
+        {cur && pos && (
+          <button className="aim-target" aria-label="Mål" style={btn(pos.x, pos.y, cur.r)}
             onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); hit(); }} />
         )}
+        {cur?.decoy && (
+          <button className="aim-target decoy" aria-label="Lockbete" style={btn(cur.decoy.x, cur.decoy.y, cur.r * 1.05)}
+            onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); hitDecoy(); }} />
+        )}
       </div>
+      <p className="muted small">Rör inte de röda lockbetena · miss +0,5 s · lockbete och för sent +1 s</p>
     </div>
   );
 }
@@ -432,12 +484,13 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
     return <div className="locked-card" role="status"><p className="display big-verdict">Försöket är förbrukat</p><p className="muted">Du laddade om mitt i utmaningen.</p></div>;
   }
   if (!playing) {
-    if (spec.kind === "lasthit" && state.settings.lastHit3d !== false && !force2d()) load3d().catch(() => {}); // hämta 3D-scenen i förväg
+    if (spec.kind === "lasthit") load3d().catch(() => {}); // hämta 3D-scenen i förväg
+    if (spec.kind === "aim") loadFlick().catch(() => {});
     return (
       <div className="stack skill-intro" style={{ alignItems: "center", textAlign: "center" }}>
         <Countdown ms={left} total={c.deadline - c.startedAt} size={90} />
         <h3>{info.name}</h3>
-        <p>{info.info}</p>
+        <HowTo kind={spec.kind} />
         <p className="muted small">Ett försök. Bäst får 3 p, tvåa 2 p, trea 1 p.</p>
         <button className="btn primary big" onClick={() => { sfx.unlock(); setFlag(key); reloaded.current = false; setPlaying(true); }}>Starta</button>
       </div>
@@ -445,7 +498,7 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
   }
   const seed = c.seed ?? 1;
   switch (spec.kind) {
-    case "lasthit": return <LastHit seed={seed} onDone={done} classic={state.settings.lastHit3d === false} />;
+    case "lasthit": return <LastHit seed={seed} onDone={done} />;
     case "aim": return <Aim seed={seed} onDone={done} />;
     case "stopwatch": return <Stopwatch target={spec.target ?? 10} onDone={done} />;
     case "pour": return <Pour seed={seed} onDone={done} />;
@@ -468,7 +521,7 @@ export function SkillTv({ state, serverNow }: { state: HostState; serverNow: () 
         <span className="mode-tag">{SKILLS[spec.kind].name}</span>
         {state.phase === "collect" ? <><span>Spela i mobilen</span><Countdown ms={left} total={c.deadline - c.startedAt} size={90} /></> : <span>Hosten kollar resultaten…</span>}
       </div>
-      <p className="qmeta" style={{ maxWidth: 760 }}>{SKILLS[spec.kind].info}</p>
+      {state.phase === "collect" && <HowTo kind={spec.kind} size="tv" />}
       {spec.kind === "order" && <p className="qmeta">{spec.prompt}: {(spec.items ?? []).map((i) => i.label).join(" · ")}</p>}
       <ul className="answered-grid" aria-label="Vilka är klara">
         {state.players.map((p) => (

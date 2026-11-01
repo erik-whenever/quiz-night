@@ -26,7 +26,7 @@ export interface SkillSpec {
 
 export const SKILLS: Record<SkillKind, { name: string; info: string; seconds: number; lowerBetter: boolean; byAbs?: boolean }> = {
   lasthit: { name: "Last hit", info: "Skjut så att pilen träffar när creepen är under ditt gula streck. Bågen spänns och pilen flyger en halv sekund, så du måste skjuta i förväg. För tidigt: du skadar bara. För sent: denied. Tre creeps.", seconds: 50, lowerBetter: true },
-  aim: { name: "Flick", info: "Tio mål dyker upp ett i taget. Träffa dem så snabbt du kan. Miss kostar +0,5 s.", seconds: 35, lowerBetter: true },
+  aim: { name: "Flick", info: "Tio mål, ett i taget. De blir mindre och börjar röra sig. Träffa dem snabbt men rör inte de röda lockbetena (+1 s). Miss +0,5 s, och ett mål som hinner försvinna kostar +1 s.", seconds: 40, lowerBetter: true },
   stopwatch: { name: "Stoppa klockan", info: "Klockan blir svart efter 3 sekunder. Stoppa den så nära målet du kan.", seconds: 35, lowerBetter: true, byAbs: true },
   order: { name: "Ordna rätt", info: "Tryck i rätt ordning. Ångra om du ångrar dig.", seconds: 45, lowerBetter: true },
   pour: { name: "Häll upp", info: "Håll inne för att hälla och släpp vid strecket. Skummet stiger lite efter. Spill inte!", seconds: 35, lowerBetter: true, byAbs: true },
@@ -40,7 +40,12 @@ export const BOW_DRAW_MS = 150;
 export const ARROW_FLIGHT_MS = 500;
 export const BOW_COOLDOWN_MS = 900;
 export const AIM_TARGETS = 10;
+/** Flick: straff för miss, för att träffa ett lockbete och för ett mål som hinner försvinna (ms). */
 export const AIM_MISS_MS = 500;
+export const AIM_DECOY_MS = 1000;
+export const AIM_ESCAPE_MS = 1000;
+/** Så länge ett mål står kvar innan det försvinner (ms). */
+export const AIM_LIFE_MS = 2400;
 
 /** Litet deterministiskt slumptal (mulberry32), samma frö ger samma bana hos alla. */
 export function rng(seed: number) {
@@ -81,19 +86,44 @@ export function lasthitCourse(seed: number): Creep[] {
   });
 }
 
-/** Målens positioner som andel av spelytan (0–1). */
-export function aimCourse(seed: number): { x: number; y: number }[] {
+export interface AimTarget {
+  /** Mittpunkt som andel av spelytan (0–1). */
+  x: number;
+  y: number;
+  /** Radie som andel av spelytans kortaste sida. Krymper ju längre in i banan. */
+  r: number;
+  /** Rörelse: amplitud (andel av ytan) och period i ms. Saknas = står still. */
+  move?: { ax: number; ay: number; ms: number; ph: number };
+  /** Ett rött lockbete som syns samtidigt. Träff kostar AIM_DECOY_MS. */
+  decoy?: { x: number; y: number };
+}
+
+/** Banan: samma för alla. Mål 1–3 står still och är stora, sedan krymper de, börjar röra sig och får lockbeten. */
+export function aimCourse(seed: number): AimTarget[] {
   const r = rng(seed ^ 0xa11);
-  const out: { x: number; y: number }[] = [];
+  const out: AimTarget[] = [];
+  const far = (a: { x: number; y: number }, b: { x: number; y: number }, d: number) => Math.hypot(a.x - b.x, a.y - b.y) >= d;
   for (let i = 0; i < AIM_TARGETS; i++) {
-    let p = { x: r.range(0.12, 0.88), y: r.range(0.12, 0.88) };
-    // Undvik att nästa mål hamnar nästan på samma ställe.
-    for (let k = 0; k < 5 && out.length && Math.hypot(p.x - out[out.length - 1].x, p.y - out[out.length - 1].y) < 0.3; k++) {
-      p = { x: r.range(0.12, 0.88), y: r.range(0.12, 0.88) };
+    let p = { x: r.range(0.15, 0.85), y: r.range(0.18, 0.82) };
+    for (let k = 0; k < 6 && out.length && !far(p, out[out.length - 1], 0.32); k++) p = { x: r.range(0.15, 0.85), y: r.range(0.18, 0.82) };
+    const t: AimTarget = { ...p, r: 0.085 - (0.03 * i) / (AIM_TARGETS - 1) };
+    if (i >= 3) t.move = { ax: r.range(0.06, 0.13), ay: i >= 6 ? r.range(0.03, 0.08) : 0, ms: r.range(1100, 1700), ph: r.range(0, Math.PI * 2) };
+    if (i >= 2 && r.next() < 0.6) {
+      let d = { x: r.range(0.15, 0.85), y: r.range(0.18, 0.82) };
+      for (let k = 0; k < 8 && !far(d, p, 0.3); k++) d = { x: r.range(0.15, 0.85), y: r.range(0.18, 0.82) };
+      t.decoy = d;
     }
-    out.push(p);
+    out.push(t);
   }
   return out;
+}
+
+/** Målets position ms efter att det dök upp (rörliga mål pendlar i sidled och lite i höjdled). */
+export function aimPos(t: AimTarget, ms: number): { x: number; y: number } {
+  if (!t.move) return { x: t.x, y: t.y };
+  const a = (ms / t.move.ms) * Math.PI * 2 + t.move.ph;
+  const x = t.x + Math.sin(a) * t.move.ax, y = t.y + Math.sin(a * 2) * t.move.ay;
+  return { x: Math.max(0.08, Math.min(0.92, x)), y: Math.max(0.1, Math.min(0.9, y)) };
 }
 
 export interface PourCourse { target: number; rate: number; accel: number; foam: number }

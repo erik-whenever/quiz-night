@@ -4,15 +4,15 @@ import { useState } from "react";
 import { TopBar } from "../App";
 import { Aim, LastHit, Order, Pour, Stopwatch } from "../skill";
 import { WheelPanel } from "../wheel";
-import { SKILLS, correctOrder, orderErrors, orderShuffle, skillText, type OrderItem, type SkillKind, type SkillResult } from "../../shared/skill";
+import { HowTo } from "../howto";
+import { correctOrder, orderErrors, orderShuffle, skillText, type OrderItem, type SkillKind, type SkillResult } from "../../shared/skill";
 import { WHEEL_SEGMENTS, WHEEL_SPIN_MS, type WheelState } from "../../shared/types";
 import { sfx } from "../lib/sound";
 
-type GameId = "lasthit3d" | "lasthit2d" | "aim" | "stopwatch" | "pour" | "order" | "wheel";
+type GameId = "lasthit" | "aim" | "stopwatch" | "pour" | "order" | "wheel";
 
 const GAMES: { id: GameId; name: string; kind?: SkillKind; note?: string }[] = [
-  { id: "lasthit3d", name: "Last hit", kind: "lasthit", note: "Ny 3D-version" },
-  { id: "lasthit2d", name: "Last hit", kind: "lasthit", note: "Klassisk" },
+  { id: "lasthit", name: "Last hit", kind: "lasthit" },
   { id: "aim", name: "Flick", kind: "aim" },
   { id: "stopwatch", name: "Stoppa klockan", kind: "stopwatch" },
   { id: "pour", name: "Häll upp", kind: "pour" },
@@ -32,7 +32,7 @@ const ORDER_SETS: { name: string; prompt: string; items: OrderItem[] }[] = [
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 
 export default function Demo() {
-  const [game, setGame] = useState<GameId>("lasthit3d");
+  const [game, setGame] = useState<GameId>("lasthit");
   const [seed, setSeed] = useState(newSeed);
   const [run, setRun] = useState(0); // ny nyckel = spelet startar om
   const [playing, setPlaying] = useState(false);
@@ -60,8 +60,7 @@ export default function Demo() {
 
   const play = () => {
     switch (game) {
-      case "lasthit3d": return <LastHit key={run} seed={seed} onDone={done} />;
-      case "lasthit2d": return <LastHit key={run} seed={seed} onDone={done} classic />;
+      case "lasthit": return <LastHit key={run} seed={seed} onDone={done} />;
       case "aim": return <Aim key={run} seed={seed} onDone={done} />;
       case "stopwatch": return <Stopwatch key={run} target={target} onDone={done} />;
       case "pour": return <Pour key={run} seed={seed} onDone={done} />;
@@ -100,7 +99,7 @@ export default function Demo() {
           ) : (
             <div className="stack" style={{ alignItems: "center", textAlign: "center" }}>
               <h2>{g.name}{g.note && <span className="muted small"> · {g.note}</span>}</h2>
-              <p style={{ maxWidth: 560 }}>{SKILLS[g.kind!].info}</p>
+              {result === null ? <HowTo kind={g.kind!} /> : null}
               {game === "stopwatch" && (
                 <label style={{ maxWidth: 160 }}>Mål (s)
                   <input type="number" aria-label="Mål i sekunder" min={3} max={30} step={0.5} value={target} onChange={(e) => setTarget(Math.max(3, Math.min(30, +e.target.value || 5)))} />

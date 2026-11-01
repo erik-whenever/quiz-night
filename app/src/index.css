@@ -316,8 +316,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .lasthit-log .hit { background: var(--go); color: var(--studio-ink); }
 .lasthit-log .miss, .lasthit-log .denied { background: rgba(255, 59, 71, 0.3); box-shadow: inset 0 0 0 2px var(--buzz); }
 .aim-field { position: relative; width: 100%; height: min(62dvh, 520px); border-radius: 18px; background: var(--studio-ink); box-shadow: inset 0 0 0 2px var(--line); touch-action: none; overflow: hidden; }
-.aim-target { position: absolute; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; border: 0; padding: 0; cursor: crosshair;
-  background: radial-gradient(circle, var(--signal) 0 18%, var(--buzz) 19% 42%, var(--chalk) 43% 62%, var(--buzz) 63%); animation: pop 140ms ease-out; }
+.aim-target { position: absolute; border-radius: 50%; border: 0; padding: 0; cursor: crosshair; background: transparent; z-index: 3; -webkit-tap-highlight-color: transparent; }
+.aim-field.plain .aim-target, .aim-field:not(.ready) .aim-target { background: radial-gradient(circle, var(--signal) 0 18%, var(--buzz) 19% 42%, var(--chalk) 43% 62%, var(--buzz) 63%); animation: pop 140ms ease-out; }
+.aim-field.plain .aim-target.decoy, .aim-field:not(.ready) .aim-target.decoy { background: repeating-linear-gradient(45deg, #ff2a3d 0 8px, #1a0006 8px 16px); }
 @keyframes pop { from { transform: scale(0.3); } }
 .stopwatch { font: 800 clamp(4rem, 22vw, 6rem) var(--display); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; transition: color 300ms; }
 .stopwatch.dark { color: var(--studio-deep); text-shadow: 0 0 1px var(--line); }
@@ -371,15 +372,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .music-toggle:hover { opacity: 1; }
 
 /* Last hit: scenen med bågskytt och creep */
-.lh-scene { width: 100%; max-width: 420px; height: auto; overflow: visible; }
-.lh-hp { font: 800 11px var(--display); fill: var(--chalk); }
-.lh-float { font: 800 16px var(--display); }
-.lh-float.ally { fill: var(--mist); }
-.lh-float.mine { fill: var(--signal); }
-.lh-float.gold { fill: #ffd23f; font-size: 20px; }
-.lh-creep { transition: opacity 300ms; }
-.lh-creep.hit { opacity: 0.35; }
-.lh-creep.denied { opacity: 0.25; filter: grayscale(1); }
 .lh-shoot { position: relative; overflow: hidden; }
 .lh-shoot::after { content: ""; position: absolute; left: 0; bottom: 0; height: 6px; width: var(--cd, 0%); background: var(--studio-ink); opacity: 0.5; }
 
@@ -490,7 +482,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* Last hit i 3D (src/lasthit3d.ts) */
 .lh3d { position: relative; width: 100%; max-width: 640px; aspect-ratio: 16 / 10; border-radius: 18px; overflow: hidden;
   background: linear-gradient(#0b1250, #3b2a7a 60%, #e0795a); box-shadow: 0 18px 40px rgba(7, 11, 58, 0.55), inset 0 0 0 1px rgba(244, 245, 255, 0.08); }
-.lh3d > .lh-scene { position: absolute; inset: 0; margin: auto; height: 100%; }
 .lh3d-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
 .lh3d:not(.ready) .lh3d-canvas { opacity: 0; }
 .lh3d.ready .lh3d-canvas { animation: lh3d-in 400ms ease-out; }
@@ -532,3 +523,53 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .demo-pick.on { border-color: var(--signal); box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.2); }
 .demo-pick:hover { border-color: rgba(255, 210, 63, 0.6); }
 .demo-stage { min-height: 360px; justify-content: center; }
+
+/* Så går det till: animation + steg innan varje minispel (src/howto.tsx) */
+.howto { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 420px; }
+.howto-anim { width: 100%; border-radius: 16px; background: linear-gradient(180deg, rgba(14, 21, 99, 0.85), rgba(7, 11, 58, 0.85)); box-shadow: inset 0 0 0 1px rgba(244, 245, 255, 0.08); overflow: hidden; }
+.howto-svg { display: block; width: 100%; height: auto; }
+.howto-steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 8px; text-align: left; width: 100%; }
+.howto-steps li { counter-increment: step; display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; line-height: 1.35; }
+.howto-steps li::before { content: counter(step); width: 26px; height: 26px; border-radius: 8px; background: var(--signal); color: var(--studio-ink); font: 800 14px var(--display); display: grid; place-items: center; }
+.howto.tv { max-width: 980px; flex-direction: row; align-items: center; gap: 28px; }
+.howto.tv .howto-anim { flex: 0 0 min(520px, 55%); }
+.howto.tv .howto-steps { font-size: 1.2rem; gap: 12px; }
+.howto.tv .howto-steps li { grid-template-columns: 32px 1fr; }
+.howto.tv .howto-steps li::before { width: 32px; height: 32px; font-size: 17px; }
+@media (max-width: 760px) { .howto.tv { flex-direction: column; } .howto.tv .howto-anim { flex-basis: auto; } }
+.howto-cap { font: 800 14px var(--display); fill: var(--chalk); }
+.howto-small { font: 700 10.5px var(--display); fill: var(--mist, #b9bff0); }
+.howto-btn { font: 800 14px var(--display); fill: var(--studio-ink); }
+.howto-item { font: 600 13px var(--body, system-ui); fill: var(--chalk); }
+.howto-clock { font: 800 38px var(--display); fill: var(--chalk); font-variant-numeric: tabular-nums; }
+.howto-win { font: 900 20px var(--display); fill: var(--signal); }
+.howto-win.small { font-size: 15px; }
+.howto-gold { font: 800 13px var(--display); fill: #ffd23f; }
+.lh-plain { position: relative; width: 100%; max-width: 420px; height: 34px; border-radius: 10px; background: var(--studio-ink); overflow: hidden; }
+.lh-plain-fill { position: absolute; inset: 0 auto 0 0; }
+.lh-plain-mark { position: absolute; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: var(--signal); }
+.lh-plain-txt { position: absolute; inset: 0; display: grid; place-items: center; font: 800 15px var(--display); text-shadow: 0 1px 3px var(--studio-ink); }
+
+/* Flick i 3D (src/flick3d.ts) */
+.fl3d { aspect-ratio: auto; height: min(62dvh, 520px); max-width: 720px; cursor: crosshair; background: radial-gradient(circle at 50% 45%, #1a2490, #050826 70%);
+  box-shadow: 0 18px 40px rgba(7, 11, 58, 0.55), inset 0 0 0 1px rgba(244, 245, 255, 0.08); }
+.fl3d-host { position: absolute; inset: 0; }
+.fl3d-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
+.fl3d:not(.ready) .fl3d-canvas { opacity: 0; }
+.fl3d.ready .fl3d-canvas { animation: lh3d-in 400ms ease-out; }
+.fl3d-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fl3d-hud { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; padding: 10px 14px; pointer-events: none; z-index: 2;
+  font: 800 15px var(--display); text-shadow: 0 2px 6px rgba(7, 11, 58, 0.9); font-variant-numeric: tabular-nums; }
+.fl3d-time em { font-style: normal; color: var(--buzz); margin-left: 6px; }
+.fl3d-ready { position: absolute; inset: 0; display: grid; place-items: center; font: 900 clamp(26px, 7vw, 44px) var(--display); color: var(--signal);
+  text-shadow: 0 0 24px rgba(255, 210, 63, 0.7); pointer-events: none; z-index: 2; animation: fl3d-pulse 600ms ease-in-out infinite alternate; }
+@keyframes fl3d-pulse { from { transform: scale(0.96); opacity: 0.75; } to { transform: scale(1.04); opacity: 1; } }
+.fl3d-float { position: absolute; left: 0; top: 0; font: 800 18px var(--display); white-space: nowrap; text-shadow: 0 2px 0 rgba(7, 11, 58, 0.9), 0 0 12px rgba(7, 11, 58, 0.7); }
+.fl3d-float.fast { color: var(--go); font-size: 22px; }
+.fl3d-float.ok { color: var(--signal); }
+.fl3d-float.slow { color: #ff9f45; }
+.fl3d-float.pen { color: var(--mist); font-size: 15px; }
+.fl3d-float.bad { color: var(--buzz); font-size: 20px; }
+.fl3d-flash { position: absolute; inset: 0; opacity: 0; }
+.fl3d-flash.on { animation: lh3d-flash 380ms ease-out; }
+.fl3d-flash.bad { background: radial-gradient(circle, transparent 40%, rgba(255, 59, 71, 0.55)); }

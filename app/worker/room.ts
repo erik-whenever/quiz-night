@@ -124,7 +124,6 @@ const clampSettings = (s: Settings): Settings => ({
   difficulty: clamp(s.difficulty, 0, 5, DEFAULT_SETTINGS.difficulty),
   autoplay: s.autoplay === undefined ? DEFAULT_SETTINGS.autoplay : !!s.autoplay,
   revealSeconds: clamp(s.revealSeconds, 3, 30, DEFAULT_SETTINGS.revealSeconds),
-  lastHit3d: s.lastHit3d === undefined ? DEFAULT_SETTINGS.lastHit3d : !!s.lastHit3d,
 });
 
 export class Room implements DurableObject {

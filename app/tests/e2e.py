@@ -591,6 +591,24 @@ async ([pin]) => {
 """
 
 
+def flick(page, shot_name=None):
+    """Spela Flick: vänta tills första målet syns och tryck på varje mål (rörliga mål följer knappen)."""
+    page.wait_for_function("() => document.querySelector('.aim-field')?.dataset.target === '0'", timeout=15000)
+    page.evaluate("""async () => {
+      const frame = () => new Promise((r) => requestAnimationFrame(r));
+      const t0 = performance.now();
+      for (;;) {
+        const i = +document.querySelector('.aim-field')?.dataset.target;
+        if (!(i < 10)) break;
+        if (performance.now() - t0 > 40000) throw new Error('flick tog aldrig slut');
+        const b = document.querySelector('[aria-label="Mål"]');
+        if (b) b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+        while (+document.querySelector('.aim-field')?.dataset.target === i) await frame();
+      }
+    }""")
+    if shot_name: shot(page, shot_name)
+
+
 def shot(page, name):
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
 
@@ -1051,20 +1069,15 @@ def main():
         p2.get_by_role("button", name="Starta").click()
         expect(p2.get_by_role("button", name="Skjut")).to_be_visible()
         # 3D-scenen laddas (eller faller tillbaka till SVG om webbläsaren saknar WebGL)
-        expect(p2.locator(".lh3d.ready, .lasthit > .lh-scene")).to_be_visible(timeout=15000)
+        expect(p2.locator(".lh3d.ready, .lh-plain")).to_be_visible(timeout=15000)
         p2.wait_for_timeout(1200)
         shot(p2, "32b-spelare-lasthit-3d")
         p2.reload()  # försöket är förbrukat
         expect(host.get_by_label("Skill-resultat").locator("li", has_text="Tobbe")).to_contain_text("Diskad")
-        # Värden byter till klassisk grafik mitt i: gäller den som startar efteråt. Tidtestet kör därför den platta
-        # scenen (samma spellogik; mjukvaru-WebGL i CI ger för få bildrutor för exakt timing).
-        host.locator("summary", has_text="Kvällens regler").click()
-        host.get_by_label("Last hit-grafik").select_option("classic")
-        p1.wait_for_timeout(500)
+        # CI saknar grafikkort: lätt grafik från start, så att tidtestet får jämna bildrutor
+        p1.evaluate("localStorage.setItem('kronan.gfx', 'low')")
         p1.get_by_role("button", name="Starta").click()
         expect(p1.get_by_role("button", name="Skjut")).to_be_visible()
-        expect(p1.locator(".lasthit > .lh-scene")).to_be_visible()
-        expect(p1.locator(".lh3d")).to_have_count(0)
         p1.wait_for_timeout(1500)
         shot(p1, "32-spelare-lasthit")
         # Pilen tar BOW_DRAW + FLIGHT ms: skjut så att den landar strax efter att creepen gått under strecket.
@@ -1076,7 +1089,7 @@ def main():
             const t0 = performance.now();
             while (!(el() && el().dataset.running === '1')) { if (performance.now() - t0 > 15000) throw new Error('creep startade aldrig'); await frame(); }
             const fireAt = +el().dataset.enterAt - +el().dataset.lead + 90;
-            while (performance.now() < fireAt) await frame();
+            await new Promise((r) => setTimeout(r, Math.max(0, fireAt - performance.now())));
             document.querySelector('[aria-label="Skjut"]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
             while (el() && el().dataset.running === '1') { if (performance.now() - t0 > 20000) throw new Error('creepen tog aldrig slut'); await frame(); }
           }
@@ -1093,10 +1106,7 @@ def main():
         # 2. Flick
         host.get_by_role("button", name="Nästa fråga (N)").click()
         p1.get_by_role("button", name="Starta").click()
-        for i in range(10):
-            p1.wait_for_function(f"() => document.querySelector('.aim-field')?.dataset.target === '{i}'", timeout=5000)
-            if i == 3: shot(p1, "34-spelare-flick")
-            p1.get_by_role("button", name="Mål").dispatch_event("pointerdown")
+        flick(p1, "34-spelare-flick")
         expect(p1.get_by_text("Klart!")).to_be_visible()
         finish_round("35-tv-flick-resultat")
 
@@ -1320,21 +1330,19 @@ def main():
         dm.goto(BASE + "/host/minispel")
         expect(dm.get_by_role("heading", name="Minispel")).to_be_visible()
         tab = lambda name: dm.get_by_role("tab", name=name)
-        # Last hit 3D (eller SVG om WebGL saknas) och klassisk
+        # Last hit (3D, eller enkel HP-mätare om WebGL saknas)
+        dm.evaluate("localStorage.setItem('kronan.gfx', 'low')")
         dm.get_by_role("button", name="Starta").click()
-        expect(dm.locator(".lh3d.ready, .lasthit > .lh-scene")).to_be_visible(timeout=15000)
+        expect(dm.locator(".lh3d.ready, .lh-plain")).to_be_visible(timeout=15000)
         dm.wait_for_timeout(1500)
         shot(dm, "80-demo-lasthit-3d")
-        tab("Last hit (Klassisk)").click()
-        dm.get_by_role("button", name="Starta").click()
-        expect(dm.locator(".lasthit > .lh-scene")).to_be_visible()
-        expect(dm.locator(".lh3d")).to_have_count(0)
         # Flick: tio träffar ger ett resultat
         tab("Flick").click()
         dm.get_by_role("button", name="Starta").click()
-        for _ in range(10):
-            dm.get_by_role("button", name="Mål").dispatch_event("pointerdown")
-        expect(dm.locator(".locked-text")).to_contain_text(" s")
+        expect(dm.locator(".fl3d.ready, .aim-field.plain")).to_be_visible(timeout=15000)
+        flick(dm)
+        expect(dm.locator(".locked-text")).to_contain_text(" s", timeout=5000)
+        shot(dm, "80b-demo-flick")
         # Stoppa klockan
         tab("Stoppa klockan").click()
         dm.get_by_label("Mål i sekunder").fill("3")

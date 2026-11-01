@@ -120,12 +120,6 @@ export function RuleSettings({ state, send }: { state: HostState; send: (m: Clie
         <input type="number" aria-label="Bonus till snabbaste rätt" min={0} max={5} key={`fb${s.fastestBonus}`} defaultValue={s.fastestBonus}
           onBlur={(e) => +e.target.value !== s.fastestBonus && set({ fastestBonus: +e.target.value })} />
       </label>
-      <label>Last hit-grafik
-        <select aria-label="Last hit-grafik" value={s.lastHit3d === false ? "classic" : "3d"} onChange={(e) => set({ lastHit3d: e.target.value === "3d" })}>
-          <option value="3d">Ny 3D-version</option>
-          <option value="classic">Klassisk (platt)</option>
-        </select>
-      </label>
       <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <input type="checkbox" style={{ width: "auto" }} checked={s.hostPlays} disabled={started && s.hostPlays}
           onChange={(e) => set({ hostPlays: e.target.checked })} />

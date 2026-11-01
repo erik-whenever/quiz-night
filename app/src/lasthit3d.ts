@@ -1,7 +1,7 @@
 // Last hit i 3D: bara grafik. All spellogik (HP, pilar, träff, denied) ligger kvar i LastHit i skill.tsx,
 // som läser av sin egen klocka. Scenen ritar det den får via getFrame() och reagerar på händelser.
 // Laddas med dynamisk import så att quizet i övrigt inte blir tyngre. Om WebGL saknas returnerar
-// createLastHitScene null och LastHit visar den platta SVG-scenen i stället.
+// createLastHitScene null och LastHit visar bara en enkel HP-mätare.
 //
 // Allt är byggt av enkla låg-poly-former i kod (inga modellfiler), med egna figurer i HoN-anda.
 import * as THREE from "three";
@@ -403,13 +403,13 @@ class Particles {
 
 // ===== Scenen =====
 
-export function createLastHitScene(host: HTMLElement, getFrame: () => LhFrame): LastHitScene | null {
+export function createLastHitScene(host: HTMLElement, getFrame: () => LhFrame, low = false): LastHitScene | null {
   const test = document.createElement("canvas");
   if (!test.getContext("webgl2") && !test.getContext("webgl")) return null;
 
   const coarse = matchMedia("(pointer: coarse)").matches;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let high = !coarse;
+  let high = !coarse && !low;
 
   let renderer: THREE.WebGLRenderer;
   try {
