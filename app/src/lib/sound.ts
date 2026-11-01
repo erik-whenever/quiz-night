@@ -292,7 +292,7 @@ export function playVoice(pcm: Float32Array, sampleRate: number, level: number):
 // En lugn, generativ lo-fi-slinga (82 bpm): Fmaj9 – Em7 – Dm9 – C13 i el-piano, mjuk kick/virvel/hihat
 // och lite vinylbrus. "think" (under frågor) är samma groove men med hihats i sextondelar och lite mer driv.
 
-type Mood = "chill" | "think";
+type Mood = "chill" | "think" | "lift";
 const BPM = 82;
 const PROG = [Fmaj9, [52, 55, 59, 62], Dm9, C13];
 const BASS = [41, 40, 38, 36];
@@ -300,6 +300,7 @@ let musicTimer: ReturnType<typeof setInterval> | null = null;
 let nextBeat = 0;
 let beat = 0;
 let mood: Mood = "chill";
+let liftBeat = 0;
 let musicGain: GainNode | null = null;
 
 function scheduleBeat(c: AudioContext, t: number, b: number) {
@@ -318,6 +319,95 @@ function scheduleBeat(c: AudioContext, t: number, b: number) {
   if (pos === 3 && Math.random() < 0.35) kalimba([72, 74, 76, 79, 81][Math.floor(Math.random() * 5)], when + swing, 0.03, 0.8);
 }
 
+// ===== Hissmusik (mellan frågorna) =====
+//
+// Eriks önskemål 2026-11-01: hissmusik mellan frågorna. Egen bossa-muzak i 116 bpm: vibrafon som spelar en
+// egenskriven, lagom glättig melodi över maj7/ii–V, el-piano som kompar bossa, kontrabas på 1 och 3,
+// kantslag i en mjuk clave, shaker i åttondelar. Var tredje varv spelar bara kompet (vibrafonen "vilar").
+
+const LIFT_BPM = 116;
+/** Ackord per takt (8 takter) och basens grundton. */
+const LIFT_CHORDS: number[][] = [
+  [53, 57, 60, 64], [50, 53, 57, 60], [55, 58, 62, 65], [48, 52, 55, 58],
+  [57, 60, 64, 67], [50, 54, 57, 60], [55, 58, 62, 65], [48, 52, 58, 61],
+];
+const LIFT_ROOTS = [41, 38, 43, 36, 45, 38, 43, 36];
+/** Melodin: [slag i takten, ton, längd i slag]. */
+const LIFT_MELODY: [number, number, number][][] = [
+  [[0, 72, 1], [1, 69, 0.5], [1.5, 72, 0.5], [2, 76, 1.5]],
+  [[0, 74, 1], [1, 72, 0.5], [1.5, 69, 0.5], [2, 65, 1.5]],
+  [[0, 70, 0.5], [0.5, 72, 0.5], [1, 74, 1], [2.5, 77, 1]],
+  [[0, 76, 1.5], [2, 74, 0.5], [2.5, 72, 0.5], [3, 70, 1]],
+  [[0, 72, 1], [1, 76, 1], [2, 79, 1.5]],
+  [[0, 78, 0.5], [0.5, 76, 0.5], [1, 74, 1], [2, 72, 1.5]],
+  [[0, 70, 1], [1, 74, 0.5], [1.5, 77, 0.5], [2, 76, 1]],
+  [[0, 72, 2], [3, 67, 0.5], [3.5, 69, 0.5]],
+];
+
+/** Vibrafon: ren sinus med en svag hög delton och snabb tremolo (motorn i en riktig vibrafon). */
+function vibes(note: number, when = 0, dur = 1, vel = 0.06) {
+  safe((c) => {
+    const t = c.currentTime + when;
+    const len = Math.max(0.6, dur * 1.6);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vel, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(vel * 0.45, t + 0.25); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    const trem = c.createGain(); trem.gain.value = 0.8;
+    const lfo = c.createOscillator(); lfo.frequency.value = 5.8;
+    const la = c.createGain(); la.gain.value = 0.2; lfo.connect(la).connect(trem.gain);
+    const f = midi(note);
+    const o1 = c.createOscillator(); o1.type = "sine"; o1.frequency.value = f;
+    const o2 = c.createOscillator(); o2.type = "sine"; o2.frequency.value = f * 4;
+    const o2g = c.createGain(); o2g.gain.setValueAtTime(0.12, t); o2g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+    o1.connect(trem); o2.connect(o2g).connect(trem); trem.connect(g); route(g, 0.55);
+    for (const o of [o1, o2, lfo]) { o.start(t); o.stop(t + len + 0.05); }
+  });
+}
+
+/** Kantslag (rim click): kort, torrt "tick". */
+function rim(when = 0, vel = 0.05) {
+  breath(when, 0.035, 1900, 1700, vel, 9, 0.15);
+  safe((c) => {
+    const t = c.currentTime + when;
+    const o = c.createOscillator(); o.type = "triangle"; o.frequency.value = 820;
+    const g = c.createGain(); g.gain.setValueAtTime(vel * 0.6, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+    o.connect(g); route(g, 0.1); o.start(t); o.stop(t + 0.04);
+  });
+}
+
+function scheduleLift(c: AudioContext, t: number, b: number) {
+  const bar = Math.floor(b / 4) % LIFT_CHORDS.length;
+  const lap = Math.floor(b / (4 * LIFT_CHORDS.length));
+  const pos = b % 4;
+  const when = t - c.currentTime;
+  const spb = 60 / LIFT_BPM;
+  const ch = LIFT_CHORDS[bar], root = LIFT_ROOTS[bar];
+  // Bas: grundton på 1, kvint på "och" före 3 och på 3, grundton på "och" efter 4 (bossa)
+  if (pos === 0) bass(root, when, spb * 0.9, 0.12);
+  if (pos === 1) bass(root + 7, when + spb * 0.5, spb * 0.45, 0.09);
+  if (pos === 2) bass(root + 7, when, spb * 0.9, 0.11);
+  if (pos === 3) bass(root, when + spb * 0.5, spb * 0.45, 0.09);
+  // Komp: korta el-piano-ackord i bossarytm
+  const comp = (off: number) => chord(ch.map((n) => n + 12), when + off, spb * 0.7, 0.026, 0.012);
+  if (pos === 0) comp(0);
+  if (pos === 1) comp(spb * 0.5);
+  if (pos === 3) comp(0);
+  // Kantslag i en mjuk clave (två takters mönster), shaker i åttondelar, mjuk kick på 1 och 3
+  const clave = bar % 2 === 0 ? [[0, 0], [1, 0.5], [3, 0]] : [[1, 0], [2, 0.5]];
+  for (const [p, off] of clave) if (p === pos) rim(when + spb * off, 0.035);
+  breath(when, 0.05, 6500, 8000, 0.007, 0.8, 0, "highpass");
+  breath(when + spb * 0.5, 0.06, 6500, 8000, 0.011, 0.8, 0, "highpass");
+  if (pos === 0 || pos === 2) kick(when, 0.07);
+  // Melodi på vibrafon, vilar var tredje varv (då bara ett och annat ackordtonsplingande)
+  if (lap % 3 === 2) {
+    if (pos === 2 && bar % 2 === 1) vibes(ch[3] + 12, when + spb * 0.5, 1, 0.035);
+    return;
+  }
+  for (const [at, note, dur] of LIFT_MELODY[bar]) {
+    if (Math.floor(at) === pos) vibes(note, when + (at - pos) * spb, dur, 0.055);
+  }
+}
+
 export const music = {
   get playing() { return !!musicTimer; },
   start(m: Mood = "chill") {
@@ -325,15 +415,21 @@ export const music = {
     if (musicTimer) return;
     safe((c) => {
       if (!musicGain) { musicGain = c.createGain(); musicGain.gain.value = 0.55; }
-      nextBeat = c.currentTime + 0.1; beat = 0;
-      const spb = 60 / BPM;
+      nextBeat = c.currentTime + 0.1; beat = 0; liftBeat = 0;
       musicTimer = setInterval(() => {
         const cc = ctx!;
-        while (nextBeat < cc.currentTime + 0.25) { scheduleBeat(cc, nextBeat, beat); nextBeat += spb; beat += 1; }
+        while (nextBeat < cc.currentTime + 0.25) {
+          if (mood === "lift") { scheduleLift(cc, nextBeat, liftBeat); liftBeat += 1; nextBeat += 60 / LIFT_BPM; }
+          else { scheduleBeat(cc, nextBeat, beat); beat += 1; nextBeat += 60 / BPM; }
+        }
       }, 60);
     });
   },
-  mood(m: Mood) { mood = m; },
+  mood(m: Mood) {
+    // Hissmusiken börjar om från första takten varje gång den kommer tillbaka.
+    if (m === "lift" && mood !== "lift") liftBeat = 0;
+    mood = m;
+  },
   stop() { if (musicTimer) { clearInterval(musicTimer); musicTimer = null; } },
 };
 

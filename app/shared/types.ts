@@ -123,7 +123,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
   playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
-  autoplay: true, revealSeconds: 8, drunk: true,
+  autoplay: true, revealSeconds: 8, drunk: false,
 };
 /** Hur länge frågans intro visas innan svarsknapparna öppnas (läggs på svarstiden). */
 export const INTRO_MS = 1400;
@@ -368,6 +368,8 @@ export function activeTwist(st: { phase: Phase; qIndex: number; wheel?: WheelSta
 // TV:n står för röst, repliker och animation (src/drunk.tsx).
 
 export const DRUNK_NAME = "Kenta";
+/** Kenta är pausad (Erik 2026-11-01): av som standard och dold i reglerna. Koden finns kvar till han tas upp igen. */
+export const DRUNK_PAUSED = true;
 export type DrunkKind = "intro" | "win" | "lose" | "hookoff";
 
 export interface DrunkCue {

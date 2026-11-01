@@ -821,19 +821,16 @@ def main():
         shot(tv, "03-tv-lobby")
         shot(p1, "04-spelare-lobby")
 
-        # Kenta (fyllot) kliver in före första frågan och väljer en buddy bland spelarna
+        # Kenta (fyllot) är pausad: inte med i reglerna, och första frågan startar direkt
+        assert host.get_by_text("Kenta (fyllot)").count() == 0, "Kenta syns i reglerna fast han är pausad"
+        # Hissmusik mellan frågorna: klicka på TV:n så att ljudet får starta
         tv.locator("main.tv").click(position={"x": 5, "y": 5})
         host.get_by_role("button", name="Starta första frågan").click()
-        expect(tv.locator(".drunk-intro")).to_be_visible()
-        expect(tv.locator(".drunk-intro .drunk-bubble")).to_contain_text("buddy")
-        expect(tv.locator(".drunk-intro .drunk-bubble")).to_contain_text(re.compile("Erik|Tobbe"))
-        expect(host.get_by_text(re.compile("Kenta hejar på (Erik|Tobbe)"))).to_be_visible()
-        expect(host.get_by_role("button", name="Hoppa över Kenta, starta nu")).to_be_visible()
-        tv.wait_for_timeout(900)
-        shot(tv, "04b-tv-kenta-intro")
+        assert tv.locator(".drunk, .drunk-hook").count() == 0, "Kenta dök upp fast han är pausad"
 
         # Fråga 1: fyra alternativ. Värden spelar själv och ser inget facit; TV:n visar inte rätt svar.
-        expect(choices_of(p1)).to_have_count(4, timeout=12000)
+        expect(choices_of(p1)).to_have_count(4)
+        expect(tv.locator("html[data-music=think]")).to_have_count(1)
         expect(tv.get_by_label("Svarsalternativ").locator("li")).to_have_count(4)
         expect(host.get_by_text("Du spelar själv, så du ser inte facit")).to_be_visible()
         assert host.get_by_text("Svar:").count() == 0, "Hosten ser facit trots att hen spelar"
@@ -853,15 +850,8 @@ def main():
         wait_vib(p1, [VIB_RIGHT])
         shot(tv, "08-tv-facit")
 
-        # Hooker-off: Kenta ropar in den, hjulet med spelarnamn landar på motståndaren
-        host.get_by_role("button", name="Hooker-off nu").click()
-        expect(tv.locator(".drunk-hook")).to_be_visible()
-        expect(tv.locator(".drunk-hook .drunk-bubble")).to_contain_text(re.compile("[Hh]ooker"))
-        expect(tv.locator(".drunk-versus")).to_contain_text("mot", timeout=12000)
-        expect(tv.locator(".drunk-versus")).to_contain_text("Erik")
-        expect(tv.locator(".drunk-versus")).to_contain_text("Tobbe")
-        shot(tv, "08a-tv-kenta-hookoff")
-        expect(tv.locator(".drunk-hook")).to_be_hidden(timeout=8000)
+        assert host.get_by_role("button", name="Hooker-off nu").count() == 0, "Kentas hooker-off-knapp syns fast han är pausad"
+        expect(tv.locator("html[data-music=lift]")).to_have_count(1)   # hissmusik mellan frågorna
 
         # Lyckohjulet: hosten snurrar mellan frågorna, TV och spelare ser samma utfall
         host.get_by_role("button", name="Snurra hjulet").click()

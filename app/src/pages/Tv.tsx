@@ -20,9 +20,12 @@ export default function Tv({ code }: { code: string }) {
   const kentaPiper = usePiper(!!state?.settings.drunk && kentaVoice);
   const phase = state?.phase;
   useEffect(() => {
-    if (!musicOn || !unlocked || !phase || phase === "finished") { music.stop(); return; }
-    music.start(phase === "collect" ? "think" : "chill");
-    music.mood(phase === "collect" ? "think" : "chill");
+    if (!musicOn || !unlocked || !phase || phase === "finished") { music.stop(); delete document.documentElement.dataset.music; return; }
+    // Under frågan: lo-fi-grooven. Mellan frågorna (lobby, facit): hissmusik.
+    const m = phase === "collect" || phase === "judge" ? "think" : "lift";
+    music.start(m);
+    music.mood(m);
+    document.documentElement.dataset.music = m;
   }, [musicOn, unlocked, phase]);
   useEffect(() => () => music.stop(), []);
   const toggleMusic = () => {
