@@ -116,12 +116,14 @@ export interface Settings {
   autoplay: boolean;
   /** Sekunder som svaret visas innan nästa fråga (autoplay). */
   revealSeconds: number;
+  /** Last hit i 3D (ny grafik). Av = den klassiska platta scenen. Gäller när spelaren trycker Starta. */
+  lastHit3d: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   collectSeconds: 20, fastestBonus: 1, choiceCount: 4, hostPlays: true,
   playMode: "turns", buzzEvery: 3, penalty: 1, buzzAnswerSeconds: 10, difficulty: 0,
-  autoplay: true, revealSeconds: 8,
+  autoplay: true, revealSeconds: 8, lastHit3d: true,
 };
 /** Hur länge frågans intro visas innan svarsknapparna öppnas (läggs på svarstiden). */
 export const INTRO_MS = 1400;

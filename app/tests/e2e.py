@@ -1056,10 +1056,15 @@ def main():
         shot(p2, "32b-spelare-lasthit-3d")
         p2.reload()  # försöket är förbrukat
         expect(host.get_by_label("Skill-resultat").locator("li", has_text="Tobbe")).to_contain_text("Diskad")
-        # Tidtestet kör den platta scenen: samma spellogik, men mjukvaru-WebGL i CI ger för få bildrutor för exakt timing
-        p1.evaluate("localStorage.setItem('kronan.lh', '2d')")
+        # Värden byter till klassisk grafik mitt i: gäller den som startar efteråt. Tidtestet kör därför den platta
+        # scenen (samma spellogik; mjukvaru-WebGL i CI ger för få bildrutor för exakt timing).
+        host.locator("summary", has_text="Kvällens regler").click()
+        host.get_by_label("Last hit-grafik").select_option("classic")
+        p1.wait_for_timeout(500)
         p1.get_by_role("button", name="Starta").click()
         expect(p1.get_by_role("button", name="Skjut")).to_be_visible()
+        expect(p1.locator(".lasthit > .lh-scene")).to_be_visible()
+        expect(p1.locator(".lh3d")).to_have_count(0)
         p1.wait_for_timeout(1500)
         shot(p1, "32-spelare-lasthit")
         # Pilen tar BOW_DRAW + FLIGHT ms: skjut så att den landar strax efter att creepen gått under strecket.
@@ -1307,6 +1312,57 @@ def main():
         assert sk["orderReveal"] == ["X", "Y", "Z"], f"Rätt ordning visades inte vid reveal: {sk['orderReveal']}"
         assert sk["qCount"] == 2, f"Ogiltig skill-utmaning ska hoppas över: {sk['qCount']}"
         raw.close()
+
+        # Demoläget: alla minispel utan rum
+        dm = b.new_page(viewport={"width": 420, "height": 900})
+        dm_errors = []
+        dm.on("pageerror", lambda e: dm_errors.append(str(e)))
+        dm.goto(BASE + "/host/minispel")
+        expect(dm.get_by_role("heading", name="Minispel")).to_be_visible()
+        tab = lambda name: dm.get_by_role("tab", name=name)
+        # Last hit 3D (eller SVG om WebGL saknas) och klassisk
+        dm.get_by_role("button", name="Starta").click()
+        expect(dm.locator(".lh3d.ready, .lasthit > .lh-scene")).to_be_visible(timeout=15000)
+        dm.wait_for_timeout(1500)
+        shot(dm, "80-demo-lasthit-3d")
+        tab("Last hit (Klassisk)").click()
+        dm.get_by_role("button", name="Starta").click()
+        expect(dm.locator(".lasthit > .lh-scene")).to_be_visible()
+        expect(dm.locator(".lh3d")).to_have_count(0)
+        # Flick: tio träffar ger ett resultat
+        tab("Flick").click()
+        dm.get_by_role("button", name="Starta").click()
+        for _ in range(10):
+            dm.get_by_role("button", name="Mål").dispatch_event("pointerdown")
+        expect(dm.locator(".locked-text")).to_contain_text(" s")
+        # Stoppa klockan
+        tab("Stoppa klockan").click()
+        dm.get_by_label("Mål i sekunder").fill("3")
+        dm.get_by_role("button", name="Starta").click()
+        dm.wait_for_timeout(1000)
+        dm.get_by_role("button", name="Stopp").dispatch_event("pointerdown")
+        expect(dm.locator(".locked-text")).to_contain_text("−")
+        expect(dm.get_by_role("button", name="Spela igen")).to_be_visible()
+        # Häll upp: spill (håll tills det rinner över)
+        tab("Häll upp").click()
+        dm.get_by_role("button", name="Starta").click()
+        dm.get_by_role("button", name="Häll").dispatch_event("pointerdown")
+        expect(dm.locator(".locked-text")).to_have_text("Spillde!", timeout=15000)
+        # Ordna rätt: tryck i rätt ordning
+        tab("Ordna rätt").click()
+        dm.get_by_role("button", name="Starta").click()
+        for label in ["Lost", "How I Met Your Mother", "Breaking Bad", "Game of Thrones", "Better Call Saul"]:
+            dm.get_by_role("button", name=label).click()
+        dm.get_by_role("button", name="Lås ordning").click()
+        expect(dm.locator(".locked-text")).to_have_text("Helt rätt")
+        shot(dm, "81-demo-ordna")
+        # Lyckohjulet
+        tab("Lyckohjulet").click()
+        dm.get_by_role("button", name="Snurra").click()
+        expect(dm.locator(".wheel-caption[data-twist]")).to_be_visible(timeout=8000)
+        shot(dm, "82-demo-hjulet")
+        assert not dm_errors, f"Sidfel i demoläget: {dm_errors}"
+        dm.close()
 
         b.close()
         print("E2E OK. Slutpoäng:", res)

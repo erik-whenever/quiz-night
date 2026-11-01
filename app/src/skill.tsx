@@ -54,7 +54,7 @@ const LH_PAUSE_MS = 1300;
 const force2d = () => { try { return new URLSearchParams(location.search).get("lh") === "2d" || localStorage.getItem("kronan.lh") === "2d"; } catch { return false; } };
 const load3d = () => import("./lasthit3d");
 
-function LastHit({ seed, onDone }: { seed: number; onDone: Done }) {
+export function LastHit({ seed, onDone, classic }: { seed: number; onDone: Done; classic?: boolean }) {
   const course = useRef(lasthitCourse(seed)).current;
   const [idx, setIdx] = useState(0);
   const [t0, setT0] = useState(() => now() + LH_START_MS);
@@ -71,7 +71,7 @@ function LastHit({ seed, onDone }: { seed: number; onDone: Done }) {
   const running = !flash && idx < LASTHIT_CREEPS;
 
   // 3D-scenen (laddas i bakgrunden, SVG visas tills den är redo eller om WebGL saknas)
-  const [view, setView] = useState<"loading" | "3d" | "2d">(() => (force2d() ? "2d" : "loading"));
+  const [view, setView] = useState<"loading" | "3d" | "2d">(() => (classic || force2d() ? "2d" : "loading"));
   const host = useRef<HTMLDivElement>(null);
   const scene3d = useRef<LastHitScene | null>(null);
   const frame3d = useRef<() => LhFrame>(() => ({ t0, idx, creep, hp: 100, arrows: [], flash }));
@@ -243,7 +243,7 @@ function LastHit({ seed, onDone }: { seed: number; onDone: Done }) {
 
 // ===== 2. Flick =====
 
-function Aim({ seed, onDone }: { seed: number; onDone: Done }) {
+export function Aim({ seed, onDone }: { seed: number; onDone: Done }) {
   const course = useRef(aimCourse(seed)).current;
   const [i, setI] = useState(-1);
   const [misses, setMisses] = useState(0);
@@ -276,7 +276,7 @@ function Aim({ seed, onDone }: { seed: number; onDone: Done }) {
 const STOPWATCH_VISIBLE_MS = 3000;
 const STOPWATCH_OVER_MS = 5000;
 
-function Stopwatch({ target, onDone }: { target: number; onDone: Done }) {
+export function Stopwatch({ target, onDone }: { target: number; onDone: Done }) {
   const start = useRef(now());
   const [ms, setMs] = useState(0);
   const [done, setDone] = useState(false);
@@ -305,7 +305,7 @@ function Stopwatch({ target, onDone }: { target: number; onDone: Done }) {
 
 // ===== 5. Ordna rätt =====
 
-function Order({ items, prompt, send }: { items: { label: string }[]; prompt: string; send: Send }) {
+export function Order({ items, prompt, onLock }: { items: { label: string }[]; prompt: string; onLock: (order: string[]) => void }) {
   const [order, setOrder] = useState<string[]>([]);
   const [sent, setSent] = useState(false);
   const toggle = (l: string) => setOrder((o) => (o.includes(l) ? o : [...o, l]));
@@ -325,7 +325,7 @@ function Order({ items, prompt, send }: { items: { label: string }[]; prompt: st
       <div className="row" style={{ justifyContent: "center" }}>
         <button className="btn ghost" disabled={!order.length || sent} onClick={() => setOrder((o) => o.slice(0, -1))}>Ångra</button>
         <button className="btn primary big" disabled={order.length !== items.length || sent}
-          onClick={() => { setSent(true); send({ t: "skill", order }); }}>Lås ordning</button>
+          onClick={() => { setSent(true); onLock(order); }}>Lås ordning</button>
       </div>
     </div>
   );
@@ -335,7 +335,7 @@ function Order({ items, prompt, send }: { items: { label: string }[]; prompt: st
 
 const FOAM_MS = 700;
 
-function Pour({ seed, onDone }: { seed: number; onDone: Done }) {
+export function Pour({ seed, onDone }: { seed: number; onDone: Done }) {
   const c = useRef(pourCourse(seed)).current;
   const [level, setLevel] = useState(0);
   const st = useRef<{ phase: "idle" | "pour" | "foam" | "done"; t0: number; last: number; base: number }>({ phase: "idle", t0: 0, last: 0, base: 0 });
@@ -432,7 +432,7 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
     return <div className="locked-card" role="status"><p className="display big-verdict">Försöket är förbrukat</p><p className="muted">Du laddade om mitt i utmaningen.</p></div>;
   }
   if (!playing) {
-    if (spec.kind === "lasthit" && !force2d()) load3d().catch(() => {}); // hämta 3D-scenen i förväg
+    if (spec.kind === "lasthit" && state.settings.lastHit3d !== false && !force2d()) load3d().catch(() => {}); // hämta 3D-scenen i förväg
     return (
       <div className="stack skill-intro" style={{ alignItems: "center", textAlign: "center" }}>
         <Countdown ms={left} total={c.deadline - c.startedAt} size={90} />
@@ -445,11 +445,11 @@ export function SkillPlay({ state, me, send, serverNow }: { state: HostState; me
   }
   const seed = c.seed ?? 1;
   switch (spec.kind) {
-    case "lasthit": return <LastHit seed={seed} onDone={done} />;
+    case "lasthit": return <LastHit seed={seed} onDone={done} classic={state.settings.lastHit3d === false} />;
     case "aim": return <Aim seed={seed} onDone={done} />;
     case "stopwatch": return <Stopwatch target={spec.target ?? 10} onDone={done} />;
     case "pour": return <Pour seed={seed} onDone={done} />;
-    case "order": return <Order items={spec.items ?? []} prompt={spec.prompt ?? "Lägst först"} send={send} />;
+    case "order": return <Order items={spec.items ?? []} prompt={spec.prompt ?? "Lägst först"} onLock={(order) => send({ t: "skill", order })} />;
   }
 }
 

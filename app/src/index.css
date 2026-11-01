@@ -522,3 +522,13 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 @keyframes lh3d-flash { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .lh3d-banner.show { animation-duration: 900ms; } }
 @media (max-width: 600px) { .lh3d { aspect-ratio: 4 / 3; } }
+
+/* Demoläge för minispelen (/host/minispel) */
+.demo { max-width: 760px; }
+.demo-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.demo-pick { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border-radius: 14px; text-align: left; cursor: pointer;
+  background: var(--studio-deep); color: var(--chalk); border: 2px solid rgba(244, 245, 255, 0.12); font: inherit; }
+.demo-pick .small { opacity: 0.7; }
+.demo-pick.on { border-color: var(--signal); box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.2); }
+.demo-pick:hover { border-color: rgba(255, 210, 63, 0.6); }
+.demo-stage { min-height: 360px; justify-content: center; }

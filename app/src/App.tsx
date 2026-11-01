@@ -6,6 +6,7 @@ import HostDashboard from "./pages/HostDashboard";
 import HostControl from "./pages/HostControl";
 import Bank from "./pages/Bank";
 import League from "./pages/League";
+import Demo from "./pages/Demo";
 
 export function navigate(to: string) {
   history.pushState(null, "", to);
@@ -38,6 +39,7 @@ export function TopBar({ host }: { host?: boolean }) {
       <nav className="nav">
         {host && <Link to="/host">Starta</Link>}
         {host && <Link to="/bank">Frågebank</Link>}
+        {host && <Link to="/host/minispel">Minispel</Link>}
         <Link to="/tabell">Tabell</Link>
       </nav>
     </header>
@@ -56,6 +58,7 @@ export default function App() {
   const code = (seg[1] ?? "").toUpperCase();
   if (seg[0] === "play" && code) return <Play code={code} />;
   if (seg[0] === "tv" && code) return <Tv code={code} />;
+  if (seg[0] === "host" && seg[1] === "minispel") return <Demo />;
   if (seg[0] === "host" && code) return <HostControl code={code} />;
   if (seg[0] === "host") return <HostDashboard />;
   if (seg[0] === "bank") return <Bank />;
