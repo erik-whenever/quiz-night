@@ -41,3 +41,14 @@ Rekord i kills/deaths/assists gäller vanliga games (Forests of Caldavar), MidWa
 - Duo-vinstprocent (minst 50 ihop): bmwlover123 + poppeyeflipp 61 % (64), poppeyeflipp + sneykijap 57 % (134).
 - Gänget totalt: Solstice 131, Zephyr 121, Glacius 103, Legionnaire 100.
 - Obs: ett "game" på 0:13 (Henchman, 1 juni) och GPM 5571 är skräpdata, används inte.
+
+## Fler siffror (uträknade 2026-11-02, samma data t.o.m. 28 okt), används i `2026-11-02-mandagsquiz.json`
+- Games på Caldavar med 0 kills: Henchman 34, poppeyeflipp 24, högerback 14, bmwlover123 8, sneykijap 5.
+- Flest kills i förlust: bmwlover123 34/11/17 (Zephyr, 6 feb). Flest deaths i vinst: Henchman 2/20/18 (Glacius, 28 sep).
+- Mest spelade hjälte: sneykijap Silhouette 31, högerback Glacius 40 (Pyromancer 38), bmwlover123 Zephyr 26.
+- Bästa vinstprocent per hjälte (minst 15 games): Henchman Moraxus 37/51, poppeyeflipp Voodoo Jester 25/39, bmwlover123 Flux 15/24, högerback Tarot 13/16, sneykijap The Madman 13/19.
+- Gänget per månad: jan 94, feb 543, mar 238, apr 177, maj 148, jun 156, jul 12 (poppeyeflipp 11, Henchman 1), aug 55, sep 329, okt 505 (t.o.m. 28 okt).
+- Samma lag, par: högerback+poppeyeflipp 222, Henchman+poppeyeflipp 165, högerback+sneykijap 156. Trio: högerback+poppeyeflipp+sneykijap 33 (15 vinster).
+- Games med minst tre ur gänget: 204, med fyra: 58. Unika hjältar totalt: 106.
+- MidWars: poppeyeflipp 10, Henchman 5, sneykijap 5, högerback 4, bmwlover123 0 (24 totalt).
+- Games kortare än 5 min räknas inte (skräpdata).

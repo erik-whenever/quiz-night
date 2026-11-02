@@ -1,0 +1,700 @@
+{
+  "id": "2026-11-02-mandagsquiz",
+  "title": "Måndagsquiz 2 nov",
+  "theme": "Mycket HoN om gänget, tv-citat, mat, lite allmänt och CS2, fem skill-utmaningar",
+  "updatedAt": "2026-11-02",
+  "questions": [
+    {
+      "id": "mq1",
+      "text": "Vem i gänget var den enda som spelade HoN på riktigt i juli (11 games)?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 1,
+      "source": "Juli: poppeyeflipp 11, Henchman 1, övriga 0. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq2",
+      "text": "Vem säger: ”Dracarys.”?",
+      "answer": "Daenerys Targaryen (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Daenerys Targaryen (Game of Thrones)",
+        "Jon Snow (Game of Thrones)",
+        "Cersei Lannister (Game of Thrones)",
+        "Arya Stark (Game of Thrones)",
+        "Viserys Targaryen (Game of Thrones)",
+        "Melisandre (Game of Thrones)",
+        "Missandei (Game of Thrones)",
+        "Tyrion Lannister (Game of Thrones)"
+      ],
+      "difficulty": 1,
+      "source": "Daenerys befaller sina drakar att spruta eld med ordet (högvalyriska för drakeld)."
+    },
+    {
+      "id": "mq3",
+      "text": "Vilken nöt hör hemma i en klassisk pesto alla genovese?",
+      "answer": "Pinjenötter",
+      "category": "Mat",
+      "choices": [
+        "Pinjenötter",
+        "Valnötter",
+        "Cashewnötter",
+        "Mandlar",
+        "Hasselnötter",
+        "Pistagenötter",
+        "Pekannötter",
+        "Paranötter"
+      ],
+      "difficulty": 1,
+      "source": "Klassisk genovesisk pesto: basilika, pinjenötter, vitlök, olivolja, parmigiano och pecorino."
+    },
+    {
+      "id": "mq4",
+      "text": "Vem har flest games med noll kills (34 st)?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Games på Caldavar med 0 kills: Henchman 34, poppeyeflipp 24, högerback 14, bmwlover123 8, sneykijap 5. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq5",
+      "text": "Devourer är HoN:s version av vilken DotA-hjälte?",
+      "answer": "Pudge",
+      "category": "HoN",
+      "choices": [
+        "Pudge",
+        "Axe",
+        "Lifestealer",
+        "Clockwerk",
+        "Tiny",
+        "Slardar",
+        "Bloodseeker",
+        "Undying"
+      ],
+      "difficulty": 2,
+      "source": "HoN porterade mycket av DotA-rostern; Devourer (krok, Decay, Cadaver Armor, Devour) motsvarar Pudge. Källa: esports.gg, MOBA family tree: hook heroes."
+    },
+    {
+      "id": "mq6",
+      "text": "Skill: Last hit! Ta creepen innan den blir denied.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "lasthit"
+      }
+    },
+    {
+      "id": "mq7",
+      "text": "34 kills och ändå förlust (34/11/17 med Zephyr, 6 februari). Vem?",
+      "answer": "bmwlover123",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Flest kills i ett förlorat game: bmwlover123 34/11/17 (Zephyr, 6 feb). Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq8",
+      "text": "Vem säger: ”That's what she said!”?",
+      "answer": "Michael Scott (The Office)",
+      "category": "Tv-citat",
+      "choices": [
+        "Michael Scott (The Office)",
+        "Dwight Schrute (The Office)",
+        "Jim Halpert (The Office)",
+        "Barney Stinson (How I Met Your Mother)",
+        "Joey Tribbiani (Friends)",
+        "Chandler Bing (Friends)",
+        "Andy Bernard (The Office)",
+        "Ted Mosby (How I Met Your Mother)"
+      ],
+      "difficulty": 1,
+      "source": "Michael Scotts signaturskämt i amerikanska The Office."
+    },
+    {
+      "id": "mq9",
+      "text": "Vilken månad i år spelade gänget minst HoN?",
+      "answer": "Juli",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Juli",
+        "September",
+        "Oktober",
+        "April",
+        "Maj",
+        "Juni",
+        "Februari",
+        "Januari"
+      ],
+      "difficulty": 2,
+      "source": "Gänget totalt per månad: jan 94, feb 543, mar 238, apr 177, maj 148, jun 156, jul 12, aug 55, sep 329, okt 505 (t.o.m. 28 okt). Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq10",
+      "text": "I vilken stad föddes pizza Margherita enligt traditionen?",
+      "answer": "Neapel",
+      "category": "Mat",
+      "choices": [
+        "Neapel",
+        "Rom",
+        "Milano",
+        "Florens",
+        "Bologna",
+        "Palermo",
+        "Venedig",
+        "Turin"
+      ],
+      "difficulty": 2,
+      "source": "Enligt traditionen skapad i Neapel 1889 till drottning Margherita (Pizzeria Brandi)."
+    },
+    {
+      "id": "mq11",
+      "text": "Vilken CS-karta har platserna Heaven, Hell, Ramp och Vents?",
+      "answer": "Nuke",
+      "category": "CS2",
+      "choices": [
+        "Nuke",
+        "Inferno",
+        "Mirage",
+        "Dust II",
+        "Overpass",
+        "Ancient",
+        "Anubis",
+        "Vertigo"
+      ],
+      "difficulty": 2,
+      "source": "Nuke: Heaven/Hell vid A, Ramp och Vents till B."
+    },
+    {
+      "id": "mq12",
+      "text": "Vem vann ett game trots att ha gått 2/20/18?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Flest deaths i ett vunnet game: Henchman 2/20/18 (Glacius, 28 sep). Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq13",
+      "text": "Skill: Flick! Tio mål, snabbast vinner.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "aim"
+      }
+    },
+    {
+      "id": "mq14",
+      "text": "Vem säger: ”I am not in danger, Skyler. I am the danger.”?",
+      "answer": "Walter White (Breaking Bad)",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White (Breaking Bad)",
+        "Jesse Pinkman (Breaking Bad)",
+        "Hank Schrader (Breaking Bad)",
+        "Gus Fring (Breaking Bad)",
+        "Saul Goodman (Breaking Bad)",
+        "Mike Ehrmantraut (Breaking Bad)",
+        "Tuco Salamanca (Breaking Bad)",
+        "Todd Alquist (Breaking Bad)"
+      ],
+      "difficulty": 2,
+      "source": "Breaking Bad säsong 4, ”Cornered”."
+    },
+    {
+      "id": "mq15",
+      "text": "Vilken hjälte har sneykijap spelat mest i år (31 games)?",
+      "answer": "Silhouette",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Silhouette",
+        "Devourer",
+        "Tarot",
+        "Moraxus",
+        "Legionnaire",
+        "Voodoo Jester",
+        "Slither",
+        "Glacius"
+      ],
+      "difficulty": 3,
+      "source": "sneykijap: Silhouette 31, Armadon 20, The Madman 19, Zephyr 18. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq16",
+      "text": "Från vilket land kommer halloumi?",
+      "answer": "Cypern",
+      "category": "Mat",
+      "choices": [
+        "Cypern",
+        "Grekland",
+        "Turkiet",
+        "Libanon",
+        "Egypten",
+        "Syrien",
+        "Bulgarien",
+        "Israel"
+      ],
+      "difficulty": 3,
+      "source": "Halloumi är en traditionell cypriotisk ost, EU-skyddad ursprungsbeteckning 2021."
+    },
+    {
+      "id": "mq17",
+      "text": "Henchman vinner 73 % med en hjälte (37 vinster på 51 games). Vilken?",
+      "answer": "Moraxus",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Moraxus",
+        "Glacius",
+        "Nomad",
+        "Zephyr",
+        "The Chipper",
+        "Flux",
+        "The Madman",
+        "Soul Reaper"
+      ],
+      "difficulty": 3,
+      "source": "Henchmans bästa vinstprocent, minst 15 games: Moraxus 37/51, Glacius 31/47. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq18",
+      "text": "Vad heter Devourers krok?",
+      "answer": "Guttling Hook",
+      "category": "HoN",
+      "choices": [
+        "Guttling Hook",
+        "Meat Hook",
+        "Flesh Hook",
+        "Chain Hook",
+        "Gut Hook",
+        "Rot Hook",
+        "Hellhook",
+        "Death Grip"
+      ],
+      "difficulty": 3,
+      "source": "Devourers Q heter Guttling Hook. Källa: HoN-wikin (hon.gamepedia.com), Devourer."
+    },
+    {
+      "id": "mq19",
+      "text": "Vilken hjälte har högerback spelat mest i år (40 games)?",
+      "answer": "Glacius",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Glacius",
+        "Pyromancer",
+        "Solstice",
+        "Devourer",
+        "Legionnaire",
+        "Nomad",
+        "Amun-Ra",
+        "Slither"
+      ],
+      "difficulty": 3,
+      "source": "högerback: Glacius 40, Pyromancer 38, Thunderbringer 21, Amun-Ra 21. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq20",
+      "text": "Skill: Ordna gängets mest spelade hjältar i år.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "order",
+        "prompt": "Mest spelad först",
+        "items": [
+          {
+            "label": "Solstice",
+            "value": 131,
+            "show": "131"
+          },
+          {
+            "label": "Zephyr",
+            "value": 121,
+            "show": "121"
+          },
+          {
+            "label": "Glacius",
+            "value": 103,
+            "show": "103"
+          },
+          {
+            "label": "Legionnaire",
+            "value": 100,
+            "show": "100"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mq21",
+      "text": "Vem säger: ”The night is dark and full of terrors.”?",
+      "answer": "Melisandre (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Melisandre (Game of Thrones)",
+        "Stannis Baratheon (Game of Thrones)",
+        "Davos Seaworth (Game of Thrones)",
+        "Bran Stark (Game of Thrones)",
+        "The Night King (Game of Thrones)",
+        "Thoros of Myr (Game of Thrones)",
+        "Sandor Clegane (Game of Thrones)",
+        "Jaqen H'ghar (Game of Thrones)"
+      ],
+      "difficulty": 3,
+      "source": "Melisandre, Röda kvinnan, upprepar det genom serien."
+    },
+    {
+      "id": "mq22",
+      "text": "Vilken månad i år spelade gänget flest games (räknat t.o.m. 28 oktober)?",
+      "answer": "Februari",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Februari",
+        "Maj",
+        "Januari",
+        "Augusti",
+        "Oktober",
+        "April",
+        "Juli",
+        "Juni"
+      ],
+      "difficulty": 3,
+      "source": "Februari 543, oktober 505 (t.o.m. 28 okt), september 329. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq23",
+      "text": "Vilket land har flest öar i världen?",
+      "answer": "Sverige",
+      "category": "Allmänt",
+      "choices": [
+        "Sverige",
+        "Norge",
+        "Finland",
+        "Kanada",
+        "Indonesien",
+        "Filippinerna",
+        "Japan",
+        "Grekland"
+      ],
+      "difficulty": 3,
+      "source": "Sverige har 267 570 öar enligt SCB:s räkning (2013), flest av alla länder."
+    },
+    {
+      "id": "mq24",
+      "text": "Vilken duo har spelat näst flest games ihop (165 st)?",
+      "answer": "Henchman och poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman och poppeyeflipp",
+        "bmwlover123 och högerback",
+        "poppeyeflipp och sneykijap",
+        "bmwlover123 och sneykijap",
+        "Henchman och sneykijap",
+        "högerback och sneykijap",
+        "Henchman och bmwlover123",
+        "högerback och poppeyeflipp"
+      ],
+      "difficulty": 3,
+      "source": "Games i samma lag: högerback+poppeyeflipp 222, Henchman+poppeyeflipp 165, högerback+sneykijap 156. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq25",
+      "text": "Vilken liten fisk ger smak åt de flesta caesardressingar?",
+      "answer": "Ansjovis",
+      "category": "Mat",
+      "choices": [
+        "Ansjovis",
+        "Sardin",
+        "Strömming",
+        "Makrill",
+        "Sill",
+        "Skarpsill",
+        "Tonfisk",
+        "Lax"
+      ],
+      "difficulty": 3,
+      "source": "Ansjovis (direkt eller via worcestershiresås) i klassisk caesardressing."
+    },
+    {
+      "id": "mq26",
+      "text": "poppeyeflipps bästa hjälte (minst 15 games): 25 vinster på 39. Vilken?",
+      "answer": "Voodoo Jester",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Voodoo Jester",
+        "Glacius",
+        "Amun-Ra",
+        "Silhouette",
+        "Thunderbringer",
+        "Devourer",
+        "Tarot",
+        "Zephyr"
+      ],
+      "difficulty": 4,
+      "source": "poppeyeflipp, minst 15 games: Voodoo Jester 25/39 (64 %). Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq27",
+      "text": "Skill: Stoppa klockan på exakt 17 sekunder.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "stopwatch",
+        "target": 17
+      }
+    },
+    {
+      "id": "mq28",
+      "text": "Vem vinner rätten att ge Barney örfilar i ”Slap Bet”?",
+      "answer": "Marshall Eriksen",
+      "category": "Tv-citat",
+      "choices": [
+        "Marshall Eriksen",
+        "Ted Mosby",
+        "Lily Aldrin",
+        "Robin Scherbatsky",
+        "Ranjit",
+        "Ted och Lily",
+        "Robin och Ted",
+        "Ingen, vadet blir ogiltigt"
+      ],
+      "difficulty": 3,
+      "source": "How I Met Your Mother säsong 2, ”Slap Bet”: Marshall vinner fem slag."
+    },
+    {
+      "id": "mq29",
+      "text": "bmwlover123 vinner 15 av 24 games med en hjälte. Vilken?",
+      "answer": "Flux",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Flux",
+        "Silhouette",
+        "The Madman",
+        "Voodoo Jester",
+        "Armadon",
+        "Solstice",
+        "Zephyr",
+        "Tarot"
+      ],
+      "difficulty": 4,
+      "source": "bmwlover123, minst 15 games: Flux 15/24 (63 %), Zephyr 12/26. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq30",
+      "text": "Vilket år öppnade Öresundsbron?",
+      "answer": "2000",
+      "category": "Allmänt",
+      "choices": [
+        "2000",
+        "1995",
+        "1997",
+        "1998",
+        "2001",
+        "2002",
+        "2004",
+        "1999"
+      ],
+      "difficulty": 3,
+      "source": "Öresundsbron invigdes 1 juli 2000."
+    },
+    {
+      "id": "mq31",
+      "text": "Vad heter det svampiga surdegsbrödet som serveras till nästan allt i Etiopien?",
+      "answer": "Injera",
+      "category": "Mat",
+      "choices": [
+        "Injera",
+        "Naan",
+        "Lavash",
+        "Pita",
+        "Roti",
+        "Arepa",
+        "Chapati",
+        "Kisra"
+      ],
+      "difficulty": 4,
+      "source": "Injera bakas av teff och används som både tallrik och bestick."
+    },
+    {
+      "id": "mq32",
+      "text": "Vilken trio har spelat flest games ihop (33 st)?",
+      "answer": "högerback, poppeyeflipp, sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "högerback, poppeyeflipp, sneykijap",
+        "Henchman, bmwlover123, poppeyeflipp",
+        "bmwlover123, högerback, poppeyeflipp",
+        "Henchman, bmwlover123, högerback",
+        "Henchman, bmwlover123, sneykijap",
+        "Henchman, högerback, poppeyeflipp",
+        "bmwlover123, högerback, sneykijap",
+        "Henchman, högerback, sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Games med samma tre (eller fler) ur gänget: högerback+poppeyeflipp+sneykijap 33, Henchman+högerback+poppeyeflipp 25. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq33",
+      "text": "Vem säger ”Tread lightly” – och till vem?",
+      "answer": "Walter White till Hank",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White till Hank",
+        "Hank till Walter White",
+        "Gus Fring till Walter White",
+        "Mike till Jesse",
+        "Walter White till Jesse",
+        "Saul till Walter White",
+        "Jesse till Walter White",
+        "Hank till Jesse"
+      ],
+      "difficulty": 4,
+      "source": "Breaking Bad säsong 5, ”Blood Money”, garagescenen."
+    },
+    {
+      "id": "mq34",
+      "text": "Skill: Häll upp! Släpp vid strecket utan att spilla.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "pour"
+      }
+    },
+    {
+      "id": "mq35",
+      "text": "poppeyeflipp förlorade 6 raka med samma hjälte i september. Vilken?",
+      "answer": "Zephyr",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Zephyr",
+        "Solstice",
+        "Voodoo Jester",
+        "Nomad",
+        "Glacius",
+        "Flux",
+        "Devourer",
+        "Soul Reaper"
+      ],
+      "difficulty": 4,
+      "source": "Längsta förlustsvit med samma hjälte: poppeyeflipp 6 (Zephyr, 13–25 sep). Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq36",
+      "text": "Från vilket land kommer khachapuri, ostfyllt bröd ofta toppat med ägg?",
+      "answer": "Georgien",
+      "category": "Mat",
+      "choices": [
+        "Georgien",
+        "Armenien",
+        "Turkiet",
+        "Azerbajdzjan",
+        "Ukraina",
+        "Grekland",
+        "Iran",
+        "Bulgarien"
+      ],
+      "difficulty": 4,
+      "source": "Khachapuri är Georgiens nationalrätt; adjaruli-varianten är båtformad med ägg."
+    },
+    {
+      "id": "mq37",
+      "text": "Hur många games har minst fyra ur gänget spelat ihop i år?",
+      "answer": "58",
+      "category": "Gänget i siffror",
+      "choices": [
+        "58",
+        "12",
+        "23",
+        "37",
+        "81",
+        "104",
+        "142",
+        "204"
+      ],
+      "difficulty": 5,
+      "source": "Games med fyra ur gänget: 58 (minst tre: 204). Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    },
+    {
+      "id": "mq38",
+      "text": "Vem säger: ”You come at the king, you best not miss.”?",
+      "answer": "Omar Little (The Wire)",
+      "category": "Tv-citat",
+      "choices": [
+        "Omar Little (The Wire)",
+        "Stringer Bell (The Wire)",
+        "Tony Soprano (The Sopranos)",
+        "Tywin Lannister (Game of Thrones)",
+        "Avon Barksdale (The Wire)",
+        "Marlo Stanfield (The Wire)",
+        "Gus Fring (Breaking Bad)",
+        "Tommy Shelby (Peaky Blinders)"
+      ],
+      "difficulty": 5,
+      "source": "The Wire säsong 1, ”The Pager”."
+    },
+    {
+      "id": "mq39",
+      "text": "Vilken huvudstad (regeringssäte) ligger högst över havet?",
+      "answer": "La Paz",
+      "category": "Allmänt",
+      "choices": [
+        "La Paz",
+        "Quito",
+        "Bogotá",
+        "Addis Abeba",
+        "Thimphu",
+        "Mexico City",
+        "Katmandu",
+        "Sanaa"
+      ],
+      "difficulty": 5,
+      "source": "La Paz ca 3 600 m ö.h., Quito ca 2 850 m. (Bolivias konstitutionella huvudstad Sucre är inte med bland alternativen.)"
+    },
+    {
+      "id": "mq40",
+      "text": "Hur många olika hjältar har gänget spelat i år, alla fem sammanlagt?",
+      "answer": "106",
+      "category": "Gänget i siffror",
+      "choices": [
+        "106",
+        "74",
+        "88",
+        "97",
+        "113",
+        "121",
+        "129",
+        "138"
+      ],
+      "difficulty": 5,
+      "source": "Unika hjältar över alla fem: 106. Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-10-29, data t.o.m. 28 okt. Uträknat 2026-11-02, se council/data/hon-svar.md."
+    }
+  ]
+}
