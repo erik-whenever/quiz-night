@@ -114,6 +114,11 @@
       "items": {}
     },
     {
+      "name": "hej",
+      "coins": 10,
+      "items": {}
+    },
+    {
       "name": "Erik",
       "coins": 8,
       "items": {
