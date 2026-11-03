@@ -8,37 +8,43 @@
   "rank_name": "Champion",
   "star_level": 2,
   "is_new_player": false,
-  "mmr": 1752,
-  "foc_mmr": 1752,
+  "mmr": 1743,
+  "foc_mmr": 1743,
   "mw_mmr": 1500,
-  "last_played": "28/10/2026",
-  "gpm": 482,
-  "xpm": 510,
-  "avg_kda": 3.19,
+  "last_played": "01/11/2026",
+  "gpm": 481,
+  "xpm": 508,
+  "avg_kda": 3.15,
   "avg_dpm": 519,
-  "win_rate": 55.2,
-  "matches": 181,
-  "total_kills": 1335,
-  "total_deaths": 1323,
-  "total_assists": 2880,
-  "total_creep_kills": 18012,
-  "total_neutral_kills": 6788,
-  "total_buybacks": 96,
+  "win_rate": 55.1,
+  "matches": 187,
+  "total_kills": 1366,
+  "total_deaths": 1384,
+  "total_assists": 2996,
+  "total_creep_kills": 18759,
+  "total_neutral_kills": 6938,
+  "total_buybacks": 101,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 11,
-   "wards_placed": 953,
+   "wards_placed": 962,
    "wards_destroyed": 0,
-   "gold_earned": 2255994
+   "gold_earned": 2334297
   },
   "top_heroes": [
    {
     "name": "Flux",
     "hero_id": 805,
-    "kda": "9.7/7.8/17.8",
+    "kda": "9.7/7.9/17.8",
     "win_rate": "60%"
+   },
+   {
+    "name": "Jeraziah",
+    "hero_id": 1077,
+    "kda": "4.7/7.3/19.3",
+    "win_rate": "67%"
    },
    {
     "name": "Zephyr",
@@ -47,29 +53,23 @@
     "win_rate": "33%"
    },
    {
-    "name": "Soul Reaper",
-    "hero_id": 1952,
-    "kda": "9.7/7.7/16.0",
-    "win_rate": "33%"
+    "name": "Defiler",
+    "hero_id": 599,
+    "kda": "4.0/5.5/7.0",
+    "win_rate": "50%"
    },
    {
     "name": "Kane",
     "hero_id": 4100,
     "kda": "4.0/6.0/14.0",
     "win_rate": "100%"
-   },
-   {
-    "name": "Night Hound",
-    "hero_id": 3159,
-    "kda": "10.5/13.0/22.0",
-    "win_rate": "50%"
    }
   ],
   "top_roles": [
    {
     "role": "Offlane",
-    "matches": 59,
-    "win_rate": "58%"
+    "matches": 64,
+    "win_rate": "56%"
    },
    {
     "role": "HardSupport",
@@ -86,7 +86,7 @@
    "penalty_level": "Chad",
    "penalty_points": 0,
    "abandons": 0,
-   "avoided": 2,
+   "avoided": 1,
    "muted": 17
   }
  },
@@ -102,8 +102,8 @@
   {
    "offset": 150,
    "status": 200,
-   "got": 31,
-   "new": 31,
+   "got": 37,
+   "new": 37,
    "has_more": false
   }
  ],
@@ -112,8 +112,116 @@
   "matches",
   "has_more"
  ],
- "matchCount": 181,
+ "matchCount": 187,
  "matches": [
+  {
+   "game_id": 13246338,
+   "date": "2026-11-01T20:30:11.7100000Z",
+   "hero_name": "Jeraziah",
+   "kda": "1/12/13",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 16,
+   "hero_id": 1077,
+   "won": false,
+   "duration": "39:11",
+   "gpm": 379,
+   "net_worth": 14854,
+   "xpm": 385,
+   "kills": 1,
+   "deaths": 12,
+   "assists": 13
+  },
+  {
+   "game_id": 13204542,
+   "date": "2026-10-31T21:10:14.9700000Z",
+   "hero_name": "Engineer",
+   "kda": "9/14/34",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 24,
+   "hero_id": 3588,
+   "won": true,
+   "duration": "55:14",
+   "gpm": 506,
+   "net_worth": 27930,
+   "xpm": 550,
+   "kills": 9,
+   "deaths": 14,
+   "assists": 34
+  },
+  {
+   "game_id": 13203238,
+   "date": "2026-10-31T20:06:08.8500000Z",
+   "hero_name": "Flux",
+   "kda": "9/10/16",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 17,
+   "hero_id": 805,
+   "won": false,
+   "duration": "36:08",
+   "gpm": 447,
+   "net_worth": 16148,
+   "xpm": 455,
+   "kills": 9,
+   "deaths": 10,
+   "assists": 16
+  },
+  {
+   "game_id": 13167990,
+   "date": "2026-10-30T22:47:11.4200000Z",
+   "hero_name": "Rampage",
+   "kda": "6/10/31",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 17,
+   "hero_id": 1701,
+   "won": true,
+   "duration": "32:11",
+   "gpm": 436,
+   "net_worth": 14035,
+   "xpm": 503,
+   "kills": 6,
+   "deaths": 10,
+   "assists": 31
+  },
+  {
+   "game_id": 13167066,
+   "date": "2026-10-30T22:03:45.4500000Z",
+   "hero_name": "Jeraziah",
+   "kda": "6/7/22",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 17,
+   "hero_id": 1077,
+   "won": true,
+   "duration": "30:45",
+   "gpm": 544,
+   "net_worth": 16734,
+   "xpm": 507,
+   "kills": 6,
+   "deaths": 7,
+   "assists": 22
+  },
+  {
+   "game_id": 13162386,
+   "date": "2026-10-30T19:06:20.3700000Z",
+   "hero_name": "Defiler",
+   "kda": "0/8/0",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 12,
+   "hero_id": 599,
+   "won": false,
+   "duration": "25:20",
+   "gpm": 318,
+   "net_worth": 8057,
+   "xpm": 308,
+   "kills": 0,
+   "deaths": 8,
+   "assists": 0
+  },
   {
    "game_id": 13086078,
    "date": "2026-10-28T18:48:21.9800000Z",
@@ -3373,5 +3481,5 @@
    "assists": 20
   }
  ],
- "fetchedAt": "2026-10-29T11:50Z"
+ "fetchedAt": "2026-11-03T10:18Z"
 }

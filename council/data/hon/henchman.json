@@ -5,40 +5,40 @@
   "id": "019bf641-298b-76b1-8820-9100112ed2f9",
   "name": "henchman",
   "country": "se",
-  "rank_name": "Warlord",
-  "star_level": 1,
+  "rank_name": "Champion",
+  "star_level": 4,
   "is_new_player": false,
-  "mmr": 1803,
-  "foc_mmr": 1803,
+  "mmr": 1774,
+  "foc_mmr": 1774,
   "mw_mmr": 1442,
-  "last_played": "28/10/2026",
-  "gpm": 482,
-  "xpm": 565,
-  "avg_kda": 3.17,
+  "last_played": "01/11/2026",
+  "gpm": 483,
+  "xpm": 568,
+  "avg_kda": 3.16,
   "avg_dpm": 525,
-  "win_rate": 51.9,
-  "matches": 647,
-  "total_kills": 4542,
-  "total_deaths": 4723,
-  "total_assists": 10425,
-  "total_creep_kills": 50671,
-  "total_neutral_kills": 33753,
-  "total_buybacks": 313,
+  "win_rate": 51.8,
+  "matches": 653,
+  "total_kills": 4574,
+  "total_deaths": 4771,
+  "total_assists": 10503,
+  "total_creep_kills": 51412,
+  "total_neutral_kills": 34334,
+  "total_buybacks": 316,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 16,
-   "wards_placed": 4291,
+   "wards_placed": 4303,
    "wards_destroyed": 0,
-   "gold_earned": 7016113
+   "gold_earned": 7101674
   },
   "top_heroes": [
    {
     "name": "Zephyr",
     "hero_id": 2184,
-    "kda": "7.4/4.9/14.4",
-    "win_rate": "80%"
+    "kda": "7.4/4.1/15.1",
+    "win_rate": "82%"
    },
    {
     "name": "Solstice",
@@ -49,26 +49,26 @@
    {
     "name": "Amun-Ra",
     "hero_id": 391,
-    "kda": "7.0/3.2/11.6",
-    "win_rate": "80%"
+    "kda": "7.8/3.8/11.2",
+    "win_rate": "60%"
    },
    {
     "name": "Moraxus",
     "hero_id": 1394,
-    "kda": "6.0/8.7/17.7",
-    "win_rate": "67%"
+    "kda": "6.2/10.2/16.2",
+    "win_rate": "50%"
    },
    {
-    "name": "Tempest",
-    "hero_id": 1998,
-    "kda": "3.0/4.0/16.3",
-    "win_rate": "67%"
+    "name": "Swiftblade",
+    "hero_id": 1975,
+    "kda": "4.5/8.0/6.5",
+    "win_rate": "50%"
    }
   ],
   "top_roles": [
    {
     "role": "Jungle",
-    "matches": 185,
+    "matches": 187,
     "win_rate": "56%"
    },
    {
@@ -78,16 +78,16 @@
    },
    {
     "role": "Offlane",
-    "matches": 101,
-    "win_rate": "57%"
+    "matches": 103,
+    "win_rate": "56%"
    }
   ],
   "reputation": {
    "penalty_level": "Chad",
    "penalty_points": 0,
    "abandons": 0,
-   "avoided": 5,
-   "muted": 135
+   "avoided": 4,
+   "muted": 136
   }
  },
  "accountId": "019bf641-298b-76b1-8820-9100112ed2f9",
@@ -165,8 +165,15 @@
   {
    "offset": 600,
    "status": 200,
-   "got": 47,
-   "new": 47,
+   "got": 50,
+   "new": 50,
+   "has_more": true
+  },
+  {
+   "offset": 650,
+   "status": 200,
+   "got": 3,
+   "new": 3,
    "has_more": false
   }
  ],
@@ -175,8 +182,115 @@
   "matches",
   "has_more"
  ],
- "matchCount": 647,
+ "matchCount": 653,
  "matches": [
+  {
+   "game_id": 13247702,
+   "date": "2026-11-01T21:12:20.6400000Z",
+   "hero_name": "Zephyr",
+   "kda": "2/7/11",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 17,
+   "hero_id": 2184,
+   "won": false,
+   "duration": "28:20",
+   "gpm": 491,
+   "net_worth": 13910,
+   "xpm": 597,
+   "kills": 2,
+   "deaths": 7,
+   "assists": 11
+  },
+  {
+   "game_id": 13243446,
+   "date": "2026-11-01T18:51:58.6600000Z",
+   "hero_name": "Zephyr",
+   "kda": "7/4/26",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 21,
+   "hero_id": 2184,
+   "won": true,
+   "duration": "33:58",
+   "gpm": 604,
+   "net_worth": 20500,
+   "xpm": 693,
+   "kills": 7,
+   "deaths": 4,
+   "assists": 26
+  },
+  {
+   "game_id": 13238242,
+   "date": "2026-11-01T16:21:24.1200000Z",
+   "hero_name": "Swiftblade",
+   "kda": "4/5/2",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 25,
+   "hero_id": 1975,
+   "won": false,
+   "duration": "21:24",
+   "gpm": 485,
+   "net_worth": 10384,
+   "kills": 4,
+   "deaths": 5,
+   "assists": 2
+  },
+  {
+   "game_id": 13235950,
+   "date": "2026-11-01T15:54:54.2100000Z",
+   "hero_name": "Swiftblade",
+   "kda": "5/11/11",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 23,
+   "hero_id": 1975,
+   "won": true,
+   "duration": "39:54",
+   "gpm": 631,
+   "net_worth": 25177,
+   "xpm": 705,
+   "kills": 5,
+   "deaths": 11,
+   "assists": 11
+  },
+  {
+   "game_id": 13233462,
+   "date": "2026-11-01T15:05:23.1200000Z",
+   "hero_name": "Amun-Ra",
+   "kda": "7/6/16",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 18,
+   "hero_id": 391,
+   "won": false,
+   "duration": "37:23",
+   "gpm": 542,
+   "net_worth": 20274,
+   "xpm": 493,
+   "kills": 7,
+   "deaths": 6,
+   "assists": 16
+  },
+  {
+   "game_id": 13183594,
+   "date": "2026-10-31T11:29:58.7500000Z",
+   "hero_name": "Moraxus",
+   "kda": "7/15/12",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 17,
+   "hero_id": 1394,
+   "won": false,
+   "duration": "38:58",
+   "gpm": 375,
+   "net_worth": 14622,
+   "xpm": 432,
+   "kills": 7,
+   "deaths": 15,
+   "assists": 12
+  },
   {
    "game_id": 13071330,
    "date": "2026-10-28T12:43:28.9200000Z",
@@ -11798,5 +11912,5 @@
    "assists": 28
   }
  ],
- "fetchedAt": "2026-10-29T11:50Z"
+ "fetchedAt": "2026-11-03T10:18Z"
 }

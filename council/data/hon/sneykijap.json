@@ -5,33 +5,33 @@
   "id": "019acf1e-fb73-7640-ad38-c01c01055806",
   "name": "sneykijap",
   "country": "se",
-  "rank_name": "Vanguard",
-  "star_level": 5,
+  "rank_name": "Champion",
+  "star_level": 3,
   "is_new_player": false,
-  "mmr": 1723,
-  "foc_mmr": 1723,
+  "mmr": 1761,
+  "foc_mmr": 1761,
   "mw_mmr": 1437,
-  "last_played": "28/10/2026",
-  "gpm": 552,
-  "xpm": 595,
-  "avg_kda": 4.04,
+  "last_played": "01/11/2026",
+  "gpm": 554,
+  "xpm": 596,
+  "avg_kda": 4.06,
   "avg_dpm": 564,
-  "win_rate": 50.7,
-  "matches": 290,
-  "total_kills": 2522,
-  "total_deaths": 1608,
-  "total_assists": 3971,
-  "total_creep_kills": 35186,
-  "total_neutral_kills": 12788,
+  "win_rate": 51.0,
+  "matches": 294,
+  "total_kills": 2565,
+  "total_deaths": 1618,
+  "total_assists": 4009,
+  "total_creep_kills": 35688,
+  "total_neutral_kills": 13393,
   "total_buybacks": 157,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 22,
-   "wards_placed": 941,
+   "wards_placed": 944,
    "wards_destroyed": 0,
-   "gold_earned": 4025609
+   "gold_earned": 4104235
   },
   "top_heroes": [
    {
@@ -43,33 +43,33 @@
    {
     "name": "Gemini",
     "hero_id": 938,
-    "kda": "11.8/5.8/16.0",
-    "win_rate": "80%"
+    "kda": "11.0/4.7/13.3",
+    "win_rate": "86%"
    },
    {
     "name": "Zephyr",
     "hero_id": 2184,
-    "kda": "12.0/3.0/15.5",
-    "win_rate": "100%"
-   },
-   {
-    "name": "Silhouette",
-    "hero_id": 1832,
-    "kda": "12.0/7.2/8.8",
-    "win_rate": "25%"
+    "kda": "11.0/2.8/14.8",
+    "win_rate": "75%"
    },
    {
     "name": "Keeper of the Forest",
     "hero_id": 1098,
     "kda": "3.8/3.2/13.5",
     "win_rate": "75%"
+   },
+   {
+    "name": "Drunken Master",
+    "hero_id": 684,
+    "kda": "14.3/7.3/25.0",
+    "win_rate": "67%"
    }
   ],
   "top_roles": [
    {
     "role": "Carry",
-    "matches": 116,
-    "win_rate": "54%"
+    "matches": 118,
+    "win_rate": "55%"
    },
    {
     "role": "Mid",
@@ -116,8 +116,8 @@
   {
    "offset": 250,
    "status": 200,
-   "got": 40,
-   "new": 40,
+   "got": 44,
+   "new": 44,
    "has_more": false
   }
  ],
@@ -126,8 +126,80 @@
   "matches",
   "has_more"
  ],
- "matchCount": 290,
+ "matchCount": 294,
  "matches": [
+  {
+   "game_id": 13246074,
+   "date": "2026-11-01T20:15:24.5400000Z",
+   "hero_name": "Zephyr",
+   "kda": "17/0/19",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 23,
+   "hero_id": 2184,
+   "won": true,
+   "duration": "33:24",
+   "gpm": 893,
+   "net_worth": 29818,
+   "xpm": 865,
+   "kills": 17,
+   "deaths": 0,
+   "assists": 19
+  },
+  {
+   "game_id": 13149550,
+   "date": "2026-10-30T14:19:37.2900000Z",
+   "hero_name": "Zephyr",
+   "kda": "8/6/6",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 18,
+   "hero_id": 2184,
+   "won": false,
+   "duration": "34:37",
+   "gpm": 443,
+   "net_worth": 15322,
+   "xpm": 509,
+   "kills": 8,
+   "deaths": 6,
+   "assists": 6
+  },
+  {
+   "game_id": 13142546,
+   "date": "2026-10-30T10:45:33.4400000Z",
+   "hero_name": "Gemini",
+   "kda": "8/2/6",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 19,
+   "hero_id": 938,
+   "won": true,
+   "duration": "30:33",
+   "gpm": 772,
+   "net_worth": 23599,
+   "xpm": 663,
+   "kills": 8,
+   "deaths": 2,
+   "assists": 6
+  },
+  {
+   "game_id": 13141006,
+   "date": "2026-10-30T09:39:57.9000000Z",
+   "hero_name": "Gemini",
+   "kda": "10/2/7",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 19,
+   "hero_id": 938,
+   "won": true,
+   "duration": "28:57",
+   "gpm": 844,
+   "net_worth": 24441,
+   "xpm": 687,
+   "kills": 10,
+   "deaths": 2,
+   "assists": 7
+  },
   {
    "game_id": 13090926,
    "date": "2026-10-28T22:01:05.6200000Z",
@@ -5341,5 +5413,5 @@
    "assists": 14
   }
  ],
- "fetchedAt": "2026-10-29T11:50Z"
+ "fetchedAt": "2026-11-03T10:18Z"
 }
