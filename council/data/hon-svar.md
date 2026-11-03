@@ -52,3 +52,22 @@ Rekord i kills/deaths/assists gäller vanliga games (Forests of Caldavar), MidWa
 - Games med minst tre ur gänget: 204, med fyra: 58. Unika hjältar totalt: 106.
 - MidWars: poppeyeflipp 10, Henchman 5, sneykijap 5, högerback 4, bmwlover123 0 (24 totalt).
 - Games kortare än 5 min räknas inte (skräpdata).
+
+## Fler siffror (uträknade 2026-11-03, ny hämtning t.o.m. 3 nov 00:31), används i `2026-11-novemberquiz-1/2/3.json`
+Alla siffror är kontrollerade med ett skript mot rådatan. Games under 5 min räknas inte. "Snitt" gäller Caldavar.
+- Oktober: högerback 172 games (30 av 31 dagar, missade 7 okt), poppeyeflipp 132, Henchman 123, bmwlover123 57, sneykijap 52. Gänget mest: Zephyr 28 (Solstice 27). högerback mest: Maliken 19. Henchmans längsta förlustsvit i okt: 7.
+- Senaste veckan (27 okt–2 nov): sneykijap Gemini 7 games, 6 vinster. Sedan 1 nov: poppeyeflipp 14 games.
+- Halloween 31 okt 22:10, vinst på 55:14: högerback Ravenor 21/14/21, bmwlover123 Engineer 9/14/34, poppeyeflipp Solstice 11/11/35.
+- 1 nov: sneykijap Zephyr 17/0/19 (vinst). 1 okt: bmwlover123 Rampage 10/8/42 (vinst, 50:01).
+- Juni: Henchman 121 games, övriga 35 tillsammans. Februari: gängets mest spelade Legionnaire 27.
+- Längsta paus: bmwlover123 160 dagar (29 mars–6 sep). Först tillbaka efter sommaren: poppeyeflipp 7 aug.
+- Natt (00–05) vinst: bmwlover123 10/13. Sämsta veckodag: högerback torsdag 28/74, Henchman söndag 33/73. Gänget flest games på måndagar (312 unika).
+- Duo minst ihop: Henchman + bmwlover123 38. Sämst vinst% (minst 30 ihop, samma lag): Henchman + poppeyeflipp 83/168.
+- Gängets sämsta hjälte (minst 20 games): Midas 11/31. Hjältar alla fem spelat: 21. Olika hjältar: Henchman och poppeyeflipp 79, bmwlover123 49.
+- Unika games i år 1 488, ca 837 timmar, 17 425 kills totalt.
+- Profiler (3 nov): muted Henchman 136, buybacks Henchman 316, creep kills poppeyeflipp 62 844. MMR 29 okt → 3 nov: sneykijap 1723→1761 (Champion, enda uppåt), Henchman 1803→1774 (Warlord→Champion), bmwlover123 1752→1743, högerback 1703→1665, poppeyeflipp 1652→1564.
+- Rekord: längsta vinst poppeyeflipp 59:48 (4 maj, 7/12/39). poppeyeflipp Deadwood 23/1/23 (mars). högerback Maliken 29/1/9 (10 okt). Flest k+a på Caldavar: sneykijap Pyromancer 27/8/39 (30 jan).
+- Flest games med minst 30 assister: Henchman 53. Flest games utan death (minst 15 min): sneykijap 20. Flest solo-games: Henchman 389. Samma hjälte flest i rad: sneykijap 6 (Silhouette, mars). Längst snittgame: högerback 35,3 min. Henchman flest kills med en hjälte: Legionnaire 500 (Solstice 496).
+- 6 feb: bmwlover123 sex games 05:47–13:19, alla förluster. 9 och 10 okt: högerback 13 games per dag. 26 okt: poppeyeflipp 15 games.
+- Årets första Caldavar-game 26 jan 19:59: poppeyeflipp och sneykijap, förlust 51:07. 16 feb: alla fem ihop tre games, 2 vinster.
+- Snitt kills per game: sneykijap 8,69, högerback 7,63, poppeyeflipp 7,48, bmwlover123 7,30, Henchman 7,05.

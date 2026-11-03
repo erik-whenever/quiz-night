@@ -1,0 +1,692 @@
+{
+  "id": "2026-11-novemberquiz-2",
+  "title": "Novemberquiz 2",
+  "theme": "Mycket HoN om gänget, tv-citat, mat, lite allmänt och CS2, fem skill-utmaningar",
+  "updatedAt": "2026-11-03",
+  "questions": [
+    {
+      "id": "n2q1",
+      "text": "I söndags, 1 november, gick någon 17/0/19 med Zephyr och vann. Vem?",
+      "answer": "sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q2",
+      "text": "Vem säger: ”Wubba lubba dub dub!”?",
+      "answer": "Rick Sanchez (Rick and Morty)",
+      "category": "Tv-citat",
+      "choices": [
+        "Rick Sanchez (Rick and Morty)",
+        "Morty Smith (Rick and Morty)",
+        "Summer Smith (Rick and Morty)",
+        "Beth Smith (Rick and Morty)",
+        "Jerry Smith (Rick and Morty)",
+        "Mr. Poopybutthole (Rick and Morty)",
+        "Birdperson (Rick and Morty)",
+        "Squanchy (Rick and Morty)"
+      ],
+      "difficulty": 1,
+      "source": "Ricks slogan, sägs betyda ”I am in great pain”."
+    },
+    {
+      "id": "n2q3",
+      "text": "Vilken grönsak ger borsjtj dess röda färg?",
+      "answer": "Rödbeta",
+      "category": "Mat",
+      "choices": [
+        "Rödbeta",
+        "Tomat",
+        "Rödkål",
+        "Paprika",
+        "Morot",
+        "Rödlök",
+        "Rödbetsblad",
+        "Chili"
+      ],
+      "difficulty": 1,
+      "source": "Borsjtj är en rödbetssoppa från Östeuropa."
+    },
+    {
+      "id": "n2q4",
+      "text": "Vem körde 15 games på måndagen den 26 oktober?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q5",
+      "text": "Magebane är HoN:s version av vilken DotA-hjälte?",
+      "answer": "Anti-Mage",
+      "category": "HoN",
+      "choices": [
+        "Anti-Mage",
+        "Phantom Assassin",
+        "Juggernaut",
+        "Spectre",
+        "Faceless Void",
+        "Riki",
+        "Slark",
+        "Morphling"
+      ],
+      "difficulty": 2,
+      "source": "Magebane bygger på Anti-Mage: bränner motståndarens mana och blinkar."
+    },
+    {
+      "id": "n2q6",
+      "text": "Skill: Last hit! Ta creepen innan den blir denied.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "lasthit"
+      }
+    },
+    {
+      "id": "n2q7",
+      "text": "Vilken veckodag spelar gänget flest HoN-games (312 i år)?",
+      "answer": "Måndag",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Måndag",
+        "Tisdag",
+        "Onsdag",
+        "Torsdag",
+        "Fredag",
+        "Lördag",
+        "Söndag"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q8",
+      "text": "Vems reklamslogan är ”Better call Saul!”?",
+      "answer": "Saul Goodman (Breaking Bad)",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White (Breaking Bad)",
+        "Jesse Pinkman (Breaking Bad)",
+        "Hank Schrader (Breaking Bad)",
+        "Saul Goodman (Breaking Bad)",
+        "Mike Ehrmantraut (Breaking Bad)",
+        "Skyler White (Breaking Bad)",
+        "Gus Fring (Breaking Bad)",
+        "Marie Schrader (Breaking Bad)"
+      ],
+      "difficulty": 1,
+      "source": "Sauls tv-reklam och slogan i Breaking Bad och Better Call Saul."
+    },
+    {
+      "id": "n2q9",
+      "text": "Vem har flest games med minst 30 assister (53 st)?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q10",
+      "text": "Från vilket land kommer pastéis de nata, små äggkrämsbakelser i smördeg?",
+      "answer": "Portugal",
+      "category": "Mat",
+      "choices": [
+        "Portugal",
+        "Spanien",
+        "Frankrike",
+        "Italien",
+        "Brasilien",
+        "Belgien",
+        "Grekland",
+        "Marocko"
+      ],
+      "difficulty": 2,
+      "source": "Pastel de nata kommer från Lissabon, med rötter i Jerónimos-klostret i Belém."
+    },
+    {
+      "id": "n2q11",
+      "text": "Vilket gevär är Terroristernas motsvarighet till CT:s FAMAS?",
+      "answer": "Galil AR",
+      "category": "CS2",
+      "choices": [
+        "Galil AR",
+        "AK-47",
+        "SG 553",
+        "M4A4",
+        "AUG",
+        "MAC-10",
+        "Nova",
+        "Negev"
+      ],
+      "difficulty": 3,
+      "source": "Billiga automatkarbiner: T har Galil AR, CT har FAMAS. AK-47 motsvarar M4A4/M4A1-S."
+    },
+    {
+      "id": "n2q12",
+      "text": "29 kills och bara 1 death med Maliken, 10 oktober. Vem?",
+      "answer": "högerback",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q13",
+      "text": "Skill: Flick! Tio mål, snabbast vinner.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "aim"
+      }
+    },
+    {
+      "id": "n2q14",
+      "text": "Vem säger: ”When you play the game of thrones, you win or you die.”?",
+      "answer": "Cersei Lannister (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Cersei Lannister (Game of Thrones)",
+        "Jon Snow (Game of Thrones)",
+        "Daenerys Targaryen (Game of Thrones)",
+        "Tyrion Lannister (Game of Thrones)",
+        "Jaime Lannister (Game of Thrones)",
+        "Arya Stark (Game of Thrones)",
+        "Eddard ”Ned” Stark (Game of Thrones)",
+        "Tywin Lannister (Game of Thrones)"
+      ],
+      "difficulty": 2,
+      "source": "Cersei till Ned Stark, säsong 1 avsnitt 7."
+    },
+    {
+      "id": "n2q15",
+      "text": "Årets längsta vinst tog 59:48 (natten till 4 maj, 7/12/39). Vem?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q16",
+      "text": "Vad är tahini gjort av?",
+      "answer": "Sesamfrön",
+      "category": "Mat",
+      "choices": [
+        "Sesamfrön",
+        "Kikärtor",
+        "Jordnötter",
+        "Solrosfrön",
+        "Pinjenötter",
+        "Linfrön",
+        "Cashewnötter",
+        "Vallmofrön"
+      ],
+      "difficulty": 2,
+      "source": "Tahini är en pasta av malda sesamfrön."
+    },
+    {
+      "id": "n2q17",
+      "text": "Henchman har gjort 500 kills med en och samma hjälte i år. Vilken?",
+      "answer": "Legionnaire",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Legionnaire",
+        "Solstice",
+        "Moraxus",
+        "Slither",
+        "Glacius",
+        "Zephyr",
+        "Amun-Ra",
+        "Devourer"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q18",
+      "text": "Vad heter spelläget där båda lagen bara har en lane, mitten?",
+      "answer": "MidWars",
+      "category": "HoN",
+      "choices": [
+        "MidWars",
+        "Grimm's Crossing",
+        "Forests of Caldavar",
+        "Capture the Flag",
+        "Rift Wars",
+        "Devo Wars",
+        "Prophets",
+        "All Pick"
+      ],
+      "difficulty": 2,
+      "source": "HoN-wikin (council/data/wiki/fandom-Mid-20Wars.txt): MidWars har en lane. Gänget har kört 24 sådana i år."
+    },
+    {
+      "id": "n2q19",
+      "text": "1 oktober vann gänget ett 50-minutersgame där bmwlover123 hade 42 assister. Med vilken hjälte?",
+      "answer": "Rampage",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Rampage",
+        "Flux",
+        "Zephyr",
+        "Soul Reaper",
+        "Wretched Hag",
+        "Engineer",
+        "Jeraziah",
+        "Defiler"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q20",
+      "text": "Skill: Ordna gänget efter MMR just nu.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "order",
+        "prompt": "Lägst först",
+        "items": [
+          {
+            "label": "poppeyeflipp",
+            "value": 1564,
+            "show": "1 564"
+          },
+          {
+            "label": "högerback",
+            "value": 1665,
+            "show": "1 665"
+          },
+          {
+            "label": "bmwlover123",
+            "value": 1743,
+            "show": "1 743"
+          },
+          {
+            "label": "sneykijap",
+            "value": 1761,
+            "show": "1 761"
+          },
+          {
+            "label": "Henchman",
+            "value": 1774,
+            "show": "1 774"
+          }
+        ]
+      }
+    },
+    {
+      "id": "n2q21",
+      "text": "Vem ropar: ”Pivot! Pivot! Pivot!” när en soffa ska bäras uppför trappan?",
+      "answer": "Ross Geller (Friends)",
+      "category": "Tv-citat",
+      "choices": [
+        "Joey Tribbiani (Friends)",
+        "Ross Geller (Friends)",
+        "Chandler Bing (Friends)",
+        "Rachel Green (Friends)",
+        "Monica Geller (Friends)",
+        "Phoebe Buffay (Friends)",
+        "Gunther (Friends)",
+        "Janice (Friends)"
+      ],
+      "difficulty": 2,
+      "source": "”The One with the Cop”, säsong 5."
+    },
+    {
+      "id": "n2q22",
+      "text": "Vilken duo vinner sämst ihop (minst 30 games): 83 vinster på 168?",
+      "answer": "Henchman och poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman och bmwlover123",
+        "Henchman och högerback",
+        "Henchman och poppeyeflipp",
+        "Henchman och sneykijap",
+        "bmwlover123 och högerback",
+        "bmwlover123 och poppeyeflipp",
+        "bmwlover123 och sneykijap",
+        "högerback och poppeyeflipp",
+        "högerback och sneykijap",
+        "poppeyeflipp och sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q23",
+      "text": "Vilket är Sydamerikas största land till ytan?",
+      "answer": "Brasilien",
+      "category": "Allmänt",
+      "choices": [
+        "Brasilien",
+        "Argentina",
+        "Peru",
+        "Colombia",
+        "Bolivia",
+        "Venezuela",
+        "Chile",
+        "Paraguay"
+      ],
+      "difficulty": 1,
+      "source": "Brasilien, ca 8,5 miljoner km², nästan halva kontinenten."
+    },
+    {
+      "id": "n2q24",
+      "text": "6 februari spelade bmwlover123 sex games mellan 05:47 och 13:19 (ett av dem med 34 kills). Hur många vann han?",
+      "answer": "0",
+      "category": "Gänget i siffror",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q25",
+      "text": "Vad består en klassisk fransk mirepoix av?",
+      "answer": "Lök, morot och selleri",
+      "category": "Mat",
+      "choices": [
+        "Lök, morot och selleri",
+        "Lök, vitlök och paprika",
+        "Morot, palsternacka och lök",
+        "Selleri, paprika och lök",
+        "Vitlök, schalottenlök och purjolök",
+        "Tomat, lök och vitlök",
+        "Purjolök, morot och potatis",
+        "Lök, fänkål och selleri"
+      ],
+      "difficulty": 3,
+      "source": "Mirepoix: tärnad lök, morot och blekselleri, vanligen 2:1:1. Selleri, paprika och lök är den kreolska ”heliga treenigheten”."
+    },
+    {
+      "id": "n2q26",
+      "text": "Hur många av oktobers 31 dagar spelade högerback HoN?",
+      "answer": "30",
+      "category": "Gänget i siffror",
+      "choices": [
+        "20",
+        "23",
+        "25",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q27",
+      "text": "Skill: Stoppa klockan på exakt 15 sekunder.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "stopwatch",
+        "target": 15
+      }
+    },
+    {
+      "id": "n2q28",
+      "text": "Vem säger: ”Someone has to protect this family from the man who protects this family.”?",
+      "answer": "Skyler White (Breaking Bad)",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White (Breaking Bad)",
+        "Jesse Pinkman (Breaking Bad)",
+        "Hank Schrader (Breaking Bad)",
+        "Saul Goodman (Breaking Bad)",
+        "Mike Ehrmantraut (Breaking Bad)",
+        "Skyler White (Breaking Bad)",
+        "Gus Fring (Breaking Bad)",
+        "Marie Schrader (Breaking Bad)"
+      ],
+      "difficulty": 3,
+      "source": "Skyler till Walt, säsong 4 (”Cornered”)."
+    },
+    {
+      "id": "n2q29",
+      "text": "Vilken veckodag vinner Henchman sämst (33 av 73)?",
+      "answer": "Söndag",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Måndag",
+        "Tisdag",
+        "Onsdag",
+        "Torsdag",
+        "Fredag",
+        "Lördag",
+        "Söndag"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q30",
+      "text": "Vilket år sjönk M/S Estonia?",
+      "answer": "1994",
+      "category": "Allmänt",
+      "choices": [
+        "1990",
+        "1991",
+        "1992",
+        "1993",
+        "1994",
+        "1995",
+        "1996",
+        "1997"
+      ],
+      "difficulty": 3,
+      "source": "Estonia sjönk natten till 28 september 1994, 852 människor omkom."
+    },
+    {
+      "id": "n2q31",
+      "text": "Vad heter den mexikanska såsen med chili och choklad, ofta till kyckling eller kalkon?",
+      "answer": "Mole",
+      "category": "Mat",
+      "choices": [
+        "Mole",
+        "Salsa verde",
+        "Pico de gallo",
+        "Chimichurri",
+        "Adobo",
+        "Guacamole",
+        "Enchiladasås",
+        "Sofrito"
+      ],
+      "difficulty": 3,
+      "source": "Mole poblano från Puebla innehåller torkad chili, kryddor och choklad."
+    },
+    {
+      "id": "n2q32",
+      "text": "Vem var först tillbaka i HoN efter sommaren (7 augusti)?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q33",
+      "text": "Vem säger: ”Haaave you met Ted?”",
+      "answer": "Barney Stinson (How I Met Your Mother)",
+      "category": "Tv-citat",
+      "choices": [
+        "Barney Stinson (How I Met Your Mother)",
+        "Ted Mosby (How I Met Your Mother)",
+        "Marshall Eriksen (How I Met Your Mother)",
+        "Lily Aldrin (How I Met Your Mother)",
+        "Robin Scherbatsky (How I Met Your Mother)",
+        "Ranjit (How I Met Your Mother)",
+        "Carl (bartendern) (How I Met Your Mother)",
+        "Tracy McConnell (How I Met Your Mother)"
+      ],
+      "difficulty": 2,
+      "source": "Barneys sätt att presentera Ted för kvinnor på baren."
+    },
+    {
+      "id": "n2q34",
+      "text": "Skill: Häll upp! Släpp vid strecket utan att spilla.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "pour"
+      }
+    },
+    {
+      "id": "n2q35",
+      "text": "Hur många kills har gänget gjort sammanlagt i år, alla fem tillsammans?",
+      "answer": "Cirka 17 400",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Cirka 5 800",
+        "Cirka 8 700",
+        "Cirka 11 600",
+        "Cirka 14 500",
+        "Cirka 17 400",
+        "Cirka 20 300",
+        "Cirka 23 200",
+        "Cirka 26 100"
+      ],
+      "difficulty": 5,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q36",
+      "text": "Vilket ämne ger umamismak? Den japanske kemisten Kikunae Ikeda hittade det i kombu 1908.",
+      "answer": "Glutamat",
+      "category": "Mat",
+      "choices": [
+        "Glutamat",
+        "Laktos",
+        "Kapsaicin",
+        "Kinin",
+        "Natriumklorid",
+        "Citronsyra",
+        "Koffein",
+        "Fruktos"
+      ],
+      "difficulty": 4,
+      "source": "Ikeda isolerade glutaminsyra ur kombu 1908 och myntade ordet umami."
+    },
+    {
+      "id": "n2q37",
+      "text": "Vem har kört samma hjälte flest games i rad (sex raka i mars)?",
+      "answer": "sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n2q38",
+      "text": "Vem säger: ”Any man who must say ’I am the king’ is no true king.”?",
+      "answer": "Tywin Lannister (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Tywin Lannister (Game of Thrones)",
+        "Jon Snow (Game of Thrones)",
+        "Daenerys Targaryen (Game of Thrones)",
+        "Tyrion Lannister (Game of Thrones)",
+        "Cersei Lannister (Game of Thrones)",
+        "Jaime Lannister (Game of Thrones)",
+        "Arya Stark (Game of Thrones)",
+        "Eddard ”Ned” Stark (Game of Thrones)"
+      ],
+      "difficulty": 4,
+      "source": "Tywin till Joffrey, säsong 3 avsnitt 10."
+    },
+    {
+      "id": "n2q39",
+      "text": "Vilken planet tar längst tid på sig att rotera ett varv runt sin egen axel?",
+      "answer": "Venus",
+      "category": "Allmänt",
+      "choices": [
+        "Venus",
+        "Merkurius",
+        "Mars",
+        "Jupiter",
+        "Saturnus",
+        "Uranus",
+        "Neptunus",
+        "Jorden"
+      ],
+      "difficulty": 4,
+      "source": "Venus roterar ett varv på ca 243 jorddygn, längre än dess år (ca 225 dygn). Merkurius tar ca 59 dygn."
+    },
+    {
+      "id": "n2q40",
+      "text": "Vem har längst games i snitt (35,3 minuter)?",
+      "answer": "högerback",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    }
+  ]
+}

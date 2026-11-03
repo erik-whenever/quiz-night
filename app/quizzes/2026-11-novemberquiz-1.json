@@ -1,0 +1,691 @@
+{
+  "id": "2026-11-novemberquiz-1",
+  "title": "Novemberquiz 1",
+  "theme": "Mycket HoN om gänget, tv-citat, mat, lite allmänt och CS2, fem skill-utmaningar",
+  "updatedAt": "2026-11-03",
+  "questions": [
+    {
+      "id": "n1q1",
+      "text": "Vem i gänget spelade flest HoN-games i oktober (172 st)?",
+      "answer": "högerback",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 1,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q2",
+      "text": "Vilket hus i Game of Thrones har orden ”Winter is coming”?",
+      "answer": "Stark",
+      "category": "Tv-citat",
+      "choices": [
+        "Stark",
+        "Lannister",
+        "Targaryen",
+        "Baratheon",
+        "Greyjoy",
+        "Tully",
+        "Tyrell",
+        "Martell"
+      ],
+      "difficulty": 1,
+      "source": "House Starks valspråk, sägs av Ned Stark redan i första avsnittet."
+    },
+    {
+      "id": "n1q3",
+      "text": "Vilken ost ingår i en klassisk tiramisu?",
+      "answer": "Mascarpone",
+      "category": "Mat",
+      "choices": [
+        "Mascarpone",
+        "Ricotta",
+        "Mozzarella",
+        "Gorgonzola",
+        "Parmesan",
+        "Pecorino",
+        "Burrata",
+        "Fontina"
+      ],
+      "difficulty": 1,
+      "source": "Tiramisu: savoiardi doppade i espresso, kräm av mascarpone, ägg och socker, kakao."
+    },
+    {
+      "id": "n1q4",
+      "text": "Senaste veckan körde sneykijap samma hjälte sju gånger och vann sex. Vilken?",
+      "answer": "Gemini",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Gemini",
+        "Silhouette",
+        "The Dark Lady",
+        "Zephyr",
+        "The Madman",
+        "Armadon",
+        "Deadwood",
+        "Monkey King"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q5",
+      "text": "Vilken HoN-hjälte är en kung fu-kämpande panda?",
+      "answer": "Pandamonium",
+      "category": "HoN",
+      "choices": [
+        "Pandamonium",
+        "Monkey King",
+        "Drunken Master",
+        "Bubbles",
+        "Moraxus",
+        "Rampage",
+        "Armadon",
+        "Behemoth"
+      ],
+      "difficulty": 1,
+      "source": "Pandamonium är en pandakrigare med kampsportsattacker."
+    },
+    {
+      "id": "n1q6",
+      "text": "Skill: Last hit! Ta creepen innan den blir denied.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "lasthit"
+      }
+    },
+    {
+      "id": "n1q7",
+      "text": "Vem spelade 121 games i juni, mer än resten av gänget tillsammans?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q8",
+      "text": "Vem säger: ”Jesus, Marie! They're minerals!”?",
+      "answer": "Hank Schrader (Breaking Bad)",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White (Breaking Bad)",
+        "Jesse Pinkman (Breaking Bad)",
+        "Hank Schrader (Breaking Bad)",
+        "Saul Goodman (Breaking Bad)",
+        "Mike Ehrmantraut (Breaking Bad)",
+        "Skyler White (Breaking Bad)",
+        "Gus Fring (Breaking Bad)",
+        "Marie Schrader (Breaking Bad)"
+      ],
+      "difficulty": 2,
+      "source": "Hank om sin mineralsamling, säsong 4."
+    },
+    {
+      "id": "n1q9",
+      "text": "Halloweenkvällen vann gänget ett game på 55 minuter. Vem gick 21/14/21 med Ravenor?",
+      "answer": "högerback",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q10",
+      "text": "Vilket kött är en äkta Wiener Schnitzel gjord av?",
+      "answer": "Kalv",
+      "category": "Mat",
+      "choices": [
+        "Kalv",
+        "Fläsk",
+        "Kyckling",
+        "Nöt",
+        "Kalkon",
+        "Lamm",
+        "Hjort",
+        "Vildsvin"
+      ],
+      "difficulty": 2,
+      "source": "I Österrike är namnet Wiener Schnitzel skyddat för kalv. Av fläsk heter den Schnitzel Wiener Art."
+    },
+    {
+      "id": "n1q11",
+      "text": "Vad heter Terroristernas brandgranat i CS2?",
+      "answer": "Molotov",
+      "category": "CS2",
+      "choices": [
+        "Molotov",
+        "Incendiary Grenade",
+        "HE Grenade",
+        "Decoy Grenade",
+        "Flashbang",
+        "Smoke Grenade",
+        "Napalm",
+        "Firebomb"
+      ],
+      "difficulty": 1,
+      "source": "T köper Molotov, CT köper Incendiary Grenade. De gör samma sak."
+    },
+    {
+      "id": "n1q12",
+      "text": "Vem har spelat flest games sedan 1 november (14 st på två dygn)?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q13",
+      "text": "Skill: Flick! Tio mål, snabbast vinner.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "aim"
+      }
+    },
+    {
+      "id": "n1q14",
+      "text": "Vem säger: ”Challenge accepted.”?",
+      "answer": "Barney Stinson (How I Met Your Mother)",
+      "category": "Tv-citat",
+      "choices": [
+        "Barney Stinson (How I Met Your Mother)",
+        "Ted Mosby (How I Met Your Mother)",
+        "Marshall Eriksen (How I Met Your Mother)",
+        "Lily Aldrin (How I Met Your Mother)",
+        "Robin Scherbatsky (How I Met Your Mother)",
+        "Ranjit (How I Met Your Mother)",
+        "Carl (bartendern) (How I Met Your Mother)",
+        "Tracy McConnell (How I Met Your Mother)"
+      ],
+      "difficulty": 1,
+      "source": "Barneys återkommande replik."
+    },
+    {
+      "id": "n1q15",
+      "text": "Vem har högst ”muted”-siffra på sin WardUp-profil (136)?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-profilen (council/data/hon/<namn>.json → profile), hämtad 2026-11-03."
+    },
+    {
+      "id": "n1q16",
+      "text": "Vad heter den franska såsen av äggula, smör och citron som hör till eggs Benedict?",
+      "answer": "Hollandaise",
+      "category": "Mat",
+      "choices": [
+        "Hollandaise",
+        "Béarnaise",
+        "Béchamel",
+        "Velouté",
+        "Beurre blanc",
+        "Aioli",
+        "Remoulad",
+        "Mornay"
+      ],
+      "difficulty": 3,
+      "source": "Hollandaise är en emulsion av äggulor, smält smör och citronsaft."
+    },
+    {
+      "id": "n1q17",
+      "text": "Vem vinner oftast mellan midnatt och fem på natten (10 av 13)?",
+      "answer": "bmwlover123",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q18",
+      "text": "Kongor har en tvilling på andra sidan Caldavar. Vad heter den?",
+      "answer": "Hell Kongor",
+      "category": "HoN",
+      "choices": [
+        "Hell Kongor",
+        "Zorgath",
+        "Phoenix",
+        "Kongor Jr.",
+        "Transmutanstein",
+        "Dark Kongor",
+        "Ancient Kongor",
+        "Hellbourne Kongor"
+      ],
+      "difficulty": 3,
+      "source": "HoN-wikin (fandom, council/data/wiki/fandom-Kongor.txt): sedan 4.6.0 har Forests of Caldavar två bossar, Kongor i sydost och Hell Kongor i nordväst."
+    },
+    {
+      "id": "n1q19",
+      "text": "Bara en i gänget har gått upp i MMR senaste veckan (+38, och upp till Champion). Vem?",
+      "answer": "sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-profilerna, MMR hämtat 29 okt (commit 1f85a16) och 3 nov 2026."
+    },
+    {
+      "id": "n1q20",
+      "text": "Skill: Ordna serierna efter när sista avsnittet sändes.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "order",
+        "prompt": "Först slut först",
+        "items": [
+          {
+            "label": "The Sopranos",
+            "value": 2007,
+            "show": "2007"
+          },
+          {
+            "label": "Breaking Bad",
+            "value": 2013,
+            "show": "2013"
+          },
+          {
+            "label": "How I Met Your Mother",
+            "value": 2014,
+            "show": "2014"
+          },
+          {
+            "label": "Game of Thrones",
+            "value": 2019,
+            "show": "2019"
+          },
+          {
+            "label": "Better Call Saul",
+            "value": 2022,
+            "show": "2022"
+          }
+        ]
+      }
+    },
+    {
+      "id": "n1q21",
+      "text": "Vem säger: ”Identity theft is not a joke, Jim!”?",
+      "answer": "Dwight Schrute (The Office)",
+      "category": "Tv-citat",
+      "choices": [
+        "Dwight Schrute (The Office)",
+        "Michael Scott (The Office)",
+        "Jim Halpert (The Office)",
+        "Pam Beesly (The Office)",
+        "Andy Bernard (The Office)",
+        "Kevin Malone (The Office)",
+        "Stanley Hudson (The Office)",
+        "Creed Bratton (The Office)"
+      ],
+      "difficulty": 2,
+      "source": "Dwight när Jim klätt ut sig till honom, säsong 3 (”Product Recall”)."
+    },
+    {
+      "id": "n1q22",
+      "text": "Vilka två i gänget har spelat minst ihop i år (38 games)?",
+      "answer": "Henchman och bmwlover123",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman och bmwlover123",
+        "Henchman och högerback",
+        "Henchman och poppeyeflipp",
+        "Henchman och sneykijap",
+        "bmwlover123 och högerback",
+        "bmwlover123 och poppeyeflipp",
+        "bmwlover123 och sneykijap",
+        "högerback och poppeyeflipp",
+        "högerback och sneykijap",
+        "poppeyeflipp och sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q23",
+      "text": "Vilket land har flest invånare i Afrika?",
+      "answer": "Nigeria",
+      "category": "Allmänt",
+      "choices": [
+        "Nigeria",
+        "Etiopien",
+        "Egypten",
+        "Kongo-Kinshasa",
+        "Sydafrika",
+        "Kenya",
+        "Tanzania",
+        "Algeriet"
+      ],
+      "difficulty": 2,
+      "source": "Nigeria har drygt 220 miljoner invånare (FN), följt av Etiopien och Egypten."
+    },
+    {
+      "id": "n1q24",
+      "text": "Med vilken hjälte vinner gänget sämst (minst 20 games): 11 vinster av 31?",
+      "answer": "Midas",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Midas",
+        "The Chipper",
+        "Bubbles",
+        "Puppet Master",
+        "Swiftblade",
+        "Moraxus",
+        "Silhouette",
+        "Predator"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q25",
+      "text": "Vilket land har feijoada, en gryta på svarta bönor och fläsk, som nationalrätt?",
+      "answer": "Brasilien",
+      "category": "Mat",
+      "choices": [
+        "Brasilien",
+        "Portugal",
+        "Mexiko",
+        "Kuba",
+        "Argentina",
+        "Colombia",
+        "Spanien",
+        "Peru"
+      ],
+      "difficulty": 3,
+      "source": "Feijoada räknas som Brasiliens nationalrätt (den har portugisiska rötter)."
+    },
+    {
+      "id": "n1q26",
+      "text": "Ungefär hur många timmar HoN har gänget spelat i år, räknat per unikt game?",
+      "answer": "Cirka 840 timmar",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Cirka 420 timmar",
+        "Cirka 560 timmar",
+        "Cirka 700 timmar",
+        "Cirka 840 timmar",
+        "Cirka 980 timmar",
+        "Cirka 1 120 timmar",
+        "Cirka 1 260 timmar",
+        "Cirka 1 400 timmar"
+      ],
+      "difficulty": 5,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q27",
+      "text": "Skill: Stoppa klockan på exakt 12 sekunder.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "stopwatch",
+        "target": 12
+      }
+    },
+    {
+      "id": "n1q28",
+      "text": "Vem säger: ”The things I do for love.”?",
+      "answer": "Jaime Lannister (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Jaime Lannister (Game of Thrones)",
+        "Jon Snow (Game of Thrones)",
+        "Daenerys Targaryen (Game of Thrones)",
+        "Tyrion Lannister (Game of Thrones)",
+        "Cersei Lannister (Game of Thrones)",
+        "Arya Stark (Game of Thrones)",
+        "Eddard ”Ned” Stark (Game of Thrones)",
+        "Tywin Lannister (Game of Thrones)"
+      ],
+      "difficulty": 3,
+      "source": "Jaime innan han knuffar ut Bran genom fönstret, säsong 1 avsnitt 1."
+    },
+    {
+      "id": "n1q29",
+      "text": "Vem har sista-slagit flest creeps i år (62 844)?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-profilen (council/data/hon/<namn>.json → profile), hämtad 2026-11-03."
+    },
+    {
+      "id": "n1q30",
+      "text": "Hur många tangenter har ett vanligt modernt piano?",
+      "answer": "88",
+      "category": "Allmänt",
+      "choices": [
+        "76",
+        "80",
+        "84",
+        "85",
+        "88",
+        "92",
+        "96",
+        "100"
+      ],
+      "difficulty": 2,
+      "source": "Standard sedan 1880-talet: 88 tangenter, 52 vita och 36 svarta."
+    },
+    {
+      "id": "n1q31",
+      "text": "Från vilket land kommer rendang, långkokt kött i kokos och kryddor?",
+      "answer": "Indonesien",
+      "category": "Mat",
+      "choices": [
+        "Indonesien",
+        "Thailand",
+        "Indien",
+        "Vietnam",
+        "Filippinerna",
+        "Sri Lanka",
+        "Kambodja",
+        "Laos"
+      ],
+      "difficulty": 4,
+      "source": "Rendang kommer från minangkabau-folket på västra Sumatra i Indonesien. Malaysia är medvetet inte med bland alternativen, eftersom rätten är vanlig även där."
+    },
+    {
+      "id": "n1q32",
+      "text": "Vilken veckodag vinner högerback sämst (28 av 74)?",
+      "answer": "Torsdag",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Måndag",
+        "Tisdag",
+        "Onsdag",
+        "Torsdag",
+        "Fredag",
+        "Lördag",
+        "Söndag"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q33",
+      "text": "Vem säger: ”Just because you shot Jesse James, don't make you Jesse James.”?",
+      "answer": "Mike Ehrmantraut (Breaking Bad)",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White (Breaking Bad)",
+        "Jesse Pinkman (Breaking Bad)",
+        "Hank Schrader (Breaking Bad)",
+        "Saul Goodman (Breaking Bad)",
+        "Mike Ehrmantraut (Breaking Bad)",
+        "Skyler White (Breaking Bad)",
+        "Gus Fring (Breaking Bad)",
+        "Marie Schrader (Breaking Bad)"
+      ],
+      "difficulty": 4,
+      "source": "Mike till Walt, säsong 5."
+    },
+    {
+      "id": "n1q34",
+      "text": "Skill: Häll upp! Släpp vid strecket utan att spilla.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "pour"
+      }
+    },
+    {
+      "id": "n1q35",
+      "text": "Vem tog en paus från HoN på 160 dagar, från 29 mars till 6 september?",
+      "answer": "bmwlover123",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q36",
+      "text": "Vilken chili tog över rekordet som världens starkaste 2023?",
+      "answer": "Pepper X",
+      "category": "Mat",
+      "choices": [
+        "Pepper X",
+        "Carolina Reaper",
+        "Trinidad Moruga Scorpion",
+        "Ghost pepper (Bhut jolokia)",
+        "Habanero",
+        "Dragon's Breath",
+        "Scotch bonnet",
+        "Naga Viper"
+      ],
+      "difficulty": 5,
+      "source": "Guinness World Records utsåg Pepper X (Ed Currie) till världens starkaste chili i oktober 2023, i snitt 2,69 miljoner Scoville. Den tog över efter Carolina Reaper."
+    },
+    {
+      "id": "n1q37",
+      "text": "Vilken hjälte spelade gänget mest i februari, årets mest intensiva månad (27 games)?",
+      "answer": "Legionnaire",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Legionnaire",
+        "Armadon",
+        "Deadwood",
+        "Solstice",
+        "Zephyr",
+        "Glacius",
+        "Slither",
+        "Pyromancer"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n1q38",
+      "text": "Vem skriker: ”Serenity now!”?",
+      "answer": "Frank Costanza (Seinfeld)",
+      "category": "Tv-citat",
+      "choices": [
+        "Frank Costanza (Seinfeld)",
+        "George Costanza (Seinfeld)",
+        "Jerry Seinfeld (Seinfeld)",
+        "Cosmo Kramer (Seinfeld)",
+        "Elaine Benes (Seinfeld)",
+        "Newman (Seinfeld)",
+        "Soppnazisten (Seinfeld)",
+        "Farbror Leo (Seinfeld)"
+      ],
+      "difficulty": 4,
+      "source": "Frank Costanzas lugnande mantra i avsnittet ”The Serenity Now” (säsong 9)."
+    },
+    {
+      "id": "n1q39",
+      "text": "Vilket grundämne har den kemiska beteckningen K?",
+      "answer": "Kalium",
+      "category": "Allmänt",
+      "choices": [
+        "Kalium",
+        "Krypton",
+        "Kalcium",
+        "Kobolt",
+        "Kol",
+        "Klor",
+        "Kisel",
+        "Koppar"
+      ],
+      "difficulty": 3,
+      "source": "K kommer från latinets kalium. Kalcium är Ca, krypton Kr, kobolt Co."
+    },
+    {
+      "id": "n1q40",
+      "text": "Hur många hjältar har alla fem i gänget spelat minst en gång var i år?",
+      "answer": "21",
+      "category": "Gänget i siffror",
+      "choices": [
+        "9",
+        "13",
+        "17",
+        "21",
+        "25",
+        "29",
+        "33",
+        "37"
+      ],
+      "difficulty": 5,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    }
+  ]
+}

@@ -1,0 +1,688 @@
+{
+  "id": "2026-11-novemberquiz-3",
+  "title": "Novemberquiz 3",
+  "theme": "Mycket HoN om gänget, tv-citat, mat, lite allmänt och CS2, fem skill-utmaningar",
+  "updatedAt": "2026-11-03",
+  "questions": [
+    {
+      "id": "n3q1",
+      "text": "Vem har spelat minst antal olika hjältar i år (49 st)?",
+      "answer": "bmwlover123",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q2",
+      "text": "Vem säger: ”How you doin'?”",
+      "answer": "Joey Tribbiani (Friends)",
+      "category": "Tv-citat",
+      "choices": [
+        "Joey Tribbiani (Friends)",
+        "Ross Geller (Friends)",
+        "Chandler Bing (Friends)",
+        "Rachel Green (Friends)",
+        "Monica Geller (Friends)",
+        "Phoebe Buffay (Friends)",
+        "Gunther (Friends)",
+        "Janice (Friends)"
+      ],
+      "difficulty": 1,
+      "source": "Joeys raggningsreplik."
+    },
+    {
+      "id": "n3q3",
+      "text": "Vad är marsipan främst gjord av?",
+      "answer": "Mandel",
+      "category": "Mat",
+      "choices": [
+        "Mandel",
+        "Hasselnöt",
+        "Kokos",
+        "Cashew",
+        "Pistage",
+        "Valnöt",
+        "Jordnöt",
+        "Kastanj"
+      ],
+      "difficulty": 1,
+      "source": "Marsipan: mald mandel och socker."
+    },
+    {
+      "id": "n3q4",
+      "text": "Vem spelade 13 games två dagar i rad, 9 och 10 oktober?",
+      "answer": "högerback",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 2,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q5",
+      "text": "Vad heter Witch Slayers ultimate?",
+      "answer": "Silver Bullet",
+      "category": "HoN",
+      "choices": [
+        "Silver Bullet",
+        "Mana Drain",
+        "Graveyard",
+        "Miniaturization",
+        "Power Overwhelming",
+        "Blood Bullet",
+        "Hex Bolt",
+        "Final Shot"
+      ],
+      "difficulty": 3,
+      "source": "Witch Slayers förmågor: Graveyard, Miniaturization, Mana Drain och ultimaten Silver Bullet."
+    },
+    {
+      "id": "n3q6",
+      "text": "Skill: Last hit! Ta creepen innan den blir denied.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "lasthit"
+      }
+    },
+    {
+      "id": "n3q7",
+      "text": "Vem har flest games (minst 15 min) utan att dö en enda gång (20 st)?",
+      "answer": "sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q8",
+      "text": "Vem säger: ”I did it for me. I liked it. I was good at it.”?",
+      "answer": "Walter White (Breaking Bad)",
+      "category": "Tv-citat",
+      "choices": [
+        "Walter White (Breaking Bad)",
+        "Jesse Pinkman (Breaking Bad)",
+        "Hank Schrader (Breaking Bad)",
+        "Saul Goodman (Breaking Bad)",
+        "Mike Ehrmantraut (Breaking Bad)",
+        "Skyler White (Breaking Bad)",
+        "Gus Fring (Breaking Bad)",
+        "Marie Schrader (Breaking Bad)"
+      ],
+      "difficulty": 3,
+      "source": "Walt till Skyler i seriefinalen ”Felina”."
+    },
+    {
+      "id": "n3q9",
+      "text": "23 kills, 23 assister och 1 death med Deadwood i mars. Vem?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q10",
+      "text": "Från vilket land kommer poutine, pommes med ostbitar och brunsås?",
+      "answer": "Kanada",
+      "category": "Mat",
+      "choices": [
+        "Kanada",
+        "USA",
+        "Frankrike",
+        "Belgien",
+        "Irland",
+        "Storbritannien",
+        "Schweiz",
+        "Nederländerna"
+      ],
+      "difficulty": 2,
+      "source": "Poutine kommer från Québec i Kanada, 1950-talet."
+    },
+    {
+      "id": "n3q11",
+      "text": "Vilken CS-karta har platserna Palace, Connector och Jungle?",
+      "answer": "Mirage",
+      "category": "CS2",
+      "choices": [
+        "Mirage",
+        "Dust II",
+        "Inferno",
+        "Nuke",
+        "Overpass",
+        "Vertigo",
+        "Ancient",
+        "Anubis"
+      ],
+      "difficulty": 2,
+      "source": "Mirage: Palace och Ramp leder till A, Connector och Jungle ligger mitt på kartan."
+    },
+    {
+      "id": "n3q12",
+      "text": "Vem spelar flest games utan någon annan ur gänget (389 st)?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q13",
+      "text": "Skill: Flick! Tio mål, snabbast vinner.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "aim"
+      }
+    },
+    {
+      "id": "n3q14",
+      "text": "Vem lär Arya att svara ”Not today” till dödsguden?",
+      "answer": "Syrio Forel (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Syrio Forel (Game of Thrones)",
+        "Jon Snow (Game of Thrones)",
+        "Daenerys Targaryen (Game of Thrones)",
+        "Tyrion Lannister (Game of Thrones)",
+        "Cersei Lannister (Game of Thrones)",
+        "Jaime Lannister (Game of Thrones)",
+        "Arya Stark (Game of Thrones)",
+        "Eddard ”Ned” Stark (Game of Thrones)"
+      ],
+      "difficulty": 3,
+      "source": "Syrio Forel, Aryas fäktlärare, säsong 1."
+    },
+    {
+      "id": "n3q15",
+      "text": "Vilken hjälte spelade gänget mest i oktober (28 games)?",
+      "answer": "Zephyr",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Zephyr",
+        "Solstice",
+        "Flux",
+        "Tarot",
+        "Maliken",
+        "Amun-Ra",
+        "Revenant",
+        "Glacius"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q16",
+      "text": "Vad heter det rostade sjögräset som rullas runt maki-sushi?",
+      "answer": "Nori",
+      "category": "Mat",
+      "choices": [
+        "Nori",
+        "Kombu",
+        "Wakame",
+        "Hijiki",
+        "Arame",
+        "Dulse",
+        "Kelp",
+        "Mozuku"
+      ],
+      "difficulty": 2,
+      "source": "Nori är tunna ark av pressad rödalg (Pyropia)."
+    },
+    {
+      "id": "n3q17",
+      "text": "Vem tappade mest MMR senaste veckan (−88)?",
+      "answer": "poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-profilerna, MMR hämtat 29 okt (commit 1f85a16) och 3 nov 2026."
+    },
+    {
+      "id": "n3q18",
+      "text": "Kongor kastar en sten som landar efter två sekunder och stunnar. Vad heter förmågan?",
+      "answer": "Boulder Toss",
+      "category": "HoN",
+      "choices": [
+        "Boulder Toss",
+        "Slam",
+        "Fury",
+        "Earthquake",
+        "Rock Throw",
+        "Pebble Chuck",
+        "Avalanche",
+        "Ground Pound"
+      ],
+      "difficulty": 4,
+      "source": "HoN-wikin (council/data/wiki/fandom-Kongor.txt): Boulder Toss, landar efter 2 s och stunnar i 2 s. Slam och Fury är hans andra förmågor."
+    },
+    {
+      "id": "n3q19",
+      "text": "Årets första game på Caldavar (26 januari, 51 minuter, förlust): vilka två ur gänget var med?",
+      "answer": "poppeyeflipp och sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman och bmwlover123",
+        "Henchman och högerback",
+        "Henchman och poppeyeflipp",
+        "Henchman och sneykijap",
+        "bmwlover123 och högerback",
+        "bmwlover123 och poppeyeflipp",
+        "bmwlover123 och sneykijap",
+        "högerback och poppeyeflipp",
+        "högerback och sneykijap",
+        "poppeyeflipp och sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q20",
+      "text": "Skill: Ordna gänget efter kills per game i snitt i år.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "order",
+        "prompt": "Flest först",
+        "items": [
+          {
+            "label": "sneykijap",
+            "value": 8.7,
+            "show": "8,7"
+          },
+          {
+            "label": "högerback",
+            "value": 7.6,
+            "show": "7,6"
+          },
+          {
+            "label": "poppeyeflipp",
+            "value": 7.5,
+            "show": "7,5"
+          },
+          {
+            "label": "bmwlover123",
+            "value": 7.3,
+            "show": "7,3"
+          },
+          {
+            "label": "Henchman",
+            "value": 7.0,
+            "show": "7,0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "n3q21",
+      "text": "Vem säger: ”I'm not superstitious, but I am a little stitious.”?",
+      "answer": "Michael Scott (The Office)",
+      "category": "Tv-citat",
+      "choices": [
+        "Dwight Schrute (The Office)",
+        "Michael Scott (The Office)",
+        "Jim Halpert (The Office)",
+        "Pam Beesly (The Office)",
+        "Andy Bernard (The Office)",
+        "Kevin Malone (The Office)",
+        "Stanley Hudson (The Office)",
+        "Creed Bratton (The Office)"
+      ],
+      "difficulty": 2,
+      "source": "Michael i ”Fun Run”, säsong 4."
+    },
+    {
+      "id": "n3q22",
+      "text": "Henchmans längsta förlustsvit i oktober: hur många raka?",
+      "answer": "7",
+      "category": "Gänget i siffror",
+      "choices": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q23",
+      "text": "Hur många ben har en insekt?",
+      "answer": "6",
+      "category": "Allmänt",
+      "choices": [
+        "2",
+        "4",
+        "6",
+        "8",
+        "10",
+        "12"
+      ],
+      "difficulty": 1,
+      "source": "Alla vuxna insekter har sex ben."
+    },
+    {
+      "id": "n3q24",
+      "text": "Två i gänget har spelat exakt lika många olika hjältar i år, 79 st. Vilka?",
+      "answer": "Henchman och poppeyeflipp",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman och bmwlover123",
+        "Henchman och högerback",
+        "Henchman och poppeyeflipp",
+        "Henchman och sneykijap",
+        "bmwlover123 och högerback",
+        "bmwlover123 och poppeyeflipp",
+        "bmwlover123 och sneykijap",
+        "högerback och poppeyeflipp",
+        "högerback och sneykijap",
+        "poppeyeflipp och sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q25",
+      "text": "Vilken ört är det som gör en béarnaise till en béarnaise?",
+      "answer": "Dragon",
+      "category": "Mat",
+      "choices": [
+        "Dragon",
+        "Persilja",
+        "Körvel",
+        "Basilika",
+        "Timjan",
+        "Dill",
+        "Gräslök",
+        "Rosmarin"
+      ],
+      "difficulty": 3,
+      "source": "Béarnaise är en hollandaise smaksatt med reduktion av vinäger, schalottenlök och dragon (estragon)."
+    },
+    {
+      "id": "n3q26",
+      "text": "Flest kills plus assister i ett game på Caldavar: 27/8/39 med Pyromancer, 30 januari. Vem?",
+      "answer": "sneykijap",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q27",
+      "text": "Skill: Stoppa klockan på exakt 8 sekunder.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "stopwatch",
+        "target": 8
+      }
+    },
+    {
+      "id": "n3q28",
+      "text": "Vem i How I Met Your Mother hade en tonårshit med ”Let's Go to the Mall”?",
+      "answer": "Robin Scherbatsky (How I Met Your Mother)",
+      "category": "Tv-citat",
+      "choices": [
+        "Barney Stinson (How I Met Your Mother)",
+        "Ted Mosby (How I Met Your Mother)",
+        "Marshall Eriksen (How I Met Your Mother)",
+        "Lily Aldrin (How I Met Your Mother)",
+        "Robin Scherbatsky (How I Met Your Mother)",
+        "Ranjit (How I Met Your Mother)",
+        "Carl (bartendern) (How I Met Your Mother)",
+        "Tracy McConnell (How I Met Your Mother)"
+      ],
+      "difficulty": 2,
+      "source": "Robin som kanadensiska popstjärnan Robin Sparkles (”Slap Bet”, säsong 2)."
+    },
+    {
+      "id": "n3q29",
+      "text": "Vem har köpt tillbaka sig flest gånger (316 buybacks)?",
+      "answer": "Henchman",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-profilen (council/data/hon/<namn>.json → profile), hämtad 2026-11-03."
+    },
+    {
+      "id": "n3q30",
+      "text": "Vilket år invigdes Globen i Stockholm?",
+      "answer": "1989",
+      "category": "Allmänt",
+      "choices": [
+        "1985",
+        "1986",
+        "1987",
+        "1988",
+        "1989",
+        "1990",
+        "1991",
+        "1992"
+      ],
+      "difficulty": 3,
+      "source": "Globen (Avicii Arena) invigdes 19 februari 1989."
+    },
+    {
+      "id": "n3q31",
+      "text": "Vad heter den libanesiska persiljesalladen med bulgur, tomat och citron?",
+      "answer": "Tabbouleh",
+      "category": "Mat",
+      "choices": [
+        "Tabbouleh",
+        "Fattoush",
+        "Baba ganoush",
+        "Muhammara",
+        "Shirazi",
+        "Kisir",
+        "Labneh",
+        "Mujaddara"
+      ],
+      "difficulty": 3,
+      "source": "Tabbouleh: mest persilja, lite bulgur, tomat, mynta, citron och olivolja. Kisir är en liknande turkisk bulgursallad men utan persiljan som bas."
+    },
+    {
+      "id": "n3q32",
+      "text": "16 februari spelade alla fem ihop tre games samma kväll. Hur många vann de?",
+      "answer": "2",
+      "category": "Gänget i siffror",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q33",
+      "text": "Vem går bakom Cersei och ringer i en klocka: ”Shame. Shame. Shame.”?",
+      "answer": "Septa Unella (Game of Thrones)",
+      "category": "Tv-citat",
+      "choices": [
+        "Septa Unella (Game of Thrones)",
+        "Jon Snow (Game of Thrones)",
+        "Daenerys Targaryen (Game of Thrones)",
+        "Tyrion Lannister (Game of Thrones)",
+        "Cersei Lannister (Game of Thrones)",
+        "Jaime Lannister (Game of Thrones)",
+        "Arya Stark (Game of Thrones)",
+        "Eddard ”Ned” Stark (Game of Thrones)"
+      ],
+      "difficulty": 3,
+      "source": "Septa Unella under Cerseis botgöringsvandring, säsong 5 avsnitt 10."
+    },
+    {
+      "id": "n3q34",
+      "text": "Skill: Häll upp! Släpp vid strecket utan att spilla.",
+      "answer": "",
+      "category": "Skill",
+      "mode": "skill",
+      "skill": {
+        "kind": "pour"
+      }
+    },
+    {
+      "id": "n3q35",
+      "text": "Halloweenkvällen: vem hade 34 assister med Engineer i 55-minutersvinsten?",
+      "answer": "bmwlover123",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Henchman",
+        "bmwlover123",
+        "högerback",
+        "poppeyeflipp",
+        "sneykijap"
+      ],
+      "difficulty": 3,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q36",
+      "text": "Vilken pasta från Apulien är formad som små öron?",
+      "answer": "Orecchiette",
+      "category": "Mat",
+      "choices": [
+        "Orecchiette",
+        "Conchiglie",
+        "Farfalle",
+        "Cavatelli",
+        "Strozzapreti",
+        "Trofie",
+        "Gnocchetti sardi",
+        "Casarecce"
+      ],
+      "difficulty": 4,
+      "source": "Orecchiette betyder små öron och är Apuliens typiska pasta, ofta med cime di rapa."
+    },
+    {
+      "id": "n3q37",
+      "text": "Hur många unika HoN-games har gänget spelat i år (minst en ur gänget med)?",
+      "answer": "Cirka 1 500",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Cirka 600",
+        "Cirka 900",
+        "Cirka 1 200",
+        "Cirka 1 500",
+        "Cirka 1 800",
+        "Cirka 2 100",
+        "Cirka 2 400",
+        "Cirka 2 700"
+      ],
+      "difficulty": 5,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    },
+    {
+      "id": "n3q38",
+      "text": "Vem säger: ”No soup for you!”?",
+      "answer": "Soppnazisten (Seinfeld)",
+      "category": "Tv-citat",
+      "choices": [
+        "Frank Costanza (Seinfeld)",
+        "George Costanza (Seinfeld)",
+        "Jerry Seinfeld (Seinfeld)",
+        "Cosmo Kramer (Seinfeld)",
+        "Elaine Benes (Seinfeld)",
+        "Newman (Seinfeld)",
+        "Soppnazisten (Seinfeld)",
+        "Farbror Leo (Seinfeld)"
+      ],
+      "difficulty": 4,
+      "source": "Soppförsäljaren i avsnittet ”The Soup Nazi”, säsong 7."
+    },
+    {
+      "id": "n3q39",
+      "text": "Vilket berg i Kaukasus räknas ofta som Europas högsta?",
+      "answer": "Elbrus",
+      "category": "Allmänt",
+      "choices": [
+        "Elbrus",
+        "Mont Blanc",
+        "Kazbek",
+        "Matterhorn",
+        "Dych-Tau",
+        "Ararat",
+        "Monte Rosa",
+        "Großglockner"
+      ],
+      "difficulty": 4,
+      "source": "Elbrus, 5 642 m. Räknas Kaukasus inte till Europa är Mont Blanc (ca 4 806 m) högst."
+    },
+    {
+      "id": "n3q40",
+      "text": "Vilken hjälte spelade högerback mest i oktober (19 games)?",
+      "answer": "Maliken",
+      "category": "Gänget i siffror",
+      "choices": [
+        "Maliken",
+        "Tarot",
+        "Pyromancer",
+        "Glacius",
+        "Wretched Hag",
+        "Witch Slayer",
+        "Engineer",
+        "Ravenor"
+      ],
+      "difficulty": 4,
+      "source": "Källa: WardUp-matchhistorik (council/data/hon/), hämtad 2026-11-03, data t.o.m. 3 nov 00:31. Games under 5 min räknas inte. Uträknat 2026-11-03, se council/data/hon-svar.md."
+    }
+  ]
+}
