@@ -8,43 +8,37 @@
   "rank_name": "Vanguard",
   "star_level": 5,
   "is_new_player": false,
-  "mmr": 1665,
-  "foc_mmr": 1665,
+  "mmr": 1694,
+  "foc_mmr": 1694,
   "mw_mmr": 1417,
-  "last_played": "01/11/2026",
-  "gpm": 469,
-  "xpm": 493,
-  "avg_kda": 3.23,
-  "avg_dpm": 540,
-  "win_rate": 50.7,
-  "matches": 538,
-  "total_kills": 4112,
-  "total_deaths": 3948,
-  "total_assists": 8634,
-  "total_creep_kills": 51338,
-  "total_neutral_kills": 17813,
-  "total_buybacks": 291,
+  "last_played": "04/11/2026",
+  "gpm": 471,
+  "xpm": 496,
+  "avg_kda": 3.24,
+  "avg_dpm": 543,
+  "win_rate": 50.8,
+  "matches": 547,
+  "total_kills": 4211,
+  "total_deaths": 4008,
+  "total_assists": 8757,
+  "total_creep_kills": 52939,
+  "total_neutral_kills": 18311,
+  "total_buybacks": 295,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 21,
-   "wards_placed": 3402,
+   "wards_placed": 3419,
    "wards_destroyed": 0,
-   "gold_earned": 6463498
+   "gold_earned": 6638996
   },
   "top_heroes": [
    {
     "name": "Tarot",
     "hero_id": 4043,
-    "kda": "11.1/4.6/18.6",
-    "win_rate": "71%"
-   },
-   {
-    "name": "Witch Slayer",
-    "hero_id": 2152,
-    "kda": "5.4/10.6/14.0",
-    "win_rate": "20%"
+    "kda": "12.2/5.4/17.8",
+    "win_rate": "62%"
    },
    {
     "name": "Wretched Hag",
@@ -53,33 +47,39 @@
     "win_rate": "60%"
    },
    {
-    "name": "Maliken",
-    "hero_id": 1264,
-    "kda": "3.0/8.3/10.3",
+    "name": "Witch Slayer",
+    "hero_id": 2152,
+    "kda": "5.5/11.5/13.8",
     "win_rate": "0%"
    },
    {
-    "name": "Engineer",
-    "hero_id": 3588,
-    "kda": "5.5/8.0/18.5",
-    "win_rate": "50%"
+    "name": "Arachna",
+    "hero_id": 431,
+    "kda": "12.7/5.7/14.0",
+    "win_rate": "67%"
+   },
+   {
+    "name": "Chronos",
+    "hero_id": 555,
+    "kda": "12.0/8.3/20.3",
+    "win_rate": "33%"
    }
   ],
   "top_roles": [
    {
     "role": "Mid",
-    "matches": 168,
-    "win_rate": "46%"
+    "matches": 170,
+    "win_rate": "47%"
    },
    {
     "role": "Carry",
-    "matches": 123,
+    "matches": 129,
     "win_rate": "56%"
    },
    {
     "role": "Offlane",
-    "matches": 114,
-    "win_rate": "46%"
+    "matches": 115,
+    "win_rate": "45%"
    }
   ],
   "reputation": {
@@ -87,7 +87,7 @@
    "penalty_points": 0,
    "abandons": 0,
    "avoided": 2,
-   "muted": 67
+   "muted": 69
   }
  },
  "accountId": "019bfbdd-2ef4-7de4-936b-06a93e9eb180",
@@ -151,8 +151,8 @@
   {
    "offset": 500,
    "status": 200,
-   "got": 38,
-   "new": 38,
+   "got": 47,
+   "new": 47,
    "has_more": false
   }
  ],
@@ -161,8 +161,169 @@
   "matches",
   "has_more"
  ],
- "matchCount": 538,
+ "matchCount": 547,
  "matches": [
+  {
+   "game_id": 13355238,
+   "date": "2026-11-04T21:23:41.9800000Z",
+   "hero_name": "Armadon",
+   "kda": "6/7/11",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 25,
+   "hero_id": 446,
+   "won": false,
+   "duration": "37:41",
+   "gpm": 440,
+   "net_worth": 16594,
+   "kills": 6,
+   "deaths": 7,
+   "assists": 11
+  },
+  {
+   "game_id": 13354224,
+   "date": "2026-11-04T20:21:51.6300000Z",
+   "hero_name": "Ravenor",
+   "kda": "8/3/17",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 16,
+   "hero_id": 3739,
+   "won": true,
+   "duration": "30:51",
+   "gpm": 705,
+   "net_worth": 21753,
+   "xpm": 471,
+   "kills": 8,
+   "deaths": 3,
+   "assists": 17
+  },
+  {
+   "game_id": 13338642,
+   "date": "2026-11-04T11:32:58.5800000Z",
+   "hero_name": "Tarot",
+   "kda": "20/12/22",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 25,
+   "hero_id": 4043,
+   "won": true,
+   "duration": "65:58",
+   "gpm": 669,
+   "net_worth": 44130,
+   "xpm": 491,
+   "kills": 20,
+   "deaths": 12,
+   "assists": 22
+  },
+  {
+   "game_id": 13337853,
+   "date": "2026-11-04T10:18:25.7800000Z",
+   "hero_name": "Arachna",
+   "kda": "12/4/18",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 19,
+   "hero_id": 431,
+   "won": true,
+   "duration": "36:25",
+   "gpm": 572,
+   "net_worth": 20840,
+   "xpm": 561,
+   "kills": 12,
+   "deaths": 4,
+   "assists": 18
+  },
+  {
+   "game_id": 13324898,
+   "date": "2026-11-03T23:14:36.6600000Z",
+   "hero_name": "Arachna",
+   "kda": "14/5/19",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 21,
+   "hero_id": 431,
+   "won": true,
+   "duration": "36:36",
+   "gpm": 675,
+   "net_worth": 24696,
+   "xpm": 635,
+   "kills": 14,
+   "deaths": 5,
+   "assists": 19
+  },
+  {
+   "game_id": 13324391,
+   "date": "2026-11-03T22:30:23.5400000Z",
+   "hero_name": "Tarot",
+   "kda": "5/5/3",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 14,
+   "hero_id": 4043,
+   "won": false,
+   "duration": "23:23",
+   "gpm": 446,
+   "net_worth": 10429,
+   "xpm": 457,
+   "kills": 5,
+   "deaths": 5,
+   "assists": 3
+  },
+  {
+   "game_id": 13323294,
+   "date": "2026-11-03T22:00:26.1300000Z",
+   "hero_name": "Chronos",
+   "kda": "15/9/20",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 25,
+   "hero_id": 555,
+   "won": false,
+   "duration": "51:26",
+   "gpm": 679,
+   "net_worth": 34924,
+   "xpm": 630,
+   "kills": 15,
+   "deaths": 9,
+   "assists": 20
+  },
+  {
+   "game_id": 13322270,
+   "date": "2026-11-03T21:00:19.8600000Z",
+   "hero_name": "Flint Beastwood",
+   "kda": "14/7/7",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 21,
+   "hero_id": 784,
+   "won": true,
+   "duration": "35:19",
+   "gpm": 671,
+   "net_worth": 23705,
+   "xpm": 704,
+   "kills": 14,
+   "deaths": 7,
+   "assists": 7
+  },
+  {
+   "game_id": 13321458,
+   "date": "2026-11-03T20:20:05.3600000Z",
+   "hero_name": "Engineer",
+   "kda": "5/8/6",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 14,
+   "hero_id": 3588,
+   "won": false,
+   "duration": "24:05",
+   "gpm": 447,
+   "net_worth": 10763,
+   "xpm": 432,
+   "kills": 5,
+   "deaths": 8,
+   "assists": 6
+  },
   {
    "game_id": 13246074,
    "date": "2026-11-01T20:15:24.5400000Z",
@@ -9847,5 +10008,5 @@
    "assists": 20
   }
  ],
- "fetchedAt": "2026-11-03T10:18Z"
+ "fetchedAt": "2026-11-05T12:42Z"
 }

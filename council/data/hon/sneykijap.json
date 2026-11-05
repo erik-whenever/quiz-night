@@ -6,24 +6,24 @@
   "name": "sneykijap",
   "country": "se",
   "rank_name": "Champion",
-  "star_level": 3,
+  "star_level": 1,
   "is_new_player": false,
-  "mmr": 1761,
-  "foc_mmr": 1761,
+  "mmr": 1730,
+  "foc_mmr": 1730,
   "mw_mmr": 1437,
-  "last_played": "01/11/2026",
+  "last_played": "04/11/2026",
   "gpm": 554,
   "xpm": 596,
-  "avg_kda": 4.06,
-  "avg_dpm": 564,
-  "win_rate": 51.0,
-  "matches": 294,
-  "total_kills": 2565,
-  "total_deaths": 1618,
-  "total_assists": 4009,
-  "total_creep_kills": 35688,
-  "total_neutral_kills": 13393,
-  "total_buybacks": 157,
+  "avg_kda": 4.05,
+  "avg_dpm": 562,
+  "win_rate": 50.7,
+  "matches": 296,
+  "total_kills": 2570,
+  "total_deaths": 1629,
+  "total_assists": 4021,
+  "total_creep_kills": 35967,
+  "total_neutral_kills": 13462,
+  "total_buybacks": 158,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
@@ -31,20 +31,20 @@
    "killstreak": 22,
    "wards_placed": 944,
    "wards_destroyed": 0,
-   "gold_earned": 4104235
+   "gold_earned": 4124798
   },
   "top_heroes": [
+   {
+    "name": "Gemini",
+    "hero_id": 938,
+    "kda": "9.1/4.9/11.7",
+    "win_rate": "67%"
+   },
    {
     "name": "The Dark Lady",
     "hero_id": 3994,
     "kda": "10.0/4.8/12.8",
     "win_rate": "50%"
-   },
-   {
-    "name": "Gemini",
-    "hero_id": 938,
-    "kda": "11.0/4.7/13.3",
-    "win_rate": "86%"
    },
    {
     "name": "Zephyr",
@@ -68,8 +68,8 @@
   "top_roles": [
    {
     "role": "Carry",
-    "matches": 118,
-    "win_rate": "55%"
+    "matches": 120,
+    "win_rate": "54%"
    },
    {
     "role": "Mid",
@@ -87,7 +87,7 @@
    "penalty_points": 0,
    "abandons": 0,
    "avoided": 0,
-   "muted": 14
+   "muted": 15
   }
  },
  "accountId": "019acf1e-fb73-7640-ad38-c01c01055806",
@@ -116,8 +116,8 @@
   {
    "offset": 250,
    "status": 200,
-   "got": 44,
-   "new": 44,
+   "got": 46,
+   "new": 46,
    "has_more": false
   }
  ],
@@ -126,8 +126,44 @@
   "matches",
   "has_more"
  ],
- "matchCount": 294,
+ "matchCount": 296,
  "matches": [
+  {
+   "game_id": 13356525,
+   "date": "2026-11-04T22:41:30.3900000Z",
+   "hero_name": "Gemini",
+   "kda": "2/8/8",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 16,
+   "hero_id": 938,
+   "won": false,
+   "duration": "28:30",
+   "gpm": 470,
+   "net_worth": 13382,
+   "xpm": 527,
+   "kills": 2,
+   "deaths": 8,
+   "assists": 8
+  },
+  {
+   "game_id": 13347735,
+   "date": "2026-11-04T15:54:34.2000000Z",
+   "hero_name": "Gemini",
+   "kda": "3/3/4",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 14,
+   "hero_id": 938,
+   "won": false,
+   "duration": "23:34",
+   "gpm": 514,
+   "net_worth": 12107,
+   "xpm": 463,
+   "kills": 3,
+   "deaths": 3,
+   "assists": 4
+  },
   {
    "game_id": 13246074,
    "date": "2026-11-01T20:15:24.5400000Z",
@@ -5413,5 +5449,5 @@
    "assists": 14
   }
  ],
- "fetchedAt": "2026-11-03T10:18Z"
+ "fetchedAt": "2026-11-05T12:42Z"
 }

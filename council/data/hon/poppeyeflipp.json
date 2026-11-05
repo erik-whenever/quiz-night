@@ -6,40 +6,34 @@
   "name": "Poppeyeflipp",
   "country": "se",
   "rank_name": "Vanguard",
-  "star_level": 3,
+  "star_level": 4,
   "is_new_player": false,
-  "mmr": 1564,
-  "foc_mmr": 1564,
-  "mw_mmr": 1477,
-  "last_played": "02/11/2026",
-  "gpm": 497,
-  "xpm": 514,
-  "avg_kda": 4.12,
-  "avg_dpm": 516,
-  "win_rate": 50.6,
-  "matches": 642,
-  "total_kills": 4808,
-  "total_deaths": 3671,
-  "total_assists": 10317,
-  "total_creep_kills": 62844,
-  "total_neutral_kills": 33426,
+  "mmr": 1576,
+  "foc_mmr": 1576,
+  "mw_mmr": 1515,
+  "last_played": "04/11/2026",
+  "gpm": 498,
+  "xpm": 515,
+  "avg_kda": 4.15,
+  "avg_dpm": 517,
+  "win_rate": 50.8,
+  "matches": 649,
+  "total_kills": 4872,
+  "total_deaths": 3701,
+  "total_assists": 10472,
+  "total_creep_kills": 63294,
+  "total_neutral_kills": 33543,
   "total_buybacks": 158,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 21,
-   "wards_placed": 5454,
+   "wards_placed": 5525,
    "wards_destroyed": 0,
-   "gold_earned": 7888610
+   "gold_earned": 7965965
   },
   "top_heroes": [
-   {
-    "name": "Solstice",
-    "hero_id": 1918,
-    "kda": "10.0/8.8/21.8",
-    "win_rate": "50%"
-   },
    {
     "name": "Magebane",
     "hero_id": 1227,
@@ -63,6 +57,12 @@
     "hero_id": 2184,
     "kda": "12.5/5.8/17.2",
     "win_rate": "50%"
+   },
+   {
+    "name": "Solstice",
+    "hero_id": 1918,
+    "kda": "10.3/10.3/23.7",
+    "win_rate": "33%"
    }
   ],
   "top_roles": [
@@ -73,13 +73,13 @@
    },
    {
     "role": "Carry",
-    "matches": 129,
-    "win_rate": "50%"
+    "matches": 131,
+    "win_rate": "51%"
    },
    {
     "role": "HardSupport",
-    "matches": 127,
-    "win_rate": "51%"
+    "matches": 131,
+    "win_rate": "52%"
    }
   ],
   "reputation": {
@@ -165,8 +165,8 @@
   {
    "offset": 600,
    "status": 200,
-   "got": 42,
-   "new": 42,
+   "got": 49,
+   "new": 49,
    "has_more": false
   }
  ],
@@ -175,8 +175,134 @@
   "matches",
   "has_more"
  ],
- "matchCount": 642,
+ "matchCount": 649,
  "matches": [
+  {
+   "game_id": 13356525,
+   "date": "2026-11-04T22:41:30.3900000Z",
+   "hero_name": "Blacksmith",
+   "kda": "0/5/7",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 8,
+   "hero_id": 480,
+   "won": false,
+   "duration": "28:30",
+   "gpm": 198,
+   "net_worth": 5639,
+   "xpm": 153,
+   "kills": 0,
+   "deaths": 5,
+   "assists": 7
+  },
+  {
+   "game_id": 13355790,
+   "date": "2026-11-04T22:04:36.0900000Z",
+   "hero_name": "Aluna",
+   "kda": "5/5/23",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 20,
+   "hero_id": 365,
+   "won": true,
+   "duration": "45:36",
+   "gpm": 409,
+   "net_worth": 18652,
+   "xpm": 472,
+   "kills": 5,
+   "deaths": 5,
+   "assists": 23
+  },
+  {
+   "game_id": 13355061,
+   "date": "2026-11-04T21:06:46.6500000Z",
+   "hero_name": "Swiftblade",
+   "kda": "21/3/13",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 23,
+   "hero_id": 1975,
+   "won": true,
+   "duration": "31:46",
+   "gpm": 853,
+   "net_worth": 27082,
+   "xpm": 878,
+   "kills": 21,
+   "deaths": 3,
+   "assists": 13
+  },
+  {
+   "game_id": 13354563,
+   "date": "2026-11-04T20:27:02.0000000Z",
+   "hero_name": "Soul Reaper",
+   "kda": "8/5/28",
+   "map": "MidWars",
+   "is_ranked": true,
+   "level": 18,
+   "hero_id": 1952,
+   "won": true,
+   "duration": "18:02",
+   "gpm": 765,
+   "net_worth": 13797,
+   "xpm": 843,
+   "kills": 8,
+   "deaths": 5,
+   "assists": 28
+  },
+  {
+   "game_id": 13354114,
+   "date": "2026-11-04T20:05:20.8800000Z",
+   "hero_name": "Vindicator",
+   "kda": "14/5/45",
+   "map": "MidWars",
+   "is_ranked": true,
+   "level": 15,
+   "hero_id": 2103,
+   "won": true,
+   "duration": "20:20",
+   "gpm": 944,
+   "net_worth": 19191,
+   "xpm": 464,
+   "kills": 14,
+   "deaths": 5,
+   "assists": 45
+  },
+  {
+   "game_id": 13353960,
+   "date": "2026-11-04T19:41:36.5400000Z",
+   "hero_name": "Forsaken Archer",
+   "kda": "4/0/8",
+   "map": "MidWars",
+   "is_ranked": true,
+   "level": 3,
+   "hero_id": 830,
+   "won": true,
+   "duration": "8:36",
+   "gpm": 701,
+   "net_worth": 6025,
+   "xpm": 59,
+   "kills": 4,
+   "deaths": 0,
+   "assists": 8
+  },
+  {
+   "game_id": 13353554,
+   "date": "2026-11-04T19:28:56.6900000Z",
+   "hero_name": "The Chipper",
+   "kda": "12/7/31",
+   "map": "MidWars",
+   "is_ranked": true,
+   "level": 24,
+   "hero_id": 532,
+   "won": false,
+   "duration": "23:56",
+   "gpm": 939,
+   "net_worth": 22475,
+   "xpm": 1150,
+   "kills": 12,
+   "deaths": 7,
+   "assists": 31
+  },
   {
    "game_id": 13288302,
    "date": "2026-11-02T23:31:55.4000000Z",
@@ -11722,5 +11848,5 @@
    "assists": 20
   }
  ],
- "fetchedAt": "2026-11-03T10:18Z"
+ "fetchedAt": "2026-11-05T12:42Z"
 }
