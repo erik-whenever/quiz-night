@@ -5,33 +5,33 @@
   "id": "019bf641-298b-76b1-8820-9100112ed2f9",
   "name": "henchman",
   "country": "se",
-  "rank_name": "Warlord",
-  "star_level": 1,
+  "rank_name": "Champion",
+  "star_level": 5,
   "is_new_player": false,
-  "mmr": 1815,
-  "foc_mmr": 1815,
+  "mmr": 1796,
+  "foc_mmr": 1796,
   "mw_mmr": 1442,
-  "last_played": "04/11/2026",
+  "last_played": "09/11/2026",
   "gpm": 484,
   "xpm": 568,
   "avg_kda": 3.16,
   "avg_dpm": 526,
   "win_rate": 51.9,
-  "matches": 668,
-  "total_kills": 4705,
-  "total_deaths": 4895,
-  "total_assists": 10771,
-  "total_creep_kills": 53062,
-  "total_neutral_kills": 35978,
+  "matches": 669,
+  "total_kills": 4714,
+  "total_deaths": 4905,
+  "total_assists": 10779,
+  "total_creep_kills": 53161,
+  "total_neutral_kills": 35982,
   "total_buybacks": 325,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 16,
-   "wards_placed": 4366,
+   "wards_placed": 4368,
    "wards_destroyed": 0,
-   "gold_earned": 7352498
+   "gold_earned": 7361985
   },
   "top_heroes": [
    {
@@ -55,14 +55,14 @@
    {
     "name": "Amun-Ra",
     "hero_id": 391,
-    "kda": "7.8/4.2/10.8",
-    "win_rate": "50%"
+    "kda": "7.7/4.7/10.7",
+    "win_rate": "33%"
    },
    {
-    "name": "Legionnaire",
-    "hero_id": 1174,
-    "kda": "12.5/11.0/12.5",
-    "win_rate": "50%"
+    "name": "Valkyrie",
+    "hero_id": 2087,
+    "kda": "12.5/7.5/10.0",
+    "win_rate": "0%"
    }
   ],
   "top_roles": [
@@ -78,7 +78,7 @@
    },
    {
     "role": "Offlane",
-    "matches": 105,
+    "matches": 106,
     "win_rate": "57%"
    }
   ],
@@ -172,8 +172,8 @@
   {
    "offset": 650,
    "status": 200,
-   "got": 18,
-   "new": 18,
+   "got": 19,
+   "new": 19,
    "has_more": false
   }
  ],
@@ -182,8 +182,26 @@
   "matches",
   "has_more"
  ],
- "matchCount": 668,
+ "matchCount": 669,
  "matches": [
+  {
+   "game_id": 13501394,
+   "date": "2026-11-09T22:35:22.1400000Z",
+   "hero_name": "Valkyrie",
+   "kda": "9/10/8",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 12,
+   "hero_id": 2087,
+   "won": false,
+   "duration": "30:22",
+   "gpm": 416,
+   "net_worth": 12626,
+   "xpm": 268,
+   "kills": 9,
+   "deaths": 10,
+   "assists": 8
+  },
   {
    "game_id": 13356525,
    "date": "2026-11-04T22:41:30.3900000Z",
@@ -215,7 +233,7 @@
    "duration": "45:36",
    "gpm": 780,
    "net_worth": 35548,
-   "xpm": 709,
+   "xpm": 711,
    "kills": 17,
    "deaths": 6,
    "assists": 16
@@ -287,7 +305,7 @@
    "duration": "43:57",
    "gpm": 484,
    "net_worth": 21282,
-   "xpm": 658,
+   "xpm": 660,
    "kills": 10,
    "deaths": 16,
    "assists": 27
@@ -12182,5 +12200,5 @@
    "assists": 28
   }
  ],
- "fetchedAt": "2026-11-05T12:42Z"
+ "fetchedAt": "2026-11-12T13:11Z"
 }

@@ -8,30 +8,30 @@
   "rank_name": "Vanguard",
   "star_level": 5,
   "is_new_player": false,
-  "mmr": 1694,
-  "foc_mmr": 1694,
+  "mmr": 1668,
+  "foc_mmr": 1668,
   "mw_mmr": 1417,
-  "last_played": "04/11/2026",
+  "last_played": "09/11/2026",
   "gpm": 471,
   "xpm": 496,
-  "avg_kda": 3.24,
+  "avg_kda": 3.23,
   "avg_dpm": 543,
-  "win_rate": 50.8,
-  "matches": 547,
-  "total_kills": 4211,
-  "total_deaths": 4008,
-  "total_assists": 8757,
-  "total_creep_kills": 52939,
+  "win_rate": 50.7,
+  "matches": 548,
+  "total_kills": 4213,
+  "total_deaths": 4019,
+  "total_assists": 8771,
+  "total_creep_kills": 52948,
   "total_neutral_kills": 18311,
-  "total_buybacks": 295,
+  "total_buybacks": 297,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 21,
-   "wards_placed": 3419,
+   "wards_placed": 3432,
    "wards_destroyed": 0,
-   "gold_earned": 6638996
+   "gold_earned": 6641567
   },
   "top_heroes": [
    {
@@ -87,7 +87,7 @@
    "penalty_points": 0,
    "abandons": 0,
    "avoided": 2,
-   "muted": 69
+   "muted": 68
   }
  },
  "accountId": "019bfbdd-2ef4-7de4-936b-06a93e9eb180",
@@ -151,8 +151,8 @@
   {
    "offset": 500,
    "status": 200,
-   "got": 47,
-   "new": 47,
+   "got": 48,
+   "new": 48,
    "has_more": false
   }
  ],
@@ -161,8 +161,26 @@
   "matches",
   "has_more"
  ],
- "matchCount": 547,
+ "matchCount": 548,
  "matches": [
+  {
+   "game_id": 13501394,
+   "date": "2026-11-09T22:35:22.1400000Z",
+   "hero_name": "Blacksmith",
+   "kda": "2/11/14",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 14,
+   "hero_id": 480,
+   "won": false,
+   "duration": "30:22",
+   "gpm": 213,
+   "net_worth": 6461,
+   "xpm": 344,
+   "kills": 2,
+   "deaths": 11,
+   "assists": 14
+  },
   {
    "game_id": 13355238,
    "date": "2026-11-04T21:23:41.9800000Z",
@@ -10008,5 +10026,5 @@
    "assists": 20
   }
  ],
- "fetchedAt": "2026-11-05T12:42Z"
+ "fetchedAt": "2026-11-12T13:11Z"
 }
