@@ -6,74 +6,42 @@
   "name": "Poppeyeflipp",
   "country": "se",
   "rank_name": "Vanguard",
-  "star_level": 5,
+  "star_level": 4,
   "is_new_player": false,
-  "mmr": 1680,
-  "foc_mmr": 1680,
+  "mmr": 1626,
+  "foc_mmr": 1626,
   "mw_mmr": 1515,
-  "last_played": "11/11/2026",
-  "gpm": 502,
-  "xpm": 521,
-  "avg_kda": 4.17,
-  "avg_dpm": 523,
-  "win_rate": 51.2,
-  "matches": 668,
-  "total_kills": 5070,
-  "total_deaths": 3810,
-  "total_assists": 10801,
-  "total_creep_kills": 66296,
-  "total_neutral_kills": 35451,
+  "last_played": "16/11/2026",
+  "gpm": 501,
+  "xpm": 520,
+  "avg_kda": 4.16,
+  "avg_dpm": 522,
+  "win_rate": 51.0,
+  "matches": 675,
+  "total_kills": 5104,
+  "total_deaths": 3847,
+  "total_assists": 10889,
+  "total_creep_kills": 66655,
+  "total_neutral_kills": 36111,
   "total_buybacks": 163,
   "all_time_record": {
    "mvps": 0,
    "annihilations": 0,
    "smackdowns": 0,
    "killstreak": 21,
-   "wards_placed": 5613,
+   "wards_placed": 5665,
    "wards_destroyed": 0,
-   "gold_earned": 8337371
+   "gold_earned": 8406097
   },
-  "top_heroes": [
-   {
-    "name": "Solstice",
-    "hero_id": 1918,
-    "kda": "12.3/6.5/21.0",
-    "win_rate": "70%"
-   },
-   {
-    "name": "Magebane",
-    "hero_id": 1227,
-    "kda": "7.4/5.2/15.8",
-    "win_rate": "56%"
-   },
-   {
-    "name": "Thunderbringer",
-    "hero_id": 2013,
-    "kda": "8.7/3.3/22.3",
-    "win_rate": "100%"
-   },
-   {
-    "name": "Defiler",
-    "hero_id": 599,
-    "kda": "12.7/6.7/7.7",
-    "win_rate": "33%"
-   },
-   {
-    "name": "Deadwood",
-    "hero_id": 3661,
-    "kda": "9.0/4.0/14.7",
-    "win_rate": "33%"
-   }
-  ],
   "top_roles": [
    {
     "role": "Jungle",
-    "matches": 145,
-    "win_rate": "57%"
+    "matches": 149,
+    "win_rate": "56%"
    },
    {
     "role": "Carry",
-    "matches": 139,
+    "matches": 140,
     "win_rate": "50%"
    },
    {
@@ -82,12 +50,535 @@
     "win_rate": "52%"
    }
   ],
+  "mmr_history": {
+   "foc": {
+    "points": [
+     {
+      "game_id": 12683442,
+      "time": "2026-10-18T20:17:41.430000+00:00",
+      "mmr": 1657.4
+     },
+     {
+      "game_id": 12702394,
+      "time": "2026-10-19T12:14:52.210000+00:00",
+      "mmr": 1674.6
+     },
+     {
+      "game_id": 12703962,
+      "time": "2026-10-19T12:59:21.710000+00:00",
+      "mmr": 1688.4
+     },
+     {
+      "game_id": 12713770,
+      "time": "2026-10-19T16:44:12.060000+00:00",
+      "mmr": 1671.5
+     },
+     {
+      "game_id": 12716978,
+      "time": "2026-10-19T17:31:15.850000+00:00",
+      "mmr": 1655.1
+     },
+     {
+      "game_id": 12719702,
+      "time": "2026-10-19T18:47:11.190000+00:00",
+      "mmr": 1637.0
+     },
+     {
+      "game_id": 12721330,
+      "time": "2026-10-19T19:30:13.950000+00:00",
+      "mmr": 1654.2
+     },
+     {
+      "game_id": 12722878,
+      "time": "2026-10-19T20:28:34.270000+00:00",
+      "mmr": 1664.1
+     },
+     {
+      "game_id": 12724086,
+      "time": "2026-10-19T21:07:45.170000+00:00",
+      "mmr": 1675.4
+     },
+     {
+      "game_id": 12761278,
+      "time": "2026-10-20T20:43:48.320000+00:00",
+      "mmr": 1690.6
+     },
+     {
+      "game_id": 12798246,
+      "time": "2026-10-21T19:34:40.670000+00:00",
+      "mmr": 1707.9
+     },
+     {
+      "game_id": 12837038,
+      "time": "2026-10-22T19:36:27.780000+00:00",
+      "mmr": 1724.6
+     },
+     {
+      "game_id": 12838478,
+      "time": "2026-10-22T20:14:43.260000+00:00",
+      "mmr": 1712.1
+     },
+     {
+      "game_id": 12839538,
+      "time": "2026-10-22T20:53:23.790000+00:00",
+      "mmr": 1696.0
+     },
+     {
+      "game_id": 12840450,
+      "time": "2026-10-22T21:45:34.210000+00:00",
+      "mmr": 1712.9
+     },
+     {
+      "game_id": 12859066,
+      "time": "2026-10-23T11:51:00.200000+00:00",
+      "mmr": 1695.8
+     },
+     {
+      "game_id": 12951798,
+      "time": "2026-10-25T12:29:12.200000+00:00",
+      "mmr": 1682.4
+     },
+     {
+      "game_id": 12954414,
+      "time": "2026-10-25T13:31:51.880000+00:00",
+      "mmr": 1669.9
+     },
+     {
+      "game_id": 12960966,
+      "time": "2026-10-25T15:45:34.730000+00:00",
+      "mmr": 1652.6
+     },
+     {
+      "game_id": 12963478,
+      "time": "2026-10-25T16:32:16.480000+00:00",
+      "mmr": 1670.0
+     },
+     {
+      "game_id": 12965454,
+      "time": "2026-10-25T17:19:02.020000+00:00",
+      "mmr": 1688.1
+     },
+     {
+      "game_id": 12968678,
+      "time": "2026-10-25T18:38:35.490000+00:00",
+      "mmr": 1671.9
+     },
+     {
+      "game_id": 12970458,
+      "time": "2026-10-25T19:42:06.170000+00:00",
+      "mmr": 1688.3
+     },
+     {
+      "game_id": 12972394,
+      "time": "2026-10-25T20:33:09.350000+00:00",
+      "mmr": 1672.0
+     },
+     {
+      "game_id": 12974134,
+      "time": "2026-10-25T21:34:25.230000+00:00",
+      "mmr": 1689.6
+     },
+     {
+      "game_id": 12975762,
+      "time": "2026-10-25T22:57:49.990000+00:00",
+      "mmr": 1706.3
+     },
+     {
+      "game_id": 12977206,
+      "time": "2026-10-26T00:24:43.460000+00:00",
+      "mmr": 1689.7
+     },
+     {
+      "game_id": 12977822,
+      "time": "2026-10-26T01:20:06.050000+00:00",
+      "mmr": 1707.3
+     },
+     {
+      "game_id": 12979378,
+      "time": "2026-10-26T02:46:24.650000+00:00",
+      "mmr": 1720.6
+     },
+     {
+      "game_id": 12992470,
+      "time": "2026-10-26T12:16:04.430000+00:00",
+      "mmr": 1707.1
+     },
+     {
+      "game_id": 12993490,
+      "time": "2026-10-26T12:59:22.070000+00:00",
+      "mmr": 1723.2
+     },
+     {
+      "game_id": 12995098,
+      "time": "2026-10-26T13:43:59.700000+00:00",
+      "mmr": 1739.5
+     },
+     {
+      "game_id": 12997274,
+      "time": "2026-10-26T14:25:47.650000+00:00",
+      "mmr": 1728.9
+     },
+     {
+      "game_id": 12999582,
+      "time": "2026-10-26T15:23:28.870000+00:00",
+      "mmr": 1718.8
+     },
+     {
+      "game_id": 13004246,
+      "time": "2026-10-26T16:39:04.570000+00:00",
+      "mmr": 1704.7
+     },
+     {
+      "game_id": 13006494,
+      "time": "2026-10-26T17:38:51.440000+00:00",
+      "mmr": 1687.8
+     },
+     {
+      "game_id": 13009102,
+      "time": "2026-10-26T18:34:24.870000+00:00",
+      "mmr": 1671.2
+     },
+     {
+      "game_id": 13009854,
+      "time": "2026-10-26T19:17:52.920000+00:00",
+      "mmr": 1687.1
+     },
+     {
+      "game_id": 13011594,
+      "time": "2026-10-26T20:30:28.260000+00:00",
+      "mmr": 1698.2
+     },
+     {
+      "game_id": 13013682,
+      "time": "2026-10-26T21:40:13.060000+00:00",
+      "mmr": 1674.5
+     },
+     {
+      "game_id": 13015066,
+      "time": "2026-10-26T22:44:19.470000+00:00",
+      "mmr": 1660.4
+     },
+     {
+      "game_id": 13051126,
+      "time": "2026-10-27T20:43:16.900000+00:00",
+      "mmr": 1635.9
+     },
+     {
+      "game_id": 13052778,
+      "time": "2026-10-27T21:28:35.710000+00:00",
+      "mmr": 1645.5
+     },
+     {
+      "game_id": 13053578,
+      "time": "2026-10-27T22:04:00.680000+00:00",
+      "mmr": 1655.7
+     },
+     {
+      "game_id": 13054334,
+      "time": "2026-10-27T22:51:30.560000+00:00",
+      "mmr": 1668.1
+     },
+     {
+      "game_id": 13147642,
+      "time": "2026-10-30T13:36:06.940000+00:00",
+      "mmr": 1651.7
+     },
+     {
+      "game_id": 13149550,
+      "time": "2026-10-30T14:19:37.290000+00:00",
+      "mmr": 1634.5
+     },
+     {
+      "game_id": 13167066,
+      "time": "2026-10-30T22:03:45.450000+00:00",
+      "mmr": 1617.1
+     },
+     {
+      "game_id": 13167990,
+      "time": "2026-10-30T22:47:11.420000+00:00",
+      "mmr": 1626.0
+     },
+     {
+      "game_id": 13203238,
+      "time": "2026-10-31T20:06:08.850000+00:00",
+      "mmr": 1640.8
+     },
+     {
+      "game_id": 13204542,
+      "time": "2026-10-31T21:10:14.970000+00:00",
+      "mmr": 1626.1
+     },
+     {
+      "game_id": 13206326,
+      "time": "2026-10-31T22:03:50.890000+00:00",
+      "mmr": 1639.4
+     },
+     {
+      "game_id": 13207378,
+      "time": "2026-10-31T22:59:32.150000+00:00",
+      "mmr": 1621.1
+     },
+     {
+      "game_id": 13238242,
+      "time": "2026-11-01T16:21:24.120000+00:00",
+      "mmr": 1602.6
+     },
+     {
+      "game_id": 13243446,
+      "time": "2026-11-01T18:51:58.660000+00:00",
+      "mmr": 1585.0
+     },
+     {
+      "game_id": 13246074,
+      "time": "2026-11-01T20:15:24.540000+00:00",
+      "mmr": 1601.2
+     },
+     {
+      "game_id": 13247702,
+      "time": "2026-11-01T21:12:20.640000+00:00",
+      "mmr": 1626.8
+     },
+     {
+      "game_id": 13250254,
+      "time": "2026-11-02T00:13:10.244000+00:00",
+      "mmr": 1609.1
+     },
+     {
+      "game_id": 13250822,
+      "time": "2026-11-02T00:14:55.700000+00:00",
+      "mmr": 1591.2
+     },
+     {
+      "game_id": 13269858,
+      "time": "2026-11-02T14:23:29.170000+00:00",
+      "mmr": 1603.8
+     },
+     {
+      "game_id": 13272114,
+      "time": "2026-11-02T15:05:14.430000+00:00",
+      "mmr": 1585.2
+     },
+     {
+      "game_id": 13275678,
+      "time": "2026-11-02T17:30:24.406000+00:00",
+      "mmr": 1565.9
+     },
+     {
+      "game_id": 13281386,
+      "time": "2026-11-02T18:57:16.970000+00:00",
+      "mmr": 1578.6
+     },
+     {
+      "game_id": 13284194,
+      "time": "2026-11-02T20:18:31.580000+00:00",
+      "mmr": 1560.1
+     },
+     {
+      "game_id": 13285302,
+      "time": "2026-11-02T21:21:34.340000+00:00",
+      "mmr": 1578.6
+     },
+     {
+      "game_id": 13287526,
+      "time": "2026-11-02T22:44:05.390000+00:00",
+      "mmr": 1563.3
+     },
+     {
+      "game_id": 13288302,
+      "time": "2026-11-02T23:31:55.400000+00:00",
+      "mmr": 1582.0
+     },
+     {
+      "game_id": 13355061,
+      "time": "2026-11-04T21:06:46.650000+00:00",
+      "mmr": 1563.8
+     },
+     {
+      "game_id": 13355790,
+      "time": "2026-11-04T22:04:36.090000+00:00",
+      "mmr": 1580.8
+     },
+     {
+      "game_id": 13356525,
+      "time": "2026-11-04T22:41:30.390000+00:00",
+      "mmr": 1598.6
+     },
+     {
+      "game_id": 13377887,
+      "time": "2026-11-05T17:49:32.340000+00:00",
+      "mmr": 1576.0
+     },
+     {
+      "game_id": 13378730,
+      "time": "2026-11-05T18:25:07.610000+00:00",
+      "mmr": 1594.4
+     },
+     {
+      "game_id": 13379867,
+      "time": "2026-11-05T19:25:44.610000+00:00",
+      "mmr": 1612.9
+     },
+     {
+      "game_id": 13383209,
+      "time": "2026-11-05T23:02:44.220000+00:00",
+      "mmr": 1637.4
+     },
+     {
+      "game_id": 13464310,
+      "time": "2026-11-08T20:11:09.080000+00:00",
+      "mmr": 1620.7
+     },
+     {
+      "game_id": 13465387,
+      "time": "2026-11-08T21:21:41.670000+00:00",
+      "mmr": 1635.2
+     },
+     {
+      "game_id": 13466317,
+      "time": "2026-11-08T21:58:32.440000+00:00",
+      "mmr": 1653.0
+     },
+     {
+      "game_id": 13466830,
+      "time": "2026-11-08T22:49:36.770000+00:00",
+      "mmr": 1636.9
+     },
+     {
+      "game_id": 13488670,
+      "time": "2026-11-09T15:47:37.220000+00:00",
+      "mmr": 1619.9
+     },
+     {
+      "game_id": 13492142,
+      "time": "2026-11-09T16:57:07.900000+00:00",
+      "mmr": 1637.7
+     },
+     {
+      "game_id": 13495030,
+      "time": "2026-11-09T17:56:13.450000+00:00",
+      "mmr": 1654.5
+     },
+     {
+      "game_id": 13496146,
+      "time": "2026-11-09T18:43:04.230000+00:00",
+      "mmr": 1671.4
+     },
+     {
+      "game_id": 13497310,
+      "time": "2026-11-09T19:45:15.010000+00:00",
+      "mmr": 1654.4
+     },
+     {
+      "game_id": 13499190,
+      "time": "2026-11-09T20:43:27.700000+00:00",
+      "mmr": 1671.9
+     },
+     {
+      "game_id": 13501234,
+      "time": "2026-11-09T22:40:00.170000+00:00",
+      "mmr": 1688.6
+     },
+     {
+      "game_id": 13531550,
+      "time": "2026-11-10T19:25:54.970000+00:00",
+      "mmr": 1705.3
+     },
+     {
+      "game_id": 13532650,
+      "time": "2026-11-10T20:16:10.660000+00:00",
+      "mmr": 1722.7
+     },
+     {
+      "game_id": 13535654,
+      "time": "2026-11-10T22:54:04.280000+00:00",
+      "mmr": 1706.7
+     },
+     {
+      "game_id": 13571188,
+      "time": "2026-11-11T23:28:11.790000+00:00",
+      "mmr": 1694.7
+     },
+     {
+      "game_id": 13709160,
+      "time": "2026-11-15T16:52:44.290000+00:00",
+      "mmr": 1680.4
+     },
+     {
+      "game_id": 13719432,
+      "time": "2026-11-15T23:26:56.770000+00:00",
+      "mmr": 1697.8
+     },
+     {
+      "game_id": 13734176,
+      "time": "2026-11-16T12:30:20.720000+00:00",
+      "mmr": 1680.9
+     },
+     {
+      "game_id": 13745032,
+      "time": "2026-11-16T16:53:52.410000+00:00",
+      "mmr": 1659.6
+     },
+     {
+      "game_id": 13746420,
+      "time": "2026-11-16T17:47:44.530000+00:00",
+      "mmr": 1677.3
+     },
+     {
+      "game_id": 13750256,
+      "time": "2026-11-16T19:44:31.810000+00:00",
+      "mmr": 1662.9
+     },
+     {
+      "game_id": 13753428,
+      "time": "2026-11-16T22:33:19.210000+00:00",
+      "mmr": 1646.3
+     },
+     {
+      "game_id": 13753428,
+      "time": "2026-11-16T23:02:38.210000+00:00",
+      "mmr": 1626.4
+     }
+    ],
+    "games": 96
+   },
+   "mw": {
+    "points": [
+     {
+      "game_id": 13353554,
+      "time": "2026-11-04T19:28:56.690000+00:00",
+      "mmr": 1477.3
+     },
+     {
+      "game_id": 13353960,
+      "time": "2026-11-04T19:41:36.540000+00:00",
+      "mmr": 1456.5
+     },
+     {
+      "game_id": 13354114,
+      "time": "2026-11-04T20:05:20.880000+00:00",
+      "mmr": 1475.2
+     },
+     {
+      "game_id": 13354563,
+      "time": "2026-11-04T20:27:02+00:00",
+      "mmr": 1495.3
+     },
+     {
+      "game_id": 13354563,
+      "time": "2026-11-04T20:45:04+00:00",
+      "mmr": 1515.7
+     }
+    ],
+    "games": 4
+   }
+  },
   "reputation": {
-   "penalty_level": "Bro",
-   "penalty_points": 1,
+   "penalty_level": "Chad",
+   "penalty_points": 0,
    "abandons": 0,
    "avoided": 3,
-   "muted": 84
+   "muted": 86,
+   "kicks": 0
   }
  },
  "accountId": "019bfb22-d5be-7be3-8374-48e46a8cf6a2",
@@ -172,8 +663,8 @@
   {
    "offset": 650,
    "status": 200,
-   "got": 18,
-   "new": 18,
+   "got": 25,
+   "new": 25,
    "has_more": false
   }
  ],
@@ -182,8 +673,141 @@
   "matches",
   "has_more"
  ],
- "matchCount": 668,
+ "matchCount": 675,
  "matches": [
+  {
+   "game_id": 13753428,
+   "date": "2026-11-16T22:33:19.2100000Z",
+   "hero_name": "Aluna",
+   "kda": "1/2/7",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 10,
+   "hero_id": 365,
+   "won": false,
+   "duration": "29:19",
+   "gpm": 207,
+   "net_worth": 6076,
+   "xpm": 198,
+   "rating_change": -19.9,
+   "kills": 1,
+   "deaths": 2,
+   "assists": 7
+  },
+  {
+   "game_id": 13750256,
+   "date": "2026-11-16T19:44:31.8100000Z",
+   "hero_name": "Legionnaire",
+   "kda": "4/7/10",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 16,
+   "hero_id": 1174,
+   "won": false,
+   "duration": "28:31",
+   "gpm": 409,
+   "net_worth": 11666,
+   "xpm": 493,
+   "rating_change": -16.6,
+   "kills": 4,
+   "deaths": 7,
+   "assists": 10
+  },
+  {
+   "game_id": 13746420,
+   "date": "2026-11-16T17:47:44.5300000Z",
+   "hero_name": "Solstice",
+   "kda": "4/6/16",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 20,
+   "hero_id": 1918,
+   "won": false,
+   "duration": "43:44",
+   "gpm": 432,
+   "net_worth": 18876,
+   "xpm": 514,
+   "rating_change": -14.4,
+   "kills": 4,
+   "deaths": 6,
+   "assists": 16
+  },
+  {
+   "game_id": 13745032,
+   "date": "2026-11-16T16:53:52.4100000Z",
+   "hero_name": "Devourer",
+   "kda": "6/1/21",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 15,
+   "hero_id": 641,
+   "won": true,
+   "duration": "28:52",
+   "gpm": 396,
+   "net_worth": 11435,
+   "xpm": 438,
+   "rating_change": 17.7,
+   "kills": 6,
+   "deaths": 1,
+   "assists": 21
+  },
+  {
+   "game_id": 13734176,
+   "date": "2026-11-16T12:30:20.7200000Z",
+   "hero_name": "Solstice",
+   "kda": "5/9/15",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 16,
+   "hero_id": 1918,
+   "won": false,
+   "duration": "28:20",
+   "gpm": 420,
+   "net_worth": 11908,
+   "xpm": 482,
+   "rating_change": -21.3,
+   "kills": 5,
+   "deaths": 9,
+   "assists": 15
+  },
+  {
+   "game_id": 13719432,
+   "date": "2026-11-15T23:26:56.7700000Z",
+   "hero_name": "Silhouette",
+   "kda": "4/5/1",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 11,
+   "hero_id": 1832,
+   "won": false,
+   "duration": "19:56",
+   "gpm": 397,
+   "net_worth": 7905,
+   "xpm": 361,
+   "rating_change": -16.9,
+   "kills": 4,
+   "deaths": 5,
+   "assists": 1
+  },
+  {
+   "game_id": 13709160,
+   "date": "2026-11-15T16:52:44.2900000Z",
+   "hero_name": "Solstice",
+   "kda": "10/7/18",
+   "map": "ForestsOfCaldavar",
+   "is_ranked": true,
+   "level": 23,
+   "hero_id": 1918,
+   "won": true,
+   "duration": "36:44",
+   "gpm": 671,
+   "net_worth": 24635,
+   "xpm": 756,
+   "rating_change": 17.4,
+   "kills": 10,
+   "deaths": 7,
+   "assists": 18
+  },
   {
    "game_id": 13571188,
    "date": "2026-11-11T23:28:11.7900000Z",
@@ -198,6 +822,7 @@
    "gpm": 401,
    "net_worth": 13323,
    "xpm": 399,
+   "rating_change": -14.3,
    "kills": 3,
    "deaths": 11,
    "assists": 7
@@ -216,6 +841,7 @@
    "gpm": 563,
    "net_worth": 24248,
    "xpm": 561,
+   "rating_change": -12.0,
    "kills": 16,
    "deaths": 6,
    "assists": 7
@@ -234,6 +860,7 @@
    "gpm": 647,
    "net_worth": 27946,
    "xpm": 694,
+   "rating_change": -16.0,
    "kills": 11,
    "deaths": 7,
    "assists": 15
@@ -252,6 +879,7 @@
    "gpm": 656,
    "net_worth": 23544,
    "xpm": 480,
+   "rating_change": 17.4,
    "kills": 9,
    "deaths": 4,
    "assists": 19
@@ -270,6 +898,7 @@
    "gpm": 638,
    "net_worth": 28708,
    "xpm": 670,
+   "rating_change": 16.7,
    "kills": 8,
    "deaths": 8,
    "assists": 20
@@ -288,6 +917,7 @@
    "gpm": 710,
    "net_worth": 26579,
    "xpm": 518,
+   "rating_change": 16.7,
    "kills": 26,
    "deaths": 5,
    "assists": 30
@@ -305,6 +935,7 @@
    "duration": "55:15",
    "gpm": 749,
    "net_worth": 41376,
+   "rating_change": 17.5,
    "kills": 18,
    "deaths": 9,
    "assists": 16
@@ -323,6 +954,7 @@
    "gpm": 500,
    "net_worth": 17021,
    "xpm": 576,
+   "rating_change": -17.0,
    "kills": 4,
    "deaths": 8,
    "assists": 6
@@ -340,6 +972,7 @@
    "duration": "24:13",
    "gpm": 794,
    "net_worth": 19226,
+   "rating_change": 16.9,
    "kills": 12,
    "deaths": 1,
    "assists": 13
@@ -358,6 +991,7 @@
    "gpm": 535,
    "net_worth": 23594,
    "xpm": 545,
+   "rating_change": 16.8,
    "kills": 10,
    "deaths": 7,
    "assists": 18
@@ -376,6 +1010,7 @@
    "gpm": 762,
    "net_worth": 39317,
    "xpm": 628,
+   "rating_change": 17.9,
    "kills": 19,
    "deaths": 7,
    "assists": 45
@@ -393,6 +1028,7 @@
    "duration": "35:36",
    "gpm": 540,
    "net_worth": 19231,
+   "rating_change": -17.1,
    "kills": 2,
    "deaths": 7,
    "assists": 18
@@ -411,6 +1047,7 @@
    "gpm": 398,
    "net_worth": 6975,
    "xpm": 346,
+   "rating_change": -16.0,
    "kills": 0,
    "deaths": 2,
    "assists": 1
@@ -429,6 +1066,7 @@
    "gpm": 802,
    "net_worth": 32618,
    "xpm": 534,
+   "rating_change": 17.8,
    "kills": 12,
    "deaths": 3,
    "assists": 21
@@ -447,6 +1085,7 @@
    "gpm": 782,
    "net_worth": 26711,
    "xpm": 442,
+   "rating_change": 14.5,
    "kills": 20,
    "deaths": 5,
    "assists": 34
@@ -465,6 +1104,7 @@
    "gpm": 471,
    "net_worth": 20596,
    "xpm": 464,
+   "rating_change": -16.7,
    "kills": 13,
    "deaths": 12,
    "assists": 18
@@ -483,6 +1123,7 @@
    "gpm": 447,
    "net_worth": 16848,
    "xpm": 400,
+   "rating_change": 24.4,
    "kills": 5,
    "deaths": 5,
    "assists": 25
@@ -501,6 +1142,7 @@
    "gpm": 611,
    "net_worth": 17802,
    "xpm": 567,
+   "rating_change": 18.5,
    "kills": 5,
    "deaths": 1,
    "assists": 9
@@ -519,6 +1161,7 @@
    "gpm": 538,
    "net_worth": 14263,
    "xpm": 382,
+   "rating_change": 18.5,
    "kills": 5,
    "deaths": 1,
    "assists": 7
@@ -537,6 +1180,7 @@
    "gpm": 198,
    "net_worth": 5639,
    "xpm": 153,
+   "rating_change": -22.6,
    "kills": 0,
    "deaths": 5,
    "assists": 7
@@ -555,6 +1199,7 @@
    "gpm": 409,
    "net_worth": 18652,
    "xpm": 274,
+   "rating_change": 17.8,
    "kills": 5,
    "deaths": 5,
    "assists": 23
@@ -573,6 +1218,7 @@
    "gpm": 853,
    "net_worth": 27082,
    "xpm": 878,
+   "rating_change": 17.0,
    "kills": 21,
    "deaths": 3,
    "assists": 13
@@ -591,6 +1237,7 @@
    "gpm": 765,
    "net_worth": 13797,
    "xpm": 843,
+   "rating_change": 20.4,
    "kills": 8,
    "deaths": 5,
    "assists": 28
@@ -609,6 +1256,7 @@
    "gpm": 944,
    "net_worth": 19191,
    "xpm": 464,
+   "rating_change": 20.1,
    "kills": 14,
    "deaths": 5,
    "assists": 45
@@ -627,6 +1275,7 @@
    "gpm": 701,
    "net_worth": 6025,
    "xpm": 59,
+   "rating_change": 18.7,
    "kills": 4,
    "deaths": 0,
    "assists": 8
@@ -645,6 +1294,7 @@
    "gpm": 939,
    "net_worth": 22475,
    "xpm": 1150,
+   "rating_change": -20.9,
    "kills": 12,
    "deaths": 7,
    "assists": 31
@@ -663,6 +1313,7 @@
    "gpm": 468,
    "net_worth": 16326,
    "xpm": 502,
+   "rating_change": -18.3,
    "kills": 8,
    "deaths": 9,
    "assists": 15
@@ -681,6 +1332,7 @@
    "gpm": 747,
    "net_worth": 25445,
    "xpm": 357,
+   "rating_change": 18.7,
    "kills": 5,
    "deaths": 1,
    "assists": 23
@@ -699,6 +1351,7 @@
    "gpm": 670,
    "net_worth": 35875,
    "xpm": 605,
+   "rating_change": -15.3,
    "kills": 20,
    "deaths": 9,
    "assists": 18
@@ -717,6 +1370,7 @@
    "gpm": 519,
    "net_worth": 14786,
    "xpm": 332,
+   "rating_change": 18.5,
    "kills": 5,
    "deaths": 4,
    "assists": 19
@@ -735,6 +1389,7 @@
    "gpm": 504,
    "net_worth": 18790,
    "xpm": 474,
+   "rating_change": -18.5,
    "kills": 8,
    "deaths": 7,
    "assists": 9
@@ -753,6 +1408,7 @@
    "gpm": 383,
    "net_worth": 18240,
    "xpm": 464,
+   "rating_change": 12.7,
    "kills": 8,
    "deaths": 10,
    "assists": 27
@@ -771,6 +1427,7 @@
    "gpm": 454,
    "net_worth": 13279,
    "xpm": 466,
+   "rating_change": -19.3,
    "kills": 6,
    "deaths": 7,
    "assists": 4
@@ -789,6 +1446,7 @@
    "gpm": 275,
    "net_worth": 10027,
    "xpm": 152,
+   "rating_change": -18.6,
    "kills": 2,
    "deaths": 9,
    "assists": 17
@@ -807,6 +1465,7 @@
    "gpm": 688,
    "net_worth": 26777,
    "xpm": 656,
+   "rating_change": 12.6,
    "kills": 6,
    "deaths": 5,
    "assists": 18
@@ -825,6 +1484,7 @@
    "gpm": 401,
    "net_worth": 15046,
    "xpm": 436,
+   "rating_change": -18.0,
    "kills": 5,
    "deaths": 6,
    "assists": 11
@@ -843,6 +1503,7 @@
    "gpm": 434,
    "net_worth": 12306,
    "xpm": 434,
+   "rating_change": -17.7,
    "kills": 2,
    "deaths": 7,
    "assists": 5
@@ -861,6 +1522,7 @@
    "gpm": 657,
    "net_worth": 21939,
    "xpm": 613,
+   "rating_change": 25.6,
    "kills": 9,
    "deaths": 1,
    "assists": 19
@@ -879,6 +1541,7 @@
    "gpm": 738,
    "net_worth": 25072,
    "xpm": 551,
+   "rating_change": 16.3,
    "kills": 24,
    "deaths": 6,
    "assists": 10
@@ -897,6 +1560,7 @@
    "gpm": 412,
    "net_worth": 8808,
    "xpm": 418,
+   "rating_change": -17.6,
    "kills": 3,
    "deaths": 4,
    "assists": 7
@@ -915,6 +1579,7 @@
    "gpm": 477,
    "net_worth": 21704,
    "xpm": 476,
+   "rating_change": -18.5,
    "kills": 6,
    "deaths": 9,
    "assists": 14
@@ -933,6 +1598,7 @@
    "gpm": 571,
    "net_worth": 21610,
    "xpm": 698,
+   "rating_change": -18.3,
    "kills": 14,
    "deaths": 7,
    "assists": 16
@@ -951,6 +1617,7 @@
    "gpm": 523,
    "net_worth": 28897,
    "xpm": 397,
+   "rating_change": 13.3,
    "kills": 11,
    "deaths": 11,
    "assists": 35
@@ -969,6 +1636,7 @@
    "gpm": 361,
    "net_worth": 13030,
    "xpm": 306,
+   "rating_change": -14.7,
    "kills": 9,
    "deaths": 8,
    "assists": 13
@@ -987,6 +1655,7 @@
    "gpm": 649,
    "net_worth": 20878,
    "xpm": 505,
+   "rating_change": 14.8,
    "kills": 12,
    "deaths": 4,
    "assists": 19
@@ -1005,6 +1674,7 @@
    "gpm": 556,
    "net_worth": 17112,
    "xpm": 292,
+   "rating_change": 8.9,
    "kills": 15,
    "deaths": 0,
    "assists": 24
@@ -1023,6 +1693,7 @@
    "gpm": 296,
    "net_worth": 10248,
    "xpm": 138,
+   "rating_change": -17.4,
    "kills": 2,
    "deaths": 6,
    "assists": 11
@@ -1041,6 +1712,7 @@
    "gpm": 494,
    "net_worth": 17837,
    "xpm": 331,
+   "rating_change": -17.2,
    "kills": 12,
    "deaths": 11,
    "assists": 21
@@ -1059,6 +1731,7 @@
    "gpm": 260,
    "net_worth": 9221,
    "xpm": 351,
+   "rating_change": -16.4,
    "kills": 4,
    "deaths": 6,
    "assists": 10
@@ -1077,6 +1750,7 @@
    "gpm": 545,
    "net_worth": 15270,
    "xpm": 384,
+   "rating_change": 12.4,
    "kills": 9,
    "deaths": 2,
    "assists": 29
@@ -1095,6 +1769,7 @@
    "gpm": 818,
    "net_worth": 28276,
    "xpm": 810,
+   "rating_change": 10.2,
    "kills": 17,
    "deaths": 3,
    "assists": 22
@@ -1113,6 +1788,7 @@
    "gpm": 499,
    "net_worth": 27555,
    "xpm": 586,
+   "rating_change": 9.6,
    "kills": 11,
    "deaths": 6,
    "assists": 25
@@ -1131,6 +1807,7 @@
    "gpm": 428,
    "net_worth": 12966,
    "xpm": 424,
+   "rating_change": -24.4,
    "kills": 5,
    "deaths": 8,
    "assists": 10
@@ -1149,6 +1826,7 @@
    "gpm": 489,
    "net_worth": 19166,
    "xpm": 508,
+   "rating_change": -14.2,
    "kills": 9,
    "deaths": 6,
    "assists": 8
@@ -1167,6 +1845,7 @@
    "gpm": 569,
    "net_worth": 30448,
    "xpm": 606,
+   "rating_change": -23.7,
    "kills": 17,
    "deaths": 12,
    "assists": 23
@@ -1185,6 +1864,7 @@
    "gpm": 375,
    "net_worth": 14593,
    "xpm": 447,
+   "rating_change": 11.1,
    "kills": 3,
    "deaths": 5,
    "assists": 20
@@ -1203,6 +1883,7 @@
    "gpm": 528,
    "net_worth": 10239,
    "xpm": 395,
+   "rating_change": 15.9,
    "kills": 9,
    "deaths": 1,
    "assists": 11
@@ -1221,6 +1902,7 @@
    "gpm": 439,
    "net_worth": 16634,
    "xpm": 537,
+   "rating_change": -16.6,
    "kills": 10,
    "deaths": 6,
    "assists": 22
@@ -1239,6 +1921,7 @@
    "gpm": 360,
    "net_worth": 10813,
    "xpm": 433,
+   "rating_change": -16.8,
    "kills": 4,
    "deaths": 8,
    "assists": 15
@@ -1257,6 +1940,7 @@
    "gpm": 565,
    "net_worth": 25700,
    "xpm": 713,
+   "rating_change": -14.1,
    "kills": 9,
    "deaths": 8,
    "assists": 10
@@ -1275,6 +1959,7 @@
    "gpm": 278,
    "net_worth": 8849,
    "xpm": 361,
+   "rating_change": -10.1,
    "kills": 5,
    "deaths": 11,
    "assists": 6
@@ -1293,6 +1978,7 @@
    "gpm": 302,
    "net_worth": 11186,
    "xpm": 276,
+   "rating_change": -10.6,
    "kills": 4,
    "deaths": 7,
    "assists": 15
@@ -1311,6 +1997,7 @@
    "gpm": 704,
    "net_worth": 24190,
    "xpm": 717,
+   "rating_change": 16.3,
    "kills": 9,
    "deaths": 2,
    "assists": 11
@@ -1329,6 +2016,7 @@
    "gpm": 546,
    "net_worth": 9310,
    "xpm": 513,
+   "rating_change": 16.1,
    "kills": 4,
    "deaths": 3,
    "assists": 9
@@ -1346,6 +2034,7 @@
    "duration": "25:24",
    "gpm": 351,
    "net_worth": 8911,
+   "rating_change": -13.6,
    "kills": 6,
    "deaths": 7,
    "assists": 6
@@ -1364,6 +2053,7 @@
    "gpm": 706,
    "net_worth": 32565,
    "xpm": 703,
+   "rating_change": 13.3,
    "kills": 10,
    "deaths": 5,
    "assists": 21
@@ -1382,6 +2072,7 @@
    "gpm": 531,
    "net_worth": 18961,
    "xpm": 367,
+   "rating_change": 17.7,
    "kills": 2,
    "deaths": 3,
    "assists": 17
@@ -1400,6 +2091,7 @@
    "gpm": 544,
    "net_worth": 24397,
    "xpm": 324,
+   "rating_change": -16.6,
    "kills": 13,
    "deaths": 12,
    "assists": 12
@@ -1418,6 +2110,7 @@
    "gpm": 592,
    "net_worth": 23323,
    "xpm": 463,
+   "rating_change": 16.7,
    "kills": 14,
    "deaths": 2,
    "assists": 20
@@ -1435,6 +2128,7 @@
    "duration": "42:09",
    "gpm": 444,
    "net_worth": 18721,
+   "rating_change": 17.6,
    "kills": 12,
    "deaths": 9,
    "assists": 32
@@ -1453,6 +2147,7 @@
    "gpm": 424,
    "net_worth": 22114,
    "xpm": 574,
+   "rating_change": -16.3,
    "kills": 5,
    "deaths": 12,
    "assists": 31
@@ -1471,6 +2166,7 @@
    "gpm": 886,
    "net_worth": 32426,
    "xpm": 867,
+   "rating_change": 16.4,
    "kills": 16,
    "deaths": 1,
    "assists": 19
@@ -1489,6 +2185,7 @@
    "gpm": 407,
    "net_worth": 13852,
    "xpm": 461,
+   "rating_change": -16.1,
    "kills": 9,
    "deaths": 6,
    "assists": 6
@@ -1507,6 +2204,7 @@
    "gpm": 660,
    "net_worth": 18654,
    "xpm": 656,
+   "rating_change": 18.0,
    "kills": 9,
    "deaths": 4,
    "assists": 16
@@ -1525,6 +2223,7 @@
    "gpm": 861,
    "net_worth": 27178,
    "xpm": 766,
+   "rating_change": 17.4,
    "kills": 12,
    "deaths": 2,
    "assists": 12
@@ -1543,6 +2242,7 @@
    "gpm": 448,
    "net_worth": 12017,
    "xpm": 458,
+   "rating_change": -17.3,
    "kills": 8,
    "deaths": 6,
    "assists": 4
@@ -1561,6 +2261,7 @@
    "gpm": 361,
    "net_worth": 7298,
    "xpm": 346,
+   "rating_change": -12.5,
    "kills": 2,
    "deaths": 3,
    "assists": 1
@@ -1579,6 +2280,7 @@
    "gpm": 394,
    "net_worth": 11834,
    "xpm": 348,
+   "rating_change": -13.5,
    "kills": 7,
    "deaths": 7,
    "assists": 6
@@ -1597,6 +2299,7 @@
    "gpm": 499,
    "net_worth": 23253,
    "xpm": 472,
+   "rating_change": -17.0,
    "kills": 8,
    "deaths": 9,
    "assists": 26
@@ -1615,6 +2318,7 @@
    "gpm": 603,
    "net_worth": 19521,
    "xpm": 376,
+   "rating_change": 16.8,
    "kills": 8,
    "deaths": 3,
    "assists": 13
@@ -1633,6 +2337,7 @@
    "gpm": 492,
    "net_worth": 15115,
    "xpm": 474,
+   "rating_change": -16.0,
    "kills": 7,
    "deaths": 6,
    "assists": 11
@@ -1651,6 +2356,7 @@
    "gpm": 477,
    "net_worth": 17881,
    "xpm": 550,
+   "rating_change": -12.5,
    "kills": 8,
    "deaths": 10,
    "assists": 14
@@ -1669,6 +2375,7 @@
    "gpm": 813,
    "net_worth": 23301,
    "xpm": 853,
+   "rating_change": 16.7,
    "kills": 17,
    "deaths": 2,
    "assists": 11
@@ -1687,6 +2394,7 @@
    "gpm": 822,
    "net_worth": 32726,
    "xpm": 574,
+   "rating_change": 17.3,
    "kills": 20,
    "deaths": 2,
    "assists": 17
@@ -1705,6 +2413,7 @@
    "gpm": 486,
    "net_worth": 13000,
    "xpm": 379,
+   "rating_change": 15.3,
    "kills": 4,
    "deaths": 3,
    "assists": 17
@@ -1723,6 +2432,7 @@
    "gpm": 720,
    "net_worth": 28485,
    "xpm": 583,
+   "rating_change": 11.2,
    "kills": 11,
    "deaths": 4,
    "assists": 11
@@ -1741,6 +2451,7 @@
    "gpm": 739,
    "net_worth": 24552,
    "xpm": 647,
+   "rating_change": 9.9,
    "kills": 16,
    "deaths": 6,
    "assists": 19
@@ -1759,6 +2470,7 @@
    "gpm": 365,
    "net_worth": 14310,
    "xpm": 259,
+   "rating_change": 17.2,
    "kills": 9,
    "deaths": 7,
    "assists": 40
@@ -1777,6 +2489,7 @@
    "gpm": 458,
    "net_worth": 16135,
    "xpm": 374,
+   "rating_change": -18.1,
    "kills": 7,
    "deaths": 8,
    "assists": 17
@@ -1795,6 +2508,7 @@
    "gpm": 525,
    "net_worth": 30013,
    "xpm": 318,
+   "rating_change": -16.4,
    "kills": 16,
    "deaths": 12,
    "assists": 31
@@ -1813,6 +2527,7 @@
    "gpm": 285,
    "net_worth": 10663,
    "xpm": 313,
+   "rating_change": -16.9,
    "kills": 5,
    "deaths": 10,
    "assists": 19
@@ -1831,6 +2546,7 @@
    "gpm": 670,
    "net_worth": 25360,
    "xpm": 652,
+   "rating_change": 13.9,
    "kills": 9,
    "deaths": 3,
    "assists": 17
@@ -1849,6 +2565,7 @@
    "gpm": 656,
    "net_worth": 29978,
    "xpm": 612,
+   "rating_change": 17.2,
    "kills": 14,
    "deaths": 11,
    "assists": 17
@@ -1867,6 +2584,7 @@
    "gpm": 341,
    "net_worth": 10750,
    "xpm": 489,
+   "rating_change": -17.9,
    "kills": 7,
    "deaths": 10,
    "assists": 15
@@ -1885,6 +2603,7 @@
    "gpm": 413,
    "net_worth": 23983,
    "xpm": 528,
+   "rating_change": -16.7,
    "kills": 13,
    "deaths": 11,
    "assists": 32
@@ -1903,6 +2622,7 @@
    "gpm": 540,
    "net_worth": 20645,
    "xpm": 553,
+   "rating_change": -20.2,
    "kills": 11,
    "deaths": 8,
    "assists": 20
@@ -1921,6 +2641,7 @@
    "gpm": 298,
    "net_worth": 9844,
    "xpm": 246,
+   "rating_change": -16.5,
    "kills": 3,
    "deaths": 3,
    "assists": 20
@@ -1939,6 +2660,7 @@
    "gpm": 568,
    "net_worth": 21980,
    "xpm": 618,
+   "rating_change": 3.2,
    "kills": 8,
    "deaths": 7,
    "assists": 24
@@ -1957,6 +2679,7 @@
    "gpm": 434,
    "net_worth": 12103,
    "xpm": 461,
+   "rating_change": -13.5,
    "kills": 8,
    "deaths": 6,
    "assists": 8
@@ -1975,6 +2698,7 @@
    "gpm": 574,
    "net_worth": 17451,
    "xpm": 477,
+   "rating_change": 6.7,
    "kills": 6,
    "deaths": 4,
    "assists": 15
@@ -1993,6 +2717,7 @@
    "gpm": 485,
    "net_worth": 25747,
    "xpm": 596,
+   "rating_change": -14.4,
    "kills": 15,
    "deaths": 11,
    "assists": 26
@@ -2011,6 +2736,7 @@
    "gpm": 612,
    "net_worth": 21201,
    "xpm": 389,
+   "rating_change": 10.4,
    "kills": 6,
    "deaths": 2,
    "assists": 24
@@ -2029,6 +2755,7 @@
    "gpm": 618,
    "net_worth": 14611,
    "xpm": 594,
+   "rating_change": 15.5,
    "kills": 5,
    "deaths": 2,
    "assists": 14
@@ -2047,6 +2774,7 @@
    "gpm": 354,
    "net_worth": 12146,
    "xpm": 440,
+   "rating_change": -15.5,
    "kills": 9,
    "deaths": 8,
    "assists": 18
@@ -2064,6 +2792,7 @@
    "duration": "41:26",
    "gpm": 608,
    "net_worth": 25208,
+   "rating_change": -13.6,
    "kills": 16,
    "deaths": 3,
    "assists": 13
@@ -2082,6 +2811,7 @@
    "gpm": 681,
    "net_worth": 13728,
    "xpm": 488,
+   "rating_change": 11.9,
    "kills": 14,
    "deaths": 1,
    "assists": 4
@@ -2100,6 +2830,7 @@
    "gpm": 271,
    "net_worth": 3556,
    "xpm": 150,
+   "rating_change": -16.7,
    "kills": 3,
    "deaths": 5,
    "assists": 4
@@ -2118,6 +2849,7 @@
    "gpm": 300,
    "net_worth": 11497,
    "xpm": 84,
+   "rating_change": -19.2,
    "kills": 4,
    "deaths": 9,
    "assists": 14
@@ -2136,6 +2868,7 @@
    "gpm": 234,
    "net_worth": 5687,
    "xpm": 361,
+   "rating_change": -15.0,
    "kills": 2,
    "deaths": 8,
    "assists": 11
@@ -2154,6 +2887,7 @@
    "gpm": 730,
    "net_worth": 31869,
    "xpm": 697,
+   "rating_change": 15.4,
    "kills": 19,
    "deaths": 6,
    "assists": 21
@@ -2172,6 +2906,7 @@
    "gpm": 298,
    "net_worth": 11670,
    "xpm": 435,
+   "rating_change": -11.0,
    "kills": 6,
    "deaths": 7,
    "assists": 14
@@ -2190,6 +2925,7 @@
    "gpm": 583,
    "net_worth": 25827,
    "xpm": 700,
+   "rating_change": 12.1,
    "kills": 10,
    "deaths": 8,
    "assists": 25
@@ -2208,6 +2944,7 @@
    "gpm": 232,
    "net_worth": 5017,
    "xpm": 81,
+   "rating_change": -15.4,
    "kills": 0,
    "deaths": 2,
    "assists": 3
@@ -2226,6 +2963,7 @@
    "gpm": 289,
    "net_worth": 6644,
    "xpm": 83,
+   "rating_change": 7.3,
    "kills": 3,
    "deaths": 3,
    "assists": 17
@@ -2244,6 +2982,7 @@
    "gpm": 405,
    "net_worth": 12797,
    "xpm": 487,
+   "rating_change": 15.6,
    "kills": 4,
    "deaths": 0,
    "assists": 30
@@ -2262,6 +3001,7 @@
    "gpm": 345,
    "net_worth": 11891,
    "xpm": 439,
+   "rating_change": 16.5,
    "kills": 0,
    "deaths": 5,
    "assists": 31
@@ -2280,6 +3020,7 @@
    "gpm": 298,
    "net_worth": 12739,
    "xpm": 106,
+   "rating_change": -15.9,
    "kills": 4,
    "deaths": 7,
    "assists": 22
@@ -2298,6 +3039,7 @@
    "gpm": 230,
    "net_worth": 7981,
    "xpm": 387,
+   "rating_change": -13.7,
    "kills": 2,
    "deaths": 3,
    "assists": 13
@@ -2316,6 +3058,7 @@
    "gpm": 380,
    "net_worth": 14775,
    "xpm": 274,
+   "rating_change": 16.1,
    "kills": 3,
    "deaths": 4,
    "assists": 31
@@ -2334,6 +3077,7 @@
    "gpm": 304,
    "net_worth": 8901,
    "xpm": 383,
+   "rating_change": -16.3,
    "kills": 1,
    "deaths": 10,
    "assists": 13
@@ -2352,6 +3096,7 @@
    "gpm": 307,
    "net_worth": 6628,
    "xpm": 342,
+   "rating_change": -15.1,
    "kills": 3,
    "deaths": 6,
    "assists": 6
@@ -2370,6 +3115,7 @@
    "gpm": 357,
    "net_worth": 5543,
    "xpm": 263,
+   "rating_change": 15.6,
    "kills": 3,
    "deaths": 3,
    "assists": 13
@@ -2388,6 +3134,7 @@
    "gpm": 419,
    "net_worth": 18639,
    "xpm": 503,
+   "rating_change": -12.3,
    "kills": 11,
    "deaths": 8,
    "assists": 9
@@ -2406,6 +3153,7 @@
    "gpm": 819,
    "net_worth": 16099,
    "xpm": 410,
+   "rating_change": 12.5,
    "kills": 5,
    "deaths": 1,
    "assists": 4
@@ -2424,6 +3172,7 @@
    "gpm": 492,
    "net_worth": 9880,
    "xpm": 445,
+   "rating_change": 12.6,
    "kills": 4,
    "deaths": 2,
    "assists": 18
@@ -2442,6 +3191,7 @@
    "gpm": 509,
    "net_worth": 14704,
    "xpm": 511,
+   "rating_change": -12.3,
    "kills": 5,
    "deaths": 3,
    "assists": 8
@@ -2460,6 +3210,7 @@
    "gpm": 382,
    "net_worth": 16370,
    "xpm": 439,
+   "rating_change": -11.5,
    "kills": 1,
    "deaths": 12,
    "assists": 18
@@ -2478,6 +3229,7 @@
    "gpm": 396,
    "net_worth": 13489,
    "xpm": 445,
+   "rating_change": 12.2,
    "kills": 1,
    "deaths": 1,
    "assists": 20
@@ -2496,6 +3248,7 @@
    "gpm": 379,
    "net_worth": 15910,
    "xpm": 21,
+   "rating_change": 15.4,
    "kills": 8,
    "deaths": 5,
    "assists": 26
@@ -2514,6 +3267,7 @@
    "gpm": 420,
    "net_worth": 7501,
    "xpm": 417,
+   "rating_change": -19.7,
    "kills": 5,
    "deaths": 3,
    "assists": 3
@@ -2532,6 +3286,7 @@
    "gpm": 606,
    "net_worth": 21532,
    "xpm": 582,
+   "rating_change": 10.5,
    "kills": 7,
    "deaths": 4,
    "assists": 26
@@ -2550,6 +3305,7 @@
    "gpm": 782,
    "net_worth": 23618,
    "xpm": 453,
+   "rating_change": 9.6,
    "kills": 11,
    "deaths": 1,
    "assists": 19
@@ -2568,6 +3324,7 @@
    "gpm": 657,
    "net_worth": 28524,
    "xpm": 737,
+   "rating_change": -9.6,
    "kills": 17,
    "deaths": 4,
    "assists": 34
@@ -2586,6 +3343,7 @@
    "gpm": 576,
    "net_worth": 26222,
    "xpm": 561,
+   "rating_change": -10.9,
    "kills": 10,
    "deaths": 6,
    "assists": 15
@@ -2604,6 +3362,7 @@
    "gpm": 457,
    "net_worth": 17006,
    "xpm": 416,
+   "rating_change": -11.1,
    "kills": 6,
    "deaths": 10,
    "assists": 18
@@ -2622,6 +3381,7 @@
    "gpm": 494,
    "net_worth": 16768,
    "xpm": 487,
+   "rating_change": -11.6,
    "kills": 5,
    "deaths": 7,
    "assists": 12
@@ -2640,6 +3400,7 @@
    "gpm": 356,
    "net_worth": 14717,
    "xpm": 532,
+   "rating_change": 15.1,
    "kills": 1,
    "deaths": 4,
    "assists": 37
@@ -2658,6 +3419,7 @@
    "gpm": 644,
    "net_worth": 28595,
    "xpm": 427,
+   "rating_change": 13.6,
    "kills": 13,
    "deaths": 5,
    "assists": 20
@@ -2676,6 +3438,7 @@
    "gpm": 544,
    "net_worth": 18418,
    "xpm": 537,
+   "rating_change": 15.6,
    "kills": 8,
    "deaths": 7,
    "assists": 14
@@ -2694,6 +3457,7 @@
    "gpm": 565,
    "net_worth": 23085,
    "xpm": 626,
+   "rating_change": 10.9,
    "kills": 8,
    "deaths": 7,
    "assists": 14
@@ -2712,6 +3476,7 @@
    "gpm": 509,
    "net_worth": 24261,
    "xpm": 659,
+   "rating_change": 15.8,
    "kills": 17,
    "deaths": 11,
    "assists": 29
@@ -2730,6 +3495,7 @@
    "gpm": 671,
    "net_worth": 25416,
    "xpm": 454,
+   "rating_change": 12.5,
    "kills": 13,
    "deaths": 2,
    "assists": 17
@@ -2748,6 +3514,7 @@
    "gpm": 535,
    "net_worth": 22853,
    "xpm": 473,
+   "rating_change": -16.4,
    "kills": 8,
    "deaths": 5,
    "assists": 11
@@ -2766,6 +3533,7 @@
    "gpm": 509,
    "net_worth": 20748,
    "xpm": 544,
+   "rating_change": 12.3,
    "kills": 12,
    "deaths": 9,
    "assists": 21
@@ -2784,6 +3552,7 @@
    "gpm": 384,
    "net_worth": 12507,
    "xpm": 372,
+   "rating_change": -17.1,
    "kills": 2,
    "deaths": 6,
    "assists": 16
@@ -2802,6 +3571,7 @@
    "gpm": 298,
    "net_worth": 13425,
    "xpm": 131,
+   "rating_change": -10.0,
    "kills": 7,
    "deaths": 3,
    "assists": 9
@@ -2820,6 +3590,7 @@
    "gpm": 404,
    "net_worth": 19065,
    "xpm": 489,
+   "rating_change": -15.9,
    "kills": 8,
    "deaths": 10,
    "assists": 26
@@ -2838,6 +3609,7 @@
    "gpm": 283,
    "net_worth": 4407,
    "xpm": 232,
+   "rating_change": -15.8,
    "kills": 1,
    "deaths": 2,
    "assists": 1
@@ -2856,6 +3628,7 @@
    "gpm": 400,
    "net_worth": 14016,
    "xpm": 477,
+   "rating_change": 16.0,
    "kills": 4,
    "deaths": 5,
    "assists": 25
@@ -2874,6 +3647,7 @@
    "gpm": 373,
    "net_worth": 17288,
    "xpm": 429,
+   "rating_change": 16.0,
    "kills": 10,
    "deaths": 9,
    "assists": 25
@@ -2892,6 +3666,7 @@
    "gpm": 346,
    "net_worth": 11699,
    "xpm": 478,
+   "rating_change": 14.4,
    "kills": 4,
    "deaths": 7,
    "assists": 28
@@ -2910,6 +3685,7 @@
    "gpm": 189,
    "net_worth": 4243,
    "xpm": 198,
+   "rating_change": -15.1,
    "kills": 0,
    "deaths": 4,
    "assists": 2
@@ -2928,6 +3704,7 @@
    "gpm": 227,
    "net_worth": 6883,
    "xpm": 237,
+   "rating_change": -12.3,
    "kills": 3,
    "deaths": 6,
    "assists": 10
@@ -2946,6 +3723,7 @@
    "gpm": 606,
    "net_worth": 19331,
    "xpm": 433,
+   "rating_change": 10.4,
    "kills": 5,
    "deaths": 1,
    "assists": 15
@@ -2964,6 +3742,7 @@
    "gpm": 600,
    "net_worth": 27861,
    "xpm": 660,
+   "rating_change": 14.9,
    "kills": 7,
    "deaths": 3,
    "assists": 30
@@ -2982,6 +3761,7 @@
    "gpm": 514,
    "net_worth": 22421,
    "xpm": 526,
+   "rating_change": -17.4,
    "kills": 16,
    "deaths": 12,
    "assists": 23
@@ -3000,6 +3780,7 @@
    "gpm": 549,
    "net_worth": 16346,
    "xpm": 550,
+   "rating_change": 15.2,
    "kills": 8,
    "deaths": 5,
    "assists": 17
@@ -3018,6 +3799,7 @@
    "gpm": 502,
    "net_worth": 16814,
    "xpm": 576,
+   "rating_change": -13.9,
    "kills": 6,
    "deaths": 10,
    "assists": 14
@@ -3036,6 +3818,7 @@
    "gpm": 290,
    "net_worth": 5497,
    "xpm": 247,
+   "rating_change": 15.6,
    "kills": 4,
    "deaths": 2,
    "assists": 14
@@ -3054,6 +3837,7 @@
    "gpm": 743,
    "net_worth": 26208,
    "xpm": 701,
+   "rating_change": 12.6,
    "kills": 16,
    "deaths": 2,
    "assists": 17
@@ -3072,6 +3856,7 @@
    "gpm": 539,
    "net_worth": 26848,
    "xpm": 651,
+   "rating_change": -15.3,
    "kills": 12,
    "deaths": 17,
    "assists": 14
@@ -3090,6 +3875,7 @@
    "gpm": 555,
    "net_worth": 8124,
    "xpm": 409,
+   "rating_change": 16.3,
    "kills": 1,
    "deaths": 1,
    "assists": 3
@@ -3108,6 +3894,7 @@
    "gpm": 591,
    "net_worth": 19093,
    "xpm": 530,
+   "rating_change": 17.1,
    "kills": 8,
    "deaths": 5,
    "assists": 29
@@ -3126,6 +3913,7 @@
    "gpm": 357,
    "net_worth": 14805,
    "xpm": 510,
+   "rating_change": -13.2,
    "kills": 1,
    "deaths": 8,
    "assists": 22
@@ -3144,6 +3932,7 @@
    "gpm": 234,
    "net_worth": 7412,
    "xpm": 252,
+   "rating_change": -14.2,
    "kills": 2,
    "deaths": 6,
    "assists": 10
@@ -3162,6 +3951,7 @@
    "gpm": 899,
    "net_worth": 14024,
    "xpm": 1090,
+   "rating_change": 21.2,
    "kills": 7,
    "deaths": 2,
    "assists": 48
@@ -3180,6 +3970,7 @@
    "gpm": 263,
    "net_worth": 6504,
    "xpm": 202,
+   "rating_change": -18.2,
    "kills": 1,
    "deaths": 4,
    "assists": 9
@@ -3198,6 +3989,7 @@
    "gpm": 517,
    "net_worth": 23858,
    "xpm": 530,
+   "rating_change": -15.1,
    "kills": 6,
    "deaths": 12,
    "assists": 10
@@ -3216,6 +4008,7 @@
    "gpm": 360,
    "net_worth": 16647,
    "xpm": 463,
+   "rating_change": 15.7,
    "kills": 3,
    "deaths": 12,
    "assists": 27
@@ -3234,6 +4027,7 @@
    "gpm": 645,
    "net_worth": 32272,
    "xpm": 648,
+   "rating_change": 14.3,
    "kills": 25,
    "deaths": 12,
    "assists": 23
@@ -3252,6 +4046,7 @@
    "gpm": 313,
    "net_worth": 10659,
    "xpm": 146,
+   "rating_change": -15.7,
    "kills": 3,
    "deaths": 9,
    "assists": 17
@@ -3270,6 +4065,7 @@
    "gpm": 244,
    "net_worth": 8400,
    "xpm": 122,
+   "rating_change": -16.1,
    "kills": 2,
    "deaths": 6,
    "assists": 17
@@ -3288,6 +4084,7 @@
    "gpm": 182,
    "net_worth": 3134,
    "xpm": 128,
+   "rating_change": -16.1,
    "kills": 1,
    "deaths": 5,
    "assists": 0
@@ -3306,6 +4103,7 @@
    "gpm": 764,
    "net_worth": 25110,
    "xpm": 732,
+   "rating_change": 11.4,
    "kills": 5,
    "deaths": 2,
    "assists": 12
@@ -3324,6 +4122,7 @@
    "gpm": 961,
    "net_worth": 35670,
    "xpm": 873,
+   "rating_change": 15.0,
    "kills": 24,
    "deaths": 4,
    "assists": 15
@@ -3342,6 +4141,7 @@
    "gpm": 401,
    "net_worth": 14613,
    "xpm": 430,
+   "rating_change": 16.8,
    "kills": 10,
    "deaths": 4,
    "assists": 27
@@ -3360,6 +4160,7 @@
    "gpm": 327,
    "net_worth": 14849,
    "xpm": 273,
+   "rating_change": -15.7,
    "kills": 9,
    "deaths": 13,
    "assists": 33
@@ -3378,6 +4179,7 @@
    "gpm": 556,
    "net_worth": 27404,
    "xpm": 607,
+   "rating_change": -12.7,
    "kills": 7,
    "deaths": 8,
    "assists": 16
@@ -3396,6 +4198,7 @@
    "gpm": 387,
    "net_worth": 11594,
    "xpm": 429,
+   "rating_change": 11.8,
    "kills": 4,
    "deaths": 1,
    "assists": 17
@@ -3414,6 +4217,7 @@
    "gpm": 283,
    "net_worth": 6001,
    "xpm": 169,
+   "rating_change": 12.4,
    "kills": 3,
    "deaths": 3,
    "assists": 11
@@ -3432,6 +4236,7 @@
    "gpm": 336,
    "net_worth": 9777,
    "xpm": 132,
+   "rating_change": 10.6,
    "kills": 1,
    "deaths": 2,
    "assists": 27
@@ -3450,6 +4255,7 @@
    "gpm": 400,
    "net_worth": 11840,
    "xpm": 482,
+   "rating_change": 15.9,
    "kills": 4,
    "deaths": 1,
    "assists": 37
@@ -3468,6 +4274,7 @@
    "gpm": 290,
    "net_worth": 5328,
    "xpm": 248,
+   "rating_change": 16.5,
    "kills": 6,
    "deaths": 3,
    "assists": 12
@@ -3486,6 +4293,7 @@
    "gpm": 244,
    "net_worth": 7399,
    "xpm": 254,
+   "rating_change": 16.6,
    "kills": 2,
    "deaths": 7,
    "assists": 11
@@ -3504,6 +4312,7 @@
    "gpm": 382,
    "net_worth": 13333,
    "xpm": 129,
+   "rating_change": 16.5,
    "kills": 7,
    "deaths": 4,
    "assists": 24
@@ -3522,6 +4331,7 @@
    "gpm": 385,
    "net_worth": 11673,
    "xpm": 291,
+   "rating_change": 17.0,
    "kills": 3,
    "deaths": 1,
    "assists": 18
@@ -3540,6 +4350,7 @@
    "gpm": 543,
    "net_worth": 17070,
    "xpm": 520,
+   "rating_change": -13.8,
    "kills": 12,
    "deaths": 7,
    "assists": 10
@@ -3558,6 +4369,7 @@
    "gpm": 712,
    "net_worth": 25549,
    "xpm": 593,
+   "rating_change": 17.1,
    "kills": 13,
    "deaths": 2,
    "assists": 15
@@ -3576,6 +4388,7 @@
    "gpm": 722,
    "net_worth": 18032,
    "xpm": 372,
+   "rating_change": 18.2,
    "kills": 15,
    "deaths": 2,
    "assists": 10
@@ -3594,6 +4407,7 @@
    "gpm": 317,
    "net_worth": 8973,
    "xpm": 237,
+   "rating_change": 15.5,
    "kills": 0,
    "deaths": 1,
    "assists": 12
@@ -3612,6 +4426,7 @@
    "gpm": 488,
    "net_worth": 15803,
    "xpm": 520,
+   "rating_change": -14.6,
    "kills": 10,
    "deaths": 5,
    "assists": 6
@@ -3630,6 +4445,7 @@
    "gpm": 363,
    "net_worth": 19906,
    "xpm": 306,
+   "rating_change": -14.9,
    "kills": 4,
    "deaths": 5,
    "assists": 43
@@ -3648,6 +4464,7 @@
    "gpm": 355,
    "net_worth": 10341,
    "xpm": 379,
+   "rating_change": -19.6,
    "kills": 10,
    "deaths": 8,
    "assists": 9
@@ -3666,6 +4483,7 @@
    "gpm": 536,
    "net_worth": 29094,
    "xpm": 597,
+   "rating_change": 15.8,
    "kills": 9,
    "deaths": 8,
    "assists": 26
@@ -3684,6 +4502,7 @@
    "gpm": 743,
    "net_worth": 39417,
    "xpm": 611,
+   "rating_change": -16.4,
    "kills": 18,
    "deaths": 11,
    "assists": 10
@@ -3702,6 +4521,7 @@
    "gpm": 644,
    "net_worth": 22285,
    "xpm": 495,
+   "rating_change": 16.6,
    "kills": 8,
    "deaths": 3,
    "assists": 15
@@ -3720,6 +4540,7 @@
    "gpm": 367,
    "net_worth": 12080,
    "xpm": 343,
+   "rating_change": -14.4,
    "kills": 6,
    "deaths": 10,
    "assists": 11
@@ -3738,6 +4559,7 @@
    "gpm": 493,
    "net_worth": 20273,
    "xpm": 582,
+   "rating_change": -14.1,
    "kills": 4,
    "deaths": 6,
    "assists": 10
@@ -3756,6 +4578,7 @@
    "gpm": 424,
    "net_worth": 16048,
    "xpm": 526,
+   "rating_change": -16.7,
    "kills": 5,
    "deaths": 12,
    "assists": 11
@@ -3774,6 +4597,7 @@
    "gpm": 412,
    "net_worth": 21356,
    "xpm": 619,
+   "rating_change": 16.4,
    "kills": 6,
    "deaths": 14,
    "assists": 35
@@ -3792,6 +4616,7 @@
    "gpm": 315,
    "net_worth": 9271,
    "xpm": 460,
+   "rating_change": 16.2,
    "kills": 1,
    "deaths": 1,
    "assists": 19
@@ -3810,6 +4635,7 @@
    "gpm": 461,
    "net_worth": 17012,
    "xpm": 466,
+   "rating_change": -17.2,
    "kills": 18,
    "deaths": 5,
    "assists": 16
@@ -3828,6 +4654,7 @@
    "gpm": 567,
    "net_worth": 25649,
    "xpm": 497,
+   "rating_change": 18.3,
    "kills": 5,
    "deaths": 4,
    "assists": 44
@@ -3846,6 +4673,7 @@
    "gpm": 551,
    "net_worth": 14808,
    "xpm": 327,
+   "rating_change": 18.3,
    "kills": 1,
    "deaths": 4,
    "assists": 14
@@ -3864,6 +4692,7 @@
    "gpm": 349,
    "net_worth": 8408,
    "xpm": 277,
+   "rating_change": -10.7,
    "kills": 2,
    "deaths": 7,
    "assists": 2
@@ -3882,6 +4711,7 @@
    "gpm": 508,
    "net_worth": 19073,
    "xpm": 646,
+   "rating_change": -16.3,
    "kills": 8,
    "deaths": 8,
    "assists": 19
@@ -3900,6 +4730,7 @@
    "gpm": 628,
    "net_worth": 25031,
    "xpm": 759,
+   "rating_change": -16.8,
    "kills": 9,
    "deaths": 8,
    "assists": 9
@@ -3918,6 +4749,7 @@
    "gpm": 254,
    "net_worth": 9424,
    "xpm": 279,
+   "rating_change": -17.0,
    "kills": 2,
    "deaths": 9,
    "assists": 19
@@ -3936,6 +4768,7 @@
    "gpm": 264,
    "net_worth": 3109,
    "xpm": 183,
+   "rating_change": 16.9,
    "kills": 0,
    "deaths": 0,
    "assists": 4
@@ -3954,6 +4787,7 @@
    "gpm": 681,
    "net_worth": 29367,
    "xpm": 457,
+   "rating_change": -13.8,
    "kills": 18,
    "deaths": 6,
    "assists": 22
@@ -3972,6 +4806,7 @@
    "gpm": 261,
    "net_worth": 4704,
    "xpm": 165,
+   "rating_change": -14.6,
    "kills": 0,
    "deaths": 4,
    "assists": 1
@@ -3990,6 +4825,7 @@
    "gpm": 445,
    "net_worth": 12368,
    "xpm": 141,
+   "rating_change": -15.5,
    "kills": 3,
    "deaths": 6,
    "assists": 15
@@ -4008,6 +4844,7 @@
    "gpm": 308,
    "net_worth": 5954,
    "xpm": 164,
+   "rating_change": 2.0,
    "kills": 4,
    "deaths": 0,
    "assists": 16
@@ -4026,6 +4863,7 @@
    "gpm": 299,
    "net_worth": 10323,
    "xpm": 304,
+   "rating_change": -15.9,
    "kills": 7,
    "deaths": 7,
    "assists": 15
@@ -4044,6 +4882,7 @@
    "gpm": 527,
    "net_worth": 17353,
    "xpm": 536,
+   "rating_change": 13.0,
    "kills": 13,
    "deaths": 5,
    "assists": 12
@@ -4062,6 +4901,7 @@
    "gpm": 367,
    "net_worth": 11124,
    "xpm": 192,
+   "rating_change": 8.3,
    "kills": 0,
    "deaths": 1,
    "assists": 21
@@ -4080,6 +4920,7 @@
    "gpm": 454,
    "net_worth": 14346,
    "xpm": 331,
+   "rating_change": 19.2,
    "kills": 4,
    "deaths": 5,
    "assists": 12
@@ -4098,6 +4939,7 @@
    "gpm": 630,
    "net_worth": 21353,
    "xpm": 567,
+   "rating_change": 16.1,
    "kills": 4,
    "deaths": 4,
    "assists": 18
@@ -4116,6 +4958,7 @@
    "gpm": 529,
    "net_worth": 21562,
    "xpm": 549,
+   "rating_change": -16.2,
    "kills": 7,
    "deaths": 9,
    "assists": 12
@@ -4134,6 +4977,7 @@
    "gpm": 484,
    "net_worth": 8441,
    "xpm": 466,
+   "rating_change": -17.7,
    "kills": 2,
    "deaths": 3,
    "assists": 0
@@ -4152,6 +4996,7 @@
    "gpm": 445,
    "net_worth": 17349,
    "xpm": 372,
+   "rating_change": 20.2,
    "kills": 3,
    "deaths": 6,
    "assists": 25
@@ -4170,6 +5015,7 @@
    "gpm": 500,
    "net_worth": 15945,
    "xpm": 593,
+   "rating_change": -16.4,
    "kills": 8,
    "deaths": 6,
    "assists": 11
@@ -4188,6 +5034,7 @@
    "gpm": 422,
    "net_worth": 21168,
    "xpm": 538,
+   "rating_change": 16.2,
    "kills": 11,
    "deaths": 5,
    "assists": 38
@@ -4206,6 +5053,7 @@
    "gpm": 778,
    "net_worth": 27109,
    "xpm": 788,
+   "rating_change": 15.2,
    "kills": 22,
    "deaths": 3,
    "assists": 16
@@ -4224,6 +5072,7 @@
    "gpm": 327,
    "net_worth": 9358,
    "xpm": 361,
+   "rating_change": -27.2,
    "kills": 3,
    "deaths": 6,
    "assists": 11
@@ -4242,6 +5091,7 @@
    "gpm": 699,
    "net_worth": 23719,
    "xpm": 679,
+   "rating_change": 19.9,
    "kills": 6,
    "deaths": 4,
    "assists": 18
@@ -4260,6 +5110,7 @@
    "gpm": 187,
    "net_worth": 2812,
    "xpm": 153,
+   "rating_change": -12.5,
    "kills": 0,
    "deaths": 3,
    "assists": 3
@@ -4278,6 +5129,7 @@
    "gpm": 397,
    "net_worth": 16133,
    "xpm": 413,
+   "rating_change": -14.1,
    "kills": 3,
    "deaths": 13,
    "assists": 18
@@ -4296,6 +5148,7 @@
    "gpm": 712,
    "net_worth": 22350,
    "xpm": 542,
+   "rating_change": 16.2,
    "kills": 7,
    "deaths": 1,
    "assists": 14
@@ -4314,6 +5167,7 @@
    "gpm": 358,
    "net_worth": 13113,
    "xpm": 375,
+   "rating_change": 16.2,
    "kills": 4,
    "deaths": 7,
    "assists": 20
@@ -4332,6 +5186,7 @@
    "gpm": 563,
    "net_worth": 21399,
    "xpm": 489,
+   "rating_change": 17.7,
    "kills": 3,
    "deaths": 5,
    "assists": 22
@@ -4350,6 +5205,7 @@
    "gpm": 492,
    "net_worth": 15760,
    "xpm": 518,
+   "rating_change": -16.1,
    "kills": 11,
    "deaths": 7,
    "assists": 3
@@ -4368,6 +5224,7 @@
    "gpm": 417,
    "net_worth": 9539,
    "xpm": 312,
+   "rating_change": -16.4,
    "kills": 3,
    "deaths": 5,
    "assists": 4
@@ -4386,6 +5243,7 @@
    "gpm": 575,
    "net_worth": 15852,
    "xpm": 469,
+   "rating_change": 15.2,
    "kills": 9,
    "deaths": 4,
    "assists": 25
@@ -4404,6 +5262,7 @@
    "gpm": 459,
    "net_worth": 12906,
    "xpm": 329,
+   "rating_change": -15.1,
    "kills": 6,
    "deaths": 9,
    "assists": 14
@@ -4422,6 +5281,7 @@
    "gpm": 654,
    "net_worth": 21174,
    "xpm": 501,
+   "rating_change": 16.8,
    "kills": 5,
    "deaths": 3,
    "assists": 21
@@ -4440,6 +5300,7 @@
    "gpm": 229,
    "net_worth": 6528,
    "xpm": 344,
+   "rating_change": -16.2,
    "kills": 2,
    "deaths": 8,
    "assists": 14
@@ -4458,6 +5319,7 @@
    "gpm": 438,
    "net_worth": 18981,
    "xpm": 447,
+   "rating_change": -17.1,
    "kills": 6,
    "deaths": 7,
    "assists": 22
@@ -4476,6 +5338,7 @@
    "gpm": 574,
    "net_worth": 8958,
    "xpm": 425,
+   "rating_change": 16.6,
    "kills": 3,
    "deaths": 0,
    "assists": 4
@@ -4494,6 +5357,7 @@
    "gpm": 718,
    "net_worth": 27239,
    "xpm": 535,
+   "rating_change": 18.6,
    "kills": 13,
    "deaths": 3,
    "assists": 18
@@ -4512,6 +5376,7 @@
    "gpm": 305,
    "net_worth": 8273,
    "xpm": 341,
+   "rating_change": -15.1,
    "kills": 4,
    "deaths": 8,
    "assists": 10
@@ -4530,6 +5395,7 @@
    "gpm": 431,
    "net_worth": 15261,
    "xpm": 499,
+   "rating_change": 20.0,
    "kills": 5,
    "deaths": 5,
    "assists": 25
@@ -4548,6 +5414,7 @@
    "gpm": 462,
    "net_worth": 18312,
    "xpm": 334,
+   "rating_change": -13.4,
    "kills": 7,
    "deaths": 9,
    "assists": 16
@@ -4566,6 +5433,7 @@
    "gpm": 576,
    "net_worth": 22775,
    "xpm": 662,
+   "rating_change": -13.3,
    "kills": 9,
    "deaths": 7,
    "assists": 7
@@ -4584,6 +5452,7 @@
    "gpm": 546,
    "net_worth": 19134,
    "xpm": 645,
+   "rating_change": -16.0,
    "kills": 4,
    "deaths": 7,
    "assists": 18
@@ -4602,6 +5471,7 @@
    "gpm": 573,
    "net_worth": 10621,
    "xpm": 551,
+   "rating_change": 20.2,
    "kills": 7,
    "deaths": 0,
    "assists": 14
@@ -4620,6 +5490,7 @@
    "gpm": 555,
    "net_worth": 12805,
    "xpm": 490,
+   "rating_change": 15.7,
    "kills": 9,
    "deaths": 2,
    "assists": 14
@@ -4638,6 +5509,7 @@
    "gpm": 323,
    "net_worth": 16431,
    "xpm": 446,
+   "rating_change": -9.8,
    "kills": 5,
    "deaths": 10,
    "assists": 21
@@ -4656,6 +5528,7 @@
    "gpm": 418,
    "net_worth": 13494,
    "xpm": 523,
+   "rating_change": -15.2,
    "kills": 6,
    "deaths": 10,
    "assists": 7
@@ -4674,6 +5547,7 @@
    "gpm": 343,
    "net_worth": 11098,
    "xpm": 386,
+   "rating_change": -15.3,
    "kills": 5,
    "deaths": 9,
    "assists": 13
@@ -4692,6 +5566,7 @@
    "gpm": 307,
    "net_worth": 10491,
    "xpm": 365,
+   "rating_change": 17.4,
    "kills": 1,
    "deaths": 1,
    "assists": 26
@@ -4710,6 +5585,7 @@
    "gpm": 386,
    "net_worth": 16148,
    "xpm": 536,
+   "rating_change": 12.3,
    "kills": 7,
    "deaths": 8,
    "assists": 26
@@ -4728,6 +5604,7 @@
    "gpm": 397,
    "net_worth": 14892,
    "xpm": 452,
+   "rating_change": 16.1,
    "kills": 10,
    "deaths": 8,
    "assists": 23
@@ -4746,6 +5623,7 @@
    "gpm": 415,
    "net_worth": 15995,
    "xpm": 541,
+   "rating_change": 10.8,
    "kills": 6,
    "deaths": 4,
    "assists": 35
@@ -4764,6 +5642,7 @@
    "gpm": 644,
    "net_worth": 25232,
    "xpm": 676,
+   "rating_change": -14.3,
    "kills": 10,
    "deaths": 6,
    "assists": 10
@@ -4782,6 +5661,7 @@
    "gpm": 490,
    "net_worth": 18667,
    "xpm": 576,
+   "rating_change": -14.3,
    "kills": 10,
    "deaths": 9,
    "assists": 15
@@ -4800,6 +5680,7 @@
    "gpm": 686,
    "net_worth": 11447,
    "xpm": 590,
+   "rating_change": 22.1,
    "kills": 7,
    "deaths": 1,
    "assists": 9
@@ -4817,6 +5698,7 @@
    "duration": "29:53",
    "gpm": 224,
    "net_worth": 6697,
+   "rating_change": -21.9,
    "kills": 0,
    "deaths": 6,
    "assists": 17
@@ -4835,6 +5717,7 @@
    "gpm": 622,
    "net_worth": 19482,
    "xpm": 483,
+   "rating_change": 16.7,
    "kills": 13,
    "deaths": 5,
    "assists": 32
@@ -4853,6 +5736,7 @@
    "gpm": 735,
    "net_worth": 22262,
    "xpm": 472,
+   "rating_change": 17.1,
    "kills": 11,
    "deaths": 2,
    "assists": 14
@@ -4871,6 +5755,7 @@
    "gpm": 828,
    "net_worth": 31051,
    "xpm": 357,
+   "rating_change": 16.1,
    "kills": 23,
    "deaths": 3,
    "assists": 20
@@ -4889,6 +5774,7 @@
    "gpm": 807,
    "net_worth": 18381,
    "xpm": 547,
+   "rating_change": 14.8,
    "kills": 10,
    "deaths": 1,
    "assists": 13
@@ -4907,6 +5793,7 @@
    "gpm": 531,
    "net_worth": 26815,
    "xpm": 641,
+   "rating_change": -17.0,
    "kills": 7,
    "deaths": 10,
    "assists": 16
@@ -4925,6 +5812,7 @@
    "gpm": 397,
    "net_worth": 12606,
    "xpm": 561,
+   "rating_change": 17.9,
    "kills": 5,
    "deaths": 5,
    "assists": 26
@@ -4943,6 +5831,7 @@
    "gpm": 320,
    "net_worth": 12757,
    "xpm": 480,
+   "rating_change": -16.7,
    "kills": 7,
    "deaths": 6,
    "assists": 25
@@ -4961,6 +5850,7 @@
    "gpm": 550,
    "net_worth": 27205,
    "xpm": 641,
+   "rating_change": 18.4,
    "kills": 5,
    "deaths": 9,
    "assists": 15
@@ -4979,6 +5869,7 @@
    "gpm": 290,
    "net_worth": 10018,
    "xpm": 446,
+   "rating_change": -16.4,
    "kills": 8,
    "deaths": 5,
    "assists": 11
@@ -4997,6 +5888,7 @@
    "gpm": 565,
    "net_worth": 21173,
    "xpm": 529,
+   "rating_change": 18.3,
    "kills": 10,
    "deaths": 9,
    "assists": 16
@@ -5015,6 +5907,7 @@
    "gpm": 600,
    "net_worth": 17709,
    "xpm": 517,
+   "rating_change": 11.8,
    "kills": 3,
    "deaths": 0,
    "assists": 19
@@ -5033,6 +5926,7 @@
    "gpm": 708,
    "net_worth": 26467,
    "xpm": 476,
+   "rating_change": 18.2,
    "kills": 10,
    "deaths": 6,
    "assists": 16
@@ -5051,6 +5945,7 @@
    "gpm": 604,
    "net_worth": 29291,
    "xpm": 669,
+   "rating_change": -16.6,
    "kills": 8,
    "deaths": 9,
    "assists": 13
@@ -5069,6 +5964,7 @@
    "gpm": 676,
    "net_worth": 33925,
    "xpm": 646,
+   "rating_change": -15.7,
    "kills": 13,
    "deaths": 6,
    "assists": 12
@@ -5087,6 +5983,7 @@
    "gpm": 556,
    "net_worth": 21665,
    "xpm": 550,
+   "rating_change": -17.7,
    "kills": 12,
    "deaths": 10,
    "assists": 10
@@ -5105,6 +6002,7 @@
    "gpm": 445,
    "net_worth": 21055,
    "xpm": 448,
+   "rating_change": -21.5,
    "kills": 3,
    "deaths": 4,
    "assists": 20
@@ -5123,6 +6021,7 @@
    "gpm": 339,
    "net_worth": 13289,
    "xpm": 359,
+   "rating_change": 18.5,
    "kills": 6,
    "deaths": 7,
    "assists": 25
@@ -5141,6 +6040,7 @@
    "gpm": 408,
    "net_worth": 17082,
    "xpm": 487,
+   "rating_change": 16.8,
    "kills": 8,
    "deaths": 16,
    "assists": 33
@@ -5159,6 +6059,7 @@
    "gpm": 318,
    "net_worth": 11702,
    "xpm": 292,
+   "rating_change": -16.4,
    "kills": 5,
    "deaths": 12,
    "assists": 18
@@ -5177,6 +6078,7 @@
    "gpm": 740,
    "net_worth": 25279,
    "xpm": 482,
+   "rating_change": 11.7,
    "kills": 16,
    "deaths": 1,
    "assists": 17
@@ -5195,6 +6097,7 @@
    "gpm": 776,
    "net_worth": 28192,
    "xpm": 653,
+   "rating_change": 18.4,
    "kills": 15,
    "deaths": 6,
    "assists": 21
@@ -5213,6 +6116,7 @@
    "gpm": 738,
    "net_worth": 21982,
    "xpm": 876,
+   "rating_change": 17.8,
    "kills": 13,
    "deaths": 2,
    "assists": 19
@@ -5231,6 +6135,7 @@
    "gpm": 624,
    "net_worth": 20420,
    "xpm": 624,
+   "rating_change": -16.0,
    "kills": 8,
    "deaths": 6,
    "assists": 5
@@ -5249,6 +6154,7 @@
    "gpm": 286,
    "net_worth": 10530,
    "xpm": 378,
+   "rating_change": -16.9,
    "kills": 5,
    "deaths": 14,
    "assists": 8
@@ -5267,6 +6173,7 @@
    "gpm": 615,
    "net_worth": 19348,
    "xpm": 621,
+   "rating_change": 16.8,
    "kills": 5,
    "deaths": 4,
    "assists": 24
@@ -5285,6 +6192,7 @@
    "gpm": 626,
    "net_worth": 21019,
    "xpm": 663,
+   "rating_change": -13.5,
    "kills": 6,
    "deaths": 6,
    "assists": 8
@@ -5303,6 +6211,7 @@
    "gpm": 665,
    "net_worth": 14071,
    "xpm": 313,
+   "rating_change": 14.0,
    "kills": 2,
    "deaths": 0,
    "assists": 9
@@ -5321,6 +6230,7 @@
    "gpm": 317,
    "net_worth": 11556,
    "xpm": 402,
+   "rating_change": -18.8,
    "kills": 3,
    "deaths": 11,
    "assists": 13
@@ -5339,6 +6249,7 @@
    "gpm": 695,
    "net_worth": 21138,
    "xpm": 401,
+   "rating_change": 17.5,
    "kills": 17,
    "deaths": 2,
    "assists": 17
@@ -5357,6 +6268,7 @@
    "gpm": 905,
    "net_worth": 33963,
    "xpm": 863,
+   "rating_change": 17.4,
    "kills": 27,
    "deaths": 4,
    "assists": 15
@@ -5375,6 +6287,7 @@
    "gpm": 334,
    "net_worth": 16922,
    "xpm": 305,
+   "rating_change": -17.9,
    "kills": 4,
    "deaths": 11,
    "assists": 26
@@ -5393,6 +6306,7 @@
    "gpm": 377,
    "net_worth": 13922,
    "xpm": 399,
+   "rating_change": 23.5,
    "kills": 12,
    "deaths": 7,
    "assists": 23
@@ -5411,6 +6325,7 @@
    "gpm": 237,
    "net_worth": 6970,
    "xpm": 197,
+   "rating_change": -20.8,
    "kills": 1,
    "deaths": 7,
    "assists": 13
@@ -5429,6 +6344,7 @@
    "gpm": 395,
    "net_worth": 10217,
    "xpm": 311,
+   "rating_change": 10.9,
    "kills": 7,
    "deaths": 1,
    "assists": 15
@@ -5447,6 +6363,7 @@
    "gpm": 364,
    "net_worth": 17573,
    "xpm": 387,
+   "rating_change": 23.6,
    "kills": 8,
    "deaths": 10,
    "assists": 26
@@ -5465,6 +6382,7 @@
    "gpm": 352,
    "net_worth": 11176,
    "xpm": 300,
+   "rating_change": 18.0,
    "kills": 0,
    "deaths": 2,
    "assists": 42
@@ -5483,6 +6401,7 @@
    "gpm": 403,
    "net_worth": 13504,
    "xpm": 446,
+   "rating_change": 14.0,
    "kills": 4,
    "deaths": 3,
    "assists": 23
@@ -5501,6 +6420,7 @@
    "gpm": 775,
    "net_worth": 30053,
    "xpm": 727,
+   "rating_change": 17.3,
    "kills": 13,
    "deaths": 4,
    "assists": 13
@@ -5519,6 +6439,7 @@
    "gpm": 725,
    "net_worth": 20254,
    "xpm": 611,
+   "rating_change": 20.3,
    "kills": 6,
    "deaths": 0,
    "assists": 7
@@ -5537,6 +6458,7 @@
    "gpm": 298,
    "net_worth": 8465,
    "xpm": 327,
+   "rating_change": -20.2,
    "kills": 1,
    "deaths": 3,
    "assists": 4
@@ -5555,6 +6477,7 @@
    "gpm": 227,
    "net_worth": 7763,
    "xpm": 170,
+   "rating_change": -23.6,
    "kills": 2,
    "deaths": 5,
    "assists": 14
@@ -5573,6 +6496,7 @@
    "gpm": 260,
    "net_worth": 7017,
    "xpm": 237,
+   "rating_change": -12.3,
    "kills": 5,
    "deaths": 8,
    "assists": 8
@@ -12194,5 +13118,5 @@
    "assists": 20
   }
  ],
- "fetchedAt": "2026-11-12T13:11Z"
+ "fetchedAt": "2026-11-19T13:49Z"
 }
